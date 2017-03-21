@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset=utf-8>
+		<title>HexaLab</title>
+		<link rel="stylesheet" href="hexalab.css">
+		<script src="../js/three.js"></script>
+		<script src="../js/TrackballControls.js"></script> 
+	</head>
+	<body>
+		<!-- HTML presentation stuff -->
+		<div id="display">
+			<div id="GUI">
+				<div id="sidenav">
+					<div id="sidenav_content">
+						<a href="javascript:void(0)" id="nav_closer" onclick="close_nav()">&times;</a>
+						<button onclick="pick_file()">Select mesh</button>
+						<input id="file_input" type="file" style="display: none;"></input>
+						</br>
+						<!--input id="file_input" type="text"></input-->
+						<input id="plane_nx" type="number" style="width:50px" value="1"></input>
+						<input id="plane_ny" type="number" style="width:50px" value="0"></input>
+						<input id="plane_nz" type="number" style="width:50px" value="0"></input>
+						<input id="plane_d" type="range"></input>
+						<textarea id="text_output" readonly></textarea>
+					</div>
+				</div>
+				<span id="sidehandle" onclick="open_nav()">&#9776;</span>
+			</div>
+			<div id="frame"></div>
+		</div>
+
+		<!-- Emscripten module -->
+		<script src="hexalab_module.js"></script>		
+		<!-- Emscripten compiled cpp code -->
+		<script src="hexalab_cpp.js"></script>
+		<!-- Three.js powered renderer -->
+		<script src="hexalab_renderer.js"></script>
+		<!-- js gui callbacks -->
+		<script src="hexalab_gui.js"></script>
+
+		<script type="text/javascript">
+			window.onload = function() {
+				renderer_init();
+				renderer_animate();
+			}
+		</script>
+
+	</body>
+</html>
