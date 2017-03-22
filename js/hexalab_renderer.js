@@ -64,23 +64,22 @@ function renderer_animate() {
 function renderer_set_mesh(HLmesh) {
     if (g_mesh) { log("FREE\n"); g_mesh.delete(); }
     g_mesh = HLmesh
-
-    g_plane = new Module.Plane();
     
     renderer_update_plane(1, 0, 0, 0.5);
     renderer_update_mesh();
 }
 
 function renderer_update_plane(nx, ny, nz, s) {
-    g_plane.orient(nx, ny, nz);
+    var normal = new Module.vec3(nx, ny, nz);
+    var d = g_mesh.get_diagonal_size();
     var center_x = g_mesh.get_center_x();
     var center_y = g_mesh.get_center_y();
     var center_z = g_mesh.get_center_z();
-    var d = g_mesh.get_diagonal_size();
     var x = center_x + nx*(s*d - d/2);
     var y = center_y + ny*(s*d - d/2)
     var z = center_z + nz*(s*d - d/2);
-    g_plane.move(x, y, z);
+    var center = new Module.vec3(x, y, z);
+    g_plane = new Module.Plane(normal, center);
 }
 
 function renderer_update_mesh() {
