@@ -31,7 +31,7 @@ function renderer_init() {
     });
 
     var light = new THREE.DirectionalLight(0xffffff, 1);
-    g_scene.add(light);
+    g_camera.add(light);
 
     g_controls = new THREE.TrackballControls(g_camera, container);
     g_controls.rotateSpeed = 20;
