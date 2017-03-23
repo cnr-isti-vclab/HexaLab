@@ -62,7 +62,7 @@ function renderer_animate() {
 // Mesh
 // ------------------------------------------------------------------------------------------------------
 function renderer_set_mesh(HLmesh) {
-    if (g_mesh) { log("FREE\n"); g_mesh.delete(); }
+    if (g_mesh) g_mesh.delete();
     g_mesh = HLmesh
     
     renderer_update_plane(1, 0, 0, 0.5);
