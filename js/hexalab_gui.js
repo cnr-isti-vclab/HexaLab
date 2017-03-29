@@ -1,6 +1,5 @@
 "use strict";
 
-
 var g_reader = new FileReader();
 var g_file;
 

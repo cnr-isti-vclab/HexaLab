@@ -97,7 +97,9 @@ function renderer_update_mesh() {
     var geometry = new THREE.Geometry();
     geometry.vertices = g_vbuffer;
     geometry.faces = g_ibuffer;
-    var material = new THREE.MeshLambertMaterial({ color: 0xeeccee, wireframe : false});
+    geometry.computeFaceNormals();
+    log(geometry.vertices.length + " " + geometry.faces.length + "\n");
+    var material = new THREE.MeshLambertMaterial({ color: 0xeeccee, side : THREE.DoubleSide});
     g_mesh = new THREE.Mesh(geometry, material);
 
     g_scene.add(g_mesh);
