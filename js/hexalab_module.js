@@ -1,12 +1,18 @@
 "use strict";
+
+var g_logger = document.getElementById("logger");
+
+function log(string) {
+    if (g_logger) {
+        g_logger.value += string;
+        g_logger.scrollTop = g_logger.scrollHeight;
+    }
+}
+
 var Module = {
     preRun : [],
     postRun : [],
-    print : function() {
-        var element = document.getElementById("text_output");
-        return function (text) {
-            element.value += text + '\n';
-            element.scrollTop = element.scrollHeight;
-        }
-    } ()
+    print : function (string) {
+        log(string + "\n");
+    }
 };
