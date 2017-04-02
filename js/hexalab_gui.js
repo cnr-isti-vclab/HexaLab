@@ -8,7 +8,7 @@ g_reader.onload = function(event) {
     FS.createDataFile("/", g_file.name, data, true, true);
 
     var result = g_visualizer.import_mesh(g_file.name);
-    if (result == Module.Result.Success) {
+    if (result) {
         log("Adding to scene...\n");
         renderer_update_vbuffer();
         renderer_update_ibuffer();
