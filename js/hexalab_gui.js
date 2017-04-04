@@ -11,8 +11,7 @@ g_reader.onload = function(event) {
     if (result) {
         log("Adding to scene...\n");
         renderer_update_vbuffer();
-        renderer_update_ibuffer();
-        renderer_update_mesh();
+        renderer_update_view();
         log("Done!\n");
     } else {
         log("Error!\n");
@@ -40,12 +39,10 @@ document.getElementById("plane_d").oninput = function(event) {
 
 function open_nav() {
     document.getElementById("sidenav").style.width = "300px";
-    console.log("open");
 }
 
 function close_nav() {
     document.getElementById("sidenav").style.width = "0";
-    console.log("close");
 }
 
 function pick_file() {
@@ -60,8 +57,7 @@ function update_plane() {
         var s  = parseFloat(document.getElementById("plane_d").value) / 100.0;
 
         g_visualizer.set_culling_plane(nx, ny, nz, s);
-        g_visualizer.update_ibuffer();
-        renderer_update_ibuffer();
-        renderer_update_mesh();
+        g_visualizer.update_view();
+        renderer_update_view();
     }
 }
