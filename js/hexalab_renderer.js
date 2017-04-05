@@ -109,9 +109,9 @@ function renderer_update_view() {
     geometry.vertices = g_verts;
     geometry.faces = g_faces;
     //geometry.computeFaceNormals();
-    var material = new THREE.MeshLambertMaterial({ color: 0xeeccee, side: THREE.DoubleSide });
+    var material = new THREE.MeshLambertMaterial({ color: 0xeeccee, side: THREE.FrontSide });
     g_mesh = new THREE.Mesh(geometry, material);
-
+     
     g_scene.add(g_mesh);
 
     var center = g_visualizer.get_center();
