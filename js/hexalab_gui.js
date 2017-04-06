@@ -7,12 +7,12 @@ g_reader.onload = function(event) {
     var data = new Int8Array(event.target.result);
     FS.createDataFile("/", g_file.name, data, true, true);
 
+    log("Importing...\n");
     var result = g_visualizer.import_mesh(g_file.name);
     if (result) {
-        log("Adding to scene...\n");
         renderer_update_vbuffer();
         renderer_update_view();
-        log("Done!\n");
+        log("Mesh imported.\n");
     } else {
         log("Error!\n");
     }
