@@ -27,7 +27,7 @@ function renderer_init() {
         g_camera.updateProjectionMatrix();
     });
 
-    var light = new THREE.DirectionalLight(0xffffff, 1);
+    var light = new THREE.PointLight(0xffffff, 1, 100);
     g_camera.add(light);
     
     g_controls = new THREE.OrbitControls(g_camera, container);
