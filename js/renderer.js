@@ -35,12 +35,12 @@ function renderer_init() {
     g_controls.dynamicDampingFactor = 1;
 
     // Background
-    var background_color = new THREE.Color(0.15, 0.15, 0.15);
+    var background_color = new THREE.Color(1, 1, 1);
     g_renderer.setClearColor(background_color, 1);
 
     // Materials
-    g_mesh_mat = new THREE.MeshLambertMaterial({ color: 0xeeccee, side: THREE.FrontSide, depthFunc: THREE.LessEqualDepth });
-    g_wireframe_mat = new THREE.LineBasicMaterial({ color: 0x000000, linewidth: 1, depthFunc: THREE.LessDepth })
+    g_mesh_mat = new THREE.MeshLambertMaterial({ color: 0x666666, polygonOffset: true, polygonOffsetFactor: 0.5, });
+    g_wireframe_mat = new THREE.LineBasicMaterial({ color: 0x000000, linewidth: 1 })
 
     // Resize event
     window.addEventListener('resize', function () {
