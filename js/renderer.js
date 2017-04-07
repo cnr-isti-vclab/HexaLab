@@ -68,7 +68,7 @@ function renderer_update_vbuffer() {
     var base = g_visualizer.get_vbuffer();
     var size = g_visualizer.get_vbuffer_size();
 
-    log("[JS]: " + size + " bytes of vbuffer data received from visualizer.\n");
+    //log("[JS]: " + size + " bytes of vbuffer data received from visualizer.\n");
 
     for (var i = 0; i < size;) {
         var f1 = Module.getValue(base + i, 'float');
@@ -88,7 +88,7 @@ function renderer_update_faces() {
     var base = g_visualizer.get_faces();
     var size = g_visualizer.get_faces_size();
 
-    log("[JS]: " + size + " bytes of face data received from visualizer.\n");
+    //log("[JS]: " + size + " bytes of face data received from visualizer.\n");
 
     for (var i = 0; i < size;) {
         var i1 = Module.getValue(base + i, 'i32');
@@ -118,7 +118,7 @@ function renderer_update_edges() {
     var base = g_visualizer.get_edges();
     var size = g_visualizer.get_edges_size();
 
-    log("[JS]: " + size + " bytes of edge data received from visualizer.\n");
+    //log("[JS]: " + size + " bytes of edge data received from visualizer.\n");
 
     for (var i = 0; i < size;) {
         var i1 = Module.getValue(base + i, 'i32');
