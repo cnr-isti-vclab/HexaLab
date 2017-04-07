@@ -22,7 +22,7 @@ body {
 #sidenav textarea {
     resize: none;
     width: 250px;
-    height: 100px;
+    height: 300px;
     outline: none;
     border: 1px solid #333;
     background: #222;
