@@ -3,17 +3,14 @@
 var HexaLab = (function () {
 
     // Members
-
-    var scene, camera, renderer, controls, plane, visualizer;
-    var mesh, wireframe;
-    var mesh_mat, wireframe_mat;
-    var vbuffer, faces, edges;
+    var scene, camera, renderer, controls, visualizer;
+    var object = {}, wireframe = {}, plane = {};
     var depth_mat, depth_target, composer;
 
     // Private functions
 
-    var update_faces = function () {
-        faces = [];
+    var get_faces = function () {
+        var faces = [];
 
         var base = visualizer.get_faces();
         var size = visualizer.get_faces_size();
@@ -40,10 +37,12 @@ var HexaLab = (function () {
             faces.push(new THREE.Face3(i1, i2, i3, new THREE.Vector3(nx, ny, nz)));
             faces.push(new THREE.Face3(i3, i4, i1, new THREE.Vector3(nx, ny, nz)));
         }
+
+        return faces;
     };
 
-    var update_edges = function () {
-        edges = [];
+    var get_edges = function () {
+        var edges = [];
 
         var base = visualizer.get_edges();
         var size = visualizer.get_edges_size();
@@ -56,28 +55,10 @@ var HexaLab = (function () {
             var i2 = Module.getValue(base + i, 'i32');
             i += 4;
 
-            edges.push(vbuffer[i1], vbuffer[i2]);
+            edges.push(object.vbuffer[i1], object.vbuffer[i2]);
         }
-    };
 
-    var update_vbuffer = function () {
-        vbuffer = [];
-
-        var base = visualizer.get_vbuffer();
-        var size = visualizer.get_vbuffer_size();
-
-        log("[JS]: " + size + " bytes of vbuffer data received from visualizer.\n");
-
-        for (var i = 0; i < size;) {
-            var f1 = Module.getValue(base + i, 'float');
-            i += 4;
-            var f2 = Module.getValue(base + i, 'float');
-            i += 4;
-            var f3 = Module.getValue(base + i, 'float');
-            i += 4;
-
-            vbuffer.push(new THREE.Vector3(f1, f2, f3));
-        }
+        return edges;
     };
 
     // Public API
@@ -117,8 +98,9 @@ var HexaLab = (function () {
             renderer.setClearColor(background_color, 1);
 
             // Materials
-            mesh_mat = new THREE.MeshLambertMaterial({ color: 0xeeee55, polygonOffset: true, polygonOffsetFactor: 0.5, });
-            wireframe_mat = new THREE.LineBasicMaterial({ color: 0x000000 })
+            object.mat = new THREE.MeshLambertMaterial({ color: 0xeeee55, polygonOffset: true, polygonOffsetFactor: 0.5 });
+            wireframe.mat = new THREE.LineBasicMaterial({ color: 0x000000 })
+            plane.mat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, side: THREE.DoubleSide, opacity: 0.2 });
 
             // Render pass
             var render_pass = new THREE.RenderPass(scene, camera);
@@ -155,50 +137,72 @@ var HexaLab = (function () {
         },
 
         update_view: function () {
-            update_faces();
-            update_edges();
+            visualizer.update_view();
+            var faces = get_faces();
+            var edges = get_edges();
 
-            if (mesh) {
-                scene.remove(mesh);
-            }
-
-            if (wireframe) {
-                scene.remove(wireframe);
-            }
-
-            // Mesh
-            var mesh_geometry = new THREE.Geometry();
-            mesh_geometry.vertices = vbuffer;
-            mesh_geometry.faces = faces;
-            mesh = new THREE.Mesh(mesh_geometry, mesh_mat);
-            scene.add(mesh);
+            // Object
+            scene.remove(object.mesh);
+            var object_geometry = new THREE.Geometry();
+            object_geometry.vertices = object.vbuffer;
+            object_geometry.faces = faces;
+            object.mesh = new THREE.Mesh(object_geometry, object.mat);
+            scene.add(object.mesh);
 
             // Wireframe
+            scene.remove(wireframe.mesh);
             var wireframe_geometry = new THREE.Geometry();
             wireframe_geometry.vertices = edges;
-            wireframe = new THREE.LineSegments(wireframe_geometry, wireframe_mat);
-            scene.add(wireframe);
+            wireframe.mesh = new THREE.LineSegments(wireframe_geometry, wireframe.mat);
+            scene.add(wireframe.mesh);
+
+            // Plane
+            scene.remove(plane.mesh);
+            var plane_geometry = new THREE.PlaneGeometry(plane.size, plane.size);
+            plane.mesh = new THREE.Mesh(plane_geometry, plane.mat);
+            scene.add(plane.mesh);
+            plane.mesh.position.set(object.center.x, object.center.y, object.center.z);
+            var plane_dir = new THREE.Vector3();
+            plane_dir.addVectors(plane.mesh.position, plane.normal);
+            plane.mesh.lookAt(plane_dir);
+            plane.mesh.translateZ(-plane.offset);
 
             // Controls
-            var center = visualizer.get_center();
-            controls.target = new THREE.Vector3(center.get_x(), center.get_y(), center.get_z());
-        },
-
-        import_mesh: function(path) {
-            var result = visualizer.import_mesh(path);
-            if (result) {
-                update_vbuffer();
-                HexaLab.update_view();
-            }
-            return result;
+            controls.target = object.center;
         },
 
         set_culling_plane: function(nx, ny, nz, s) {
-            if (mesh) {
-                visualizer.set_culling_plane(nx, ny, nz, s);
-                visualizer.update_view();
-                HexaLab.update_view();
+            visualizer.set_culling_plane(nx, ny, nz, s);
+            var plane_norm = visualizer.get_plane_normal();
+            plane.normal = new THREE.Vector3(plane_norm.get_x(), plane_norm.get_y(), plane_norm.get_z());
+            plane.offset = visualizer.get_plane_offset();
+            plane.size = visualizer.get_object_size();
+        },
+
+        import_mesh: function (path) {
+            var result = visualizer.import_mesh(path);
+            if (result) {
+                object.vbuffer = [];
+
+                var base = visualizer.get_vbuffer();
+                var size = visualizer.get_vbuffer_size();
+
+                log("[JS]: " + size + " bytes of vbuffer data received from visualizer.\n");
+
+                for (var i = 0; i < size;) {
+                    var f1 = Module.getValue(base + i, 'float');
+                    i += 4;
+                    var f2 = Module.getValue(base + i, 'float');
+                    i += 4;
+                    var f3 = Module.getValue(base + i, 'float');
+                    i += 4;
+
+                    object.vbuffer.push(new THREE.Vector3(f1, f2, f3));
+                }
+                var obj_center = visualizer.get_object_center();
+                object.center = new THREE.Vector3(obj_center.get_x(), obj_center.get_y(), obj_center.get_z());
             }
+            return result;
         },
 
         animate: function () {

@@ -10,6 +10,7 @@ HexaLabGui.reader.onload = function(event) {
     log("Importing...\n");
     var result = HexaLab.import_mesh(HexaLabGui.file.name);
     if (result) {
+        HexaLabGui.update_plane();
         HexaLab.update_view();
         log("Mesh imported.\n");
     } else {
@@ -45,13 +46,17 @@ HexaLabGui.close_nav = function () {
 
 document.getElementById("plane_nx").onchange = function(event) {
     HexaLabGui.update_plane()
+    HexaLab.update_view();
 };
 document.getElementById("plane_ny").onchange = function(event) {
     HexaLabGui.update_plane()
+    HexaLab.update_view();
 };
 document.getElementById("plane_nz").onchange = function(event) {
     HexaLabGui.update_plane()
+    HexaLab.update_view();
 };
 document.getElementById("plane_d").oninput = function(event) {
     HexaLabGui.update_plane()
+    HexaLab.update_view();
 };
