@@ -6,6 +6,12 @@
 		<link rel="stylesheet" href="css/hexalab.css">
 		<script src="js/external/three.js"></script>
 		<script src="js/external/TrackballControls.js"></script> 
+		<script src="js/external/SSAOShader.js"></script> 
+		<script src="js/external/CopyShader.js"></script> 
+		<script src="js/external/EffectComposer.js"></script> 
+		<script src="js/external/RenderPass.js"></script> 
+		<script src="js/external/ShaderPass.js"></script> 
+		<script src="js/external/MaskPass.js"></script> 
 	</head>
 	<body>
 		<!-- HTML presentation stuff -->
@@ -13,8 +19,8 @@
 			<div id="GUI">
 				<div id="sidenav">
 					<div id="sidenav_content">
-						<a href="javascript:void(0)" id="nav_closer" onclick="close_nav()">&times;</a>
-						<button onclick="pick_file()">Select mesh</button>
+						<a href="javascript:void(0)" id="nav_closer" onclick="HexaLabGui.close_nav()">&times;</a>
+						<button onclick="HexaLabGui.pick_file()">Select mesh</button>
 						<input id="file_input" type="file" style="display: none;"></input>
 						</br>
 						<input id="plane_nx" type="number" style="width:50px" value="1"></input>
@@ -24,7 +30,7 @@
 						<textarea id="logger" readonly></textarea>
 					</div>
 				</div>
-				<span id="sidehandle" onclick="open_nav()">&#9776;</span>
+				<span id="sidehandle" onclick="HexaLabGui.open_nav()">&#9776;</span>
 			</div>
 			<div id="frame"></div>
 		</div>
@@ -40,8 +46,8 @@
 
 		<script type="text/javascript">
 			window.onload = function() {
-				renderer_init();
-				renderer_animate();
+				HexaLab.init();
+				HexaLab.animate();
 			}
 		</script>
 

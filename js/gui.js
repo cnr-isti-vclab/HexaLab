@@ -1,63 +1,57 @@
 "use strict";
 
-var g_reader = new FileReader();
-var g_file;
+var HexaLabGui = {}
+HexaLabGui.reader = new FileReader();
 
-g_reader.onload = function(event) {
+HexaLabGui.reader.onload = function(event) {
     var data = new Int8Array(event.target.result);
-    FS.createDataFile("/", g_file.name, data, true, true);
+    FS.createDataFile("/", HexaLabGui.file.name, data, true, true);
 
     log("Importing...\n");
-    var result = g_visualizer.import_mesh(g_file.name);
+    var result = HexaLab.import_mesh(HexaLabGui.file.name);
     if (result) {
-        renderer_update_vbuffer();
-        renderer_update_view();
+        HexaLab.update_view();
         log("Mesh imported.\n");
     } else {
         log("Error!\n");
     }
 }
 
-// Load from file
-document.getElementById("file_input").onchange = function(event) {
-    g_file = event.target.files[0];
-    g_reader.readAsArrayBuffer(g_file, "UTF-8");
-};
+HexaLabGui.update_plane = function () {
+    var nx = parseFloat(document.getElementById("plane_nx").value);
+    var ny = parseFloat(document.getElementById("plane_ny").value);
+    var nz = parseFloat(document.getElementById("plane_nz").value);
+    var s = parseFloat(document.getElementById("plane_d").value) / 100.0;
 
-document.getElementById("plane_nx").onchange = function(event) {
-    update_plane()
-};
-document.getElementById("plane_ny").onchange = function(event) {
-    update_plane()
-};
-document.getElementById("plane_nz").onchange = function(event) {
-    update_plane()
-};
-document.getElementById("plane_d").oninput = function(event) {
-    update_plane()
-};
-
-function open_nav() {
-    document.getElementById("sidenav").style.width = "300px";
+    HexaLab.set_culling_plane(nx, ny, nz, s);
 }
 
-function close_nav() {
-    document.getElementById("sidenav").style.width = "0";
-}
-
-function pick_file() {
+HexaLabGui.pick_file = function () {
     document.getElementById('file_input').click();
 }
 
-function update_plane() {
-    if (g_mesh) {
-        var nx = parseFloat(document.getElementById("plane_nx").value);
-        var ny = parseFloat(document.getElementById("plane_ny").value);
-        var nz = parseFloat(document.getElementById("plane_nz").value);
-        var s  = parseFloat(document.getElementById("plane_d").value) / 100.0;
+document.getElementById("file_input").onchange = function(event) {
+    HexaLabGui.file = event.target.files[0];
+    HexaLabGui.reader.readAsArrayBuffer(HexaLabGui.file, "UTF-8");
+};
 
-        g_visualizer.set_culling_plane(nx, ny, nz, s);
-        g_visualizer.update_view();
-        renderer_update_view();
-    }
+HexaLabGui.open_nav = function () {
+    document.getElementById("sidenav").style.width = "300px";
 }
+
+HexaLabGui.close_nav = function () {
+    document.getElementById("sidenav").style.width = "0";
+}
+
+document.getElementById("plane_nx").onchange = function(event) {
+    HexaLabGui.update_plane()
+};
+document.getElementById("plane_ny").onchange = function(event) {
+    HexaLabGui.update_plane()
+};
+document.getElementById("plane_nz").onchange = function(event) {
+    HexaLabGui.update_plane()
+};
+document.getElementById("plane_d").oninput = function(event) {
+    HexaLabGui.update_plane()
+};

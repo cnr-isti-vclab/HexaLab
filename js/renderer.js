@@ -1,161 +1,216 @@
 "use strict";
 
-var g_scene, g_camera, g_renderer, g_controls, g_plane, g_visualizer;
-var g_mesh, g_wireframe;
-var g_mesh_mat, g_wireframe_mat;
-var g_vbuffer, g_faces, g_edges;
+var HexaLab = (function () {
 
-function renderer_init() {
-    // Scene
-    g_scene = new THREE.Scene();
-    var width = window.innerWidth;
-    var height = window.innerHeight;
+    // Members
 
-    // Visualizer interface
-    g_visualizer = new Module.Visualizer();
+    var scene, camera, renderer, controls, plane, visualizer;
+    var mesh, wireframe;
+    var mesh_mat, wireframe_mat;
+    var vbuffer, faces, edges;
+    var depth_mat, depth_target, composer;
 
-    // Renderer
-    g_renderer = new THREE.WebGLRenderer();
-    g_renderer.setSize(width, height);
-    var container = document.getElementById("frame");
-    container.appendChild(g_renderer.domElement);
+    // Private functions
 
-    // Camera
-    g_camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000);
-    g_camera.position.set(0, 0, 5);
-    g_scene.add(g_camera);
+    var update_faces = function () {
+        faces = [];
 
-    // Light
-    var light = new THREE.PointLight(0xffffff, 1, 100);
-    g_camera.add(light);
-    
-    // Controls
-    g_controls = new THREE.TrackballControls(g_camera, container);
-    g_controls.rotateSpeed = 10;
-    g_controls.dynamicDampingFactor = 1;
+        var base = visualizer.get_faces();
+        var size = visualizer.get_faces_size();
 
-    // Background
-    var background_color = new THREE.Color(1, 1, 1);
-    g_renderer.setClearColor(background_color, 1);
+        log("[JS]: " + size + " bytes of face data received from visualizer.\n");
 
-    // Materials
-    g_mesh_mat = new THREE.MeshLambertMaterial({ color: 0x666666, polygonOffset: true, polygonOffsetFactor: 0.5, });
-    g_wireframe_mat = new THREE.LineBasicMaterial({ color: 0x000000, linewidth: 1 })
+        for (var i = 0; i < size;) {
+            var i1 = Module.getValue(base + i, 'i32');
+            i += 4;
+            var i2 = Module.getValue(base + i, 'i32');
+            i += 4;
+            var i3 = Module.getValue(base + i, 'i32');
+            i += 4;
+            var i4 = Module.getValue(base + i, 'i32');
+            i += 4;
 
-    // Resize event
-    window.addEventListener('resize', function () {
-        var width = window.innerWidth;
-        var height = window.innerHeight;
-        g_renderer.setSize(width, height);
-        g_camera.aspect = width / height;
-        g_camera.updateProjectionMatrix();
-    });
-}
+            var nx = Module.getValue(base + i, 'float');
+            i += 4;
+            var ny = Module.getValue(base + i, 'float');
+            i += 4;
+            var nz = Module.getValue(base + i, 'float');
+            i += 4;
 
-function renderer_render() {
-    g_renderer.render(g_scene, g_camera);
-}
+            faces.push(new THREE.Face3(i1, i2, i3, new THREE.Vector3(nx, ny, nz)));
+            faces.push(new THREE.Face3(i3, i4, i1, new THREE.Vector3(nx, ny, nz)));
+        }
+    };
 
-function renderer_animate() {
-    g_controls.update();
-    renderer_render();
-    requestAnimationFrame(renderer_animate);
-}
+    var update_edges = function () {
+        edges = [];
 
-function renderer_update_vbuffer() {
-    g_vbuffer = [];
+        var base = visualizer.get_edges();
+        var size = visualizer.get_edges_size();
 
-    var base = g_visualizer.get_vbuffer();
-    var size = g_visualizer.get_vbuffer_size();
+        log("[JS]: " + size + " bytes of edge data received from visualizer.\n");
 
-    //log("[JS]: " + size + " bytes of vbuffer data received from visualizer.\n");
+        for (var i = 0; i < size;) {
+            var i1 = Module.getValue(base + i, 'i32');
+            i += 4;
+            var i2 = Module.getValue(base + i, 'i32');
+            i += 4;
 
-    for (var i = 0; i < size;) {
-        var f1 = Module.getValue(base + i, 'float');
-        i += 4;
-        var f2 = Module.getValue(base + i, 'float');
-        i += 4;
-        var f3 = Module.getValue(base + i, 'float');
-        i += 4;
+            edges.push(vbuffer[i1], vbuffer[i2]);
+        }
+    };
 
-        g_vbuffer.push(new THREE.Vector3(f1, f2, f3));
+    var update_vbuffer = function () {
+        vbuffer = [];
+
+        var base = visualizer.get_vbuffer();
+        var size = visualizer.get_vbuffer_size();
+
+        log("[JS]: " + size + " bytes of vbuffer data received from visualizer.\n");
+
+        for (var i = 0; i < size;) {
+            var f1 = Module.getValue(base + i, 'float');
+            i += 4;
+            var f2 = Module.getValue(base + i, 'float');
+            i += 4;
+            var f3 = Module.getValue(base + i, 'float');
+            i += 4;
+
+            vbuffer.push(new THREE.Vector3(f1, f2, f3));
+        }
+    };
+
+    // Public API
+
+    return {
+        init: function () {
+            // Scene
+            scene = new THREE.Scene();
+            var width = window.innerWidth;
+            var height = window.innerHeight;
+
+            // Visualizer interface
+            visualizer = new Module.Visualizer();
+
+            // Renderer
+            renderer = new THREE.WebGLRenderer();
+            renderer.setSize(width, height);
+            var container = document.getElementById("frame");
+            container.appendChild(renderer.domElement);
+
+            // Camera
+            camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000);
+            camera.position.set(0, 0, 5);
+            scene.add(camera);
+
+            // Light
+            var light = new THREE.PointLight(0xffffff, 1, 100);
+            camera.add(light);
+
+            // Controls
+            controls = new THREE.TrackballControls(camera, container);
+            controls.rotateSpeed = 10;
+            controls.dynamicDampingFactor = 1;
+
+            // Background
+            var background_color = new THREE.Color(1, 1, 1);
+            renderer.setClearColor(background_color, 1);
+
+            // Materials
+            mesh_mat = new THREE.MeshLambertMaterial({ color: 0xeeee55, polygonOffset: true, polygonOffsetFactor: 0.5, });
+            wireframe_mat = new THREE.LineBasicMaterial({ color: 0x000000 })
+
+            // Render pass
+            var render_pass = new THREE.RenderPass(scene, camera);
+
+            // Depth pass
+            depth_mat = new THREE.MeshDepthMaterial();
+            depth_mat.depthPacking = THREE.RGBADepthPacking;
+            depth_mat.blending = THREE.NoBlending;
+            depth_target = new THREE.WebGLRenderTarget(width, height, { minFilter: THREE.NearestFilter, magFilter: THREE.NearestFilter, format: THREE.RGBAFormat });
+
+            // SSAO pass
+            var ssao_pass = new THREE.ShaderPass(THREE.SSAOShader);
+            ssao_pass.renderToScreen = true;
+            ssao_pass.uniforms['tDepth'].value = depth_target.texture;
+            ssao_pass.uniforms['size'].value.set(width, height);
+            ssao_pass.uniforms['cameraNear'].value = camera.near;
+            ssao_pass.uniforms['cameraFar'].value = camera.far;
+            ssao_pass.uniforms['onlyAO'].value = false;
+            ssao_pass.uniforms['lumInfluence'].value = 0.0;
+
+            // Pass composer
+            composer = new THREE.EffectComposer(renderer);
+            composer.addPass(render_pass);
+            composer.addPass(ssao_pass);
+
+            // Resize event
+            window.addEventListener('resize', function () {
+                var width = window.innerWidth;
+                var height = window.innerHeight;
+                renderer.setSize(width, height);
+                camera.aspect = width / height;
+                camera.updateProjectionMatrix();
+            });
+        },
+
+        update_view: function () {
+            update_faces();
+            update_edges();
+
+            if (mesh) {
+                scene.remove(mesh);
+            }
+
+            if (wireframe) {
+                scene.remove(wireframe);
+            }
+
+            // Mesh
+            var mesh_geometry = new THREE.Geometry();
+            mesh_geometry.vertices = vbuffer;
+            mesh_geometry.faces = faces;
+            mesh = new THREE.Mesh(mesh_geometry, mesh_mat);
+            scene.add(mesh);
+
+            // Wireframe
+            var wireframe_geometry = new THREE.Geometry();
+            wireframe_geometry.vertices = edges;
+            wireframe = new THREE.LineSegments(wireframe_geometry, wireframe_mat);
+            scene.add(wireframe);
+
+            // Controls
+            var center = visualizer.get_center();
+            controls.target = new THREE.Vector3(center.get_x(), center.get_y(), center.get_z());
+        },
+
+        import_mesh: function(path) {
+            var result = visualizer.import_mesh(path);
+            if (result) {
+                update_vbuffer();
+                HexaLab.update_view();
+            }
+            return result;
+        },
+
+        set_culling_plane: function(nx, ny, nz, s) {
+            if (mesh) {
+                visualizer.set_culling_plane(nx, ny, nz, s);
+                visualizer.update_view();
+                HexaLab.update_view();
+            }
+        },
+
+        animate: function () {
+            controls.update();
+
+            renderer.render(scene, camera);
+            //g_scene.overrideMaterial = g_depth_mat;
+            //g_renderer.render(g_scene, g_camera, g_depth_target, true);
+            //g_scene.overrideMaterial = null;
+            //g_composer.render();
+
+            requestAnimationFrame(HexaLab.animate);
+        },
     }
-}
-
-function renderer_update_faces() {
-    g_faces = [];
-
-    var base = g_visualizer.get_faces();
-    var size = g_visualizer.get_faces_size();
-
-    //log("[JS]: " + size + " bytes of face data received from visualizer.\n");
-
-    for (var i = 0; i < size;) {
-        var i1 = Module.getValue(base + i, 'i32');
-        i += 4;
-        var i2 = Module.getValue(base + i, 'i32');
-        i += 4;
-        var i3 = Module.getValue(base + i, 'i32');
-        i += 4;
-        var i4 = Module.getValue(base + i, 'i32');
-        i += 4;
-
-        var nx = Module.getValue(base + i, 'float');
-        i += 4;
-        var ny = Module.getValue(base + i, 'float');
-        i += 4;
-        var nz = Module.getValue(base + i, 'float');
-        i += 4;
-
-        g_faces.push(new THREE.Face3(i1, i2, i3, new THREE.Vector3(nx, ny, nz)));
-        g_faces.push(new THREE.Face3(i3, i4, i1, new THREE.Vector3(nx, ny, nz)));
-    }
-}
-
-function renderer_update_edges() {
-    g_edges = [];
-
-    var base = g_visualizer.get_edges();
-    var size = g_visualizer.get_edges_size();
-
-    //log("[JS]: " + size + " bytes of edge data received from visualizer.\n");
-
-    for (var i = 0; i < size;) {
-        var i1 = Module.getValue(base + i, 'i32');
-        i += 4;
-        var i2 = Module.getValue(base + i, 'i32');
-        i += 4;
-
-        g_edges.push(g_vbuffer[i1], g_vbuffer[i2]);
-    }
-}
-
-function renderer_update_view() {
-    renderer_update_faces();
-    renderer_update_edges();
-
-    if (g_mesh) {
-        g_scene.remove(g_mesh);
-    }
-
-    if (g_wireframe) {
-        g_scene.remove(g_wireframe);
-    }
-
-    // Mesh
-    var mesh_geometry = new THREE.Geometry();
-    mesh_geometry.vertices = g_vbuffer;
-    mesh_geometry.faces = g_faces;
-    g_mesh = new THREE.Mesh(mesh_geometry, g_mesh_mat);
-    g_scene.add(g_mesh);
-
-    // Wireframe
-    var wireframe_geometry = new THREE.Geometry();
-    wireframe_geometry.vertices = g_edges;
-    g_wireframe = new THREE.LineSegments(wireframe_geometry, g_wireframe_mat);
-    g_scene.add(g_wireframe);
-
-    // Controls
-    var center = g_visualizer.get_center();
-    g_controls.target = new THREE.Vector3(center.get_x(), center.get_y(), center.get_z());
-}
+})();
