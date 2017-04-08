@@ -41,6 +41,38 @@ var HexaLab = (function () {
         return faces;
     };
 
+    var get_culled_faces = function () {
+        var faces = [];
+
+        var base = visualizer.get_culled_faces();
+        var size = visualizer.get_culled_faces_size();
+
+        log("[JS]: " + size + " bytes of culled face data received from visualizer.\n");
+
+        for (var i = 0; i < size;) {
+            var i1 = Module.getValue(base + i, 'i32');
+            i += 4;
+            var i2 = Module.getValue(base + i, 'i32');
+            i += 4;
+            var i3 = Module.getValue(base + i, 'i32');
+            i += 4;
+            var i4 = Module.getValue(base + i, 'i32');
+            i += 4;
+
+            var nx = Module.getValue(base + i, 'float');
+            i += 4;
+            var ny = Module.getValue(base + i, 'float');
+            i += 4;
+            var nz = Module.getValue(base + i, 'float');
+            i += 4;
+
+            faces.push(new THREE.Face3(i1, i2, i3, new THREE.Vector3(nx, ny, nz)));
+            faces.push(new THREE.Face3(i3, i4, i1, new THREE.Vector3(nx, ny, nz)));
+        }
+
+        return faces;
+    };
+
     var get_edges = function () {
         var edges = [];
 
@@ -99,6 +131,7 @@ var HexaLab = (function () {
 
             // Materials
             object.mat = new THREE.MeshLambertMaterial({ color: 0xeeee55, polygonOffset: true, polygonOffsetFactor: 0.5 });
+            object.cull_mat = new THREE.MeshBasicMaterial({ color: 0x000000, polygonOffset: true, polygonOffsetFactor: 0.5, transparent: true, opacity: 0.5 });
             wireframe.mat = new THREE.LineBasicMaterial({ color: 0x000000 })
             plane.mat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, side: THREE.DoubleSide, opacity: 0.2 });
 
@@ -139,6 +172,7 @@ var HexaLab = (function () {
         update_view: function () {
             visualizer.update_view();
             var faces = get_faces();
+            var cull_faces = get_culled_faces();
             var edges = get_edges();
 
             // Object
@@ -149,6 +183,14 @@ var HexaLab = (function () {
             object.mesh = new THREE.Mesh(object_geometry, object.mat);
             scene.add(object.mesh);
 
+            // Culled object
+            scene.remove(object.cull_mesh);
+            var object_cull_geometry = new THREE.Geometry();
+            object_cull_geometry.vertices = object.vbuffer;
+            object_cull_geometry.faces = cull_faces;
+            object.cull_mesh = new THREE.Mesh(object_cull_geometry, object.cull_mat);
+            scene.add(object.cull_mesh);
+            
             // Wireframe
             scene.remove(wireframe.mesh);
             var wireframe_geometry = new THREE.Geometry();
