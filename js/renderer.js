@@ -2,20 +2,44 @@
 
 var HexaLab = (function () {
 
-    // Members
-    var scene, camera, renderer, controls, visualizer;
-    var object = {}, wireframe = {}, plane = {};
-    var depth_mat, depth_target, composer;
+    // Private
 
-    // Private functions
+    var scene, camera, light, renderer, controls, backend;
+    var object = {}, wireframe = {}, plane = {};
+    var draw_flags = {};
+    var canvas = {};
+
+    var default_settings = {
+        clear_color: "ffffff",
+        light_color: "ffffff",
+
+        mesh_color: "eeee55",
+        mesh_cull_color: "000000",
+        mesh_cull_opacity: 0.5,
+        wireframe_color: "000000",
+
+        plane_color: "000000",
+        plane_opacity: 0.5,
+        plane_offset: 0.5,
+        plane_normal: new THREE.Vector3(1, 0, 0),
+
+        camera_fov: 60,
+        camera_position: new THREE.Vector3(0, 0, 5),
+        camera_direction: new THREE.Vector3(0, 0, -1),
+
+        draw_culled_mesh: true,
+        draw_culling_plane: true,
+        draw_wireframe: true,
+        ssao: false,
+    };
 
     var get_faces = function () {
         var faces = [];
 
-        var base = visualizer.get_faces();
-        var size = visualizer.get_faces_size();
+        var base = backend.get_faces();
+        var size = backend.get_faces_size();
 
-        log("[JS]: " + size + " bytes of face data received from visualizer.\n");
+        log("[JS]: " + size + " bytes of face data received.\n");
 
         for (var i = 0; i < size;) {
             var i1 = Module.getValue(base + i, 'i32');
@@ -44,10 +68,10 @@ var HexaLab = (function () {
     var get_culled_faces = function () {
         var faces = [];
 
-        var base = visualizer.get_culled_faces();
-        var size = visualizer.get_culled_faces_size();
+        var base = backend.get_culled_faces();
+        var size = backend.get_culled_faces_size();
 
-        log("[JS]: " + size + " bytes of culled face data received from visualizer.\n");
+        log("[JS]: " + size + " bytes of culled face data received.\n");
 
         for (var i = 0; i < size;) {
             var i1 = Module.getValue(base + i, 'i32');
@@ -76,10 +100,10 @@ var HexaLab = (function () {
     var get_edges = function () {
         var edges = [];
 
-        var base = visualizer.get_edges();
-        var size = visualizer.get_edges_size();
+        var base = backend.get_edges();
+        var size = backend.get_edges_size();
 
-        log("[JS]: " + size + " bytes of edge data received from visualizer.\n");
+        log("[JS]: " + size + " bytes of edge data received.\n");
 
         for (var i = 0; i < size;) {
             var i1 = Module.getValue(base + i, 'i32');
@@ -96,81 +120,96 @@ var HexaLab = (function () {
     // Public API
 
     return {
+        load_settings: function (settings) {
+            renderer.setClearColor("#" + settings.clear_color, 1);
+
+            scene.remove(camera);
+            camera = new THREE.PerspectiveCamera(settings.camera_fov, canvas.width / canvas.height, 0.1, 1000);
+            scene.add(camera);
+            camera.position.set(settings.camera_position.x, settings.camera_position.y, settings.camera_position.z);
+            var camera_target = new THREE.Vector3();
+            camera_target.addVectors(settings.camera_position, settings.camera_direction);
+            camera.up = new THREE.Vector3(0, 1, 0);
+            camera.lookAt(camera_target);
+            camera.updateProjectionMatrix();
+
+            light = new THREE.PointLight("#" + settings.light_color);
+            camera.add(light);
+
+            if(controls) controls.dispose();
+            controls = new THREE.TrackballControls(camera, canvas.container);
+            controls.rotateSpeed = 10;
+            controls.dynamicDampingFactor = 1;
+            controls.noPan = true;
+            if (object.center) controls.target = object.center.clone();
+            else controls.target = new THREE.Vector3(0, 0, 0);
+
+            object.mat = new THREE.MeshLambertMaterial({ color: "#" + settings.mesh_color, polygonOffset: true, polygonOffsetFactor: 0.5 });
+            object.cull_mat = new THREE.MeshBasicMaterial({ color: "#" + settings.mesh_cull_color, opacity: settings.mesh_cull_opacity, polygonOffset: true, polygonOffsetFactor: 0.5, transparent: true });
+            plane.mat = new THREE.MeshBasicMaterial({ color: "#" + settings.plane_color, opacity: settings.plane_opacity, transparent: true, side: THREE.DoubleSide });
+            wireframe.mat = new THREE.LineBasicMaterial({ color: "#" + settings.wireframe_color });
+
+            HexaLab.set_culling_plane(settings.plane_normal.x, settings.plane_normal.y, settings.plane_normal.z, settings.plane_offset);
+
+            draw_flags.culled_mesh = settings.draw_culled_mesh;
+            draw_flags.plane = settings.draw_culling_plane;
+            draw_flags.wireframe = settings.draw_wireframe;
+            draw_flags.ssao = settings.ssao;
+        },
+
+        get_settings: function() {
+            var settings = {
+                clear_color: renderer.getClearColor().getHexString(),
+                light_color: light.color.getHexString(),
+                mesh_color: object.mat.color.getHexString(),
+                mesh_cull_color: object.cull_mat.color.getHexString(),
+                mesh_cull_opacity: object.cull_mat.opacity,
+                wireframe_color: wireframe.mat.color.getHexString(),
+                plane_color: plane.mat.color.getHexString(),
+                plane_opacity: plane.mat.opacity,
+                plane_offset: plane.s,
+                plane_normal: plane.normal,
+                camera_position: camera.position,
+                camera_direction: camera.getWorldDirection(),
+                camera_fov: camera.fov,
+                draw_culled_mesh: draw_flags.culled_mesh,
+                draw_culling_plane: draw_flags.plane,
+                draw_wireframe: draw_flags.wireframe,
+                ssao: draw_flags.ssao,
+            };
+            return settings;
+        },
+
         init: function () {
             // Scene
             scene = new THREE.Scene();
-            var width = window.innerWidth;
-            var height = window.innerHeight;
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
 
-            // Visualizer interface
-            visualizer = new Module.Visualizer();
+            // Backend interface
+            backend = new Module.Visualizer();
 
             // Renderer
             renderer = new THREE.WebGLRenderer();
-            renderer.setSize(width, height);
-            var container = document.getElementById("frame");
-            container.appendChild(renderer.domElement);
+            renderer.setSize(canvas.width, canvas.height);
+            canvas.container = document.getElementById("frame");
+            canvas.container.appendChild(renderer.domElement);
 
-            // Camera
-            camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000);
-            camera.position.set(0, 0, 5);
-            scene.add(camera);
-
-            // Light
-            var light = new THREE.PointLight(0xffffff, 1, 100);
-            camera.add(light);
-
-            // Controls
-            controls = new THREE.TrackballControls(camera, container);
-            controls.rotateSpeed = 10;
-            controls.dynamicDampingFactor = 1;
-
-            // Background
-            var background_color = new THREE.Color(1, 1, 1);
-            renderer.setClearColor(background_color, 1);
-
-            // Materials
-            object.mat = new THREE.MeshLambertMaterial({ color: 0xeeee55, polygonOffset: true, polygonOffsetFactor: 0.5 });
-            object.cull_mat = new THREE.MeshBasicMaterial({ color: 0x000000, polygonOffset: true, polygonOffsetFactor: 0.5, transparent: true, opacity: 0.5 });
-            wireframe.mat = new THREE.LineBasicMaterial({ color: 0x000000 })
-            plane.mat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, side: THREE.DoubleSide, opacity: 0.2 });
-
-            // Render pass
-            var render_pass = new THREE.RenderPass(scene, camera);
-
-            // Depth pass
-            depth_mat = new THREE.MeshDepthMaterial();
-            depth_mat.depthPacking = THREE.RGBADepthPacking;
-            depth_mat.blending = THREE.NoBlending;
-            depth_target = new THREE.WebGLRenderTarget(width, height, { minFilter: THREE.NearestFilter, magFilter: THREE.NearestFilter, format: THREE.RGBAFormat });
-
-            // SSAO pass
-            var ssao_pass = new THREE.ShaderPass(THREE.SSAOShader);
-            ssao_pass.renderToScreen = true;
-            ssao_pass.uniforms['tDepth'].value = depth_target.texture;
-            ssao_pass.uniforms['size'].value.set(width, height);
-            ssao_pass.uniforms['cameraNear'].value = camera.near;
-            ssao_pass.uniforms['cameraFar'].value = camera.far;
-            ssao_pass.uniforms['onlyAO'].value = false;
-            ssao_pass.uniforms['lumInfluence'].value = 0.0;
-
-            // Pass composer
-            composer = new THREE.EffectComposer(renderer);
-            composer.addPass(render_pass);
-            composer.addPass(ssao_pass);
+            // Settings
+            HexaLab.load_settings(default_settings);
 
             // Resize event
             window.addEventListener('resize', function () {
-                var width = window.innerWidth;
-                var height = window.innerHeight;
-                renderer.setSize(width, height);
-                camera.aspect = width / height;
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                renderer.setSize(canvas.width, canvas.height);
+                camera.aspect = canvas.width / canvas.height;
                 camera.updateProjectionMatrix();
             });
         },
 
-        update_view: function () {
-            visualizer.update_view();
+        update_scene: function () {
+            backend.update_view();
             var faces = get_faces();
             var cull_faces = get_culled_faces();
             var edges = get_edges();
@@ -199,37 +238,42 @@ var HexaLab = (function () {
             scene.add(wireframe.mesh);
 
             // Plane
-            scene.remove(plane.mesh);
-            var plane_geometry = new THREE.PlaneGeometry(plane.size, plane.size);
-            plane.mesh = new THREE.Mesh(plane_geometry, plane.mat);
-            scene.add(plane.mesh);
             plane.mesh.position.set(object.center.x, object.center.y, object.center.z);
             var plane_dir = new THREE.Vector3();
             plane_dir.addVectors(plane.mesh.position, plane.normal);
             plane.mesh.lookAt(plane_dir);
-            plane.mesh.translateZ(-plane.offset);
-
-            // Controls
-            controls.target = object.center;
+            plane.mesh.translateZ(-plane.world_offset);
         },
 
-        set_culling_plane: function(nx, ny, nz, s) {
-            visualizer.set_culling_plane(nx, ny, nz, s);
-            var plane_norm = visualizer.get_plane_normal();
+        set_culling_plane: function (nx, ny, nz, s) {
+            backend.set_culling_plane(nx, ny, nz, s);
+            var plane_norm = backend.get_plane_normal();
             plane.normal = new THREE.Vector3(plane_norm.get_x(), plane_norm.get_y(), plane_norm.get_z());
-            plane.offset = visualizer.get_plane_offset();
-            plane.size = visualizer.get_object_size();
+            plane.s = s;
+            plane.world_offset = backend.get_plane_offset();
+        },
+
+        get_culling_plane: function() {
+            var plane_state = {
+                nx: plane.normal.x,
+                ny: plane.normal.y,
+                nz: plane.normal.z,
+                s: plane.normal.s,
+            };
+            return plane_state;
         },
 
         import_mesh: function (path) {
-            var result = visualizer.import_mesh(path);
+            var result = backend.import_mesh(path);
             if (result) {
+
+                // VBuffer
                 object.vbuffer = [];
 
-                var base = visualizer.get_vbuffer();
-                var size = visualizer.get_vbuffer_size();
+                var base = backend.get_vbuffer();
+                var size = backend.get_vbuffer_size();
 
-                log("[JS]: " + size + " bytes of vbuffer data received from visualizer.\n");
+                log("[JS]: " + size + " bytes of vbuffer data received.\n");
 
                 for (var i = 0; i < size;) {
                     var f1 = Module.getValue(base + i, 'float');
@@ -241,8 +285,20 @@ var HexaLab = (function () {
 
                     object.vbuffer.push(new THREE.Vector3(f1, f2, f3));
                 }
-                var obj_center = visualizer.get_object_center();
+
+                // Object info
+                var obj_center = backend.get_object_center();
                 object.center = new THREE.Vector3(obj_center.get_x(), obj_center.get_y(), obj_center.get_z());
+                object.size = backend.get_object_size();
+
+                // Plane
+                scene.remove(plane.mesh);
+                var plane_geometry = new THREE.PlaneGeometry(object.size, object.size);
+                plane.mesh = new THREE.Mesh(plane_geometry, plane.mat);
+                scene.add(plane.mesh);
+
+                // Controls
+                controls.target = object.center.clone();
             }
             return result;
         },

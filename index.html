@@ -6,12 +6,7 @@
 		<link rel="stylesheet" href="css/hexalab.css">
 		<script src="js/external/three.js"></script>
 		<script src="js/external/TrackballControls.js"></script> 
-		<script src="js/external/SSAOShader.js"></script> 
-		<script src="js/external/CopyShader.js"></script> 
-		<script src="js/external/EffectComposer.js"></script> 
-		<script src="js/external/RenderPass.js"></script> 
-		<script src="js/external/ShaderPass.js"></script> 
-		<script src="js/external/MaskPass.js"></script> 
+		<script src="js/external/FileSaver.js"></script> 
 	</head>
 	<body>
 		<!-- HTML presentation stuff -->
@@ -20,8 +15,12 @@
 				<div id="sidenav">
 					<div id="sidenav_content">
 						<a href="javascript:void(0)" id="nav_closer" onclick="HexaLabGui.close_nav()">&times;</a>
-						<button onclick="HexaLabGui.pick_file()">Select mesh</button>
+						<button onclick="HexaLabGui.pick_file()">Load mesh</button>
 						<input id="file_input" type="file" style="display: none;"></input>
+                        </br>
+						<button onclick="HexaLabGui.load_settings()">Load settings</button>
+						<input id="settings_input" type="file" style="display: none;"></input>
+						<button onclick="HexaLabGui.save_settings()">Save settings</button>
 						</br>
 						<input id="plane_nx" type="number" style="width:50px" value="1"></input>
 						<input id="plane_ny" type="number" style="width:50px" value="0"></input>
