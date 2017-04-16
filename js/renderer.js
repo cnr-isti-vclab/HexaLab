@@ -33,90 +33,6 @@ var HexaLab = (function () {
         ssao: false,
     };
 
-    var get_faces = function () {
-        var faces = [];
-
-        var base = backend.get_faces();
-        var size = backend.get_faces_size();
-
-        log("[JS]: " + size + " bytes of face data received.\n");
-
-        for (var i = 0; i < size;) {
-            var i1 = Module.getValue(base + i, 'i32');
-            i += 4;
-            var i2 = Module.getValue(base + i, 'i32');
-            i += 4;
-            var i3 = Module.getValue(base + i, 'i32');
-            i += 4;
-            var i4 = Module.getValue(base + i, 'i32');
-            i += 4;
-
-            var nx = Module.getValue(base + i, 'float');
-            i += 4;
-            var ny = Module.getValue(base + i, 'float');
-            i += 4;
-            var nz = Module.getValue(base + i, 'float');
-            i += 4;
-
-            faces.push(new THREE.Face3(i1, i2, i3, new THREE.Vector3(nx, ny, nz)));
-            faces.push(new THREE.Face3(i3, i4, i1, new THREE.Vector3(nx, ny, nz)));
-        }
-
-        return faces;
-    };
-
-    var get_culled_faces = function () {
-        var faces = [];
-
-        var base = backend.get_culled_faces();
-        var size = backend.get_culled_faces_size();
-
-        log("[JS]: " + size + " bytes of culled face data received.\n");
-
-        for (var i = 0; i < size;) {
-            var i1 = Module.getValue(base + i, 'i32');
-            i += 4;
-            var i2 = Module.getValue(base + i, 'i32');
-            i += 4;
-            var i3 = Module.getValue(base + i, 'i32');
-            i += 4;
-            var i4 = Module.getValue(base + i, 'i32');
-            i += 4;
-
-            var nx = Module.getValue(base + i, 'float');
-            i += 4;
-            var ny = Module.getValue(base + i, 'float');
-            i += 4;
-            var nz = Module.getValue(base + i, 'float');
-            i += 4;
-
-            faces.push(new THREE.Face3(i1, i2, i3, new THREE.Vector3(nx, ny, nz)));
-            faces.push(new THREE.Face3(i3, i4, i1, new THREE.Vector3(nx, ny, nz)));
-        }
-
-        return faces;
-    };
-
-    var get_edges = function () {
-        var edges = [];
-
-        var base = backend.get_edges();
-        var size = backend.get_edges_size();
-
-        log("[JS]: " + size + " bytes of edge data received.\n");
-
-        for (var i = 0; i < size;) {
-            var i1 = Module.getValue(base + i, 'i32');
-            i += 4;
-            var i2 = Module.getValue(base + i, 'i32');
-            i += 4;
-
-            edges.push(object.vbuffer[i1], object.vbuffer[i2]);
-        }
-
-        return edges;
-    };
-
     // Public API
 
     return {
@@ -145,9 +61,10 @@ var HexaLab = (function () {
             else controls.target = new THREE.Vector3(0, 0, 0);
 
             object.mat = new THREE.MeshLambertMaterial({ color: "#" + settings.mesh_color, polygonOffset: true, polygonOffsetFactor: 0.5 });
-            object.cull_mat = new THREE.MeshBasicMaterial({ color: "#" + settings.mesh_cull_color, opacity: settings.mesh_cull_opacity, polygonOffset: true, polygonOffsetFactor: 0.5, transparent: true });
-            plane.mat = new THREE.MeshBasicMaterial({ color: "#" + settings.plane_color, opacity: settings.plane_opacity, transparent: true, side: THREE.DoubleSide });
+            object.cull_mat = new THREE.MeshBasicMaterial({ color: "#" + settings.mesh_cull_color, opacity: settings.mesh_cull_opacity, polygonOffset: true, polygonOffsetFactor: 0.5, transparent: true, depthWrite: false });
+            plane.mat = new THREE.MeshBasicMaterial({ color: "#" + settings.plane_color, opacity: settings.plane_opacity, transparent: true, side: THREE.DoubleSide, depthWrite: false });
             wireframe.mat = new THREE.LineBasicMaterial({ color: "#" + settings.wireframe_color });
+            wireframe.cull_mat = new THREE.LineBasicMaterial({ color: "#" + settings.wireframe_color });
 
             HexaLab.set_culling_plane(settings.plane_normal.x, settings.plane_normal.y, settings.plane_normal.z, settings.plane_offset);
 
@@ -209,33 +126,47 @@ var HexaLab = (function () {
         },
 
         update_scene: function () {
-            backend.update_view();
-            var faces = get_faces();
-            var cull_faces = get_culled_faces();
-            var edges = get_edges();
+            backend.update_components();
+
+            var vert_pos = new Float32Array(Module.HEAPU8.buffer, backend.get_vert_pos(), backend.get_vert_count() * 3);
+            var visible_face_pos = new Float32Array(Module.HEAPU8.buffer, backend.get_visible_face_pos(), backend.get_visible_face_count() * 3 * 3);
+            var visible_face_norm = new Float32Array(Module.HEAPU8.buffer, backend.get_visible_face_norm(), backend.get_visible_face_count() * 3 * 3);
+            var culled_face_pos = new Float32Array(Module.HEAPU8.buffer, backend.get_culled_face_pos(), backend.get_culled_face_count() * 3 * 3);
+            var culled_face_norm = new Float32Array(Module.HEAPU8.buffer, backend.get_culled_face_norm(), backend.get_culled_face_count() * 3 * 3);
+            var visible_edge_idx = new Uint16Array(Module.HEAPU8.buffer, backend.get_visible_edge_idx(), backend.get_visible_edge_count() * 2);
+            var culled_edge_idx = new Uint16Array(Module.HEAPU8.buffer, backend.get_culled_edge_idx(), backend.get_culled_edge_count() * 2);
 
             // Object
             scene.remove(object.mesh);
-            var object_geometry = new THREE.Geometry();
-            object_geometry.vertices = object.vbuffer;
-            object_geometry.faces = faces;
+            var object_geometry = new THREE.BufferGeometry();
+            object_geometry.addAttribute('position', new THREE.BufferAttribute(visible_face_pos, 3));
+            object_geometry.addAttribute('normal', new THREE.BufferAttribute(visible_face_norm, 3));
             object.mesh = new THREE.Mesh(object_geometry, object.mat);
             scene.add(object.mesh);
 
             // Culled object
             scene.remove(object.cull_mesh);
-            var object_cull_geometry = new THREE.Geometry();
-            object_cull_geometry.vertices = object.vbuffer;
-            object_cull_geometry.faces = cull_faces;
+            var object_cull_geometry = new THREE.BufferGeometry();
+            object_cull_geometry.addAttribute('position', new THREE.BufferAttribute(culled_face_pos, 3));
+            object_cull_geometry.addAttribute('normal', new THREE.BufferAttribute(culled_face_norm, 3));
             object.cull_mesh = new THREE.Mesh(object_cull_geometry, object.cull_mat);
             scene.add(object.cull_mesh);
             
             // Wireframe
             scene.remove(wireframe.mesh);
-            var wireframe_geometry = new THREE.Geometry();
-            wireframe_geometry.vertices = edges;
+            var wireframe_geometry = new THREE.BufferGeometry();
+            wireframe_geometry.addAttribute('position', new THREE.BufferAttribute(vert_pos, 3));
+            wireframe_geometry.setIndex(new THREE.BufferAttribute(visible_edge_idx, 1));
             wireframe.mesh = new THREE.LineSegments(wireframe_geometry, wireframe.mat);
             scene.add(wireframe.mesh);
+
+            // Culled wireframe
+            scene.remove(wireframe.cull_mesh);
+            var wireframe_cull_geometry = new THREE.BufferGeometry();
+            wireframe_cull_geometry.addAttribute('position', new THREE.BufferAttribute(vert_pos, 3));
+            wireframe_cull_geometry.setIndex(new THREE.BufferAttribute(culled_edge_idx, 1));
+            wireframe.cull_mesh = new THREE.LineSegments(wireframe_cull_geometry, wireframe.cull_mat);
+            scene.add(wireframe.cull_mesh);
 
             // Plane
             plane.mesh.position.set(object.center.x, object.center.y, object.center.z);
@@ -268,23 +199,6 @@ var HexaLab = (function () {
             if (result) {
 
                 // VBuffer
-                object.vbuffer = [];
-
-                var base = backend.get_vbuffer();
-                var size = backend.get_vbuffer_size();
-
-                log("[JS]: " + size + " bytes of vbuffer data received.\n");
-
-                for (var i = 0; i < size;) {
-                    var f1 = Module.getValue(base + i, 'float');
-                    i += 4;
-                    var f2 = Module.getValue(base + i, 'float');
-                    i += 4;
-                    var f3 = Module.getValue(base + i, 'float');
-                    i += 4;
-
-                    object.vbuffer.push(new THREE.Vector3(f1, f2, f3));
-                }
 
                 // Object info
                 var obj_center = backend.get_object_center();
