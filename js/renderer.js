@@ -66,7 +66,8 @@ var HexaLab = (function () {
             wireframe.mat = new THREE.LineBasicMaterial({ color: "#" + settings.wireframe_color });
             wireframe.cull_mat = new THREE.LineBasicMaterial({ color: "#" + settings.wireframe_color });
 
-            HexaLab.set_culling_plane(settings.plane_normal.x, settings.plane_normal.y, settings.plane_normal.z, settings.plane_offset);
+            HexaLab.set_plane_normal(settings.plane_normal.x, settings.plane_normal.y, settings.plane_normal.z);
+            HexaLab.set_plane_offset(settings.plane_offset);
 
             draw_flags.culled_mesh = settings.draw_culled_mesh;
             draw_flags.plane = settings.draw_culling_plane;
@@ -176,20 +177,41 @@ var HexaLab = (function () {
             plane.mesh.translateZ(-plane.world_offset);
         },
 
-        set_culling_plane: function (nx, ny, nz, s) {
-            backend.set_culling_plane(nx, ny, nz, s);
+        set_plane_normal: function (nx, ny, nz) {
+            backend.set_plane_normal(nx, ny, nz);
             var plane_norm = backend.get_plane_normal();
             plane.normal = new THREE.Vector3(plane_norm.get_x(), plane_norm.get_y(), plane_norm.get_z());
-            plane.s = s;
+        },
+
+        set_plane_offset: function (range) {
+            backend.set_plane_range(range);
+            plane.range = range;
+            plane.world_offset = backend.get_plane_offset();
+
+            var plane_pos = backend.get_plane_position();
+            plane.position = new THREE.Vector3(plane_pos.get_x(), plane_pos.get_y(), plane_pos.get_z());
+            log(plane.position.x);
+            log(plane.position.y);
+            log(plane.position.z);
+        },
+
+        set_plane_position: function (x, y, z) {
+            backend.set_plane_position(x, y, z);
+            plane.position = new THREE.Vector3(x, y, z);
+
+            plane.range = backend.get_plane_range();
             plane.world_offset = backend.get_plane_offset();
         },
 
-        get_culling_plane: function() {
+        get_plane_state: function() {
             var plane_state = {
+                x: plane.position.x,
+                y: plane.position.y,
+                z: plane.position.z,
                 nx: plane.normal.x,
                 ny: plane.normal.y,
                 nz: plane.normal.z,
-                s: plane.normal.s,
+                range: plane.range,
             };
             return plane_state;
         },

@@ -12,6 +12,8 @@ body {
     background-color: #111;
     overflow-x: hidden;
     transition: 0.5s;
+	color: #bbb;
+	font-family: monospace;
 }
 
 #sidenav_content {
@@ -34,7 +36,10 @@ body {
     border: 1px solid #222;
     background: #eee;
     color: #222;
-    margin-bottom: 25px;
+}
+
+#sidenav input[type="number"] {
+	width: 50px;
 }
 
 #sidenav #nav_closer {

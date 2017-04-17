@@ -6,7 +6,7 @@
 		<link rel="stylesheet" href="css/hexalab.css">
 		<script src="js/external/three.js"></script>
 		<script src="js/external/TrackballControls.js"></script> 
-		<script src="js/external/FileSaver.js"></script> 
+		<script src="js/external/FileSaver.js"></script>
 	</head>
 	<body>
 		<!-- HTML presentation stuff -->
@@ -16,17 +16,51 @@
 					<div id="sidenav_content">
 						<a href="javascript:void(0)" id="nav_closer" onclick="HexaLabGui.close_nav()">&times;</a>
 						<button onclick="HexaLabGui.pick_file()">Load mesh</button>
-						<input id="file_input" type="file" style="display: none;"></input>
-                        </br>
+						<input id="file_input" type="file" style="display: none;" />
+                        <br />
 						<button onclick="HexaLabGui.load_settings()">Load settings</button>
-						<input id="settings_input" type="file" style="display: none;"></input>
+						<input id="settings_input" type="file" style="display: none;" />
 						<button onclick="HexaLabGui.save_settings()">Save settings</button>
-						</br>
-						<input id="plane_nx" type="number" style="width:50px" value="1"></input>
-						<input id="plane_ny" type="number" style="width:50px" value="0"></input>
-						<input id="plane_nz" type="number" style="width:50px" value="0"></input>
-						<input id="plane_d" type="range"></input>
-						<textarea id="logger" readonly></textarea>
+						<br />
+                        Plane normal:
+                        <br />
+						<input id="plane_nx" type="number" style="width:50px" value="1" />
+						<input id="plane_ny" type="number" style="width:50px" value="0" />
+						<input id="plane_nz" type="number" style="width:50px" value="0" />
+						<br />
+                        Plane offset:
+                        <input id="plane_offset_range" type="range" />
+                        <input id="plane_offset_number" type="number" value="0.5" />
+						<br />
+                        Plane position:
+                        <br />
+                        <input id="plane_x" type="number" value="0" />
+                        <input id="plane_y" type="number" value="0" />
+                        <input id="plane_z" type="number" value="0" />
+                        <br />
+                        Show plane: <input id="show_plane" type="checkbox" />
+                        <br />
+                        Show wireframe: <input id="show_wireframe" type="checkbox" />
+                        <br />
+                        Show culled mesh: <input id="show_culled_mesh" type="checkbox" />
+                        <br />
+                        Show culled wireframe: <input id="show_culled_wireframe" type="checkbox" />
+                        <br />
+                        Plane color: <input id="plane_color" type="color" />
+                        <br />
+                        Plane opacity: <input id="plane_opacity" type="range" />
+                        <br />
+                        Wireframe color: <input id="wireframe_color" type="color" />
+                        <br />
+                        Culled mesh color: <input id="culled_mesh_color" type="color" />
+                        <br />
+                        Culled mesh opacity: <input id="culled_mesh_opacity" type="range" />
+                        <br />
+                        Culled wireframe color: <input id="culled_wireframe_color" type="color" />
+                        <br />
+                        Culled wireframe opacity: <input id="culled_wireframe_opacity" type="range" />
+                        <br />
+                        <textarea id="logger" readonly></textarea>
 					</div>
 				</div>
 				<span id="sidehandle" onclick="HexaLabGui.open_nav()">&#9776;</span>
