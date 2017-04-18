@@ -30,14 +30,42 @@ HexaLabGui.mesh_reader.onload = function (event) {
     if (result) {
         HexaLabGui.submit_plane_normal();
         HexaLabGui.submit_plane_offset_range();
-        HexaLabGui.sync_plane_offset();
-        HexaLabGui.sync_plane_position();
+        HexaLabGui.sync_all();
 
         HexaLab.update_scene();
         log("Mesh imported.\n");
     } else {
         log("Error!\n");
     }
+}
+
+HexaLabGui.sync_all = function () {
+    var state = HexaLab.get_state();
+
+    document.getElementById("plane_x").value = state.plane.position.x;
+    document.getElementById("plane_y").value = state.plane.position.y;
+    document.getElementById("plane_z").value = state.plane.position.z;
+
+    document.getElementById("plane_nx").value = state.plane.normal.x;
+    document.getElementById("plane_ny").value = state.plane.normal.y;
+    document.getElementById("plane_nz").value = state.plane.normal.z;
+
+    document.getElementById("plane_offset_range").value = state.plane.offset * 100;
+    document.getElementById("plane_offset_number").value = state.plane.offset;
+
+    document.getElementById("show_plane").checked = state.plane.material.visible;
+    document.getElementById("show_wireframe").checked = state.object.visible_wireframe.material.visible;
+    document.getElementById("show_culled_mesh").checked = state.object.culled_surface.material.visible;
+    document.getElementById("show_culled_wireframe").checked = state.object.culled_wireframe.material.visible;
+
+    document.getElementById("plane_color").value = "#" + state.plane.material.color.getHexString();
+    document.getElementById("plane_opacity").value = state.plane.material.opacity * 100;
+    document.getElementById("mesh_color").value = "#" + state.object.visible_surface.material.color.getHexString();
+    document.getElementById("wireframe_color").value = "#" + state.object.visible_wireframe.material.color.getHexString();
+    document.getElementById("culled_mesh_color").value = "#" + state.object.culled_surface.material.color.getHexString();
+    document.getElementById("culled_mesh_opacity").value = state.object.culled_surface.material.opacity * 100;
+    document.getElementById("culled_wireframe_color").value = "#" + state.object.culled_wireframe.material.color.getHexString();
+    document.getElementById("culled_wireframe_opacity").value = state.object.culled_wireframe.material.opacity * 100;
 }
 
 HexaLabGui.submit_plane_position = function () {
@@ -62,6 +90,24 @@ HexaLabGui.submit_plane_offset_range = function () {
 HexaLabGui.submit_plane_offset_number = function () {
     var range = parseFloat(document.getElementById("plane_offset_number").value);
     HexaLab.set_plane_offset(range);
+}
+
+HexaLabGui.submit_materials = function () {
+    var state = HexaLab.get_state();
+
+    state.plane.material.color.set(document.getElementById("plane_color").value);
+    state.plane.material.opacity = parseFloat(document.getElementById("plane_opacity").value) / 100.0;
+    state.object.visible_surface.material.color.set(document.getElementById("mesh_color").value);
+    state.object.visible_wireframe.material.color.set(document.getElementById("wireframe_color").value);
+    state.object.culled_surface.material.color.set(document.getElementById("culled_mesh_color").value);
+    state.object.culled_wireframe.material.color.set(document.getElementById("culled_wireframe_color").value);
+    state.object.culled_surface.material.opacity = parseFloat(document.getElementById("culled_mesh_opacity").value) / 100.0;
+    state.object.culled_wireframe.material.opacity = parseFloat(document.getElementById("culled_wireframe_opacity").value) / 100.0;
+
+    state.plane.material.visible = document.getElementById("show_plane").checked;
+    state.object.visible_wireframe.material.visible = document.getElementById("show_wireframe").checked;
+    state.object.culled_surface.material.visible = document.getElementById("show_culled_mesh").checked;
+    state.object.culled_wireframe.material.visible = document.getElementById("show_culled_wireframe").checked;
 }
 
 HexaLabGui.sync_plane_position = function () {
@@ -141,62 +187,63 @@ document.getElementById("plane_nz").onchange = function (event) {
 };
 document.getElementById("plane_offset_range").oninput = function (event) {
     HexaLabGui.submit_plane_offset_range();
-    HexaLabGui.sync_plane_offset();
-    HexaLabGui.sync_plane_position();
+    HexaLabGui.sync_all();
     HexaLab.update_scene();
 };
 document.getElementById("plane_offset_number").onchange = function (event) {
     HexaLabGui.submit_plane_offset_number();
-    HexaLabGui.sync_plane_offset();
-    HexaLabGui.sync_plane_position();
+    HexaLabGui.sync_all();
     HexaLab.update_scene();
 };
 document.getElementById("plane_x").onchange = function (event) {
     HexaLabGui.submit_plane_position();
-    HexaLabGui.sync_plane_offset();
+    HexaLabGui.sync_all();
     HexaLab.update_scene();
 };
 document.getElementById("plane_y").onchange = function (event) {
     HexaLabGui.submit_plane_position();
-    HexaLabGui.sync_plane_offset();
+    HexaLabGui.sync_all();
     HexaLab.update_scene();
 };
 document.getElementById("plane_z").onchange = function (event) {
     HexaLabGui.submit_plane_position();
-    HexaLabGui.sync_plane_offset();
+    HexaLabGui.sync_all();
     HexaLab.update_scene();
 };
 document.getElementById("show_plane").onclick = function (event) {
-
+    HexaLabGui.submit_materials();
 };
 document.getElementById("show_wireframe").onclick = function (event) {
-
+    HexaLabGui.submit_materials();
 };
 document.getElementById("show_culled_mesh").onclick = function (event) {
-
+    HexaLabGui.submit_materials();
 };
 document.getElementById("show_culled_wireframe").onclick = function (event) {
-
+    HexaLabGui.submit_materials();
 };
 document.getElementById("plane_color").onchange = function (event) {
-
+    HexaLabGui.submit_materials();
 };
 document.getElementById("plane_opacity").oninput = function (event) {
-
+    HexaLabGui.submit_materials();
 };
+document.getElementById("mesh_color").onchange = function (event) {
+    HexaLabGui.submit_materials();
+}
 document.getElementById("wireframe_color").onchange = function (event) {
-
+    HexaLabGui.submit_materials();
 };
 document.getElementById("culled_mesh_color").onchange = function (event) {
-
+    HexaLabGui.submit_materials();
 };
 document.getElementById("culled_mesh_opacity").oninput = function (event) {
-
+    HexaLabGui.submit_materials();
 };
 document.getElementById("culled_wireframe_color").onchange = function (event) {
-
+    HexaLabGui.submit_materials();
 };
 document.getElementById("culled_wireframe_opacity").oninput = function (event) {
-
+    HexaLabGui.submit_materials();
 };
 

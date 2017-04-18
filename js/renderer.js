@@ -2,57 +2,96 @@
 
 var HexaLab = (function () {
 
+    var default_settings = {
+        plane: {
+            color: "000000",
+            opacity: 0.5,
+            offset: 0.5,
+            normal: new THREE.Vector3(1, 0, 0),
+            show: true,
+        },
+        object: {
+            visible_surface: {
+                color: "eeee55",
+                show: true,
+            },
+            visible_wireframe: {
+                color: "000000",
+                show: true,
+            },
+            culled_surface: {
+                color: "000000",
+                opacity: 0.5,
+                show: true,
+            },
+            culled_wireframe: {
+                color: "000000",
+                opacity: 0.5,
+                show: true,
+            }
+        },
+        camera: {
+            fov: 60,
+            position: new THREE.Vector3(0, 0, 5),
+            direction: new THREE.Vector3(0, 0, -1),
+        },
+        background: "ffffff",
+        light: "ffffff",
+        ssao: false,
+    }
+
     // Private
 
     var scene, camera, light, renderer, controls, backend;
-    var object = {}, wireframe = {}, plane = {};
-    var draw_flags = {};
     var canvas = {};
 
-    var default_settings = {
-        clear_color: "ffffff",
-        light_color: "ffffff",
+    var object = {
+        visible_surface: {
+            mesh: null,
+            material: null,
+        },
+        visible_wireframe: {
+            mesh: null,
+            material: null,
+        },
+        culled_surface: {
+            mesh: null,
+            material: null,
+        },
+        culled_wireframe: {
+            mesh: null,
+            material: null,
+        },
+    };
 
-        mesh_color: "eeee55",
-        mesh_cull_color: "000000",
-        mesh_cull_opacity: 0.5,
-        wireframe_color: "000000",
-
-        plane_color: "000000",
-        plane_opacity: 0.5,
-        plane_offset: 0.5,
-        plane_normal: new THREE.Vector3(1, 0, 0),
-
-        camera_fov: 60,
-        camera_position: new THREE.Vector3(0, 0, 5),
-        camera_direction: new THREE.Vector3(0, 0, -1),
-
-        draw_culled_mesh: true,
-        draw_culling_plane: true,
-        draw_wireframe: true,
-        ssao: false,
+    var plane = {
+        offset: 0,
+        world_offset: 0,
+        position: null,
+        normal: null,
+        mesh: null,
+        material: null,
     };
 
     // Public API
 
     return {
         load_settings: function (settings) {
-            renderer.setClearColor("#" + settings.clear_color, 1);
+            renderer.setClearColor("#" + settings.background, 1);
 
             scene.remove(camera);
             camera = new THREE.PerspectiveCamera(settings.camera_fov, canvas.width / canvas.height, 0.1, 1000);
             scene.add(camera);
-            camera.position.set(settings.camera_position.x, settings.camera_position.y, settings.camera_position.z);
-            var camera_target = new THREE.Vector3();
-            camera_target.addVectors(settings.camera_position, settings.camera_direction);
+            camera.position.set(settings.camera.position.x, settings.camera.position.y, settings.camera.position.z);
+            var camera_target = new THREE.Vector3().addVectors(settings.camera.position, settings.camera.direction);
             camera.up = new THREE.Vector3(0, 1, 0);
             camera.lookAt(camera_target);
             camera.updateProjectionMatrix();
 
-            light = new THREE.PointLight("#" + settings.light_color);
+            light = new THREE.PointLight("#" + settings.light);
             camera.add(light);
 
-            if(controls) controls.dispose();
+            if (controls) controls.dispose();
             controls = new THREE.TrackballControls(camera, canvas.container);
             controls.rotateSpeed = 10;
             controls.dynamicDampingFactor = 1;
@@ -60,42 +99,88 @@ var HexaLab = (function () {
             if (object.center) controls.target = object.center.clone();
             else controls.target = new THREE.Vector3(0, 0, 0);
 
-            object.mat = new THREE.MeshLambertMaterial({ color: "#" + settings.mesh_color, polygonOffset: true, polygonOffsetFactor: 0.5 });
-            object.cull_mat = new THREE.MeshBasicMaterial({ color: "#" + settings.mesh_cull_color, opacity: settings.mesh_cull_opacity, polygonOffset: true, polygonOffsetFactor: 0.5, transparent: true, depthWrite: false });
-            plane.mat = new THREE.MeshBasicMaterial({ color: "#" + settings.plane_color, opacity: settings.plane_opacity, transparent: true, side: THREE.DoubleSide, depthWrite: false });
-            wireframe.mat = new THREE.LineBasicMaterial({ color: "#" + settings.wireframe_color });
-            wireframe.cull_mat = new THREE.LineBasicMaterial({ color: "#" + settings.wireframe_color });
+            object.visible_surface.material = new THREE.MeshLambertMaterial({
+                color: "#" + settings.object.visible_surface.color,
+                polygonOffset: true,
+                polygonOffsetFactor: 0.5,
+                visible: settings.object.visible_surface.show,
+            });
+            object.culled_surface.material = new THREE.MeshBasicMaterial({
+                color: "#" + settings.object.culled_surface.color,
+                opacity: settings.object.culled_surface.opacity,
+                polygonOffset: true,
+                polygonOffsetFactor: 0.5,
+                transparent: true,
+                depthWrite: false,
+                visible: settings.object.culled_surface.show,
+            });
+            object.visible_wireframe.material = new THREE.LineBasicMaterial({
+                color: "#" + settings.object.visible_wireframe.color,
+                visible: settings.object.visible_wireframe.show,
+            });
+            object.culled_wireframe.material = new THREE.LineBasicMaterial({
+                color: "#" + settings.object.culled_wireframe.color,
+                opacity: settings.object.culled_wireframe.opacity,
+                transparent: true,
+                depthWrite: false,
+                visible: settings.object.culled_wireframe.show,
+            });
 
-            HexaLab.set_plane_normal(settings.plane_normal.x, settings.plane_normal.y, settings.plane_normal.z);
-            HexaLab.set_plane_offset(settings.plane_offset);
+            plane.material = new THREE.MeshBasicMaterial({
+                color: "#" + settings.plane.color,
+                opacity: settings.plane.opacity,
+                transparent: true,
+                side: THREE.DoubleSide,
+                depthWrite: false,
+                visible: settings.plane.show,
+            });
 
-            draw_flags.culled_mesh = settings.draw_culled_mesh;
-            draw_flags.plane = settings.draw_culling_plane;
-            draw_flags.wireframe = settings.draw_wireframe;
-            draw_flags.ssao = settings.ssao;
+            HexaLab.set_plane_normal(settings.plane.normal.x, settings.plane.normal.y, settings.plane.normal.z);
+            HexaLab.set_plane_offset(settings.plane.offset);
+
+            //draw_flags.culled_mesh = settings.draw_culled_mesh;
+            //draw_flags.plane = settings.draw_culling_plane;
+            //draw_flags.wireframe = settings.draw_wireframe;
+            //draw_flags.ssao = settings.ssao;
         },
 
-        get_settings: function() {
-            var settings = {
-                clear_color: renderer.getClearColor().getHexString(),
-                light_color: light.color.getHexString(),
-                mesh_color: object.mat.color.getHexString(),
-                mesh_cull_color: object.cull_mat.color.getHexString(),
-                mesh_cull_opacity: object.cull_mat.opacity,
-                wireframe_color: wireframe.mat.color.getHexString(),
-                plane_color: plane.mat.color.getHexString(),
-                plane_opacity: plane.mat.opacity,
-                plane_offset: plane.s,
-                plane_normal: plane.normal,
-                camera_position: camera.position,
-                camera_direction: camera.getWorldDirection(),
-                camera_fov: camera.fov,
-                draw_culled_mesh: draw_flags.culled_mesh,
-                draw_culling_plane: draw_flags.plane,
-                draw_wireframe: draw_flags.wireframe,
-                ssao: draw_flags.ssao,
+        get_settings: function () {
+            return {
+                plane: {
+                    color: plane.material.color.getHexString(),
+                    opacity: plane.material.opacity,
+                    offset: plane.offset,
+                    normal: plane.normal.clone(),
+                },
+                object: {
+                    visible_surface: {
+                        color: object.visible_surface.material.color.getHexString(),
+                        show: object.visible_surface.material.visible,
+                    },
+                    visible_wireframe: {
+                        color: object.visible_wireframe.material.color.getHexString(),
+                        show: object.visible_wireframe.material.visible,
+                    },
+                    culled_surface: {
+                        color: object.culled_surface.material.color.getHexString(),
+                        opacity: object.culled_surface.material.opacity,
+                        show: object.culled_surface.material.visible,
+                    },
+                    culled_wireframe: {
+                        color: object.culled_wireframe.material.color.getHexString(),
+                        opacity: object.culled_wireframe.material.opacity,
+                        show: object.culled_wireframe.material.visible,
+                    }
+                },
+                camera: {
+                    fov: camera.fov,
+                    position: camera.position.clone(),
+                    direction: camera.getWorldDirection().clone(),
+                },
+                background: renderer.getClearColor().getHexString(),
+                //light: light.
+                //ssao: false,
             };
-            return settings;
         },
 
         init: function () {
@@ -138,36 +223,36 @@ var HexaLab = (function () {
             var culled_edge_idx = new Uint16Array(Module.HEAPU8.buffer, backend.get_culled_edge_idx(), backend.get_culled_edge_count() * 2);
 
             // Object
-            scene.remove(object.mesh);
+            scene.remove(object.visible_surface.mesh);
             var object_geometry = new THREE.BufferGeometry();
             object_geometry.addAttribute('position', new THREE.BufferAttribute(visible_face_pos, 3));
             object_geometry.addAttribute('normal', new THREE.BufferAttribute(visible_face_norm, 3));
-            object.mesh = new THREE.Mesh(object_geometry, object.mat);
-            scene.add(object.mesh);
+            object.visible_surface.mesh = new THREE.Mesh(object_geometry, object.visible_surface.material);
+            scene.add(object.visible_surface.mesh);
 
             // Culled object
-            scene.remove(object.cull_mesh);
+            scene.remove(object.culled_surface.mesh);
             var object_cull_geometry = new THREE.BufferGeometry();
             object_cull_geometry.addAttribute('position', new THREE.BufferAttribute(culled_face_pos, 3));
             object_cull_geometry.addAttribute('normal', new THREE.BufferAttribute(culled_face_norm, 3));
-            object.cull_mesh = new THREE.Mesh(object_cull_geometry, object.cull_mat);
-            scene.add(object.cull_mesh);
+            object.culled_surface.mesh = new THREE.Mesh(object_cull_geometry, object.culled_surface.material);
+            scene.add(object.culled_surface.mesh);
             
             // Wireframe
-            scene.remove(wireframe.mesh);
+            scene.remove(object.visible_wireframe.mesh);
             var wireframe_geometry = new THREE.BufferGeometry();
             wireframe_geometry.addAttribute('position', new THREE.BufferAttribute(vert_pos, 3));
             wireframe_geometry.setIndex(new THREE.BufferAttribute(visible_edge_idx, 1));
-            wireframe.mesh = new THREE.LineSegments(wireframe_geometry, wireframe.mat);
-            scene.add(wireframe.mesh);
+            object.visible_wireframe.mesh = new THREE.LineSegments(wireframe_geometry, object.visible_wireframe.material);
+            scene.add(object.visible_wireframe.mesh);
 
             // Culled wireframe
-            scene.remove(wireframe.cull_mesh);
+            scene.remove(object.culled_wireframe.mesh);
             var wireframe_cull_geometry = new THREE.BufferGeometry();
             wireframe_cull_geometry.addAttribute('position', new THREE.BufferAttribute(vert_pos, 3));
             wireframe_cull_geometry.setIndex(new THREE.BufferAttribute(culled_edge_idx, 1));
-            wireframe.cull_mesh = new THREE.LineSegments(wireframe_cull_geometry, wireframe.cull_mat);
-            scene.add(wireframe.cull_mesh);
+            object.culled_wireframe.mesh = new THREE.LineSegments(wireframe_cull_geometry, object.culled_wireframe.material);
+            scene.add(object.culled_wireframe.mesh);
 
             // Plane
             plane.mesh.position.set(object.center.x, object.center.y, object.center.z);
@@ -183,37 +268,28 @@ var HexaLab = (function () {
             plane.normal = new THREE.Vector3(plane_norm.get_x(), plane_norm.get_y(), plane_norm.get_z());
         },
 
-        set_plane_offset: function (range) {
-            backend.set_plane_range(range);
-            plane.range = range;
-            plane.world_offset = backend.get_plane_offset();
+        set_plane_offset: function (offset) {
+            backend.set_plane_offset(offset);
+            plane.offset = offset;
+            plane.world_offset = backend.get_plane_world_offset();
 
             var plane_pos = backend.get_plane_position();
             plane.position = new THREE.Vector3(plane_pos.get_x(), plane_pos.get_y(), plane_pos.get_z());
-            log(plane.position.x);
-            log(plane.position.y);
-            log(plane.position.z);
         },
 
         set_plane_position: function (x, y, z) {
             backend.set_plane_position(x, y, z);
             plane.position = new THREE.Vector3(x, y, z);
 
-            plane.range = backend.get_plane_range();
-            plane.world_offset = backend.get_plane_offset();
+            plane.offset = backend.get_plane_offset();
+            plane.world_offset = backend.get_plane_world_offset();
         },
 
-        get_plane_state: function() {
-            var plane_state = {
-                x: plane.position.x,
-                y: plane.position.y,
-                z: plane.position.z,
-                nx: plane.normal.x,
-                ny: plane.normal.y,
-                nz: plane.normal.z,
-                range: plane.range,
-            };
-            return plane_state;
+        get_state: function() {
+            return {
+                plane: plane,
+                object: object,
+            }
         },
 
         import_mesh: function (path) {
@@ -230,7 +306,7 @@ var HexaLab = (function () {
                 // Plane
                 scene.remove(plane.mesh);
                 var plane_geometry = new THREE.PlaneGeometry(object.size, object.size);
-                plane.mesh = new THREE.Mesh(plane_geometry, plane.mat);
+                plane.mesh = new THREE.Mesh(plane_geometry, plane.material);
                 scene.add(plane.mesh);
 
                 // Controls
