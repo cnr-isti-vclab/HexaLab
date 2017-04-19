@@ -1,24 +1,53 @@
-body { 
+html, body { 
     margin: 0;
+	height: 100%;
+}
+
+canvas {
+    display: block;
+}
+
+#display {
+	min-height: 100%;
+	display: flex;
 }
 
 #sidenav {
-    height: 100%;
-    width: 300px;
     position: fixed;
-    z-index: 200;
-    top: 0;
-    left: 0;
+	top: 0;
+	bottom: 0;
+	width: 20%;
+
+	height: 100%;
     background-color: #111;
-    overflow-x: hidden;
-    transition: 0.5s;
 	color: #bbb;
 	font-family: monospace;
+	transition: 0s;
+
+	z-index: 200;
+	overflow-x: hidden;
+
+	display: block;
 }
 
+#frame {
+	width: 80%;
+	margin-left: 20%;
+	align-items: stretch;
+}
+
+#sidehandle {
+    position: fixed;
+    z-index: 100;
+    font-size: 30px;
+    cursor: pointer;
+}
+
+/* Sidenav content */
+
 #sidenav_content {
-    margin: 20px;
-    padding-top: 60px;
+    padding: 5%;
+	height: 95%;
 }
 
 #sidenav textarea {
@@ -53,22 +82,4 @@ body {
     right: 25px;
     font-size: 36px;
     margin-left: 50px;
-}
-
-#frame {
-    transition: margin-left .5s;
-    padding: 0px;
-    position:fixed;
-    top:0;
-    bottom:0;
-    left:0;
-    right:0;
-    z-index: 1;
-}
-
-#sidehandle {
-    position: fixed;
-    z-index: 100;
-    font-size: 30px;
-    cursor: pointer;
 }

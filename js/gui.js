@@ -166,11 +166,17 @@ document.getElementById("settings_input").onchange = function (event) {
 };
 
 HexaLabGui.open_nav = function () {
-    document.getElementById("sidenav").style.width = "300px";
+    document.getElementById("sidenav").style.width = "20%";
+    document.getElementById("frame").style.width = "80%";
+    document.getElementById("frame").style.marginLeft = "20%";
+    HexaLab.on_resize();
 }
 
 HexaLabGui.close_nav = function () {
     document.getElementById("sidenav").style.width = "0";
+    document.getElementById("frame").style.width = "100%";
+    document.getElementById("frame").style.marginLeft = "0";
+    HexaLab.on_resize();
 }
 
 // Interface callbacks

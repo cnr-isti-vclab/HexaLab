@@ -182,11 +182,20 @@ var HexaLab = (function () {
             };
         },
 
+        on_resize: function () {
+            canvas.width = document.getElementById('frame').offsetWidth;
+            canvas.height = document.getElementById('frame').offsetHeight;
+            renderer.setSize(canvas.width, canvas.height);
+            camera.aspect = canvas.width / canvas.height;
+            camera.updateProjectionMatrix();
+            log("Frame resized to " + canvas.width + "x" + canvas.height);
+        },
+
         init: function () {
             // Scene
             scene = new THREE.Scene();
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+            canvas.width = document.getElementById('frame').offsetWidth;
+            canvas.height = document.getElementById('frame').offsetHeight;
 
             // Backend interface
             backend = new Module.Visualizer();
@@ -201,13 +210,7 @@ var HexaLab = (function () {
             HexaLab.load_settings(default_settings);
 
             // Resize event
-            window.addEventListener('resize', function () {
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
-                renderer.setSize(canvas.width, canvas.height);
-                camera.aspect = canvas.width / canvas.height;
-                camera.updateProjectionMatrix();
-            });
+            window.addEventListener('resize', HexaLab.on_resize());
         },
 
         update_scene: function () {
