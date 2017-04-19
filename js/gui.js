@@ -134,6 +134,8 @@ HexaLabGui.settings_reader.onload = function (event) {
     var data = event.target.result;
     var settings = JSON.parse(data);
     HexaLab.load_settings(settings);
+    HexaLabGui.sync_all();
+    HexaLab.update_scene();
 }
 
 HexaLabGui.pick_file = function () {

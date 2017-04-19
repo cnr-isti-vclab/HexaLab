@@ -2,6 +2,8 @@
 
 var HexaLab = (function () {
 
+    // SETUP
+
     var default_settings = {
         plane: {
             color: "000000",
@@ -40,27 +42,40 @@ var HexaLab = (function () {
         ssao: false,
     }
 
-    // Private
+    // PRIVATE
 
     var scene, camera, light, renderer, controls, backend;
     var canvas = {};
+    var render_context = {};
 
     var object = {
         visible_surface: {
-            mesh: null,
-            material: null,
+            mesh: new THREE.BufferGeometry(),
+            material: new THREE.MeshLambertMaterial({
+                polygonOffset: true,
+                polygonOffsetFactor: 0.5,
+            }),
         },
         visible_wireframe: {
-            mesh: null,
-            material: null,
+            mesh: new THREE.BufferGeometry(),
+            material: new THREE.MeshBasicMaterial({
+            }),
         },
         culled_surface: {
-            mesh: null,
-            material: null,
+            mesh: new THREE.BufferGeometry(),
+            material: new THREE.LineBasicMaterial({
+                polygonOffset: true,
+                polygonOffsetFactor: 0.5,
+                transparent: true,
+                depthWrite: false,
+            }),
         },
         culled_wireframe: {
-            mesh: null,
-            material: null,
+            mesh: new THREE.BufferGeometry(),
+            material: new THREE.LineBasicMaterial({
+                transparent: true,
+                depthWrite: false,
+            }),
         },
     };
 
@@ -70,15 +85,21 @@ var HexaLab = (function () {
         position: null,
         normal: null,
         mesh: null,
-        material: null,
+        material: new THREE.MeshBasicMaterial({
+            transparent: true,
+            side: THREE.DoubleSide,
+            depthWrite: false,
+        }),
     };
 
-    // Public API
+    // PUBLIC API
 
     return {
         load_settings: function (settings) {
+            // Renderer
             renderer.setClearColor("#" + settings.background, 1);
 
+            // Camera
             scene.remove(camera);
             camera = new THREE.PerspectiveCamera(settings.camera_fov, canvas.width / canvas.height, 0.1, 1000);
             scene.add(camera);
@@ -88,9 +109,11 @@ var HexaLab = (function () {
             camera.lookAt(camera_target);
             camera.updateProjectionMatrix();
 
+            // Light
             light = new THREE.PointLight("#" + settings.light);
             camera.add(light);
 
+            // Controls
             if (controls) controls.dispose();
             controls = new THREE.TrackballControls(camera, canvas.container);
             controls.rotateSpeed = 10;
@@ -99,7 +122,26 @@ var HexaLab = (function () {
             if (object.center) controls.target = object.center.clone();
             else controls.target = new THREE.Vector3(0, 0, 0);
 
-            object.visible_surface.material = new THREE.MeshLambertMaterial({
+            // Materials
+            object.visible_surface.material.color.set("#" + settings.object.visible_surface.color);
+            object.visible_surface.material.visible = settings.object.visible_surface.show;
+
+            object.culled_surface.material.color.set("#" + settings.object.culled_surface.color);
+            object.culled_surface.material.opacity = settings.object.culled_surface.opacity;
+            object.culled_surface.material.visible = settings.object.culled_surface.show;
+
+            object.visible_wireframe.material.color.set("#" + settings.object.visible_wireframe.color);
+            object.visible_wireframe.material.visible = settings.object.visible_wireframe.show;
+
+            object.culled_wireframe.material.color.set("#" + settings.object.culled_wireframe.color);
+            object.culled_wireframe.material.opacity = settings.object.culled_wireframe.opacity;
+            object.culled_wireframe.material.visible = settings.object.culled_wireframe.show;
+
+            plane.material.color.set("#" + settings.plane.color);
+            plane.material.opacity = settings.plane.opacity;
+            plane.material.visible = settings.plane.show;
+
+            /*object.visible_surface.material = new THREE.MeshLambertMaterial({
                 color: "#" + settings.object.visible_surface.color,
                 polygonOffset: true,
                 polygonOffsetFactor: 0.5,
@@ -133,15 +175,14 @@ var HexaLab = (function () {
                 side: THREE.DoubleSide,
                 depthWrite: false,
                 visible: settings.plane.show,
-            });
+            });*/
 
+            // Plane state
             HexaLab.set_plane_normal(settings.plane.normal.x, settings.plane.normal.y, settings.plane.normal.z);
             HexaLab.set_plane_offset(settings.plane.offset);
 
-            //draw_flags.culled_mesh = settings.draw_culled_mesh;
-            //draw_flags.plane = settings.draw_culling_plane;
-            //draw_flags.wireframe = settings.draw_wireframe;
-            //draw_flags.ssao = settings.ssao;
+            // Context
+            render_context.ssao = settings.ssao;
         },
 
         get_settings: function () {
@@ -151,6 +192,7 @@ var HexaLab = (function () {
                     opacity: plane.material.opacity,
                     offset: plane.offset,
                     normal: plane.normal.clone(),
+                    show: plane.material.visible,
                 },
                 object: {
                     visible_surface: {
@@ -178,8 +220,8 @@ var HexaLab = (function () {
                     direction: camera.getWorldDirection().clone(),
                 },
                 background: renderer.getClearColor().getHexString(),
-                //light: light.
-                //ssao: false,
+                light: light.color.getHexString(),
+                ssao: false,    // TODO
             };
         },
 
