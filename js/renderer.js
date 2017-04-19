@@ -97,12 +97,25 @@ var HexaLab = (function () {
     };
 
     var reset_camera = function (offset, direction, distance) {
-        controls.target = object.center.clone();
+        controls.target = object.center.clone().add(offset);
         var target = new THREE.Vector3().addVectors(object.center, offset);
+        //controls.dispose();
         camera.position.set(target.x, target.y, target.z);
+        log("position: ");
+        var pos = camera.position;
+        log(pos.x + " " + pos.y + " " + pos.z + "\n");
         camera.up.set(0, 1, 0);
         camera.lookAt(target.add(direction));
+        log("direction: ");
+        var dir = camera.getWorldDirection();
+        log(dir.x + " " + dir.y + " " + dir.z + "\n");
         camera.translateZ(object.size * distance);
+        log("position: ");
+        var pos = camera.position;
+        log(pos.x + " " + pos.y + " " + pos.z + "\n");
+        log("direction: ");
+        var dir = camera.getWorldDirection();
+        log(dir.x + " " + dir.y + " " + dir.z + "\n");
     }
 
     // PUBLIC API
@@ -155,6 +168,8 @@ var HexaLab = (function () {
 
             // Context
             render_context.ssao = settings.ssao;
+
+            if (object.center) reset_camera(current_settings.camera.offset, current_settings.camera.direction, current_settings.camera.distance);
         },
 
         get_settings: function () {
@@ -188,8 +203,9 @@ var HexaLab = (function () {
                 },
                 camera: {
                     fov: camera.fov,
-                    position: camera.position.clone(),
-                    target: controls.target.clone(),
+                    offset: new THREE.Vector3().subVectors(controls.target, object.center),
+                    direction: camera.getWorldDirection(),
+                    distance: camera.position.distanceTo(object.center) / object.size,
                 },
                 background: renderer.getClearColor().getHexString(),
                 light: light.color.getHexString(),
@@ -216,7 +232,10 @@ var HexaLab = (function () {
             backend = new Module.Visualizer();
 
             // Renderer
-            renderer = new THREE.WebGLRenderer();
+            renderer = new THREE.WebGLRenderer({
+                antialias: true,
+                preserveDrawingBuffer: true,
+            });
             renderer.setSize(canvas.width, canvas.height);
             canvas.container = document.getElementById("frame");
             canvas.container.appendChild(renderer.domElement);

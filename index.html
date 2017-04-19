@@ -15,13 +15,16 @@
 				<div id="sidenav">
 					<div id="sidenav_content">
 						<a href="javascript:void(0)" id="nav_closer" onclick="HexaLabGui.close_nav()">&times;</a>
-						<button onclick="HexaLabGui.pick_file()">Load mesh</button>
+						
+                        <button onclick="HexaLabGui.pick_file()">Load mesh</button>
 						<input id="file_input" type="file" style="display: none;" />
                         <br />
 						<button onclick="HexaLabGui.load_settings()">Load settings</button>
 						<input id="settings_input" type="file" style="display: none;" />
 						<button onclick="HexaLabGui.save_settings()">Save settings</button>
 						<br />
+                        <button id="snapshot" onclick="HexaLabGui.take_snapshot()">Snapshot</button>
+                        <br />
                         Plane normal:
                         <br />
 						<input id="plane_nx" type="number" style="width:50px" value="1" />

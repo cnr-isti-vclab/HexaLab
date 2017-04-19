@@ -143,6 +143,13 @@ HexaLabGui.pick_file = function () {
     document.getElementById('file_input').click();
 }
 
+HexaLabGui.snapshot = function () {
+    var canvas = document.getElementById('frame').getElementsByTagName('canvas')[0];
+    canvas.toBlob(function (blob) {
+        saveAs(blob, "HexaLab_snapshot.png");
+    }, "image/png");
+}
+
 HexaLabGui.load_settings = function () {
     document.getElementById('settings_input').value = "";
     document.getElementById('settings_input').click();
@@ -180,6 +187,10 @@ HexaLabGui.close_nav = function () {
 }
 
 // Interface callbacks
+
+document.getElementById("snapshot").onclick = function (event) {
+    HexaLabGui.snapshot();
+}
 
 document.getElementById("plane_nx").onchange = function (event) {
     HexaLabGui.submit_plane_normal();
