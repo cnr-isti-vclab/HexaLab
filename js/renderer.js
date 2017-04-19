@@ -4,6 +4,9 @@ var HexaLab = (function () {
 
     // SETUP
 
+    var default_offset = new THREE.Vector3(0, 0, 5);
+    var default_scaling = 2;
+
     var default_settings = {
         plane: {
             color: "000000",
@@ -34,8 +37,9 @@ var HexaLab = (function () {
         },
         camera: {
             fov: 60,
-            position: new THREE.Vector3(0, 0, 5),
-            target: new THREE.Vector3(0, 0, 0),
+            offset: new THREE.Vector3(0, 0, 0),
+            direction: new THREE.Vector3(0, 0, -1),
+            distance: 2
         },
         background: "ffffff",
         light: "ffffff",
@@ -47,6 +51,7 @@ var HexaLab = (function () {
     var scene, camera, light, renderer, controls, backend;
     var canvas = {};
     var render_context = {};
+    var current_settings;
 
     var object = {
         visible_surface: {
@@ -91,10 +96,21 @@ var HexaLab = (function () {
         }),
     };
 
+    var reset_camera = function (offset, direction, distance) {
+        controls.target = object.center.clone();
+        var target = new THREE.Vector3().addVectors(object.center, offset);
+        camera.position.set(target.x, target.y, target.z);
+        camera.up.set(0, 1, 0);
+        camera.lookAt(target.add(direction));
+        camera.translateZ(object.size * distance);
+    }
+
     // PUBLIC API
 
     return {
         load_settings: function (settings) {
+            current_settings = settings;
+
             // Renderer
             renderer.setClearColor("#" + settings.background, 1);
 
@@ -102,7 +118,7 @@ var HexaLab = (function () {
             scene.remove(camera);
             camera = new THREE.PerspectiveCamera(settings.camera_fov, canvas.width / canvas.height, 0.1, 1000);
             scene.add(camera);
-            camera.position.set(settings.camera.position.x, settings.camera.position.y, settings.camera.position.z);
+            //camera.position.set(settings.camera.position.x, settings.camera.position.y, settings.camera.position.z);
 
             // Light
             light = new THREE.PointLight("#" + settings.light);
@@ -113,7 +129,6 @@ var HexaLab = (function () {
             controls = new THREE.TrackballControls(camera, canvas.container);
             controls.rotateSpeed = 10;
             controls.dynamicDampingFactor = 1;
-            controls.target.set(settings.camera.target.x, settings.camera.target.y, settings.camera.target.z);
 
             // Materials
             object.visible_surface.material.color.set("#" + settings.object.visible_surface.color);
@@ -304,8 +319,7 @@ var HexaLab = (function () {
                 plane.mesh = new THREE.Mesh(plane_geometry, plane.material);
                 scene.add(plane.mesh);
 
-                // Controls
-                controls.target = object.center.clone();
+                reset_camera(current_settings.camera.offset, current_settings.camera.direction, current_settings.camera.distance);
             }
             return result;
         },
