@@ -35,7 +35,7 @@ var HexaLab = (function () {
         camera: {
             fov: 60,
             position: new THREE.Vector3(0, 0, 5),
-            direction: new THREE.Vector3(0, 0, -1),
+            target: new THREE.Vector3(0, 0, 0),
         },
         background: "ffffff",
         light: "ffffff",
@@ -103,10 +103,6 @@ var HexaLab = (function () {
             camera = new THREE.PerspectiveCamera(settings.camera_fov, canvas.width / canvas.height, 0.1, 1000);
             scene.add(camera);
             camera.position.set(settings.camera.position.x, settings.camera.position.y, settings.camera.position.z);
-            var camera_target = new THREE.Vector3().addVectors(settings.camera.position, settings.camera.direction);
-            camera.up = new THREE.Vector3(0, 1, 0);
-            camera.lookAt(camera_target);
-            camera.updateProjectionMatrix();
 
             // Light
             light = new THREE.PointLight("#" + settings.light);
@@ -117,9 +113,7 @@ var HexaLab = (function () {
             controls = new THREE.TrackballControls(camera, canvas.container);
             controls.rotateSpeed = 10;
             controls.dynamicDampingFactor = 1;
-            controls.noPan = true;
-            if (object.center) controls.target = object.center.clone();
-            else controls.target = new THREE.Vector3(0, 0, 0);
+            controls.target.set(settings.camera.target.x, settings.camera.target.y, settings.camera.target.z);
 
             // Materials
             object.visible_surface.material.color.set("#" + settings.object.visible_surface.color);
@@ -139,42 +133,6 @@ var HexaLab = (function () {
             plane.material.color.set("#" + settings.plane.color);
             plane.material.opacity = settings.plane.opacity;
             plane.material.visible = settings.plane.show;
-
-            /*object.visible_surface.material = new THREE.MeshLambertMaterial({
-                color: "#" + settings.object.visible_surface.color,
-                polygonOffset: true,
-                polygonOffsetFactor: 0.5,
-                visible: settings.object.visible_surface.show,
-            });
-            object.culled_surface.material = new THREE.MeshBasicMaterial({
-                color: "#" + settings.object.culled_surface.color,
-                opacity: settings.object.culled_surface.opacity,
-                polygonOffset: true,
-                polygonOffsetFactor: 0.5,
-                transparent: true,
-                depthWrite: false,
-                visible: settings.object.culled_surface.show,
-            });
-            object.visible_wireframe.material = new THREE.LineBasicMaterial({
-                color: "#" + settings.object.visible_wireframe.color,
-                visible: settings.object.visible_wireframe.show,
-            });
-            object.culled_wireframe.material = new THREE.LineBasicMaterial({
-                color: "#" + settings.object.culled_wireframe.color,
-                opacity: settings.object.culled_wireframe.opacity,
-                transparent: true,
-                depthWrite: false,
-                visible: settings.object.culled_wireframe.show,
-            });
-
-            plane.material = new THREE.MeshBasicMaterial({
-                color: "#" + settings.plane.color,
-                opacity: settings.plane.opacity,
-                transparent: true,
-                side: THREE.DoubleSide,
-                depthWrite: false,
-                visible: settings.plane.show,
-            });*/
 
             // Plane state
             HexaLab.set_plane_normal(settings.plane.normal.x, settings.plane.normal.y, settings.plane.normal.z);
@@ -216,7 +174,7 @@ var HexaLab = (function () {
                 camera: {
                     fov: camera.fov,
                     position: camera.position.clone(),
-                    direction: camera.getWorldDirection().clone(),
+                    target: controls.target.clone(),
                 },
                 background: renderer.getClearColor().getHexString(),
                 light: light.color.getHexString(),
@@ -332,9 +290,6 @@ var HexaLab = (function () {
         import_mesh: function (path) {
             var result = backend.import_mesh(path);
             if (result) {
-
-                // VBuffer
-
                 // Object info
                 var obj_center = backend.get_object_center();
                 object.center = new THREE.Vector3(obj_center.get_x(), obj_center.get_y(), obj_center.get_z());
