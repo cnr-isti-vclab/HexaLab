@@ -50,19 +50,19 @@ var HexaLab = (function () {
 
     var object = {
         visible_surface: {
-            mesh: new THREE.BufferGeometry(),
+            geometry: new THREE.BufferGeometry(),
             material: new THREE.MeshLambertMaterial({
                 polygonOffset: true,
                 polygonOffsetFactor: 0.5,
             }),
         },
         visible_wireframe: {
-            mesh: new THREE.BufferGeometry(),
+            geometry: new THREE.BufferGeometry(),
             material: new THREE.MeshBasicMaterial({
             }),
         },
         culled_surface: {
-            mesh: new THREE.BufferGeometry(),
+            geometry: new THREE.BufferGeometry(),
             material: new THREE.LineBasicMaterial({
                 polygonOffset: true,
                 polygonOffsetFactor: 0.5,
@@ -71,7 +71,7 @@ var HexaLab = (function () {
             }),
         },
         culled_wireframe: {
-            mesh: new THREE.BufferGeometry(),
+            geometry: new THREE.BufferGeometry(),
             material: new THREE.LineBasicMaterial({
                 transparent: true,
                 depthWrite: false,
@@ -84,7 +84,6 @@ var HexaLab = (function () {
         world_offset: 0,
         position: null,
         normal: null,
-        mesh: null,
         material: new THREE.MeshBasicMaterial({
             transparent: true,
             side: THREE.DoubleSide,
@@ -266,34 +265,30 @@ var HexaLab = (function () {
 
             // Object
             scene.remove(object.visible_surface.mesh);
-            var object_geometry = new THREE.BufferGeometry();
-            object_geometry.addAttribute('position', new THREE.BufferAttribute(visible_face_pos, 3));
-            object_geometry.addAttribute('normal', new THREE.BufferAttribute(visible_face_norm, 3));
-            object.visible_surface.mesh = new THREE.Mesh(object_geometry, object.visible_surface.material);
+            object.visible_surface.geometry.addAttribute('position', new THREE.BufferAttribute(visible_face_pos, 3));   // Old attributes are automatically overwritten
+            object.visible_surface.geometry.addAttribute('normal', new THREE.BufferAttribute(visible_face_norm, 3));
+            object.visible_surface.mesh = new THREE.Mesh(object.visible_surface.geometry, object.visible_surface.material);
             scene.add(object.visible_surface.mesh);
 
             // Culled object
             scene.remove(object.culled_surface.mesh);
-            var object_cull_geometry = new THREE.BufferGeometry();
-            object_cull_geometry.addAttribute('position', new THREE.BufferAttribute(culled_face_pos, 3));
-            object_cull_geometry.addAttribute('normal', new THREE.BufferAttribute(culled_face_norm, 3));
-            object.culled_surface.mesh = new THREE.Mesh(object_cull_geometry, object.culled_surface.material);
+            object.culled_surface.geometry.addAttribute('position', new THREE.BufferAttribute(culled_face_pos, 3));
+            object.culled_surface.geometry.addAttribute('normal', new THREE.BufferAttribute(culled_face_norm, 3));
+            object.culled_surface.mesh = new THREE.Mesh(object.culled_surface.geometry, object.culled_surface.material);
             scene.add(object.culled_surface.mesh);
             
             // Wireframe
             scene.remove(object.visible_wireframe.mesh);
-            var wireframe_geometry = new THREE.BufferGeometry();
-            wireframe_geometry.addAttribute('position', new THREE.BufferAttribute(vert_pos, 3));
-            wireframe_geometry.setIndex(new THREE.BufferAttribute(visible_edge_idx, 1));
-            object.visible_wireframe.mesh = new THREE.LineSegments(wireframe_geometry, object.visible_wireframe.material);
+            object.visible_wireframe.geometry.addAttribute('position', new THREE.BufferAttribute(vert_pos, 3));
+            object.visible_wireframe.geometry.setIndex(new THREE.BufferAttribute(visible_edge_idx, 1));
+            object.visible_wireframe.mesh = new THREE.LineSegments(object.visible_wireframe.geometry, object.visible_wireframe.material);
             scene.add(object.visible_wireframe.mesh);
 
             // Culled wireframe
             scene.remove(object.culled_wireframe.mesh);
-            var wireframe_cull_geometry = new THREE.BufferGeometry();
-            wireframe_cull_geometry.addAttribute('position', new THREE.BufferAttribute(vert_pos, 3));
-            wireframe_cull_geometry.setIndex(new THREE.BufferAttribute(culled_edge_idx, 1));
-            object.culled_wireframe.mesh = new THREE.LineSegments(wireframe_cull_geometry, object.culled_wireframe.material);
+            object.culled_wireframe.geometry.addAttribute('position', new THREE.BufferAttribute(vert_pos, 3));
+            object.culled_wireframe.geometry.setIndex(new THREE.BufferAttribute(culled_edge_idx, 1));
+            object.culled_wireframe.mesh = new THREE.LineSegments(object.culled_wireframe.geometry, object.culled_wireframe.material);
             scene.add(object.culled_wireframe.mesh);
 
             // Plane
