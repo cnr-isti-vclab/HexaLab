@@ -4,9 +4,6 @@ var HexaLab = (function () {
 
     // SETUP
 
-    var default_offset = new THREE.Vector3(0, 0, 5);
-    var default_scaling = 2;
-
     var default_settings = {
         plane: {
             color: "000000",
@@ -50,7 +47,6 @@ var HexaLab = (function () {
 
     var scene, camera, light, renderer, controls, backend;
     var canvas = {};
-    var render_context = {};
     var current_settings;
 
     var object = {
@@ -96,27 +92,48 @@ var HexaLab = (function () {
         }),
     };
 
+    var render_context = {
+        ssao: {},
+        depth_prepass: {},
+        render_pass: {},
+        flags: {}
+    };
+
     var reset_camera = function (offset, direction, distance) {
         controls.target = object.center.clone().add(offset);
         var target = new THREE.Vector3().addVectors(object.center, offset);
-        //controls.dispose();
         camera.position.set(target.x, target.y, target.z);
-        log("position: ");
-        var pos = camera.position;
-        log(pos.x + " " + pos.y + " " + pos.z + "\n");
         camera.up.set(0, 1, 0);
         camera.lookAt(target.add(direction));
-        log("direction: ");
-        var dir = camera.getWorldDirection();
-        log(dir.x + " " + dir.y + " " + dir.z + "\n");
         camera.translateZ(object.size * distance);
-        log("position: ");
-        var pos = camera.position;
-        log(pos.x + " " + pos.y + " " + pos.z + "\n");
-        log("direction: ");
-        var dir = camera.getWorldDirection();
-        log(dir.x + " " + dir.y + " " + dir.z + "\n");
-    }
+
+        pp_setup();
+    };
+
+    var pp_setup = function () {
+        // Context
+        render_context.depth_prepass.material = new THREE.MeshDepthMaterial({
+            depthPacking: THREE.RGBADepthPacking,
+            blending: THREE.NoBlending,
+        });
+        render_context.depth_prepass.render_target = new THREE.WebGLRenderTarget(canvas.width, canvas.height);
+
+        render_context.render_pass.pass = new THREE.RenderPass(scene, camera);
+
+        render_context.ssao.pass = new THREE.ShaderPass(THREE.SSAOShader);
+        render_context.ssao.pass.renderToScreen = true;
+        render_context.ssao.pass.uniforms["tDepth"].value = render_context.depth_prepass.render_target.texture;
+        render_context.ssao.pass.uniforms['size'].value.set(canvas.width, canvas.height);
+        render_context.ssao.pass.uniforms['cameraNear'].value = camera.near;
+        render_context.ssao.pass.uniforms['cameraFar'].value = camera.far;
+        render_context.ssao.pass.uniforms['onlyAO'].value = true;
+        render_context.ssao.pass.uniforms['aoClamp'].value = 0.3;
+        render_context.ssao.pass.uniforms['lumInfluence'].value = 0.5;
+
+        render_context.composer = new THREE.EffectComposer(renderer);
+        render_context.composer.addPass(render_context.render_pass.pass);
+        render_context.composer.addPass(render_context.ssao.pass);
+    };
 
     // PUBLIC API
 
@@ -167,7 +184,7 @@ var HexaLab = (function () {
             HexaLab.set_plane_offset(settings.plane.offset);
 
             // Context
-            render_context.ssao = settings.ssao;
+            render_context.flags.ssao = settings.ssao;
 
             if (object.center) reset_camera(current_settings.camera.offset, current_settings.camera.direction, current_settings.camera.distance);
         },
@@ -209,7 +226,7 @@ var HexaLab = (function () {
                 },
                 background: renderer.getClearColor().getHexString(),
                 light: light.color.getHexString(),
-                ssao: false,    // TODO
+                ssao: render_context.flags.ssao,
             };
         },
 
@@ -346,11 +363,14 @@ var HexaLab = (function () {
         animate: function () {
             controls.update();
 
-            renderer.render(scene, camera);
-            //g_scene.overrideMaterial = g_depth_mat;
-            //g_renderer.render(g_scene, g_camera, g_depth_target, true);
-            //g_scene.overrideMaterial = null;
-            //g_composer.render();
+            if (render_context.composer) {
+                scene.overrideMaterial = render_context.depth_prepass.material;
+                renderer.render(scene, camera, render_context.depth_prepass.render_target, true);
+                scene.overrideMaterial = null;
+                render_context.composer.render();
+            } else {
+                renderer.render(scene, camera);
+            }
 
             requestAnimationFrame(HexaLab.animate);
         },
