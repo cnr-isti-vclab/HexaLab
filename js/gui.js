@@ -58,6 +58,8 @@ HexaLabGui.sync_all = function () {
     document.getElementById("show_culled_mesh").checked = state.object.culled_surface.material.visible;
     document.getElementById("show_culled_wireframe").checked = state.object.culled_wireframe.material.visible;
 
+    document.getElementById("ssao").checked = state.render_context.flags.ssao;
+
     document.getElementById("plane_color").value = "#" + state.plane.material.color.getHexString();
     document.getElementById("plane_opacity").value = state.plane.material.opacity * 100;
     document.getElementById("mesh_color").value = "#" + state.object.visible_surface.material.color.getHexString();
@@ -265,4 +267,7 @@ document.getElementById("culled_wireframe_color").onchange = function (event) {
 document.getElementById("culled_wireframe_opacity").oninput = function (event) {
     HexaLabGui.submit_materials();
 };
-
+document.getElementById("ssao").onclick = function (event) {
+    var state = HexaLab.get_state();
+    state.render_context.flags.ssao = document.getElementById("ssao").checked;
+};

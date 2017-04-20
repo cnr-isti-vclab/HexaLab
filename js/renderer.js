@@ -126,7 +126,7 @@ var HexaLab = (function () {
         render_context.ssao.pass.uniforms['size'].value.set(canvas.width, canvas.height);
         render_context.ssao.pass.uniforms['cameraNear'].value = camera.near;
         render_context.ssao.pass.uniforms['cameraFar'].value = camera.far;
-        render_context.ssao.pass.uniforms['onlyAO'].value = true;
+        render_context.ssao.pass.uniforms['onlyAO'].value = false;
         render_context.ssao.pass.uniforms['aoClamp'].value = 0.3;
         render_context.ssao.pass.uniforms['lumInfluence'].value = 0.5;
 
@@ -338,6 +338,7 @@ var HexaLab = (function () {
             return {
                 plane: plane,
                 object: object,
+                render_context: render_context,
             }
         },
 
@@ -363,7 +364,7 @@ var HexaLab = (function () {
         animate: function () {
             controls.update();
 
-            if (render_context.composer) {
+            if (render_context.composer && render_context.flags.ssao) {
                 scene.overrideMaterial = render_context.depth_prepass.material;
                 renderer.render(scene, camera, render_context.depth_prepass.render_target, true);
                 scene.overrideMaterial = null;
