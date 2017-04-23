@@ -78,6 +78,11 @@ var HexaLab = (function () {
                 depthWrite: false,
             }),
         },
+        bad_edges: {
+            geometry: new THREE.BufferGeometry(),
+            material: new THREE.LineBasicMaterial({
+            }),
+        }
     };
 
     var plane = {
@@ -174,6 +179,8 @@ var HexaLab = (function () {
             object.culled_wireframe.material.color.set("#" + settings.object.culled_wireframe.color);
             object.culled_wireframe.material.opacity = settings.object.culled_wireframe.opacity;
             object.culled_wireframe.material.visible = settings.object.culled_wireframe.show;
+
+            object.bad_edges.material.vertexColors = THREE.VertexColors;
 
             plane.material.color.set("#" + settings.plane.color);
             plane.material.opacity = settings.plane.opacity;
@@ -274,6 +281,8 @@ var HexaLab = (function () {
             var culled_face_norm = new Float32Array(Module.HEAPU8.buffer, backend.get_culled_face_norm(), backend.get_culled_face_count() * 3 * 3);
             var visible_edge_idx = new Uint16Array(Module.HEAPU8.buffer, backend.get_visible_edge_idx(), backend.get_visible_edge_count() * 2);
             var culled_edge_idx = new Uint16Array(Module.HEAPU8.buffer, backend.get_culled_edge_idx(), backend.get_culled_edge_count() * 2);
+            var bad_edge_pos = new Float32Array(Module.HEAPU8.buffer, backend.get_bad_edge_pos(), backend.get_bad_edge_count() * 2 * 3);
+            var bad_edge_color = new Float32Array(Module.HEAPU8.buffer, backend.get_bad_edge_color(), backend.get_bad_edge_count() * 2 * 3);
 
             // Object
             scene.remove(object.visible_surface.mesh);
@@ -302,6 +311,13 @@ var HexaLab = (function () {
             object.culled_wireframe.geometry.setIndex(new THREE.BufferAttribute(culled_edge_idx, 1));
             object.culled_wireframe.mesh = new THREE.LineSegments(object.culled_wireframe.geometry, object.culled_wireframe.material);
             scene.add(object.culled_wireframe.mesh);
+
+            // Bad edges
+            scene.remove(object.bad_edges.mesh);
+            object.bad_edges.geometry.addAttribute('position', new THREE.BufferAttribute(bad_edge_pos, 3));
+            object.bad_edges.geometry.addAttribute('color', new THREE.BufferAttribute(bad_edge_color, 3));
+            object.bad_edges.mesh = new THREE.LineSegments(object.bad_edges.geometry, object.bad_edges.material);
+            scene.add(object.bad_edges.mesh);
 
             // Plane
             plane.mesh.position.set(object.center.x, object.center.y, object.center.z);
