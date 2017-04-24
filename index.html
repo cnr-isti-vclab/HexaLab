@@ -31,6 +31,7 @@
 						<br />
                         <button id="snapshot" onclick="HexaLabGui.take_snapshot()">Snapshot</button>
                         <br />
+                        <hr />
                         Plane normal:
                         <br />
 						<input id="plane_nx" type="number" style="width:50px" value="1" />
@@ -47,32 +48,48 @@
                         <input id="plane_y" type="number" value="0" />
                         <input id="plane_z" type="number" value="0" />
                         <br />
-                        Show plane: <input id="show_plane" type="checkbox" />
+                        <hr />
+                        Show plane <input id="show_plane" type="checkbox" />
                         <br />
-                        Show wireframe: <input id="show_wireframe" type="checkbox" />
+                        Show wireframe <input id="show_wireframe" type="checkbox" />
                         <br />
-                        Show culled mesh: <input id="show_culled_mesh" type="checkbox" />
+                        Show culled mesh <input id="show_culled_mesh" type="checkbox" />
                         <br />
-                        Show culled wireframe: <input id="show_culled_wireframe" type="checkbox" />
+                        Show culled wireframe <input id="show_culled_wireframe" type="checkbox" />
                         <br />
-                        Plane color: <input id="plane_color" type="color" />
+                        Plane color <input id="plane_color" type="color" />
                         <br />
-                        Plane opacity: <input id="plane_opacity" type="range" />
+                        Plane opacity <input id="plane_opacity" type="range" />
                         <br />
-                        Mesh color: <input id="mesh_color" type="color" />
+                        Mesh color <input id="mesh_color" type="color" />
                         <br />
-                        Wireframe color: <input id="wireframe_color" type="color" />
+                        Mesh opacity <input id="mesh_opacity" type="range" />
                         <br />
-                        Culled mesh color: <input id="culled_mesh_color" type="color" />
+                        Wireframe color <input id="wireframe_color" type="color" />
                         <br />
-                        Culled mesh opacity: <input id="culled_mesh_opacity" type="range" />
+                        wireframe opacity <input id="wireframe_opacity" type="range" />
                         <br />
-                        Culled wireframe color: <input id="culled_wireframe_color" type="color" />
+                        Culled mesh color <input id="culled_mesh_color" type="color" />
                         <br />
-                        Culled wireframe opacity: <input id="culled_wireframe_opacity" type="range" />
+                        Culled mesh opacity <input id="culled_mesh_opacity" type="range" />
                         <br />
-                        SSAO: <input id="ssao" type="checkbox" />
+                        Culled wireframe color <input id="culled_wireframe_color" type="color" />
                         <br />
+                        Culled wireframe opacity <input id="culled_wireframe_opacity" type="range" />
+                        <br />
+                        Show singularity edges <input id="show_singularity_edge" type="checkbox" />
+                        <br />
+                        Singularity edges opacity <input id="singularity_edge_opacity" type="range" />
+                        <br />
+                        Show hexa quality <input id="show_hexa_quality" type="checkbox" />
+                        <br />
+                        Show bad hexas only <input id="show_bad_hexa_only" type="checkbox" />
+                        <br />
+                        Bad hexa threshold [0-1] <input id="bad_hexa_threshold" type="number" value="0.5" />
+                        <br />
+                        Occlusion: <input id="show_occlusion" type="checkbox" />
+                        <br />
+                        <hr />
                         <textarea id="logger" readonly></textarea>
 					</div>
 				</div>

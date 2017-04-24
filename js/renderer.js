@@ -15,10 +15,12 @@ var HexaLab = (function () {
         object: {
             visible_surface: {
                 color: "eeee55",
+                opacity: 1,
                 show: true,
             },
             visible_wireframe: {
                 color: "000000",
+                opacity: 1,
                 show: true,
             },
             culled_surface: {
@@ -30,7 +32,16 @@ var HexaLab = (function () {
                 color: "000000",
                 opacity: 0.5,
                 show: true,
-            }
+            },
+            singularity_edge: {
+                opacity: 0.5,
+                show: true,
+            },
+            bad_hexa_mode: {
+                enabled: false,
+            },
+            occlusion: false,
+            quality: false,
         },
         camera: {
             fov: 60,
@@ -40,7 +51,6 @@ var HexaLab = (function () {
         },
         background: "ffffff",
         light: "ffffff",
-        ssao: false,
     }
 
     // PRIVATE
@@ -55,11 +65,13 @@ var HexaLab = (function () {
             material: new THREE.MeshLambertMaterial({
                 polygonOffset: true,
                 polygonOffsetFactor: 0.5,
+                transparent: true,
             }),
         },
         visible_wireframe: {
             geometry: new THREE.BufferGeometry(),
             material: new THREE.MeshBasicMaterial({
+                transparent: true,
             }),
         },
         culled_surface: {
@@ -153,7 +165,6 @@ var HexaLab = (function () {
             scene.remove(camera);
             camera = new THREE.PerspectiveCamera(settings.camera_fov, canvas.width / canvas.height, 0.1, 1000);
             scene.add(camera);
-            //camera.position.set(settings.camera.position.x, settings.camera.position.y, settings.camera.position.z);
 
             // Light
             light = new THREE.PointLight("#" + settings.light);
@@ -166,7 +177,8 @@ var HexaLab = (function () {
             controls.dynamicDampingFactor = 1;
 
             // Materials
-            object.visible_surface.material.color.set("#" + settings.object.visible_surface.color);
+            //object.visible_surface.material.color.set("#" + settings.object.visible_surface.color);
+            object.visible_surface.material.vertexColors = THREE.VertexColors;
             object.visible_surface.material.visible = settings.object.visible_surface.show;
 
             object.culled_surface.material.color.set("#" + settings.object.culled_surface.color);
@@ -277,6 +289,7 @@ var HexaLab = (function () {
             var vert_pos = new Float32Array(Module.HEAPU8.buffer, backend.get_vert_pos(), backend.get_vert_count() * 3);
             var visible_face_pos = new Float32Array(Module.HEAPU8.buffer, backend.get_visible_face_pos(), backend.get_visible_face_count() * 3 * 3);
             var visible_face_norm = new Float32Array(Module.HEAPU8.buffer, backend.get_visible_face_norm(), backend.get_visible_face_count() * 3 * 3);
+            var visible_face_color = new Float32Array(Module.HEAPU8.buffer, backend.get_visible_face_color(), backend.get_visible_face_count() * 3 * 3);
             var culled_face_pos = new Float32Array(Module.HEAPU8.buffer, backend.get_culled_face_pos(), backend.get_culled_face_count() * 3 * 3);
             var culled_face_norm = new Float32Array(Module.HEAPU8.buffer, backend.get_culled_face_norm(), backend.get_culled_face_count() * 3 * 3);
             var visible_edge_idx = new Uint16Array(Module.HEAPU8.buffer, backend.get_visible_edge_idx(), backend.get_visible_edge_count() * 2);
@@ -288,6 +301,7 @@ var HexaLab = (function () {
             scene.remove(object.visible_surface.mesh);
             object.visible_surface.geometry.addAttribute('position', new THREE.BufferAttribute(visible_face_pos, 3));   // Old attributes are automatically overwritten
             object.visible_surface.geometry.addAttribute('normal', new THREE.BufferAttribute(visible_face_norm, 3));
+            object.visible_surface.geometry.addAttribute('color', new THREE.BufferAttribute(visible_face_color, 3));
             object.visible_surface.mesh = new THREE.Mesh(object.visible_surface.geometry, object.visible_surface.material);
             scene.add(object.visible_surface.mesh);
 
