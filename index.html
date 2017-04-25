@@ -22,14 +22,14 @@
 					<div id="sidenav_content">
 						<a href="javascript:void(0)" id="nav_closer" onclick="HexaLabGui.close_nav()">&times;</a>
 						
-                        <button onclick="HexaLabGui.pick_file()">Load mesh</button>
+                        <button id="mesh_pick_button">Load mesh</button>
 						<input id="file_input" type="file" style="display: none;" />
                         <br />
-						<button onclick="HexaLabGui.load_settings()">Load settings</button>
+						<button id="settings_pick_button">Load settings</button>
 						<input id="settings_input" type="file" style="display: none;" />
-						<button onclick="HexaLabGui.save_settings()">Save settings</button>
+						<button id="settings_store_button">Save settings</button>
 						<br />
-                        <button id="snapshot" onclick="HexaLabGui.take_snapshot()">Snapshot</button>
+                        <button id="snapshot">Snapshot</button>
                         <br />
                         <hr />
                         Plane normal:
@@ -49,6 +49,8 @@
                         <input id="plane_z" type="number" value="0" />
                         <br />
                         <hr />
+                        Background color <input id="background_color" type="color" />
+                        <br />
                         Show plane <input id="show_plane" type="checkbox" />
                         <br />
                         Show wireframe <input id="show_wireframe" type="checkbox" />
@@ -63,8 +65,6 @@
                         <br />
                         Mesh color <input id="mesh_color" type="color" />
                         <br />
-                        Mesh opacity <input id="mesh_opacity" type="range" />
-                        <br />
                         Wireframe color <input id="wireframe_color" type="color" />
                         <br />
                         wireframe opacity <input id="wireframe_opacity" type="range" />
@@ -77,13 +77,13 @@
                         <br />
                         Culled wireframe opacity <input id="culled_wireframe_opacity" type="range" />
                         <br />
-                        Show singularity edges <input id="show_singularity_edge" type="checkbox" />
+                        Show singularity edges <input id="show_singularity_edges" type="checkbox" />
                         <br />
-                        Singularity edges opacity <input id="singularity_edge_opacity" type="range" />
+                        Singularity edges opacity <input id="singularity_edges_opacity" type="range" />
                         <br />
-                        Show hexa quality <input id="show_hexa_quality" type="checkbox" />
+                        Show hexa quality <input id="show_mesh_quality" type="checkbox" />
                         <br />
-                        Show bad hexas only <input id="show_bad_hexa_only" type="checkbox" />
+                        Show bad hexas only <input id="show_bad_hexas_only" type="checkbox" />
                         <br />
                         Bad hexa threshold [0-1] <input id="bad_hexa_threshold" type="number" value="0.5" />
                         <br />
