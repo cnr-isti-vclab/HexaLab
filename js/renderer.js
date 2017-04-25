@@ -66,6 +66,7 @@ var HexaLab = (function () {
             material: new THREE.MeshLambertMaterial({
                 polygonOffset: true,
                 polygonOffsetFactor: 0.5,
+                vertexColors: THREE.VertexColors,
                 //transparent: true,
             }),
         },
@@ -205,7 +206,7 @@ var HexaLab = (function () {
 
             HexaLab.show_mesh_occlusion(new_settings.object.occlusion);
             HexaLab.show_mesh_quality(new_settings.object.quality);
-            HexaLab.show_only_bad_hexas(new_settings.object.bad_hexa_mode.enabled);
+            HexaLab.show_bad_hexas_only(new_settings.object.bad_hexa_mode.enabled);
             HexaLab.set_bad_hexa_threshold(new_settings.object.bad_hexa_mode.threshold);
         },
 
@@ -357,6 +358,7 @@ var HexaLab = (function () {
         // Materials
         set_mesh_color: function (color) {
             object.visible_surface.material.color.set(color);
+            settings.mesh_color = color;
         },
 
         set_mesh_opacity: function (opacity) {
@@ -429,8 +431,12 @@ var HexaLab = (function () {
             settings.show_mesh_quality = show;
             if (show) {
                 object.visible_surface.material.vertexColors = THREE.VertexColors;
+                object.visible_surface.material.color.set(0xffffff);
+                object.visible_surface.material.needsUpdate = true;
             } else {
-                object.visible_surface.material.vertexColors = false;
+                object.visible_surface.material.vertexColors = THREE.NoColors;
+                object.visible_surface.material.color.set(settings.mesh_color);
+                object.visible_surface.material.needsUpdate = true;
             }
         },
 
@@ -438,7 +444,7 @@ var HexaLab = (function () {
             settings.show_mesh_occlusion = show;
         },
 
-        show_only_bad_hexas: function (show) {
+        show_bad_hexas_only: function (show) {
             settings.show_bad_hexas_only = show;
         },
 

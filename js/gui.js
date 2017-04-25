@@ -268,3 +268,13 @@ document.getElementById("singularity_edges_opacity").oninput = function (event) 
 document.getElementById("show_occlusion").onclick = function (event) {
     HexaLab.show_mesh_occlusion(document.getElementById("show_occlusion").checked);
 };
+document.getElementById("show_mesh_quality").onclick = function (event) {
+    HexaLab.show_mesh_quality(document.getElementById("show_mesh_quality").checked);
+    HexaLabGui.sync_all()
+};
+document.getElementById("show_bad_hexas_only").onclick = function (event) {
+    HexaLab.show_bad_hexas_only(document.getElementById("show_bad_hexas_only").checked);
+};
+document.getElementById("bad_hexa_threshold").onclick = function (event) {
+    HexaLab.set_bad_hexa_threshold(document.getElementById("bad_hexa_threshold").checked);
+};
