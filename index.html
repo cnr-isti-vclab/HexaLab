@@ -5,6 +5,7 @@
 		<title>HexaLab</title>
 		<link rel="stylesheet" href="css/hexalab.css">
 		<script src="js/external/three.js"></script>
+		<script src="js/external/plotly.js"></script>
 		<script src="js/external/TrackballControls.js"></script> 
 		<script src="js/external/FileSaver.js"></script>
         <script src="js/external/SSAOShader.js"></script>
@@ -20,80 +21,13 @@
 			<div id="GUI">
 				<div id="sidenav">
 					<div id="sidenav_content">
-						<a href="javascript:void(0)" id="nav_closer" onclick="HexaLabGui.close_nav()">&times;</a>
-						
-                        <button id="mesh_pick_button">Load mesh</button>
-						<input id="file_input" type="file" style="display: none;" />
-                        <br />
-						<button id="settings_pick_button">Load settings</button>
-						<input id="settings_input" type="file" style="display: none;" />
-						<button id="settings_store_button">Save settings</button>
-						<br />
-                        <button id="snapshot">Snapshot</button>
-                        <br />
-                        <hr />
-                        Plane normal:
-                        <br />
-						<input id="plane_nx" type="number" style="width:50px" value="1" />
-						<input id="plane_ny" type="number" style="width:50px" value="0" />
-						<input id="plane_nz" type="number" style="width:50px" value="0" />
-						<br />
-                        Plane offset:
-                        <input id="plane_offset_range" type="range" />
-                        <input id="plane_offset_number" type="number" value="0.5" />
-						<br />
-                        Plane position:
-                        <br />
-                        <input id="plane_x" type="number" value="0" />
-                        <input id="plane_y" type="number" value="0" />
-                        <input id="plane_z" type="number" value="0" />
-                        <br />
-                        <hr />
-                        Background color <input id="background_color" type="color" />
-                        <br />
-                        Show plane <input id="show_plane" type="checkbox" />
-                        <br />
-                        Show wireframe <input id="show_wireframe" type="checkbox" />
-                        <br />
-                        Show culled mesh <input id="show_culled_mesh" type="checkbox" />
-                        <br />
-                        Show culled wireframe <input id="show_culled_wireframe" type="checkbox" />
-                        <br />
-                        Plane color <input id="plane_color" type="color" />
-                        <br />
-                        Plane opacity <input id="plane_opacity" type="range" />
-                        <br />
-                        Mesh color <input id="mesh_color" type="color" />
-                        <br />
-                        Wireframe color <input id="wireframe_color" type="color" />
-                        <br />
-                        wireframe opacity <input id="wireframe_opacity" type="range" />
-                        <br />
-                        Culled mesh color <input id="culled_mesh_color" type="color" />
-                        <br />
-                        Culled mesh opacity <input id="culled_mesh_opacity" type="range" />
-                        <br />
-                        Culled wireframe color <input id="culled_wireframe_color" type="color" />
-                        <br />
-                        Culled wireframe opacity <input id="culled_wireframe_opacity" type="range" />
-                        <br />
-                        Show singularity edges <input id="show_singularity_edges" type="checkbox" />
-                        <br />
-                        Singularity edges opacity <input id="singularity_edges_opacity" type="range" />
-                        <br />
-                        Show hexa quality <input id="show_mesh_quality" type="checkbox" />
-                        <br />
-                        Show bad hexas only <input id="show_bad_hexas_only" type="checkbox" />
-                        <br />
-                        Bad hexa threshold [0-1] <input id="bad_hexa_threshold" type="number" value="0.5" />
-                        <br />
-                        Occlusion: <input id="show_occlusion" type="checkbox" />
-                        <br />
-                        <hr />
+                        <div id="dynamic_gui">
+                        </div>
+                        <div id="plot_div" ></div>
                         <textarea id="logger" readonly></textarea>
 					</div>
 				</div>
-				<span id="sidehandle" onclick="HexaLabGui.open_nav()">&#9776;</span>
+				<span id="sidehandle" onclick="HexaLab.GUI.open_nav()">&#9776;</span>
 			</div>
 			<div id="frame"></div>
 		</div>
@@ -103,14 +37,20 @@
 		<!-- Emscripten compiled cpp code -->
 		<script src="js/generated/hexalab_cpp.js"></script>
 		<!-- Three.js powered renderer -->
-		<script src="js/renderer.js"></script>
+		<script src="js/hexalab.js"></script>
 		<!-- js gui callbacks -->
-		<script src="js/gui.js"></script>
+		<!--<script src="js/gui.js"></script>-->
+		<script src="js/culling_plane_view.js"></script>
 
 		<script type="text/javascript">
-			window.onload = function() {
-				HexaLab.init();
-				HexaLab.animate();
+		    window.onload = function () {
+		        //HexaLab.init('frame', 'dynamic_gui');
+		        var context = new HexaLab.Context('frame', 'dynamic_gui');
+		        context.add_view(new HexaLab.CullingPlaneView(context.canvas));
+		        context.set_view("Culling Plane View");
+		        //var ctx = new HexaLab.Context();
+		        //ctx.add_view(new HexaLab.CullingPlaneView(ctx.canvas));
+		        context.animate();
 			}
 		</script>
 
