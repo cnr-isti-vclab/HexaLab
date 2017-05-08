@@ -1,12 +1,12 @@
 "use strict";
 
-HexaLab.CullingPlaneView = function (canvas) {
+HexaLab.CullingPlaneView = function () {
 
     var view = new Module.CullingPlaneView();
 
     // View Constructor
 
-    HexaLab.View.call(this, view, canvas);
+    HexaLab.View.call(this, view);
 
     // Models
 
@@ -35,6 +35,16 @@ HexaLab.CullingPlaneView = function (canvas) {
                 transparent: true,
                 depthWrite: false,
             })
+        ),
+
+        singularity: new HexaLab.Model(
+            view.get_singularity_model(),
+            null,
+            new THREE.MeshBasicMaterial({
+                transparent: true,
+                depthWrite: false,
+                vertexColors: THREE.VertexColors
+            })
         )
     };
 
@@ -44,7 +54,7 @@ HexaLab.CullingPlaneView = function (canvas) {
         material: new THREE.MeshBasicMaterial({
             transparent: true,
             side: THREE.DoubleSide,
-            //depthWrite: false
+            depthWrite: false
         }),
         offset: 0,
         world_offset: 0,
@@ -126,6 +136,9 @@ HexaLab.CullingPlaneView = function (canvas) {
     this.make_range("hidden_wireframe_opacity", function () {
         self.set_hidden_wireframe_opacity(this.get());
     });
+    this.make_checkbox('show_singularity', function () {
+        self.show_singularity(this.get());
+    });
 
     this.on_settings_change(this.default_settings);
 };
@@ -146,7 +159,8 @@ HexaLab.CullingPlaneView.prototype = Object.assign(Object.create(HexaLab.View.pr
         plane_normal: new THREE.Vector3(1, 0, 0),
         plane_offset: 0.5,
         plane_opacity: 0.5,
-        plane_color: "#000000"
+        plane_color: "#000000",
+        show_singularity: true
     },
 
     // Api
@@ -195,6 +209,7 @@ HexaLab.CullingPlaneView.prototype = Object.assign(Object.create(HexaLab.View.pr
     on_update: function () {
         this.update_model(this.models.straight);
         this.update_model(this.models.hidden);
+        this.update_model(this.models.singularity);
 
         if (this.plane.mesh) {
             var pos = this.get_center();

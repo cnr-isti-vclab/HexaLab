@@ -21,13 +21,12 @@
 			<div id="GUI">
 				<div id="sidenav">
 					<div id="sidenav_content">
-                        <div id="dynamic_gui">
-                        </div>
-                        <div id="plot_div" ></div>
+                        <a href="javascript:void(0)" id="nav_closer">&times;</a>
+                        <div id="dynamic_gui"></div>
                         <textarea id="logger" readonly></textarea>
 					</div>
 				</div>
-				<span id="sidehandle" onclick="HexaLab.GUI.open_nav()">&#9776;</span>
+				<span id="nav_opener">&#9776;</span>
 			</div>
 			<div id="frame"></div>
 		</div>
@@ -46,7 +45,7 @@
 		    window.onload = function () {
 		        //HexaLab.init('frame', 'dynamic_gui');
 		        var context = new HexaLab.Context('frame', 'dynamic_gui');
-		        context.add_view(new HexaLab.CullingPlaneView(context.canvas));
+		        context.add_view(new HexaLab.CullingPlaneView());
 		        context.set_view("Culling Plane View");
 		        //var ctx = new HexaLab.Context();
 		        //ctx.add_view(new HexaLab.CullingPlaneView(ctx.canvas));

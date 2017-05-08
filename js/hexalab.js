@@ -121,13 +121,12 @@ Object.assign(HexaLab.DynamicInterface.prototype, {
 
 // VIEW
 
-HexaLab.View = function (view, canvas) {
+HexaLab.View = function (view) {
     HexaLab.DynamicInterface.call(this);
 
     var self = this;
     this.scene = new THREE.Scene();
-    this.canvas = canvas;
-    this.camera = new THREE.PerspectiveCamera(60, canvas.width / canvas.height, 0.1, 1000);
+    this.camera = new THREE.PerspectiveCamera(60, 1, 0.1, 1000);
     this.light = new THREE.PointLight(),
     this.ambient_light = new THREE.AmbientLight(0x404040);
     this.camera.add(this.light);
@@ -136,6 +135,7 @@ HexaLab.View = function (view, canvas) {
     this.view = view;
     this.renderer_settings = {};
     this.camera_settings = {};
+    this.webGL = true;  // TODO split into 2 superclasses
 
     this.make_color_picker('background_color', function () {
         self.set_background_color(this.get());
@@ -205,8 +205,10 @@ HexaLab.View.prototype = Object.assign(Object.create(HexaLab.DynamicInterface.pr
             var buffer = new Float32Array(Module.HEAPU8.buffer, model.buffers.surface_color().data(), model.buffers.surface_color().size() * 3);
             model.surface.geometry.addAttribute('color', new THREE.BufferAttribute(buffer, 3));
         }
-        model.surface.mesh = new THREE.Mesh(model.surface.geometry, model.surface.material);
-        this.scene.add(model.surface.mesh);
+        if (model.buffers.surface_pos().size() != 0) {
+            model.surface.mesh = new THREE.Mesh(model.surface.geometry, model.surface.material);
+            this.scene.add(model.surface.mesh);
+        }
 
         this.scene.remove(model.wireframe.mesh);
         model.wireframe.geometry.removeAttribute('position');
@@ -219,8 +221,10 @@ HexaLab.View.prototype = Object.assign(Object.create(HexaLab.DynamicInterface.pr
             var buffer = new Float32Array(Module.HEAPU8.buffer, model.buffers.wireframe_color().data(), model.buffers.wireframe_color().size() * 3);
             model.wireframe.geometry.addAttribute('color', new THREE.BufferAttribute(buffer, 3));
         }
-        model.wireframe.mesh = new THREE.LineSegments(model.wireframe.geometry, model.wireframe.material);
-        this.scene.add(model.wireframe.mesh);
+        if (model.buffers.wireframe_pos().size() != 0) {
+            model.wireframe.mesh = new THREE.LineSegments(model.wireframe.geometry, model.wireframe.material);
+            this.scene.add(model.wireframe.mesh);
+        }
     },
 
     // Implementation Api
@@ -292,17 +296,18 @@ HexaLab.View.prototype = Object.assign(Object.create(HexaLab.DynamicInterface.pr
     },
 
     set_camera: function (target, direction, distance) {
-        if (this.controls) this.controls.dispose();
-        this.controls = new THREE.TrackballControls(this.camera, this.canvas.container);
-        this.controls.rotateSpeed = 10;
-        this.controls.dynamicDampingFactor = 1;
-        this.controls.target = target.clone();//object.center.clone().add(offset);
+        if (this.canvas) {
+            if (this.controls) this.controls.dispose();
+            this.controls = new THREE.TrackballControls(this.camera, this.canvas.container);
+            this.controls.rotateSpeed = 10;
+            this.controls.dynamicDampingFactor = 1;
+            this.controls.target = target.clone();
+        }
 
-        //var target = offset.clone();// new THREE.Vector3().addVectors(object.center, offset);
         this.camera.position.set(target.x, target.y, target.z);
         this.camera.up.set(0, 1, 0);
         this.camera.lookAt(new THREE.Vector3().addVectors(target, direction));
-        this.camera.translateZ(distance);//object.size * distance);
+        this.camera.translateZ(distance);
     },
 
     set_mesh: function (mesh) {
@@ -326,6 +331,12 @@ HexaLab.View.prototype = Object.assign(Object.create(HexaLab.DynamicInterface.pr
         this.light.color.set(color);
         this.gui['light_color'].set(color);
     },
+
+    set_canvas: function (canvas) {
+        this.canvas = canvas;
+        this.resize();
+        this.set_camera(new THREE.Vector3().addVectors(this.camera_settings.offset, this.get_center()), this.camera_settings.direction, this.camera_settings.distance * this.get_size());
+    }
 });
 
 // HEXALAB
@@ -416,8 +427,7 @@ HexaLab.Context = function (frame_id, gui_id) {
 
     // Resize
 
-    window.addEventListener('resize', this.on_resize());
-
+    window.addEventListener('resize', this.on_resize.bind(this));
 };
  
 HexaLab.Context.prototype = Object.assign(Object.create(HexaLab.DynamicInterface.prototype), {
@@ -425,6 +435,7 @@ HexaLab.Context.prototype = Object.assign(Object.create(HexaLab.DynamicInterface
 
     add_view: function (view) {
         this.views[view.get_name()] = view;
+        view.set_canvas(this.canvas);
     },
 
     set_view: function (view) {

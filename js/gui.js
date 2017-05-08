@@ -10,6 +10,8 @@ HexaLab.gui = {
     store_settings_button: document.getElementById('settings_store_button'),
     snapshot_button: document.getElementById('snapshot'),
     sidenav: document.getElementById('sidenav'),
+    sidenav_opener: document.getElementById('nav_opener'),
+    sidenav_closer: document.getElementById('nav_closer'),
     frame: HexaLab.context.canvas.container
 }
 /*
@@ -33,19 +35,20 @@ HexaLab.gui.make_file = function (data, name) {
 */
 // Menu
 
-HexaLab.gui.open_nav = function () {
+HexaLab.gui.sidenav_opener.addEventListener('click', function () {
     HexaLab.gui.sidenav.style.width = "20%";
     HexaLab.gui.frame.style.width = "80%";
     HexaLab.gui.frame.style.marginLeft = "20%";
     HexaLab.context.on_resize();
-}
+})
 
-HexaLab.gui.close_nav = function () {
+HexaLab.gui.sidenav_closer.addEventListener('click', function () {
     HexaLab.gui.sidenav.style.width = "0";
     HexaLab.gui.frame.style.width = "100%";
     HexaLab.gui.frame.style.marginLeft = "0";
     HexaLab.context.on_resize();
-}
+})
+
 /*
 // Mesh
 

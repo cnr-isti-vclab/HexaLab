@@ -30,13 +30,17 @@ canvas {
 	display: block;
 }
 
+#sidenav p {
+	margin: 0;
+}
+
 #frame {
 	width: 80%;
 	margin-left: 20%;
 	align-items: stretch;
 }
 
-#sidehandle {
+#nav_opener {
     position: fixed;
     z-index: 100;
     font-size: 30px;
@@ -71,7 +75,7 @@ canvas {
 	width: 50px;
 }
 
-#sidenav #nav_closer {
+#nav_closer {
     padding: 8px 8px 8px 32px;
     text-decoration: none;
     color: #818181;
