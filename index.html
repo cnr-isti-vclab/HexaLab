@@ -40,13 +40,15 @@
 		<!-- js gui callbacks -->
 		<!--<script src="js/gui.js"></script>-->
 		<script src="js/culling_plane_view.js"></script>
+		<script src="js/low_quality_view.js"></script>
 
 		<script type="text/javascript">
 		    window.onload = function () {
 		        //HexaLab.init('frame', 'dynamic_gui');
 		        var context = new HexaLab.Context('frame', 'dynamic_gui');
+		        context.add_view(new HexaLab.LowQualityView());
 		        context.add_view(new HexaLab.CullingPlaneView());
-		        context.set_view("Culling Plane View");
+		        context.set_view("Low Quality View");
 		        //var ctx = new HexaLab.Context();
 		        //ctx.add_view(new HexaLab.CullingPlaneView(ctx.canvas));
 		        context.animate();

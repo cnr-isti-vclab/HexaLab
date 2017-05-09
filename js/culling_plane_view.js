@@ -2,17 +2,15 @@
 
 HexaLab.CullingPlaneView = function () {
 
-    var view = new Module.CullingPlaneView();
-
     // View Constructor
 
-    HexaLab.View.call(this, view);
+    HexaLab.View.call(this, new Module.CullingPlaneView());
 
     // Models
 
     this.models = {
         straight: new HexaLab.Model(
-            view.get_straight_model(),
+            this.view.get_straight_model(),
             new THREE.MeshLambertMaterial({
                 polygonOffset: true,
                 polygonOffsetFactor: 0.5
@@ -24,7 +22,7 @@ HexaLab.CullingPlaneView = function () {
         ),
 
         hidden: new HexaLab.Model(
-            view.get_hidden_model(),
+            this.view.get_hidden_model(),
             new THREE.MeshBasicMaterial({
                 polygonOffset: true,
                 polygonOffsetFactor: 0.5,
@@ -38,7 +36,7 @@ HexaLab.CullingPlaneView = function () {
         ),
 
         singularity: new HexaLab.Model(
-            view.get_singularity_model(),
+            this.view.get_singularity_model(),
             null,
             new THREE.MeshBasicMaterial({
                 transparent: true,
@@ -78,67 +76,119 @@ HexaLab.CullingPlaneView = function () {
         self.set_plane_position(x, y, z);
     }
 
-    this.make_numeric("plane_nx", function () {
-        set_plane_normal_from_gui();
-        self.update();
-    });
-    this.make_numeric("plane_ny", function () {
-        set_plane_normal_from_gui();
-        self.update();
-    });
-    this.make_numeric("plane_nz", function () {
-        set_plane_normal_from_gui();
-        self.update();
-    });
-    this.make_range("plane_offset", function () {
-        self.set_plane_offset(this.get());
-        self.update();
-    });
-    this.make_numeric("plane_x", function () {
-        set_plane_position_from_gui();
-        self.update();
-    });
-    this.make_numeric("plane_y", function () {
-        set_plane_position_from_gui();
-        self.update();
-    });
-    this.make_numeric("plane_z", function () {
-        set_plane_position_from_gui();
-        self.update();
-    });
-    this.make_color_picker('plane_color', function () {
-        self.set_plane_color(this.get());
-    });
-    this.make_range('plane_opacity', function () {
-        self.set_plane_opacity(this.get());
-    });
-    this.make_checkbox("show_quality", function () {
-        self.show_quality(this.get());
-    });
-    this.make_color_picker("straight_surface_color", function () {
-        self.set_straight_surface_color(this.get());
-    });
-    this.make_color_picker("straight_wireframe_color", function () {
-        self.set_straight_wireframe_color(this.get());
-    });
-    this.make_range("straight_wireframe_opacity", function () {
-        self.set_straight_wireframe_opacity(this.get());
-    });
-    this.make_color_picker("hidden_surface_color", function () {
-        self.set_hidden_surface_color(this.get());
-    });
-    this.make_range("hidden_surface_opacity", function () {
-        self.set_hidden_surface_opacity(this.get());
-    });
-    this.make_color_picker("hidden_wireframe_color", function () {
-        self.set_hidden_wireframe_color(this.get());
-    });
-    this.make_range("hidden_wireframe_opacity", function () {
-        self.set_hidden_wireframe_opacity(this.get());
-    });
-    this.make_checkbox('show_singularity', function () {
-        self.show_singularity(this.get());
-    });
+    this.make_gui_root(this.make_div({
+        title: 'plane'
+    }).append(this.make_numeric({
+        key: 'plane_nx',
+        label: 'normal',
+        callback: function () {
+            set_plane_normal_from_gui();
+            self.update();
+        }
+    })).append(this.make_numeric({
+        key: 'plane_ny',
+        callback: function () {
+            set_plane_normal_from_gui();
+            self.update();
+        }
+    })).append(this.make_numeric({
+        key: 'plane_nz',
+        callback: function () {
+            set_plane_normal_from_gui();
+            self.update();
+        }
+    })).newline().append(this.make_range({
+        key: 'plane_offset',
+        label: 'offset',
+        callback: function () {
+            self.set_plane_offset(this.get());
+            self.update();
+        }
+    })).newline().append(this.make_numeric({
+        key: 'plane_x',
+        label: 'x',
+        callback: function () {
+            set_plane_position_from_gui();
+            self.update();
+        }
+    })).newline().append(this.make_numeric({
+        key: 'plane_y',
+        label: 'y',
+        callback: function () {
+            set_plane_position_from_gui();
+            self.update();
+        }
+    })).newline().append(this.make_numeric({
+        key: 'plane_z',
+        label: 'z',
+        callback: function () {
+            set_plane_position_from_gui();
+            self.update();
+        }
+    })).newline().append(this.make_color_picker({
+        key: 'plane_color',
+        label: 'color',
+        callback: function () {
+            self.set_plane_color(this.get());
+        }
+    })).newline().append(this.make_range({
+        key: 'plane_opacity',
+        label: 'opacity',
+        callback: function () {
+            self.set_plane_opacity(this.get());
+        }
+    })));
+    this.make_gui_root(this.make_div({
+        title: 'object'
+    }).append(this.make_checkbox({
+        key: 'show_quality',
+        label: 'show quality',
+        callback: function () {
+            self.show_quality(this.get());
+        }
+    })).newline().append(this.make_color_picker({
+        key: 'straight_surface_color',
+        label: 'surface color',
+        callback: function () {
+            self.set_straight_surface_color(this.get());
+        }
+    })).newline().append(this.make_color_picker({
+        key: 'straight_wireframe_color',
+        label: 'wireframe color',
+        callback: function () {
+            self.set_straight_wireframe_color(this.get());
+        }
+    })).newline().append(this.make_range({
+        key: 'straight_wireframe_opacity',
+        label: 'wireframe opacity',
+        callback: function () {
+            self.set_straight_wireframe_opacity(this.get());
+        }
+    })).newline().append(this.make_color_picker({
+        key: 'hidden_surface_color',
+        label: 'culled surface color',
+        callback: function () {
+            self.set_hidden_surface_color(this.get());
+        }
+    })).newline().append(this.make_range({
+        key: 'hidden_surface_opacity',
+        label: 'culled surface opacity',
+        callback: function () {
+            self.set_hidden_surface_opacity(this.get());
+        }
+    })).newline().append(this.make_color_picker({
+        key: 'hidden_wireframe_color',
+        label: 'culled wireframe color',
+        callback: function () {
+            self.set_hidden_wireframe_color(this.get());
+        }
+    })).newline().append(this.make_range({
+        key: 'hidden_wireframe_opacity',
+        label: 'culled wireframe opacity',
+        callback: function () {
+            self.set_hidden_wireframe_opacity(this.get());
+        }
+    })))
 
     this.on_settings_change(this.default_settings);
 };
@@ -227,12 +277,13 @@ HexaLab.CullingPlaneView.prototype = Object.assign(Object.create(HexaLab.View.pr
             this.models.straight.surface.material.vertexColors = THREE.VertexColors;
             this.surface_color = '#' + this.models.straight.surface.material.color.getHexString();
             this.set_straight_surface_color('#ffffff');
-            if (this.gui.straight_surface_color.parentNode) this.gui.straight_surface_color.parentNode.style.display = 'none';
+            this.gui.straight_surface_color.hide();
         } else {
             this.models.straight.surface.material.vertexColors = THREE.NoColors;
-            this.set_straight_surface_color(this.surface_color);
-            if (this.gui.straight_surface_color.parentNode) this.gui.straight_surface_color.parentNode.style.display = '';
+            if (this.surface_color) this.set_straight_surface_color(this.surface_color);
+            this.gui.straight_surface_color.show();
         }
+        this.gui.show_quality.set(show);
         this.models.straight.surface.material.needsUpdate = true;
     },
 
