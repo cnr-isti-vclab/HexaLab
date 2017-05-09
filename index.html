@@ -41,6 +41,7 @@
 		<!--<script src="js/gui.js"></script>-->
 		<script src="js/culling_plane_view.js"></script>
 		<script src="js/low_quality_view.js"></script>
+		<script src="js/stats_view.js"></script>
 
 		<script type="text/javascript">
 		    window.onload = function () {
@@ -48,6 +49,7 @@
 		        var context = new HexaLab.Context('frame', 'dynamic_gui');
 		        context.add_view(new HexaLab.LowQualityView());
 		        context.add_view(new HexaLab.CullingPlaneView());
+		        context.add_view(new HexaLab.StatsView());
 		        context.set_view("Low Quality View");
 		        //var ctx = new HexaLab.Context();
 		        //ctx.add_view(new HexaLab.CullingPlaneView(ctx.canvas));

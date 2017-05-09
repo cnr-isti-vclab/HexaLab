@@ -44,49 +44,49 @@ HexaLab.LowQualityView = function () {
             self.set_quality_threshold(this.get());
             self.update();
         }
-    })).append(this.make_checkbox({
+    })).newline().append(this.make_checkbox({
         key: 'show_quality',
         label: 'show quality',
         callback: function () {
             self.show_quality(this.get());
         }
-    })).append(this.make_color_picker({
+    })).newline().append(this.make_color_picker({
         key: 'visible_surface_color',
         label: 'surface color',
         callback: function () {
             self.set_visible_surface_color(this.get());
         }
-    })).append(this.make_color_picker({
+    })).newline().append(this.make_color_picker({
         key: 'visible_wireframe_color',
         label: 'wireframe_color',
         callback: function () {
             self.set_visible_wireframe_color(this.get());
         }
-    })).append(this.make_range({
+    })).newline().append(this.make_range({
         key: 'visible_wireframe_opacity',
         label: 'wireframe opacity',
         callback: function () {
             self.set_visible_wireframe_opacity(this.get());
         }
-    })).append(this.make_color_picker({
+    })).newline().append(this.make_color_picker({
         key: 'hidden_surface_color',
         label: 'culled surface color',
         callback: function () {
             self.set_hidden_surface_color(this.get());
         }
-    })).append(this.make_range({
+    })).newline().append(this.make_range({
         key: 'hidden_surface_opacity',
         label: 'hidden surface opacity',
         callback: function () {
             self.set_hidden_surface_opacity(this.get());
         }
-    })).append(this.make_color_picker({
+    })).newline().append(this.make_color_picker({
         key: 'hidden_wireframe_color',
         label: 'hidden wireframe color',
         callback: function () {
             self.set_hidden_wireframe_color(this.get());
         }
-    })).append(this.make_range({
+    })).newline().append(this.make_range({
         key: 'hidden_wireframe_opacity',
         label: 'hidden wireframe opacity',
         callback: function () {

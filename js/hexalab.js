@@ -673,7 +673,8 @@ HexaLab.Context = function (frame_id, gui_id) {
     this.composer.addPass(this.ssao_pass);
 
     this.renderer.setSize(this.canvas.width, this.canvas.height);
-    this.canvas.container.appendChild(this.renderer.domElement);
+    this.canvas.element = this.renderer.domElement;
+    this.canvas.container.appendChild(this.canvas.element);
 
     // Resize
 
@@ -768,23 +769,36 @@ HexaLab.Context.prototype = Object.assign(Object.create(HexaLab.DynamicInterface
 
     animate: function () {
         if (this.view) {
-            // update view controls
-            this.view.controls.update();
+            if (this.view.webGL) {
+                if (this.canvas.html) {
+                    this.canvas.element.style.display = 'block';
+                    this.canvas.container.removeChild(this.canvas.html);
+                    this.canvas.html = null;
+                }
 
-            // prepare renderer
-            this.show_occlusion(this.view.renderer_settings.occlusion);
-            this.set_background_color(this.view.renderer_settings.background);
-            this.render_pass.scene = this.view.scene;
-            this.render_pass.camera = this.view.camera;
+                // update view controls
+                this.view.controls.update();
 
-            // render
-            if (this.composer && this.ssao_pass.enabled) {
-                this.view.scene.overrideMaterial = this.depth_prepass.material;
-                this.renderer.render(this.view.scene, this.view.camera, this.depth_prepass.target, true);
-                this.view.scene.overrideMaterial = null;
-                this.composer.render();
+                // prepare renderer
+                this.show_occlusion(this.view.renderer_settings.occlusion);
+                this.set_background_color(this.view.renderer_settings.background);
+                this.render_pass.scene = this.view.scene;
+                this.render_pass.camera = this.view.camera;
+
+                // render
+                if (this.composer && this.ssao_pass.enabled) {
+                    this.view.scene.overrideMaterial = this.depth_prepass.material;
+                    this.renderer.render(this.view.scene, this.view.camera, this.depth_prepass.target, true);
+                    this.view.scene.overrideMaterial = null;
+                    this.composer.render();
+                } else {
+                    this.renderer.render(this.view.scene, this.view.camera);
+                }
             } else {
-                this.renderer.render(this.view.scene, this.view.camera);
+                if (!this.canvas.html) {
+                    this.canvas.element.style.display = 'none';
+                    this.canvas.html = this.canvas.container.appendChild(this.view.html);
+                }
             }
         }
 
