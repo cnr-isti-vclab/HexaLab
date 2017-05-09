@@ -686,7 +686,6 @@ HexaLab.Context.prototype = Object.assign(Object.create(HexaLab.DynamicInterface
     add_view: function (view) {
         this.views[view.get_name()] = view;
         this.gui.views_select.add(view.get_name());
-        this.gui.views_select.set(view.get_name());
         view.set_canvas(this.canvas);
     },
 
@@ -700,6 +699,8 @@ HexaLab.Context.prototype = Object.assign(Object.create(HexaLab.DynamicInterface
         } else {    // TODO use proper inheritance, check for instanceof View, abort if false
             this.view = view;
         }
+
+        this.gui.views_select.set(this.view.get_name());
 
         // clear previous gui
         while (this.gui_container.firstChild) {
