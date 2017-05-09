@@ -64,125 +64,126 @@ HexaLab.CullingPlaneView = function () {
 
     var self = this;
     var set_plane_normal_from_gui = function () {
-        var nx = self.gui.plane_nx.get();
-        var ny = self.gui.plane_ny.get();
-        var nz = self.gui.plane_nz.get();
+        var nx = self.gui.map.plane_nx.get();
+        var ny = self.gui.map.plane_ny.get();
+        var nz = self.gui.map.plane_nz.get();
         self.set_plane_normal(nx, ny, nz);
     }
     var set_plane_position_from_gui = function () {
-        var x = self.gui.plane_x.get();
-        var y = self.gui.plane_y.get();
-        var z = self.gui.plane_z.get();
+        var x = self.gui.map.plane_x.get();
+        var y = self.gui.map.plane_y.get();
+        var z = self.gui.map.plane_z.get();
         self.set_plane_position(x, y, z);
     }
 
-    this.make_gui_root(this.make_div({
-        title: 'plane'
-    }).append(this.make_numeric({
+    this.gui.new_frame({
+        title: 'View Settings'
+    }).append(this.gui.group({
+        title: 'Plane'
+    }).append(this.gui.numeric({
         key: 'plane_nx',
         label: 'normal',
         callback: function () {
             set_plane_normal_from_gui();
             self.update();
         }
-    })).append(this.make_numeric({
+    })).append(this.gui.numeric({
         key: 'plane_ny',
         callback: function () {
             set_plane_normal_from_gui();
             self.update();
         }
-    })).append(this.make_numeric({
+    })).append(this.gui.numeric({
         key: 'plane_nz',
         callback: function () {
             set_plane_normal_from_gui();
             self.update();
         }
-    })).newline().append(this.make_range({
+    })).newline().append(this.gui.range({
         key: 'plane_offset',
         label: 'offset',
         callback: function () {
             self.set_plane_offset(this.get());
             self.update();
         }
-    })).newline().append(this.make_numeric({
+    })).newline().append(this.gui.numeric({
         key: 'plane_x',
         label: 'x',
         callback: function () {
             set_plane_position_from_gui();
             self.update();
         }
-    })).newline().append(this.make_numeric({
+    })).newline().append(this.gui.numeric({
         key: 'plane_y',
         label: 'y',
         callback: function () {
             set_plane_position_from_gui();
             self.update();
         }
-    })).newline().append(this.make_numeric({
+    })).newline().append(this.gui.numeric({
         key: 'plane_z',
         label: 'z',
         callback: function () {
             set_plane_position_from_gui();
             self.update();
         }
-    })).newline().append(this.make_color_picker({
+    })).newline().append(this.gui.color_picker({
         key: 'plane_color',
         label: 'color',
         callback: function () {
             self.set_plane_color(this.get());
         }
-    })).newline().append(this.make_range({
+    })).newline().append(this.gui.range({
         key: 'plane_opacity',
         label: 'opacity',
         callback: function () {
             self.set_plane_opacity(this.get());
         }
-    })));
-    this.make_gui_root(this.make_div({
-        title: 'object'
-    }).append(this.make_checkbox({
+    }))).append(this.gui.group({
+        title: 'Object'
+    }).append(this.gui.checkbox({
         key: 'show_quality',
         label: 'show quality',
         callback: function () {
             self.show_quality(this.get());
         }
-    })).newline().append(this.make_color_picker({
+    })).newline().append(this.gui.color_picker({
         key: 'straight_surface_color',
         label: 'surface color',
         callback: function () {
             self.set_straight_surface_color(this.get());
         }
-    })).newline().append(this.make_color_picker({
+    })).newline().append(this.gui.color_picker({
         key: 'straight_wireframe_color',
         label: 'wireframe color',
         callback: function () {
             self.set_straight_wireframe_color(this.get());
         }
-    })).newline().append(this.make_range({
+    })).newline().append(this.gui.range({
         key: 'straight_wireframe_opacity',
         label: 'wireframe opacity',
         callback: function () {
             self.set_straight_wireframe_opacity(this.get());
         }
-    })).newline().append(this.make_color_picker({
+    })).newline().append(this.gui.color_picker({
         key: 'hidden_surface_color',
         label: 'culled surface color',
         callback: function () {
             self.set_hidden_surface_color(this.get());
         }
-    })).newline().append(this.make_range({
+    })).newline().append(this.gui.range({
         key: 'hidden_surface_opacity',
         label: 'culled surface opacity',
         callback: function () {
             self.set_hidden_surface_opacity(this.get());
         }
-    })).newline().append(this.make_color_picker({
+    })).newline().append(this.gui.color_picker({
         key: 'hidden_wireframe_color',
         label: 'culled wireframe color',
         callback: function () {
             self.set_hidden_wireframe_color(this.get());
         }
-    })).newline().append(this.make_range({
+    })).newline().append(this.gui.range({
         key: 'hidden_wireframe_opacity',
         label: 'culled wireframe opacity',
         callback: function () {
@@ -277,49 +278,49 @@ HexaLab.CullingPlaneView.prototype = Object.assign(Object.create(HexaLab.View.pr
             this.models.straight.surface.material.vertexColors = THREE.VertexColors;
             this.surface_color = '#' + this.models.straight.surface.material.color.getHexString();
             this.set_straight_surface_color('#ffffff');
-            this.gui.straight_surface_color.hide();
+            this.gui.map.straight_surface_color.hide();
         } else {
             this.models.straight.surface.material.vertexColors = THREE.NoColors;
             if (this.surface_color) this.set_straight_surface_color(this.surface_color);
-            this.gui.straight_surface_color.show();
+            this.gui.map.straight_surface_color.show();
         }
-        this.gui.show_quality.set(show);
+        this.gui.map.show_quality.set(show);
         this.models.straight.surface.material.needsUpdate = true;
     },
 
     set_straight_surface_color: function (color) {
         this.models.straight.surface.material.color.set(color);
-        this.gui.straight_surface_color.set(color);
+        this.gui.map.straight_surface_color.set(color);
     },
 
     set_straight_wireframe_color: function (color) {
         this.models.straight.wireframe.material.color.set(color);
-        this.gui.straight_wireframe_color.set(color);
+        this.gui.map.straight_wireframe_color.set(color);
     },
 
     set_straight_wireframe_opacity: function (opacity) {
         this.models.straight.wireframe.material.opacity = opacity;
-        this.gui.straight_wireframe_opacity.set(opacity);
+        this.gui.map.straight_wireframe_opacity.set(opacity);
     },
 
     set_hidden_surface_color: function (color) {
         this.models.hidden.surface.material.color.set(color);
-        this.gui.hidden_surface_color.set(color);
+        this.gui.map.hidden_surface_color.set(color);
     },
 
     set_hidden_surface_opacity: function (opacity) {
         this.models.hidden.surface.material.opacity = opacity;
-        this.gui.hidden_surface_opacity.set(opacity);
+        this.gui.map.hidden_surface_opacity.set(opacity);
     },
 
     set_hidden_wireframe_color: function (color) {
         this.models.hidden.wireframe.material.color.set(color);
-        this.gui.hidden_wireframe_color.set(color);
+        this.gui.map.hidden_wireframe_color.set(color);
     },
 
     set_hidden_wireframe_opacity: function (opacity) {
         this.models.hidden.wireframe.material.opacity = opacity;
-        this.gui.hidden_wireframe_opacity.set(opacity);
+        this.gui.map.hidden_wireframe_opacity.set(opacity);
     },
 
     set_plane_position: function (x, y, z) {
@@ -328,10 +329,10 @@ HexaLab.CullingPlaneView.prototype = Object.assign(Object.create(HexaLab.View.pr
         this.plane.offset = this.view.get_plane_offset();
         this.plane.world_offset = this.view.get_plane_world_offset();
 
-        this.gui.plane_offset.set(this.plane.offset);
-        this.gui.plane_x.set(this.plane.position.x);
-        this.gui.plane_y.set(this.plane.position.y);
-        this.gui.plane_z.set(this.plane.position.z);
+        this.gui.map.plane_offset.set(this.plane.offset);
+        this.gui.map.plane_x.set(this.plane.position.x);
+        this.gui.map.plane_y.set(this.plane.position.y);
+        this.gui.map.plane_z.set(this.plane.position.z);
     },
 
     set_plane_normal: function (nx, ny, nz) {
@@ -340,9 +341,9 @@ HexaLab.CullingPlaneView.prototype = Object.assign(Object.create(HexaLab.View.pr
         this.plane.normal = new THREE.Vector3(n.x(), n.y(), n.z());
         n.delete(); // TODO don't allocate at all, just read memory?
 
-        this.gui.plane_nx.set(this.plane.normal.x);
-        this.gui.plane_ny.set(this.plane.normal.y);
-        this.gui.plane_nz.set(this.plane.normal.z);
+        this.gui.map.plane_nx.set(this.plane.normal.x);
+        this.gui.map.plane_ny.set(this.plane.normal.y);
+        this.gui.map.plane_nz.set(this.plane.normal.z);
     },
 
     set_plane_offset: function (offset) {
@@ -353,20 +354,20 @@ HexaLab.CullingPlaneView.prototype = Object.assign(Object.create(HexaLab.View.pr
         this.plane.position = new THREE.Vector3(p.x(), p.y(), p.z());
         p.delete();
 
-        this.gui.plane_offset.set(this.plane.offset);
-        this.gui.plane_x.set(this.plane.position.x);
-        this.gui.plane_y.set(this.plane.position.y);
-        this.gui.plane_z.set(this.plane.position.z);
+        this.gui.map.plane_offset.set(this.plane.offset);
+        this.gui.map.plane_x.set(this.plane.position.x);
+        this.gui.map.plane_y.set(this.plane.position.y);
+        this.gui.map.plane_z.set(this.plane.position.z);
     },
 
     set_plane_opacity: function (opacity) {
         this.plane.material.opacity = opacity;
-        this.gui.plane_opacity.set(opacity);
+        this.gui.map.plane_opacity.set(opacity);
     },
 
     set_plane_color: function (color) {
         this.plane.material.color.set(color);
-        this.gui.plane_color.set(color);
+        this.gui.map.plane_color.set(color);
     }
 });
 

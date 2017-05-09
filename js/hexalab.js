@@ -1,6 +1,21 @@
 "use strict";
 
-var HexaLab = {};
+var HexaLab = {
+    file_exists: function (path) {
+        var stat = FS.stat(path);
+        if (!stat) return false;
+        return FS.isFile(stat.mode);
+    },
+    make_file: function (data, name) {
+        try {
+            if (HexaLab.file_exists("/" + name)) {
+                FS.unlink('/' + name);
+            }
+        } catch (err) {
+        }
+        FS.createDataFile("/", name, data, true, true);
+    }
+};
 
 // MODEL
 
@@ -21,26 +36,12 @@ HexaLab.Model = function (buffers, surface_material, wireframe_material) {
 // DYNAMIC INTERFACE
 
 HexaLab.DynamicInterface = function () {
-    this.gui = [];
-    this.gui_roots = [];
+    this.map = [];
+    this.roots = [];
 }
 
 Object.assign(HexaLab.DynamicInterface.prototype, {
-    file_exists: function(path) {
-        var stat = FS.stat(path);
-        if (!stat) return false;
-        return FS.isFile(stat.mode);
-    },
-    make_file: function (data, name) {
-        try {
-            if (this.file_exists("/" + name)) {
-                FS.unlink('/' + name);
-            }
-        } catch (err) {
-        }
-        FS.createDataFile("/", name, data, true, true);
-    },
-    make_color_picker: function (params) {
+    color_picker: function (params) {
         var e = document.createElement('input');
         e.setAttribute('type', 'color');
         e.set = function (value) {
@@ -50,29 +51,21 @@ Object.assign(HexaLab.DynamicInterface.prototype, {
             return this.value;
         }
         e.hide = function () {
-            if (this.label) {
-                this.parentNode.style.display = 'none';
-            } else {
-                this.style.display = 'none';
-            }
+            this.label ? this.parentNode.style.display = 'none' : this.style.display = 'none';
         }
         e.show = function () {
-            if (this.label) {
-                this.parentNode.style.display = '';
-            } else {
-                this.style.display = '';
-            }
+            this.label ? this.parentNode.style.display = '' : this.style.display = '';
         }
         if (params) {
-            if (params.label) e.label = params.label;
+            if (params.label) e.label = params.label + ' ';
             if (params.style) e.setAttribute('style', params.style);
             if (params.callback) e.addEventListener('input', params.callback);
             if (params.value) e.set(value);
-            if (params.key) this.gui[params.key] = e;
+            if (params.key) this.map[params.key] = e;
         }
         return e;
     },
-    make_range: function (params) {
+    range: function (params) {
         var e = document.createElement('input');
         e.setAttribute('type', 'range');
         e.set = function (value) {
@@ -82,29 +75,21 @@ Object.assign(HexaLab.DynamicInterface.prototype, {
             return parseFloat(this.value) / 100;
         }
         e.hide = function () {
-            if (this.label) {
-                this.parentNode.style.display = 'none';
-            } else {
-                this.style.display = 'none';
-            }
+            this.label ? this.parentNode.style.display = 'none' : this.style.display = 'none';
         }
         e.show = function () {
-            if (this.label) {
-                this.parentNode.style.display = '';
-            } else {
-                this.style.display = '';
-            }
+            this.label ? this.parentNode.style.display = '' : this.style.display = '';
         }
         if (params) {
-            if (params.label) e.label = params.label;
+            if (params.label) e.label = params.label + ' ';
             if (params.style) e.setAttribute('style', params.style);
             if (params.callback) e.addEventListener('input', params.callback);
             if (params.value) e.set(value);
-            if (params.key) this.gui[params.key] = e;
+            if (params.key) this.map[params.key] = e;
         }
         return e;
     },
-    make_checkbox: function (params) {
+    checkbox: function (params) {
         var e = document.createElement('input');
         e.setAttribute('type', 'checkbox');
         e.set = function (value) {
@@ -114,29 +99,21 @@ Object.assign(HexaLab.DynamicInterface.prototype, {
             return this.checked;
         }
         e.hide = function () {
-            if (this.label) {
-                this.parentNode.style.display = 'none';
-            } else {
-                this.style.display = 'none';
-            }
+            this.label ? this.parentNode.style.display = 'none' : this.style.display = 'none';
         }
         e.show = function () {
-            if (this.label) {
-                this.parentNode.style.display = '';
-            } else {
-                this.style.display = '';
-            }
+            this.label ? this.parentNode.style.display = '' : this.style.display = '';
         }
         if (params) {
-            if (params.label) e.label = params.label;
+            if (params.label) e.label = params.label + ' ';
             if (params.style) e.setAttribute('style', params.style);
             if (params.callback) e.addEventListener('click', params.callback);
             if (params.value) e.set(value);
-            if (params.key) this.gui[params.key] = e;
+            if (params.key) this.map[params.key] = e;
         }
         return e;
     },
-    make_numeric: function (params) {
+    numeric: function (params) {
         var e = document.createElement('input');
         e.setAttribute('type', 'number');
         e.set = function (value) {
@@ -146,29 +123,21 @@ Object.assign(HexaLab.DynamicInterface.prototype, {
             return parseFloat(this.value);
         }
         e.hide = function () {
-            if (this.label) {
-                this.parentNode.style.display = 'none';
-            } else {
-                this.style.display = 'none';
-            }
+            this.label ? this.parentNode.style.display = 'none' : this.style.display = 'none';
         }
         e.show = function () {
-            if (this.label) {
-                this.parentNode.style.display = '';
-            } else {
-                this.style.display = '';
-            }
+            this.label ? this.parentNode.style.display = '' : this.style.display = '';
         }
         if (params) {
-            if (params.label) e.label = params.label;
+            if (params.label) e.label = params.label + ' ';
             if (params.style) e.setAttribute('style', params.style);
             if (params.callback) e.addEventListener('change', params.callback);
             if (params.value) e.set(params.value);
-            if (params.key) this.gui[params.key] = e;
+            if (params.key) this.map[params.key] = e;
         }
         return e;
     },
-    make_button: function (params) {
+    button: function (params) {
         var e = document.createElement('input');
         e.setAttribute('type', 'button');
         e.set = function (value) {
@@ -178,29 +147,21 @@ Object.assign(HexaLab.DynamicInterface.prototype, {
             return this.value;
         }
         e.hide = function () {
-            if (this.label) {
-                this.parentNode.style.display = 'none';
-            } else {
-                this.style.display = 'none';
-            }
+            this.label ? this.parentNode.style.display = 'none' : this.style.display = 'none';
         }
         e.show = function () {
-            if (this.label) {
-                this.parentNode.style.display = '';
-            } else {
-                this.style.display = '';
-            }
+            this.label ? this.parentNode.style.display = '' : this.style.display = '';
         }
         if (params) {
-            if (params.label) e.label = params.label;
+            if (params.label) e.label = params.label + ' ';
             if (params.style) e.setAttribute('style', params.style);
             if (params.callback) e.addEventListener('click', params.callback);
             if (params.value) e.set(params.value);
-            if (params.key) this.gui[params.key] = e;
+            if (params.key) this.map[params.key] = e;
         }
         return e;
     },
-    make_select: function (params) {
+    select: function (params) {
         var e = document.createElement('select');
         if (params) {
             for (var option in params.options) {
@@ -222,75 +183,59 @@ Object.assign(HexaLab.DynamicInterface.prototype, {
                 this.value = value;
             }
             e.hide = function () {
-                if (this.label) {
-                    this.parentNode.style.display = 'none';
-                } else {
-                    this.style.display = 'none';
-                }
+                this.label ? this.parentNode.style.display = 'none' : this.style.display = 'none';
             }
             e.show = function () {
-                if (this.label) {
-                    this.parentNode.style.display = '';
-                } else {
-                    this.style.display = '';
-                }
+                this.label ? this.parentNode.style.display = '' : this.style.display = '';
             }
             e.add = function (value, text) {
                 var e = document.createElement('option');
                 e.value = value;
-                if (text) e.innerHTML = text;
-                else e.innerHTML = value;
+                text ? e.innerHTML = text : e.innerHTML = value;
                 this.appendChild(e);
             }
             if (params.callback) e.addEventListener('change', params.callback);
-            if (params.label) e.label = params.label;
-            if (params.key) this.gui[params.key] = e;
+            if (params.label) e.label = params.label + ' ';
+            if (params.key) this.map[params.key] = e;
         }
         return e;
     },
-    make_file_picker: function (params) {
+    file_picker: function (params) {
         var e = document.createElement('input'); 
         e.setAttribute('type', 'file'); 
         e.addEventListener('click', function () {
             this.value = null;
         });
         e.hide = function () {
-            if (this.label) {
-                this.parentNode.style.display = 'none';
-            } else {
-                this.style.display = 'none';
-            }
+            this.label ? this.parentNode.style.display = 'none' : this.style.display = 'none';
         }
         e.show = function () {
-            if (this.label) {
-                this.parentNode.style.display = '';
-            } else {
-                this.style.display = '';
-            }
+            this.label ? this.parentNode.style.display = '' : this.style.display = '';
         }
         if (params) {
-            if (params.label) e.label = params.label;
+            if (params.label) e.label = params.label + ' ';
             if (params.style) e.setAttribute('style', params.style);
             if (params.callback) e.addEventListener('change', params.callback);
-            if (params.key) this.gui[params.key] = e;
+            if (params.key) this.map[params.key] = e;
         }
         return e;
     },
-    make_label: function (text, params) {
+    text: function (text, params) {
         var e = document.createElement('span'); 
         e.innerHTML = text;
         if (params) {
             if (params.style) e.setAttribute('style', params.style);
-            if (params.key) this.gui[params.key] = e;
+            if (params.key) this.map[params.key] = e;
         }
         return e;
     },
 
-    make_div: function (params) {
+    div: function (params) {
         var e = document.createElement('div');
         e.append =  function (e) {
             if (e.label) {
                 var span = document.createElement('span');
+                span.className += ' hl_label';
                 span.innerHTML = e.label;
                 span.appendChild(e);
                 e = span;
@@ -311,25 +256,34 @@ Object.assign(HexaLab.DynamicInterface.prototype, {
         if (params) {
             if (params.style) e.setAttribute('style', style);
             if (params.title) {
-                e.label = document.createElement('span');
-                e.label.innerHTML = params.title;
-                if (params.title_style) e.label.setAttribute('style', title_style);
+                e.heading = document.createElement('span');
+                e.heading.innerHTML = params.title;
+                if (params.title_style) e.heading.setAttribute('style', title_style);
+                e.append(e.heading).newline();
             }
+            if (params.key) this.map[params.key] = e;
         }
         return e;
     },
 
-    make_gui_root: function (e) {
-        this.gui_roots.push(e);
+    group: function (params) {
+        var e = this.div(params);
+        e.className += ' hl_group';
+        if (e.heading) e.heading.className += ' hl_group_title';
+        return e;
     },
 
-    create_html: function (root) {
-        for (var key in this.gui_roots) {
-            var e = this.gui_roots[key];
-            if (e.label) {
-                root.appendChild(e.label);
-                root.appendChild(document.createElement('br'));
-            }
+    new_frame: function (params) {
+        var e = this.div(params);
+        e.className += ' hl_frame';
+        if (e.heading) e.heading.className += ' hl_frame_title';
+        this.roots.push(e);
+        return e;
+    },
+
+    append_html: function (root) {
+        for (var key in this.roots) {
+            var e = this.roots[key];
             root.appendChild(e);
         }
     }
@@ -338,9 +292,9 @@ Object.assign(HexaLab.DynamicInterface.prototype, {
 // VIEW
 
 HexaLab.View = function (view) {
-    HexaLab.DynamicInterface.call(this);
 
     var self = this;
+    this.gui = new HexaLab.DynamicInterface();
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(60, 1, 0.1, 1000);
     this.light = new THREE.PointLight(),
@@ -353,30 +307,30 @@ HexaLab.View = function (view) {
     this.camera_settings = {};
     this.webGL = true;  // TODO split into 2 superclasses
 
-    this.make_gui_root(this.make_div({
-        title: 'renderer settings'
-    }).append(this.make_color_picker({
+    this.gui.new_frame({
+        title: 'Renderer Settings'
+    }).append(this.gui.color_picker({
         key: 'background_color',
-        label: 'background',
+        label: 'Background',
         callback: function () {
             self.set_background_color(this.get());
             self.update();
         },
-    })).newline().append(this.make_color_picker({
+    })).newline().append(this.gui.color_picker({
         key: 'light_color',
-        label: 'light',
+        label: 'Light',
         callback: function () {
             self.set_light_color(this.get());
             self.update();
         },
-    })).newline().append(this.make_checkbox({
+    })).newline().append(this.gui.checkbox({
         key: 'occlusion',
-        label: 'occlusion',
+        label: 'Occlusion',
         callback: function () {
             self.show_occlusion(this.get());
             self.update();
         }
-    })));
+    }));
 
     var default_settings = {
         camera: {
@@ -412,7 +366,7 @@ HexaLab.View = function (view) {
     set_base_settings(default_settings);
 };
 
-HexaLab.View.prototype = Object.assign(Object.create(HexaLab.DynamicInterface.prototype), {
+Object.assign(HexaLab.View.prototype, {
 
     // Utility to plug a model from the view.cpp straight into the scene
 
@@ -547,17 +501,17 @@ HexaLab.View.prototype = Object.assign(Object.create(HexaLab.DynamicInterface.pr
 
     set_background_color: function (color) {
         this.renderer_settings.background = color;
-        this.gui.background_color.set(color);
+        this.gui.map.background_color.set(color);
     },
     
     show_occlusion: function (show) {
         this.renderer_settings.occlusion = show;
-        this.gui.occlusion.set(show);
+        this.gui.map.occlusion.set(show);
     },
 
     set_light_color: function (color) {
         this.light.color.set(color);
-        this.gui.light_color.set(color);
+        this.gui.map.light_color.set(color);
     },
 
     set_canvas: function (canvas) {
@@ -575,31 +529,33 @@ HexaLab.Context = function (frame_id, gui_id) {
 
     // Dynamic interface
 
-    HexaLab.DynamicInterface.call(this);
+    this.gui = new HexaLab.DynamicInterface();
 
     var mesh_reader = new FileReader();
     var settings_reader = new FileReader();
 
-    this.make_gui_root(this.make_div().append(this.make_select({
+    this.gui.new_frame({
+        title: 'General Settings'
+    }).append(this.gui.select({
         key: 'views_select',
         label: "View:",
         values: {},
         callback: function () {
             self.set_view(this.get());
         }
-    })).newline().append(this.make_file_picker({
+    })).newline().append(this.gui.file_picker({
         key: 'mesh_picker',
         label: 'mesh',
         callback: function () {
             var file = this.files[0];
             mesh_reader.onload = function () {
                 var data = new Int8Array(this.result);
-                self.make_file(data, file.name);
+                HexaLab.make_file(data, file.name);
                 self.import_mesh(file.name);
             }
             mesh_reader.readAsArrayBuffer(file, "UTF-8");
         }
-    })).newline().append(this.make_file_picker({
+    })).newline().append(this.gui.file_picker({
         key: 'settings_picker',
         label: 'settings',
         callback: function () {
@@ -609,15 +565,7 @@ HexaLab.Context = function (frame_id, gui_id) {
             }
             settings_reader.readAsText(this.files[0], "UTF-8");
         }
-    })).newline().append(this.make_button({
-        key: 'snapshot',
-        value: 'Snapshot',
-        callback: function () {
-            elf.canvas.container.getElementsByTagName('canvas')[0].toBlob(function (blob) {
-                saveAs(blob, "HLsnapshot.png");
-            }, "image/png");
-        }
-    })).newline().append(this.make_button({
+    })).newline().append(this.gui.button({
         key: 'settings_saver',
         value: 'Export settings',
         callback: function () {
@@ -625,9 +573,17 @@ HexaLab.Context = function (frame_id, gui_id) {
             var blob = new Blob([settings], { type: "text/plain;charset=utf-8" });
             saveAs(blob, "HLsettings.txt");
         }
-    })));
+    })).newline().append(this.gui.button({
+        key: 'snapshot',
+        value: 'Snapshot',
+        callback: function () {
+            elf.canvas.container.getElementsByTagName('canvas')[0].toBlob(function (blob) {
+                saveAs(blob, "HLsnapshot.png");
+            }, "image/png");
+        }
+    }));
 
-    this.create_html(document.getElementById(gui_id));
+    this.gui.append_html(document.getElementById(gui_id));
     
     // Canvas
 
@@ -681,12 +637,12 @@ HexaLab.Context = function (frame_id, gui_id) {
     window.addEventListener('resize', this.on_resize.bind(this));
 };
  
-HexaLab.Context.prototype = Object.assign(Object.create(HexaLab.DynamicInterface.prototype), {
+Object.assign(HexaLab.Context.prototype, {
     // view
 
     add_view: function (view) {
         this.views[view.get_name()] = view;
-        this.gui.views_select.add(view.get_name());
+        this.gui.map.views_select.add(view.get_name());
         view.set_canvas(this.canvas);
     },
 
@@ -701,7 +657,7 @@ HexaLab.Context.prototype = Object.assign(Object.create(HexaLab.DynamicInterface
             this.view = view;
         }
 
-        this.gui.views_select.set(this.view.get_name());
+        this.gui.map.views_select.set(this.view.get_name());
 
         // clear previous gui
         while (this.gui_container.firstChild) {
@@ -709,8 +665,8 @@ HexaLab.Context.prototype = Object.assign(Object.create(HexaLab.DynamicInterface
         }
 
         // create new gui
-        this.create_html(this.gui_container);
-        this.view.create_html(this.gui_container);
+        this.gui.append_html(this.gui_container);
+        this.view.gui.append_html(this.gui_container);
     },
 
     // settings

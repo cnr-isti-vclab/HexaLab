@@ -35,66 +35,69 @@ HexaLab.LowQualityView = function () {
     // Gui
 
     var self = this;
-    this.make_gui_root(this.make_div({
+    this.gui.new_frame({
         title: 'View controls'
-    }).append(this.make_numeric({
+    }).append(this.gui.group({
+        title: 'Quality'
+    }).append(this.gui.numeric({
         key: 'threshold',
         label: 'quality threshold',
         callback: function () {
             self.set_quality_threshold(this.get());
             self.update();
         }
-    })).newline().append(this.make_checkbox({
+    })).newline().append(this.gui.checkbox({
         key: 'show_quality',
         label: 'show quality',
         callback: function () {
             self.show_quality(this.get());
         }
-    })).newline().append(this.make_color_picker({
+    }))).append(this.gui.group({
+        title: 'Object'
+    }).append(this.gui.color_picker({
         key: 'visible_surface_color',
         label: 'surface color',
         callback: function () {
             self.set_visible_surface_color(this.get());
         }
-    })).newline().append(this.make_color_picker({
+    })).newline().append(this.gui.color_picker({
         key: 'visible_wireframe_color',
         label: 'wireframe_color',
         callback: function () {
             self.set_visible_wireframe_color(this.get());
         }
-    })).newline().append(this.make_range({
+    })).newline().append(this.gui.range({
         key: 'visible_wireframe_opacity',
         label: 'wireframe opacity',
         callback: function () {
             self.set_visible_wireframe_opacity(this.get());
         }
-    })).newline().append(this.make_color_picker({
+    })).newline().append(this.gui.color_picker({
         key: 'hidden_surface_color',
         label: 'culled surface color',
         callback: function () {
             self.set_hidden_surface_color(this.get());
         }
-    })).newline().append(this.make_range({
+    })).newline().append(this.gui.range({
         key: 'hidden_surface_opacity',
         label: 'hidden surface opacity',
         callback: function () {
             self.set_hidden_surface_opacity(this.get());
         }
-    })).newline().append(this.make_color_picker({
+    })).newline().append(this.gui.color_picker({
         key: 'hidden_wireframe_color',
         label: 'hidden wireframe color',
         callback: function () {
             self.set_hidden_wireframe_color(this.get());
         }
-    })).newline().append(this.make_range({
+    })).newline().append(this.gui.range({
         key: 'hidden_wireframe_opacity',
         label: 'hidden wireframe opacity',
         callback: function () {
             self.set_hidden_wireframe_opacity(this.get());
         }
-    }))
-    )
-
+    })))
+    
     this.on_settings_change(this.default_settings); // TODO automate ?
 }
 
@@ -157,7 +160,7 @@ HexaLab.LowQualityView.prototype = Object.assign(Object.create(HexaLab.View.prot
 
     set_quality_threshold: function (threshold) {
         this.view.quality_threshold = threshold;
-        this.gui.threshold.set(threshold);
+        this.gui.map.threshold.set(threshold);
     },
 
     show_quality: function (show) {
@@ -165,48 +168,48 @@ HexaLab.LowQualityView.prototype = Object.assign(Object.create(HexaLab.View.prot
             this.models.visible.surface.material.vertexColors = THREE.VertexColors;
             this.surface_color = '#' + this.models.visible.surface.material.color.getHexString();
             this.set_visible_surface_color('#ffffff');
-            this.gui.visible_surface_color.hide();
+            this.gui.map.visible_surface_color.hide();
         } else {
             this.models.visible.surface.material.vertexColors = THREE.NoColors;
             if (this.surface_color) this.set_visible_surface_color(this.surface_color);
-            this.gui.visible_surface_color.show();
+            this.gui.map.visible_surface_color.show();
         }
-        this.gui.show_quality.set(show);
+        this.gui.map.show_quality.set(show);
         this.models.visible.surface.material.needsUpdate = true;
     },
 
     set_visible_surface_color: function (color) {
         this.models.visible.surface.material.color.set(color);
-        this.gui.visible_surface_color.set(color);
+        this.gui.map.visible_surface_color.set(color);
     },
 
     set_visible_wireframe_color: function (color) {
         this.models.visible.wireframe.material.color.set(color);
-        this.gui.visible_wireframe_color.set(color);
+        this.gui.map.visible_wireframe_color.set(color);
     },
 
     set_visible_wireframe_opacity: function (opacity) {
         this.models.visible.wireframe.material.opacity = opacity;
-        this.gui.visible_wireframe_opacity.set(opacity);
+        this.gui.map.visible_wireframe_opacity.set(opacity);
     },
 
     set_hidden_surface_color: function (color) {
         this.models.hidden.surface.material.color.set(color);
-        this.gui.hidden_surface_color.set(color);
+        this.gui.map.hidden_surface_color.set(color);
     },
 
     set_hidden_surface_opacity: function (opacity) {
         this.models.hidden.surface.material.opacity = opacity;
-        this.gui.hidden_surface_opacity.set(opacity);
+        this.gui.map.hidden_surface_opacity.set(opacity);
     },
 
     set_hidden_wireframe_color: function (color) {
         this.models.hidden.wireframe.material.color.set(color);
-        this.gui.hidden_wireframe_color.set(color);
+        this.gui.map.hidden_wireframe_color.set(color);
     },
 
     set_hidden_wireframe_opacity: function (opacity) {
         this.models.hidden.wireframe.material.opacity = opacity;
-        this.gui.hidden_wireframe_opacity.set(opacity);
+        this.gui.map.hidden_wireframe_opacity.set(opacity);
     },
 });
