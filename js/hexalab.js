@@ -20,55 +20,6 @@ HexaLab.Model = function (buffers, surface_material, wireframe_material) {
 
 // DYNAMIC INTERFACE
 
-HexaLab.DynamicContainer = function () {
-    this.element = document.createElement('div');
-
-
-    this.style = function (style) {
-        this.element.setAttribute('style', style);
-    }
-
-    this.name = function (name) {
-        this.name_string = name;
-    }
-}
-
-HexaLab.DynamicInput = function (key, type, owner) {
-    this.element = document.createElement('input');
-    this.element.setAttribute('type', type);
-    this.next = null;
-    owner.gui[key] = this;
-
-    this.add = function () {
-        var di = this;
-        var container = new HexaLab.DynamicContainer();
-        do {
-            if (di.name_element) container.element.appendChild(e.name_element);
-            container.element.appendChild(di.element);
-            di = di.next;
-        } while (di != null);
-        owner.gui_containers.push(container);
-        return container;
-    }
-
-    this.style = function (style) {
-        this.element.setAttribute('style', style);
-        return this;
-    }
-
-    this.name = function (name, style) {
-        this.name_element = document.createElement('span');
-        this.name_element.innerHTML = name;
-        if (style) this.name_element.setAttribute('style', style);
-        return this;
-    }
-
-    this.append = function (di) {
-        this.next = di;
-        return this;
-    }
-}
-
 HexaLab.DynamicInterface = function () {
     this.gui = [];
     this.gui_roots = [];
@@ -596,17 +547,17 @@ HexaLab.View.prototype = Object.assign(Object.create(HexaLab.DynamicInterface.pr
 
     set_background_color: function (color) {
         this.renderer_settings.background = color;
-        this.gui['background_color'].set(color);
+        this.gui.background_color.set(color);
     },
     
     show_occlusion: function (show) {
         this.renderer_settings.occlusion = show;
-        this.gui['occlusion'].set(show);
+        this.gui.occlusion.set(show);
     },
 
     set_light_color: function (color) {
         this.light.color.set(color);
-        this.gui['light_color'].set(color);
+        this.gui.light_color.set(color);
     },
 
     set_canvas: function (canvas) {
