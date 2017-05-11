@@ -1,6 +1,10 @@
+/* page (TODO split in 2 files?) */
+
 html, body { 
     margin: 0;
 	height: 100%;
+	font-size: 95%;
+	font-family: 'Raleway', sans-serif;
 }
 
 canvas {
@@ -9,7 +13,6 @@ canvas {
 
 #display {
 	min-height: 100%;
-	display: flex;
 }
 
 #sidenav {
@@ -19,10 +22,9 @@ canvas {
 	width: 20%;
 
 	height: 100%;
-    background-color: #111;
-	color: #bbb;
-	font-family: monospace;
 	transition: 0s;
+	border-right: 1px solid black;
+	background: #bbb;
 
 	z-index: 200;
 	overflow-x: hidden;
@@ -35,6 +37,9 @@ canvas {
 }
 
 #frame {
+	position: fixed;
+	overflow: auto;
+	height: 100%;
 	width: 80%;
 	margin-left: 20%;
 	align-items: stretch;
@@ -46,8 +51,6 @@ canvas {
     font-size: 30px;
     cursor: pointer;
 }
-
-/* Sidenav content */
 
 #sidenav_content {
     padding: 5%;
@@ -86,4 +89,44 @@ canvas {
     right: 25px;
     font-size: 36px;
     margin-left: 50px;
+}
+
+/* HexaLab */
+
+.hl_frame_title {
+	font-size: 200%;
+}
+
+.hl_group_title {
+	font-weight: bold;
+}
+
+.hl_frame input {
+	margin-top: 4px;
+	margin-bottom: 4px;
+	vertical-align: middle;
+}
+
+.hl_frame {
+	border: 1px solid black;
+	display: block;
+}
+
+.hl_frame input {
+	display: inline-block;
+}
+
+.hl_label_text {
+	width: 40%;
+	max-width: 400px;
+	display: inline-block;
+	font-size: 85%;
+	font-weight: bold;
+}
+
+.hl_group {
+	width: 100%;
+	border: 1px solid red;
+	padding-left: 15px;
+	box-sizing: border-box;
 }

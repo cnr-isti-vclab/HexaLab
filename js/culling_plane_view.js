@@ -4,7 +4,7 @@ HexaLab.CullingPlaneView = function () {
 
     // View Constructor
 
-    HexaLab.View.call(this, new Module.CullingPlaneView());
+    HexaLab.WebGLView.call(this, new Module.CullingPlaneView(), 'test');
 
     // Models
 
@@ -99,32 +99,30 @@ HexaLab.CullingPlaneView = function () {
             set_plane_normal_from_gui();
             self.update();
         }
-    })).newline().append(this.gui.range({
-        key: 'plane_offset',
-        label: 'offset',
-        callback: function () {
-            self.set_plane_offset(this.get());
-            self.update();
-        }
     })).newline().append(this.gui.numeric({
         key: 'plane_x',
-        label: 'x',
+        label: 'position',
         callback: function () {
             set_plane_position_from_gui();
             self.update();
         }
-    })).newline().append(this.gui.numeric({
+    })).append(this.gui.numeric({
         key: 'plane_y',
-        label: 'y',
         callback: function () {
             set_plane_position_from_gui();
             self.update();
         }
-    })).newline().append(this.gui.numeric({
+    })).append(this.gui.numeric({
         key: 'plane_z',
-        label: 'z',
         callback: function () {
             set_plane_position_from_gui();
+            self.update();
+        }
+    })).append(this.gui.range({
+        key: 'plane_offset',
+        style: 'width:100%; max-width:500px',
+        callback: function () {
+            self.set_plane_offset(this.get());
             self.update();
         }
     })).newline().append(this.gui.color_picker({
@@ -194,7 +192,7 @@ HexaLab.CullingPlaneView = function () {
     this.on_settings_change(this.default_settings);
 };
 
-HexaLab.CullingPlaneView.prototype = Object.assign(Object.create(HexaLab.View.prototype), {
+HexaLab.CullingPlaneView.prototype = Object.assign(Object.create(HexaLab.WebGLView.prototype), {
 
     // Default settings
 

@@ -4,7 +4,7 @@ HexaLab.LowQualityView = function () {
     
     // View
 
-    HexaLab.View.call(this, new Module.LowQualityView());
+    HexaLab.WebGLView.call(this, new Module.LowQualityView());
 
     // Models
     
@@ -62,7 +62,7 @@ HexaLab.LowQualityView = function () {
         }
     })).newline().append(this.gui.color_picker({
         key: 'visible_wireframe_color',
-        label: 'wireframe_color',
+        label: 'wireframe color',
         callback: function () {
             self.set_visible_wireframe_color(this.get());
         }
@@ -101,10 +101,10 @@ HexaLab.LowQualityView = function () {
     this.on_settings_change(this.default_settings); // TODO automate ?
 }
 
-HexaLab.LowQualityView.prototype = Object.assign(Object.create(HexaLab.View.prototype), {
+HexaLab.LowQualityView.prototype = Object.assign(Object.create(HexaLab.WebGLView.prototype), {
 
     default_settings: {
-        threshold: 0,
+        threshold: 0.8,
         show_quality: true,
         visible_surface_color: '#ff0000',
         visible_wireframe_color: '#000000',

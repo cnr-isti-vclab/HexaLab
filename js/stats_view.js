@@ -1,14 +1,20 @@
 "use strict";
 
 HexaLab.StatsView = function () {
-
-    HexaLab.View.call(this, new Module.StatsView());
-
-    this.webGL = false;
-    this.html = document.createElement('div');
+    HexaLab.HTMLView.call(this, new Module.StatsView());
+    this.content.new_frame({
+        key: 'quality',
+        title: 'Jacobian Quality',
+        style: 'text-align:center;'
+    }).append(this.content.group({
+        key: 'quality_plot',
+        style: "width: 100%; text-align:center;"
+    }).append(this.content.text({
+        text: 'Select a mesh first.'
+    })))
 }
 
-HexaLab.StatsView.prototype = Object.assign(Object.create(HexaLab.View.prototype), {
+HexaLab.StatsView.prototype = Object.assign(Object.create(HexaLab.HTMLView.prototype), {
     // interface
     on_update: function () {
     },
@@ -18,6 +24,10 @@ HexaLab.StatsView.prototype = Object.assign(Object.create(HexaLab.View.prototype
 
     on_mesh_change: function () {
         var x = [];
+
+        while (this.content.map.quality_plot.firstChild) {
+            this.content.map.quality_plot.removeChild(this.content.map.quality_plot.firstChild);
+        }
         var quality = this.view.get_hexa_quality();
         var data = new Float32Array(Module.HEAPU8.buffer, quality.data(), quality.size());
         for (var i = 0; i < quality.size(); i++) {
@@ -32,10 +42,11 @@ HexaLab.StatsView.prototype = Object.assign(Object.create(HexaLab.View.prototype
               },
           }
         ];
-        Plotly.newPlot(this.html, plot_data);
+        Plotly.newPlot(this.content.map.quality_plot, plot_data);
     },
 
     on_resize: function () {
+        Plotly.Plots.resize(this.content.map.quality_plot);
     },
 
     serialize_settings: function () {
