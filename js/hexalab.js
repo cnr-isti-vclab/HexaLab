@@ -706,6 +706,7 @@ HexaLab.Context = function (frame_id, gui_id) {
     this.ssao_pass.uniforms['onlyAO'].value = false;
 
     this.composer = new THREE.EffectComposer(this.renderer);
+    this.composer.setSize(this.canvas.width, this.canvas.height);
     this.composer.addPass(this.render_pass);
     this.composer.addPass(this.ssao_pass);
 
@@ -745,8 +746,10 @@ Object.assign(HexaLab.Context.prototype, {
                 return;
             }
             new_view = this.views[view];
-        } else {    // TODO use proper inheritance, check for instanceof View, abort if false
+        } else if (view instanceof HexaLab.View) {
             new_view = view;
+        } else {
+            alert('Not a view!');
         }
 
         // update camera
@@ -869,12 +872,12 @@ Object.assign(HexaLab.Context.prototype, {
                 this.show_occlusion(this.view.renderer_settings.occlusion);
                 this.set_background_color(this.view.renderer_settings.background);
                 this.render_pass.scene = this.view.scene;
-                this.render_pass.camera = this.view.camera;
+                this.render_pass.camera = this.cameras[this.view.camera].camera;
 
                 // render
                 if (this.composer && this.ssao_pass.enabled) {
                     this.view.scene.overrideMaterial = this.depth_prepass.material;
-                    this.renderer.render(this.view.scene, this.view.camera, this.depth_prepass.target, true);
+                    this.renderer.render(this.view.scene, this.cameras[this.view.camera].camera, this.depth_prepass.target, true);
                     this.view.scene.overrideMaterial = null;
                     this.composer.render();
                 } else {
@@ -887,15 +890,3 @@ Object.assign(HexaLab.Context.prototype, {
         requestAnimationFrame(this.animate.bind(this));
     }
 });
-
-// Automated global context
-
-HexaLab.views = [];
-HexaLab.register_view = function (view) {
-    this.views[view.get_name()] = view;
-}
-HexaLab.init = function (frame_id, gui_id) {
-    this.context = new HexaLab.Context(frame_id, gui_id);
-    this.context.views = this.views;
-    //this.context.animate();
-}

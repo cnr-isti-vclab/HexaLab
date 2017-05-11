@@ -252,7 +252,7 @@ HexaLab.CullingPlaneView.prototype = Object.assign(Object.create(HexaLab.WebGLVi
         var plane_geometry = new THREE.PlaneGeometry(this.get_size(), this.get_size());
         this.plane.mesh = new THREE.Mesh(plane_geometry, this.plane.material);
         this.scene.add(this.plane.mesh);
-        this.set_plane_offset(this.plane.offset);
+        this.on_settings_change(this.default_settings);
     },
 
     on_update: function () {
