@@ -9,12 +9,11 @@
 		<script src="js/external/plotly.js"></script>
 		<script src="js/external/TrackballControls.js"></script> 
 		<script src="js/external/FileSaver.js"></script>
-        <script src="js/external/SSAOShader.js"></script>
-        <script src="js/external/CopyShader.js"></script>
-        <script src="js/external/EffectComposer.js"></script>
-        <script src="js/external/RenderPass.js"></script>
-        <script src="js/external/ShaderPass.js"></script>
-        <script src="js/external/MaskPass.js"></script>
+        <script src="js/external/Stats.js"></script>
+        <script src="js/ssao_eval.js"></script>
+        <script src="js/ssao_blur.js"></script>
+        <script src="js/ssao_apply.js"></script>
+        <script src="js/ssao_norm.js"></script>
     </head>
 	<body>
 		<!-- HTML presentation stuff -->
@@ -45,10 +44,10 @@
 		<script type="text/javascript">
 		    window.onload = function () {
 		        var context = new HexaLab.Context('frame', 'dynamic_gui');
-		        context.add_view(new HexaLab.LowQualityView());
-		        context.add_view(new HexaLab.CullingPlaneView());
-		        context.add_view(new HexaLab.StatsView());
-		        context.set_view("Quality filter");
+		        context.add_view(HexaLab.LowQualityView);
+		        context.add_view(HexaLab.CullingPlaneView);
+		        context.add_view(HexaLab.StatsView);
+		        //context.set_view("Quality filter");
 
 		        document.getElementById('nav_opener').addEventListener('click', function () {
 		            document.getElementById('sidenav').style.width = '20%';

@@ -1,50 +1,48 @@
 "use strict";
 
-HexaLab.CullingPlaneView = function () {
+HexaLab.CullingPlaneView = function (mesh) {
 
     // View Constructor
-
-    HexaLab.WebGLView.call(this, new Module.CullingPlaneView(), 'test');
+    this.mesh = mesh;
+    HexaLab.WebGLView.call(this, new Module.CullingPlaneView(mesh), 'Mesh');
 
     // Models
 
-    this.models = {
-        straight: new HexaLab.Model(
-            this.view.get_straight_model(),
-            new THREE.MeshLambertMaterial({
-                polygonOffset: true,
-                polygonOffsetFactor: 0.5
-            }),
-            new THREE.MeshBasicMaterial({
-                transparent: true,
-                depthWrite: false
-            })
-        ),
+    this.models.straight = new HexaLab.Model(
+        this.view.get_straight_model(),
+        new THREE.MeshLambertMaterial({
+            polygonOffset: true,
+            polygonOffsetFactor: 0.5
+        }),
+        new THREE.MeshBasicMaterial({
+            transparent: true,
+            depthWrite: false
+        })
+    );
 
-        hidden: new HexaLab.Model(
-            this.view.get_hidden_model(),
-            new THREE.MeshBasicMaterial({
-                polygonOffset: true,
-                polygonOffsetFactor: 0.5,
-                transparent: true,
-                depthWrite: false
-            }),
-            new THREE.MeshBasicMaterial({
-                transparent: true,
-                depthWrite: false,
-            })
-        ),
+    this.models.hidden = new HexaLab.Model(
+        this.view.get_hidden_model(),
+        new THREE.MeshBasicMaterial({
+            polygonOffset: true,
+            polygonOffsetFactor: 0.5,
+            transparent: true,
+            depthWrite: false
+        }),
+        new THREE.MeshBasicMaterial({
+            transparent: true,
+            depthWrite: false,
+        })
+    );
 
-        singularity: new HexaLab.Model(
-            this.view.get_singularity_model(),
-            null,
-            new THREE.MeshBasicMaterial({
-                transparent: true,
-                depthWrite: false,
-                vertexColors: THREE.VertexColors
-            })
-        )
-    };
+    this.models.singularity = new HexaLab.Model(
+        this.view.get_singularity_model(),
+        null,
+        new THREE.MeshBasicMaterial({
+            transparent: true,
+            depthWrite: false,
+            vertexColors: THREE.VertexColors
+        })
+    );
 
     // Plane 
 
@@ -197,18 +195,18 @@ HexaLab.CullingPlaneView.prototype = Object.assign(Object.create(HexaLab.WebGLVi
     // Default settings
 
     default_settings: {
-        straight_surface_color: "#eeee55",
+        straight_surface_color: "#ffee9f",
         show_quality: false,
         straight_wireframe_color: "#000000",
         straight_wireframe_opacity: 1,
-        hidden_surface_color: "#000000",
-        hidden_surface_opacity: 0.5,
+        hidden_surface_color: "#d2de0c",
+        hidden_surface_opacity: 0.28,
         hidden_wireframe_color: "#000000",
-        hidden_wireframe_opacity: 0.5,
+        hidden_wireframe_opacity: 0.3,
         plane_normal: new THREE.Vector3(1, 0, 0),
-        plane_offset: 0.5,
-        plane_opacity: 0.5,
-        plane_color: "#000000",
+        plane_offset: 0.39,
+        plane_opacity: 0.3,
+        plane_color: "#56bbbb",
         show_singularity: true
     },
 
@@ -248,20 +246,18 @@ HexaLab.CullingPlaneView.prototype = Object.assign(Object.create(HexaLab.WebGLVi
     },
 
     on_mesh_change: function (mesh) {
-        this.scene.remove(this.plane.mesh);
-        var plane_geometry = new THREE.PlaneGeometry(this.get_size(), this.get_size());
+        var plane_geometry = new THREE.PlaneGeometry(this.mesh.get_size(), this.mesh.get_size());
         this.plane.mesh = new THREE.Mesh(plane_geometry, this.plane.material);
-        this.scene.add(this.plane.mesh);
         this.on_settings_change(this.default_settings);
     },
 
     on_update: function () {
-        this.update_model(this.models.straight);
-        this.update_model(this.models.hidden);
-        this.update_model(this.models.singularity);
+        this.models.straight.update();
+        this.models.hidden.update();
+        this.models.singularity.update();
 
         if (this.plane.mesh) {
-            var pos = this.get_center();
+            var pos = this.mesh.get_center();
             this.plane.mesh.position.set(pos.x, pos.y, pos.z);
             var dir = new THREE.Vector3().addVectors(pos, this.plane.normal);
             this.plane.mesh.lookAt(dir);

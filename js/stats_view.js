@@ -1,7 +1,8 @@
 "use strict";
 
-HexaLab.StatsView = function () {
-    HexaLab.HTMLView.call(this, new Module.StatsView());
+HexaLab.StatsView = function (mesh) {
+    HexaLab.HTMLView.call(this, new Module.StatsView(mesh), 'Stats');
+
     this.content.new_frame({
         key: 'quality',
         title: 'Jacobian Quality',

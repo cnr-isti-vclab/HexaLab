@@ -1,36 +1,34 @@
 "use strict";
 
-HexaLab.LowQualityView = function () {
+HexaLab.LowQualityView = function (mesh) {
     
     // View
-
-    HexaLab.WebGLView.call(this, new Module.LowQualityView());
+    HexaLab.WebGLView.call(this, new Module.LowQualityView(mesh), 'Quality filter');
 
     // Models
     
-    this.models = {
-        visible: new HexaLab.Model(
-            this.view.get_visible_model(),
-            new THREE.MeshLambertMaterial({
-                polygonOffset: true,
-                polygonOffsetFactor: 0.5
-            }),
-            new THREE.MeshBasicMaterial({
-                transparent: true,
-            })
-        ),
-        hidden: new HexaLab.Model(
-            this.view.get_hidden_model(),
-            new THREE.MeshBasicMaterial({
-                polygonOffset: true,
-                polygonOffsetFactor: 0.5,
-                transparent: true
-            }),
-            new THREE.MeshBasicMaterial({
-                transparent: true
-            })
-        )
-    }
+    this.models.visible = new HexaLab.Model(
+        this.view.get_visible_model(),
+        new THREE.MeshLambertMaterial({
+            polygonOffset: true,
+            polygonOffsetFactor: 0.5
+        }),
+        new THREE.MeshBasicMaterial({
+            transparent: true,
+        })
+    );
+    this.models.hidden = new HexaLab.Model(
+        this.view.get_hidden_model(),
+        new THREE.MeshBasicMaterial({
+            polygonOffset: true,
+            polygonOffsetFactor: 0.5,
+            transparent: true
+        }),
+        new THREE.MeshBasicMaterial({
+            transparent: true
+        })
+    );
+    
 
     // Gui
 
@@ -144,8 +142,8 @@ HexaLab.LowQualityView.prototype = Object.assign(Object.create(HexaLab.WebGLView
     },
 
     on_update: function () {
-        this.update_model(this.models.visible);
-        this.update_model(this.models.hidden);
+        this.models.visible.update();
+        this.models.hidden.update();
     },
 
     on_mesh_change: function () {
