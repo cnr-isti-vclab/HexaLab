@@ -52,11 +52,14 @@ HexaLab.CullingPlaneView = function (mesh) {
             side: THREE.DoubleSide,
             depthWrite: false
         }),
+        geometry: new THREE.PlaneGeometry(this.mesh.get_size(), this.mesh.get_size()),
         offset: 0,
         world_offset: 0,
         position: null,
         normal: null
     };
+    this.plane.mesh = new THREE.Mesh(this.plane.geometry, this.plane.material);
+    this.scene_node.add(this.plane.mesh);
 
     // Gui
 
@@ -243,12 +246,6 @@ HexaLab.CullingPlaneView.prototype = Object.assign(Object.create(HexaLab.WebGLVi
         this.set_plane_offset(settings.plane_offset);
         this.set_plane_opacity(settings.plane_opacity);
         this.set_plane_color(settings.plane_color);
-    },
-
-    on_mesh_change: function (mesh) {
-        var plane_geometry = new THREE.PlaneGeometry(this.mesh.get_size(), this.mesh.get_size());
-        this.plane.mesh = new THREE.Mesh(plane_geometry, this.plane.material);
-        this.on_settings_change(this.default_settings);
     },
 
     on_update: function () {

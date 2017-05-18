@@ -42,10 +42,10 @@
 
 		<script type="text/javascript">
 		    window.onload = function () {
-		        var context = new HexaLab.Context('frame', 'dynamic_gui');
-		        context.add_view(HexaLab.LowQualityView);
-		        context.add_view(HexaLab.CullingPlaneView);
-		        context.add_view(HexaLab.StatsView);
+		        var app = new HexaLab.App('frame', 'dynamic_gui');
+		        app.add_view(HexaLab.LowQualityView);
+		        app.add_view(HexaLab.CullingPlaneView);
+		        app.add_view(HexaLab.StatsView);
 		        //context.set_view("Quality filter");
 
 		        document.getElementById('nav_opener').addEventListener('click', function () {
@@ -62,7 +62,7 @@
 		            context.resize();
 		        })
 
-		        context.animate();
+		        app.animate();
 			}
 		</script>
 

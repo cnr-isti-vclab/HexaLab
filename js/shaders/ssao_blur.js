@@ -8,7 +8,7 @@ THREE.SSAOBlur = {
 		"void main() {",
 
 			"vUv = uv;",
-			"gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
+			"gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);",
 
 		"}"
 
@@ -17,8 +17,8 @@ THREE.SSAOBlur = {
 	fragmentShader: [
 
 		// Uniform parameters
-		"uniform vec2 uSize;",
 		"uniform sampler2D uTexture;",
+		"uniform vec2 uSize;",
 
 		// VS Output
 		"varying vec2 vUv;",
