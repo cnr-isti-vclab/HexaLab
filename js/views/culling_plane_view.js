@@ -188,6 +188,12 @@ HexaLab.CullingPlaneView = function (mesh) {
         callback: function () {
             self.set_hidden_wireframe_opacity(this.get());
         }
+    })).newline().append(this.gui.range({
+        key: 'singularity_opacity',
+        label: 'singularity lines opacity',
+        callback: function () {
+            self.set_singularity_opacity(this.get());
+        }
     })))
 
     this.on_settings_change(this.default_settings);
@@ -312,6 +318,11 @@ HexaLab.CullingPlaneView.prototype = Object.assign(Object.create(HexaLab.WebGLVi
     set_hidden_wireframe_opacity: function (opacity) {
         this.models.hidden.wireframe.material.opacity = opacity;
         this.gui.map.hidden_wireframe_opacity.set(opacity);
+    },
+
+    set_singularity_opacity: function (opacity) {
+        this.models.singularity.wireframe.material.opacity = opacity;
+        this.gui.map.singularity_opacity.set(opacity);
     },
 
     set_plane_position: function (x, y, z) {

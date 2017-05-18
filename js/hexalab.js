@@ -827,7 +827,13 @@ HexaLab.App = function (frame_id, gui_id) {
                 saveAs(blob, "HLsnapshot.png");
             }, "image/png");
         }
-    })).append(this.gui.color_picker({
+    })).newline().append(this.gui.button({
+        key: 'reset_camera',
+        value: 'Reset Camera',
+        callback: function () {
+            self.set_camera(self.default_camera_settings);
+        }
+    })).newline().append(this.gui.color_picker({
         key: 'background_color',
         label: 'Background',
         callback: function () {
@@ -948,6 +954,10 @@ Object.assign(HexaLab.App.prototype, {
     get_camera: function () {
         if (this.mesh) {
             var c = this.mesh.get_center();
+            var center = new THREE.Vector3(c.x(), c.y(), c.z());
+            var offset = new THREE.Vector3().subVectors(this.controls.target, center);
+            var distance = this.camera.getWorldDirection();
+            var direction = this.camera.position.distanceTo(this.controls.target) / this.mesh.get_size();
             return {
                 offset: new THREE.Vector3().subVectors(this.controls.target, new THREE.Vector3(c.x(), c.y(), c.z())),
                 direction: this.camera.getWorldDirection(),
@@ -1025,19 +1035,7 @@ Object.assign(HexaLab.App.prototype, {
     // mesh
 
     import_mesh: function (path) {
-        var result = Module.import_mesh(path);
-        if (!result) {
-            log('error');
-        }
-
-        var mesh = Module.get_mesh();
-        for (var key in this.view_types) {
-            var view = new this.view_types[key](mesh);
-            this.views[view.name] = view;
-            this.gui.map.views_select.add(view.name);
-        }
-        this.set_view('Mesh');
-
+        // store prev settings
         var settings = {
             camera: this.get_camera(),
             renderer: this.renderer_settings,
@@ -1048,8 +1046,22 @@ Object.assign(HexaLab.App.prototype, {
             settings.views[view.name] = view.default_settings;
         }
 
-        this.mesh = mesh;
+        // import mesh
+        var result = Module.import_mesh(path);
+        if (!result) {
+            log('error');
+        }
 
+        // re create views
+        var mesh = Module.get_mesh();
+        for (var key in this.view_types) {
+            var view = new this.view_types[key](mesh);
+            this.views[view.name] = view;
+            this.gui.map.views_select.add(view.name);
+        }
+
+        // restore settings
+        this.mesh = mesh;
         this.set_settings(settings);
     },
 
