@@ -52,14 +52,14 @@ HexaLab.CullingPlaneView = function (mesh) {
             side: THREE.DoubleSide,
             depthWrite: false
         }),
-        geometry: new THREE.PlaneGeometry(this.mesh.get_size(), this.mesh.get_size()),
+        geometry: new THREE.PlaneGeometry(2, 2),
         offset: 0,
         world_offset: 0,
         position: null,
         normal: null
     };
     this.plane.mesh = new THREE.Mesh(this.plane.geometry, this.plane.material);
-    this.scene_node.add(this.plane.mesh);
+    this.meshes.push(this.plane.mesh);
 
     // Gui
 
@@ -255,8 +255,8 @@ HexaLab.CullingPlaneView.prototype = Object.assign(Object.create(HexaLab.WebGLVi
 
         if (this.plane.mesh) {
             var pos = this.mesh.get_center();
-            this.plane.mesh.position.set(pos.x, pos.y, pos.z);
-            var dir = new THREE.Vector3().addVectors(pos, this.plane.normal);
+            this.plane.mesh.position.set(pos.x(), pos.y(), pos.z());
+            var dir = new THREE.Vector3().addVectors(this.plane.mesh.position, this.plane.normal);
             this.plane.mesh.lookAt(dir);
             this.plane.mesh.translateZ(-this.plane.world_offset);
         }

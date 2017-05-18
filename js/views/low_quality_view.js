@@ -117,15 +117,15 @@ HexaLab.LowQualityView.prototype = Object.assign(Object.create(HexaLab.WebGLView
 
     serialize_settings: function () {
         return {
-            threshold: view.quality_threshold,
-            show_quality: models.visible.surface.material.vertexColors == THREE.VertexColors,
-            visible_surface_color: '#' + models.visible.surface.material.color.getHexString(),
-            visible_wireframe_color: '#' + models.visible.wireframe.material.color.getHexString(),
-            visible_wireframe_opacity: models.visible.wireframe.material.opacity,
-            hidden_surface_color: '#' + models.hidden.surface.material.color.getHexString(),
-            hidden_surface_opacity: models.hidden.surface.material.opacity,
-            hidden_wireframe_color: '#' + models.hidden.material.opacity,
-            hidden_wireframe_opacity: models.hidden.material.opacity
+            threshold: this.view.quality_threshold,
+            show_quality: this.models.visible.surface.material.vertexColors == THREE.VertexColors,
+            visible_surface_color: '#' + this.models.visible.surface.material.color.getHexString(),
+            visible_wireframe_color: '#' + this.models.visible.wireframe.material.color.getHexString(),
+            visible_wireframe_opacity: this.models.visible.wireframe.material.opacity,
+            hidden_surface_color: '#' + this.models.hidden.surface.material.color.getHexString(),
+            hidden_surface_opacity: this.models.hidden.surface.material.opacity,
+            hidden_wireframe_color: '#' + this.models.hidden.wireframe.material.opacity,
+            hidden_wireframe_opacity: this.models.hidden.wireframe.material.opacity
         }
     },
 

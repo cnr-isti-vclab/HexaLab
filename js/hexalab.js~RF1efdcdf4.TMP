@@ -377,7 +377,7 @@ Object.assign(HexaLab.View.prototype, {
     },
 
     get_settings: function () {
-        return this.serialize_settings();
+        this.serialize_settings();
     },
 
     update: function () {
@@ -601,7 +601,7 @@ Object.assign(HexaLab.Renderer.prototype, {
         this.renderer.setSize(width, height);
     },
 
-    render: function (view, camera, settings) {
+    render: function (view, camera) {
         var self = this;
         function clear_scene() {
             while (self.scene.children.length > 0) {
@@ -620,8 +620,8 @@ Object.assign(HexaLab.Renderer.prototype, {
         }
 
         // prepare renderer
-        var do_ssao = settings.occlusion;//this.settings.occlusion;
-        var clear_color = '#ffffff';//this.settings.clear_color; // TODO white?
+        var do_ssao = true;//this.settings.occlusion;
+        var clear_color = '#ffffff';//this.settings.clear_color;
         this.renderer.setClearColor(clear_color, 1);
 
         clear_scene();
@@ -633,9 +633,9 @@ Object.assign(HexaLab.Renderer.prototype, {
                 var model = view.models[k];
                 if (model.surface.material && !model.surface.material.transparent) add_model_surface(model);
             }
-            for (var k in view.meshes) {
-                var mesh = view.meshes[k];
-                if (!mesh.material.transparent) this.scene.add(mesh);
+            for (var k in view.meshes.children) {
+                var mesh = view.meshes.children[k];
+                if (!mesh.material.transparent) this.scene.add(item);
             }
             // finish up the scene
             this.scene.add(view.scene_node);
@@ -648,9 +648,11 @@ Object.assign(HexaLab.Renderer.prototype, {
             this.scene.overrideMaterial = null;
 
             // render opaque models
+            this.renderer.antialias = true;
             this.renderer.setRenderTarget(null);
             this.renderer.clear();
             this.renderer.render(this.scene, camera);
+            this.renderer.antialias = false;
             
             // clean up
             clear_scene();
@@ -676,9 +678,9 @@ Object.assign(HexaLab.Renderer.prototype, {
                 if (model.wireframe.material) add_model_wireframe(model);
                 if (model.surface.material && model.surface.material.transparent) add_model_surface(model);
             }
-            for (var k in view.meshes) {
-                var mesh = view.meshes[k];
-                if (mesh.material.transparent) this.scene.add(mesh);
+            for (var k in view.scene_node.children) {
+                var item = view.scene_node.children[k];
+                if (item.material && item.material.transparent) this.scene.add(item);
             }
             // finish up the scene
             this.scene.add(view.scene_node);
@@ -697,10 +699,6 @@ Object.assign(HexaLab.Renderer.prototype, {
                 var model = view.models[k];
                 add_model_surface(model);
                 add_model_wireframe(model);
-            }
-            for (var k in view.meshes) {
-                var mesh = view.meshes[k];
-                this.scene.add(mesh);
             }
             this.scene.add(view.scene_node);
             this.scene.add(camera);
@@ -760,14 +758,6 @@ HexaLab.App = function (frame_id, gui_id) {
         }
     }
     this.gui_container = document.getElementById(gui_id);
-
-    // Renderer
-    this.renderer = new HexaLab.Renderer(this.canvas.width, this.canvas.height);
-    this.canvas.element = this.renderer.get_element();
-    this.renderer_settings = {
-            occlusion: false,
-            background_color: '#ffffff'
-    },
 
     // Dynamic interface
     this.gui = new HexaLab.DynamicInterface();
@@ -831,17 +821,21 @@ HexaLab.App = function (frame_id, gui_id) {
         key: 'background_color',
         label: 'Background',
         callback: function () {
-            self.set_background_color(this.get());
+            self.renderer.set_clear_color(this.get());
         },
     })).newline().append(this.gui.checkbox({
         key: 'occlusion',
         label: 'Occlusion',
         callback: function () {
-            self.set_occlusion(this.get());
+            self.renderer.set_ssao(this.get());
         }
     })));
 
     this.gui.append_to(document.getElementById(gui_id));
+
+    // Renderer
+    this.renderer = new HexaLab.Renderer(this.canvas.width, this.canvas.height);
+    this.canvas.element = this.renderer.get_element();
 
     // Views
     this.view_types = [];
@@ -850,7 +844,9 @@ HexaLab.App = function (frame_id, gui_id) {
     // Camera
     this.camera = new THREE.PerspectiveCamera(60, this.canvas.width / this.canvas.height, 0.1, 1000);
     this.controls = new THREE.TrackballControls(this.camera, this.frame.element);
-    this.set_camera(this.default_camera_settings);
+    this.set_camera({
+            camera: this.default_camera_settings
+    });
 
     // Stats
     this.stats = new Stats();
@@ -935,19 +931,16 @@ Object.assign(HexaLab.App.prototype, {
             this.views[key].resize(this.canvas.width, this.canvas.height);
         }
 
-        this.renderer.on_resize(this.canvas.width, this.canvas.height);
+        this.renderer.on_resize(width, height);
 
         log('Frame resized to ' + this.canvas.width + 'x' + this.canvas.height);
     },
 
     get_camera: function () {
-        if (this.mesh) {
-            var c = this.mesh.get_center();
-            return {
-                offset: new THREE.Vector3().subVectors(this.controls.target, new THREE.Vector3(c.x(), c.y(), c.z())),
-                direction: this.camera.getWorldDirection(),
-                distance: this.camera.position.distanceTo(this.controls.target) / this.mesh.get_size(),
-            }
+        if (this.mesh) return {
+            offset: new THREE.Vector3().subVectors(this.controls.target, this.mesh.get_center()),
+            direction: this.camera.getWorldDirection(),
+            distance: this.camera.position.distanceTo(this.controls.target) / this.mesh.get_size(),
         }
         else return this.default_camera_settings;
     },
@@ -964,9 +957,9 @@ Object.assign(HexaLab.App.prototype, {
             center = new THREE.Vector3(0, 0, 0);
         }
 
-        var target = new THREE.Vector3().addVectors(settings.offset, center);
-        var direction = settings.direction;
-        var distance = settings.distance * size;
+        var target = new THREE.Vector3().addVectors(settings.camera.offset, center);
+        var direction = this.camera.getWorldDirection();
+        var distance = settings.camera.distance * size;
 
         this.controls.rotateSpeed = 10;
         this.controls.dynamicDampingFactor = 1;
@@ -979,42 +972,24 @@ Object.assign(HexaLab.App.prototype, {
     },
 
     set_settings: function (settings) {
-        // views
         for (var key in this.views) {
             if (settings[key]) {
-                this.views[key].set_settings(settings.views[key]);
+                this.views[key].set_settings(settings[key]);
             }
         }
-        // camera
-        this.set_camera(settings.camera);
-        // renderer
-        this.set_occlusion(settings.renderer.occlusion);
-        this.set_background_color(settings.renderer.background_color);
-        this.renderer_settings = settings.renderer;
+        set_camera(settings);
     },
 
     get_settings: function () {
-        var settings = {};
-        // views
-        settings.views = {};
+        var settings = {
+            views: {}
+        };
         for (var key in this.views) {
             settings.views[key] = this.views[key].get_settings();
         }
-        // camera
         settings.camera = this.get_camera();
-        // renderer
-        settings.renderer = this.renderer_settings;
+        settings.renderer = this.renderer.settings;
         return settings;
-    },
-
-    set_occlusion: function (value) {
-        this.renderer_settings.occlusion = value;
-        this.gui.map.occlusion.set(value);
-    },
-
-    set_background_color: function (value) {
-        this.renderer_settings.background_color = value;
-        this.gui.map.background_color.set(value);
     },
 
     // mesh
@@ -1026,26 +1001,16 @@ Object.assign(HexaLab.App.prototype, {
         }
 
         var mesh = Module.get_mesh();
-        for (var key in this.view_types) {
+        for (key in this.view_types) {
             var view = new this.view_types[key](mesh);
             this.views[view.name] = view;
             this.gui.map.views_select.add(view.name);
         }
         this.set_view('Mesh');
 
-        var settings = {
-            camera: this.get_camera(),
-            renderer: this.renderer_settings,
-            views: {}
-        }
-        for (var key in this.views) {
-            var view = this.views[key];
-            settings.views[view.name] = view.default_settings;
-        }
-
+        var settings = { camera: this.get_camera() };
         this.mesh = mesh;
-
-        this.set_settings(settings);
+        this.set_camera(settings);
     },
 
     // Animate
@@ -1056,7 +1021,7 @@ Object.assign(HexaLab.App.prototype, {
             if (this.view instanceof HexaLab.WebGLView) {
                 this.controls.update();
                 this.stats.begin();
-                this.renderer.render(this.view, this.camera, this.renderer_settings);
+                this.renderer.render(this.view, this.camera);
                 this.stats.end();
             }
         }
