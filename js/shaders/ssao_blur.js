@@ -34,7 +34,7 @@ THREE.SSAOBlur = {
 	   		"}",
 		 
 		 	"result = result / 16.0;",
-			"gl_FragColor = vec4(result, result, result, 1.0);",
+			"gl_FragColor = vec4(vec3(result), 1.0);",
 		"}"
 
 	].join( "\n" )

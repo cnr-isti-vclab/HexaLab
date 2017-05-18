@@ -1,4 +1,4 @@
-THREE.SSAONorm = {
+THREE.SSAOPre = {
 
 	vertexShader: [
 

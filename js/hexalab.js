@@ -454,6 +454,9 @@ HexaLab.Gizmo = function (size) {
     this.add(arrows.z);
 }
 
+HexaLab.Gizmo.prototype = Object.assign(Object.create(THREE.Object3D.prototype), {
+})
+
 // --------------------------------------------------------------------------------
 // Camera
 // --------------------------------------------------------------------------------
@@ -476,11 +479,20 @@ Object.assign(HexaLab.Camera.prototype, {
 
 
 HexaLab.Renderer = function (width, height) {
-    //this.gizmo = new HexaLab.Gizmo(0.07);
+    this.width = width;
+    this.height = height;
+    this.aspect = width / height;
+
+    this.gizmo = new HexaLab.Gizmo(1);
+    this.gizmo.position.set(0, 0, 0);
+
+    this.hud_camera = new THREE.OrthographicCamera(-this.aspect, this.aspect, 1, -1, -500, 1000);
+    this.hud_camera.position.set(0, 0, 0);
+
     this.scene = new THREE.Scene();
-    this.hud_camera = new THREE.OrthographicCamera(width / -2, width / 2, height / 2, height / -2, 0.1, 1000);
 
     this.renderer = new THREE.WebGLRenderer({
+        antialias: true,
         preserveDrawingBuffer: true
     });
     this.renderer.setSize(width, height);
@@ -536,10 +548,10 @@ HexaLab.Renderer = function (width, height) {
         THREE.UVMapping, THREE.RepeatWrapping, THREE.RepeatWrapping, THREE.NearestFilter, THREE.NearestFilter);
     noise_tex.needsUpdate = true;
 
-    this.norm_pass = {
+    this.pre_pass = {
         material: new THREE.ShaderMaterial({
-            vertexShader: THREE.SSAONorm.vertexShader,
-            fragmentShader: THREE.SSAONorm.fragmentShader,
+            vertexShader: THREE.SSAOPre.vertexShader,
+            fragmentShader: THREE.SSAOPre.fragmentShader,
             uniforms: {
             },
         }),
@@ -552,20 +564,23 @@ HexaLab.Renderer = function (width, height) {
             depthBuffer: true,
         })
     }
+    this.pre_pass.target.texture.generateMipmaps = false;
+    this.pre_pass.target.depthTexture = new THREE.DepthTexture();
+    this.pre_pass.target.depthTexture.type = THREE.UnsignedShortType;
 
     this.ssao_pass = {
         material: new THREE.ShaderMaterial({
             vertexShader: THREE.SSAOEval.vertexShader,
             fragmentShader: THREE.SSAOEval.fragmentShader,
             uniforms: {
-                tDepth: { value: this.opaque_pass.target.depthTexture },
+                tDepth: { value: this.pre_pass.target.depthTexture },
+                tNormals: { value: this.pre_pass.target.texture },
                 uRadius: { value: 0.1 },
                 uSize: { value: new THREE.Vector2(width, height) },
                 uNear: { value: 0.1 },
                 uFar: { value: 1000 },
                 uKernel: { value: kernel },
-                tNoise: { value: noise_tex },
-                tNormals: { value: this.norm_pass.target.texture }
+                tNoise: { value: noise_tex }
             },
         }),
         target: new THREE.WebGLRenderTarget(width, height, {
@@ -584,33 +599,19 @@ HexaLab.Renderer = function (width, height) {
             uniforms: {
                 uSize: { value: new THREE.Vector2(width, height) },
                 uTexture: { value: this.ssao_pass.target.texture }
-            }
+            },
+            blending: THREE.CustomBlending,
+            blendEquation: THREE.AddEquation,
+            blendSrc: THREE.DstColorFactor,
+            blendDst: THREE.ZeroFactor,
+            transparent: true,
+            depthTest: false,
+            depthWrite: false
         }),
-        target: new THREE.WebGLRenderTarget(width, height, {
-            format: THREE.RGBFormat,
-            minFilter: THREE.NearestFilter,
-            magFilter: THREE.NearestFilter,
-            stencilBuffer: false,
-            depthBuffer: false,
-        })
     }
-
-    this.blend_pass = {
-        material: new THREE.ShaderMaterial({
-            vertexShader: THREE.SSAOApply.vertexShader,
-            fragmentShader: THREE.SSAOApply.fragmentShader,
-            uniforms: {
-                t1: { value: this.opaque_pass.target.texture },
-                t2: { value: this.blur_pass.target.texture }
-            }
-        })
-    }
-
-    this.width = width;
-    this.height = height;
 
     this.renderer.autoClear = false;
-    this.renderer.clear(true, true, true);
+    this.renderer.clear();
 }
 
 Object.assign(HexaLab.Renderer.prototype, {
@@ -645,9 +646,9 @@ Object.assign(HexaLab.Renderer.prototype, {
         }
 
         // prepare renderer
-        var do_ssao = true;
+        var do_ssao = false;
         var clear_color = '#ffffff';
-        this.renderer.setClearColor(0xffffff, 1);
+        this.renderer.setClearColor(clear_color, 1);
 
         clear_scene();
 
@@ -668,16 +669,16 @@ Object.assign(HexaLab.Renderer.prototype, {
             this.scene.add(camera);
             camera.add(view.camera_node);
             
-            // view normals prepass
-            this.scene.overrideMaterial = this.norm_pass.material;
-            //this.renderer.clear(); // why is this needed?
-            this.renderer.render(this.scene, camera, this.norm_pass.target, true);
+            // view norm/depth prepass
+            this.scene.overrideMaterial = this.pre_pass.material;
+            this.renderer.render(this.scene, camera, this.pre_pass.target, true);
             this.scene.overrideMaterial = null;
 
             // render opaque models
             this.renderer.antialias = true;
-            //this.renderer.clear();
-            this.renderer.render(this.scene, camera, this.opaque_pass.target, true);
+            this.renderer.setRenderTarget(null);
+            this.renderer.clear();
+            this.renderer.render(this.scene, camera);
             this.renderer.antialias = false;
             
             // clean up
@@ -691,16 +692,9 @@ Object.assign(HexaLab.Renderer.prototype, {
             this.scene.add(this.fullscreen_quad);
 
             this.fullscreen_quad.material = this.ssao_pass.material;
-            //this.renderer.clear();
             this.renderer.render(this.scene, this.ortho_camera, this.ssao_pass.target, true);
             
             this.fullscreen_quad.material = this.blur_pass.material;
-            //this.renderer.clear();
-            this.renderer.render(this.scene, this.ortho_camera, this.blur_pass.target, true);
-
-            this.fullscreen_quad.material = this.blend_pass.material;
-            //this.renderer.setRenderTarget(null);
-            //this.renderer.clear();
             this.renderer.render(this.scene, this.ortho_camera);
 
             clear_scene();
@@ -721,13 +715,7 @@ Object.assign(HexaLab.Renderer.prototype, {
             this.scene.add(camera);
             camera.add(view.camera_node);
 
-            var geometry = new THREE.SphereGeometry(0.5, 32, 32);
-            var material = new THREE.MeshBasicMaterial({ color: 0xffff00 });
-            var sphere = new THREE.Mesh(geometry, material);
-            //this.scene.add(sphere);
-
-            // render
-            this.renderer.clear(false, false, true);
+            // render translucents
             this.renderer.render(this.scene, camera);
 
             // clean up
@@ -738,7 +726,7 @@ Object.assign(HexaLab.Renderer.prototype, {
             for (var k in view.models) {
                 var model = view.models[k];
                 add_model_surface(model);
-                add_model_sireframe(model);
+                add_model_wireframe(model);
             }
             this.scene.add(view.scene_node);
             this.scene.add(camera);
@@ -746,22 +734,24 @@ Object.assign(HexaLab.Renderer.prototype, {
 
             // render
             //this.renderer.setClearColor(clear_color);
+            this.renderer.clear();
             this.renderer.render(this.scene, camera);
 
             // clean up the scene
+            clear_scene();
             camera.remove(view.camera_node);
         }
 
-        // TODO add hud pass
+        // hud
+        this.scene.add(this.gizmo);
+        this.renderer.setViewport(this.width - 100 * this.aspect, (this.aspect - 1) * 50, 100 * this.aspect, 100);
+        this.hud_camera.setRotationFromMatrix(camera.matrixWorld);
+        this.renderer.render(this.scene, this.hud_camera);
+        this.scene.remove(this.gizmo);
+        this.renderer.setViewport(0, 0, this.width, this.height);
     }
 })
 
-/*var geometry = new THREE.SphereGeometry(1, 32, 32);
-var material = new THREE.MeshBasicMaterial({ color: 0xffff00 });
-var sphere = new THREE.Mesh(geometry, material);
-sphere.position.set(0, 0, -1);
-this.scene.add(sphere);
-*/
 
 // --------------------------------------------------------------------------------
 // Context
