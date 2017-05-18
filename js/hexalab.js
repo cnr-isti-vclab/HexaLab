@@ -422,8 +422,8 @@ HexaLab.WebGLView.prototype = Object.assign(Object.create(HexaLab.View.prototype
 // Displays an HTML page inside the viewer. Might be useful to embed stuff
 // like graphs?
 
-HexaLab.HTMLView = function (view) {
-    HexaLab.View.call(this, view);
+HexaLab.HTMLView = function (view, name) {
+    HexaLab.View.call(this, view, name);
     this.content = new HexaLab.DynamicInterface();
 }
 
@@ -901,6 +901,11 @@ Object.assign(HexaLab.App.prototype, {
 
         // create gui
         this.gui.append_to(this.gui_container);
+        if (new_view instanceof HexaLab.HTMLView) {
+            this.gui.map.renderer_settings.hide();
+        } else {
+            this.gui.map.renderer_settings.show();
+        }
         new_view.gui.append_to(this.gui_container);
 
         // update frame content
@@ -909,7 +914,7 @@ Object.assign(HexaLab.App.prototype, {
             this.frame.set_content(this.canvas.element);
         } else if (new_view instanceof HexaLab.HTMLView && this.frame.content != this.html.element) {
             this.html.clear();
-            this.view.content.append_to(this.html.element);
+            new_view.content.append_to(this.html.element);
             this.frame.clear();
             this.frame.set_content(this.html.element);
             new_view.resize(this.canvas.width, this.canvas.height);

@@ -10,9 +10,28 @@ HexaLab.StatsView = function (mesh) {
     }).append(this.content.group({
         key: 'quality_plot',
         style: "width: 100%; text-align:center;"
-    }).append(this.content.text({
-        text: 'Select a mesh first.'
-    })))
+    }))
+
+    var x = [];
+
+    while (this.content.map.quality_plot.firstChild) {
+        this.content.map.quality_plot.removeChild(this.content.map.quality_plot.firstChild);
+    }
+    var quality = this.view.get_hexa_quality();
+    var data = new Float32Array(Module.HEAPU8.buffer, quality.data(), quality.size());
+    for (var i = 0; i < quality.size() ; i++) {
+        x[i] = data[i];
+    }
+    var plot_data = [
+      {
+          x: x,
+          type: 'histogram',
+          marker: {
+              color: 'rgba(0,0,0,0.7)',
+          },
+      }
+    ];
+    Plotly.newPlot(this.content.map.quality_plot, plot_data);
 }
 
 HexaLab.StatsView.prototype = Object.assign(Object.create(HexaLab.HTMLView.prototype), {
