@@ -1059,6 +1059,7 @@ Object.assign(HexaLab.App.prototype, {
             this.views[view.name] = view;
             this.gui.map.views_select.add(view.name);
         }
+        this.set_view(Object.keys(this.views)[0]);
 
         // restore settings
         this.mesh = mesh;
