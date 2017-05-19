@@ -626,8 +626,8 @@ Object.assign(HexaLab.Renderer.prototype, {
         }
 
         // prepare renderer
-        var do_ssao = settings.occlusion;//this.settings.occlusion;
-        var clear_color = '#ffffff';//this.settings.clear_color; // TODO white?
+        var do_ssao = settings.occlusion;
+        var clear_color = settings.background_color;
         this.renderer.setClearColor(clear_color, 1);
 
         clear_scene();
@@ -770,10 +770,7 @@ HexaLab.App = function (frame_id, gui_id) {
     // Renderer
     this.renderer = new HexaLab.Renderer(this.canvas.width, this.canvas.height);
     this.canvas.element = this.renderer.get_element();
-    this.renderer_settings = {
-            occlusion: false,
-            background_color: '#ffffff'
-    },
+    this.renderer_settings = this.default_renderer_settings;
 
     // Dynamic interface
     this.gui = new HexaLab.DynamicInterface();
@@ -878,6 +875,11 @@ Object.assign(HexaLab.App.prototype, {
         offset: new THREE.Vector3(0, 0, 0),
         direction: new THREE.Vector3(0, 0, -1),
         //distance: 2
+    },
+
+    default_renderer_settings: {
+        occlusion: false,
+        background_color: '#ffffff'
     },
 
     // view
@@ -1041,10 +1043,10 @@ Object.assign(HexaLab.App.prototype, {
     // mesh
 
     import_mesh: function (path) {
-        // store prev settings
+        // prepare new settings
         var settings = {
-            camera: this.default_camera_settings,// get_camera(),
-            renderer: this.renderer_settings,
+            camera: this.default_camera_settings,
+            renderer: this.default_renderer_settings,
             views: {}
         }
         for (var key in this.views) {
