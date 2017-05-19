@@ -52,7 +52,7 @@ HexaLab.CullingPlaneView = function (mesh) {
             side: THREE.DoubleSide,
             depthWrite: false
         }),
-        geometry: new THREE.PlaneGeometry(2, 2),
+        geometry: new THREE.PlaneGeometry(this.mesh.get_size(), this.mesh.get_size()),
         offset: 0,
         world_offset: 0,
         position: null,

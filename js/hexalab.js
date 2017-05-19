@@ -233,10 +233,16 @@ Object.assign(HexaLab.DynamicInterface.prototype, {
                 this.label ? this.parentNode.style.display = '' : this.style.display = '';
             }
             e.add = function (value, text) {
+                if (this.options[value]) return;
                 var e = document.createElement('option');
                 e.value = value;
                 text ? e.innerHTML = text : e.innerHTML = value;
                 this.appendChild(e);
+            }
+            e.clear = function () {
+                for (var i = this.options.length - 1 ; i >= 0 ; --i) {
+                    this.remove(i);
+                }
             }
             if (params.callback) e.addEventListener('change', params.callback);
             if (params.label) e.label = params.label + ' ';
@@ -871,7 +877,7 @@ Object.assign(HexaLab.App.prototype, {
     default_camera_settings: {
         offset: new THREE.Vector3(0, 0, 0),
         direction: new THREE.Vector3(0, 0, -1),
-        distance: 2
+        //distance: 2
     },
 
     // view
@@ -981,7 +987,7 @@ Object.assign(HexaLab.App.prototype, {
 
         var target = new THREE.Vector3().addVectors(settings.offset, center);
         var direction = settings.direction;
-        var distance = settings.distance * size;
+        var distance = size;
 
         this.controls.rotateSpeed = 10;
         this.controls.dynamicDampingFactor = 1;
@@ -1037,7 +1043,7 @@ Object.assign(HexaLab.App.prototype, {
     import_mesh: function (path) {
         // store prev settings
         var settings = {
-            camera: this.get_camera(),
+            camera: this.default_camera_settings,// get_camera(),
             renderer: this.renderer_settings,
             views: {}
         }
@@ -1053,6 +1059,7 @@ Object.assign(HexaLab.App.prototype, {
         }
 
         // re create views
+        this.gui.map.views_select.clear();
         var mesh = Module.get_mesh();
         for (var key in this.view_types) {
             var view = new this.view_types[key](mesh);
