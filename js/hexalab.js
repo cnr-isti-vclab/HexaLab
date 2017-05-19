@@ -587,10 +587,10 @@ Object.assign(HexaLab.Renderer.prototype, {
         this.settings.occlusion = value;
     },
 
-    resize: function (width, height, aspect) {
+    resize: function (width, height) {
         this.width = width;
         this.height = height;
-        this.aspect = aspect;
+        this.aspect = width / height;
 
         this.ssao_pass.material.uniforms.uSize.value.set(width, height);
         this.blur_pass.material.uniforms.uSize.value.set(width, height);
@@ -861,7 +861,7 @@ HexaLab.App = function (frame_id, gui_id) {
     // Stats
     this.stats = new Stats();
     this.stats.showPanel(0);
-    document.body.appendChild(this.stats.dom);
+    //document.body.appendChild(this.stats.dom);
 
     // Hook resize event
     window.addEventListener('resize', this.resize.bind(this));
@@ -939,14 +939,14 @@ Object.assign(HexaLab.App.prototype, {
         this.canvas.height = this.frame.element.offsetHeight;
         this.renderer.resize(this.canvas.width, this.canvas.height);
 
-        this.camera.aspectRatio = this.canvas.width / this.canvas.height;
+        this.camera.aspect = this.canvas.width / this.canvas.height;
         this.camera.updateProjectionMatrix();
 
         for (var key in this.views) {
             this.views[key].resize(this.canvas.width, this.canvas.height);
         }
 
-        this.renderer.on_resize(this.canvas.width, this.canvas.height);
+        this.renderer.resize(this.canvas.width, this.canvas.height);
 
         log('Frame resized to ' + this.canvas.width + 'x' + this.canvas.height);
     },

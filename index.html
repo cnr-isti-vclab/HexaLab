@@ -51,14 +51,14 @@
 		            document.getElementById('sidenav').style.width = '20%';
 		            document.getElementById('frame').style.width = '80%';
 		            document.getElementById('frame').style.marginLeft = '20%';
-		            context.resize();
+		            app.resize();
 		        })
 
 		        document.getElementById('nav_closer').addEventListener('click', function () {
 		            document.getElementById('sidenav').style.width = '0';
 		            document.getElementById('frame').style.width = '100%';
 		            document.getElementById('frame').style.marginLeft = '0';
-		            context.resize();
+		            app.resize();
 		        })
 
 		        app.animate();
