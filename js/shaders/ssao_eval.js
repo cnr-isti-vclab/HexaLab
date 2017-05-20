@@ -30,8 +30,10 @@ THREE.SSAOEval = {
 		"varying vec2 vUv;",
 
 
+		"#include <packing>",
+
 		"float getLinearDepth(const in vec2 coord) {",
-			"return texture2D(tDepth, coord).r;",
+			"return unpackRGBAToDepth(texture2D(tDepth, coord));",
 		"}",
 
 		// https://mynameismjp.wordpress.com/2009/03/10/reconstructing-position-from-depth/

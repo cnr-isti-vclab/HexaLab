@@ -471,7 +471,8 @@ HexaLab.Renderer = function (width, height) {
 
     this.renderer = new THREE.WebGLRenderer({
         antialias: true,
-        preserveDrawingBuffer: true
+        preserveDrawingBuffer: true,
+        //logarithmicDepthBuffer: true
     });
     this.renderer.setSize(width, height);
 
@@ -481,12 +482,16 @@ HexaLab.Renderer = function (width, height) {
 
     var num_samples = 16;
     var kernel = new Float32Array(num_samples * 3);
+    var n = new THREE.Vector3(0, 0, 1);
     for (var i = 0; i < num_samples * 3; i += 3) {
-        var v = new THREE.Vector3(
-            Math.random() * 2.0 - 1.0,
-            Math.random() * 2.0 - 1.0,
-            Math.random()
-        ).normalize();
+        var v;
+        //do {
+            v = new THREE.Vector3(
+                Math.random() * 2.0 - 1.0,
+                Math.random() * 2.0 - 1.0,
+                Math.random()
+            ).normalize();
+        //} while(v.dot(n) < 0.15);
         var scale = i / (num_samples * 3);
         scale = 0.1 + scale * scale * 0.9;
         kernel[i + 0] = v.x * scale;
@@ -530,13 +535,22 @@ HexaLab.Renderer = function (width, height) {
     this.pre_pass.target.depthTexture = new THREE.DepthTexture();
     this.pre_pass.target.depthTexture.type = THREE.UnsignedShortType;
 
+    this.depth_pass = {
+        material: new THREE.MeshDepthMaterial({
+            depthPacking: THREE.RGBADepthPacking
+        }),
+        target: new THREE.WebGLRenderTarget(width, height, {
+
+        })
+    }
+
     // Render ssao on another off texture
     this.ssao_pass = {
         material: new THREE.ShaderMaterial({
             vertexShader: THREE.SSAOEval.vertexShader,
             fragmentShader: THREE.SSAOEval.fragmentShader,
             uniforms: {
-                tDepth: { value: this.pre_pass.target.depthTexture },
+                tDepth: { value: this.depth_pass.target.texture },
                 tNormals: { value: this.pre_pass.target.texture },
                 uRadius: { value: 0.1 },
                 uSize: { value: new THREE.Vector2(width, height) },
@@ -591,6 +605,11 @@ Object.assign(HexaLab.Renderer.prototype, {
 
     set_ssao: function (value) {
         this.settings.occlusion = value;
+    },
+
+    set_mesh_params(avg_edge_len) {
+        this.ssao_pass.material.uniforms.uRadius.value = 5 * avg_edge_len;
+        log('ssao radius: ' + this.ssao_pass.material.uniforms.uRadius.value);
     },
 
     resize: function (width, height) {
@@ -653,11 +672,15 @@ Object.assign(HexaLab.Renderer.prototype, {
             this.renderer.render(this.scene, camera, this.pre_pass.target, true);
             this.scene.overrideMaterial = null;
 
+            this.scene.overrideMaterial = this.depth_pass.material;
+            this.renderer.render(this.scene, camera, this.depth_pass.target, true);
+            this.scene.overrideMaterial = null;
+
             // render opaque models
             this.renderer.setRenderTarget(null);
             this.renderer.clear();
             this.renderer.render(this.scene, camera);
-            
+
             // clean up
             clear_scene();
             camera.remove(view.camera_node);
@@ -1073,6 +1096,9 @@ Object.assign(HexaLab.App.prototype, {
         // restore settings
         this.mesh = mesh;
         this.set_settings(settings);
+
+        // update renderer
+        this.renderer.set_mesh_params(mesh.avg_edge_len());
     },
 
     // Animate
