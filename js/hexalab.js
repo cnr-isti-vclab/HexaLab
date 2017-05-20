@@ -472,7 +472,6 @@ HexaLab.Renderer = function (width, height) {
     this.renderer = new THREE.WebGLRenderer({
         antialias: true,
         preserveDrawingBuffer: true,
-        //logarithmicDepthBuffer: true
     });
     this.renderer.setSize(width, height);
 
@@ -485,13 +484,13 @@ HexaLab.Renderer = function (width, height) {
     var n = new THREE.Vector3(0, 0, 1);
     for (var i = 0; i < num_samples * 3; i += 3) {
         var v;
-        //do {
+        do {
             v = new THREE.Vector3(
                 Math.random() * 2.0 - 1.0,
                 Math.random() * 2.0 - 1.0,
                 Math.random()
             ).normalize();
-        //} while(v.dot(n) < 0.15);
+        } while(v.dot(n) < 0.15);
         var scale = i / (num_samples * 3);
         scale = 0.1 + scale * scale * 0.9;
         kernel[i + 0] = v.x * scale;
@@ -578,8 +577,11 @@ HexaLab.Renderer = function (width, height) {
             vertexShader: THREE.SSAOBlur.vertexShader,
             fragmentShader: THREE.SSAOBlur.fragmentShader,
             uniforms: {
+                tSSAO: { value: this.ssao_pass.target.texture },
+                tDepth: { value: this.depth_pass.target.texture },
+                tNormals: { value: this.pre_pass.target.texture },
                 uSize: { value: new THREE.Vector2(width, height) },
-                uTexture: { value: this.ssao_pass.target.texture }
+                depthThreshold: { value: 0.01 }
             },
             blending: THREE.CustomBlending,
             blendEquation: THREE.AddEquation,
@@ -607,9 +609,11 @@ Object.assign(HexaLab.Renderer.prototype, {
         this.settings.occlusion = value;
     },
 
-    set_mesh_params(avg_edge_len) {
+    set_mesh_params(min_edge_len, avg_edge_len) {
         this.ssao_pass.material.uniforms.uRadius.value = 5 * avg_edge_len;
+        this.blur_pass.material.uniforms.depthThreshold.value = min_edge_len * 0.5 + avg_edge_len * 0.5;
         log('ssao radius: ' + this.ssao_pass.material.uniforms.uRadius.value);
+        log('ssao depth threshold: ' + this.blur_pass.material.uniforms.depthThreshold.value);
     },
 
     resize: function (width, height) {
@@ -688,6 +692,7 @@ Object.assign(HexaLab.Renderer.prototype, {
             // ssao
             this.ssao_pass.material.uniforms.uProj = { value: camera.projectionMatrix };
             this.ssao_pass.material.uniforms.uInvProj = { value: new THREE.Matrix4().getInverse(camera.projectionMatrix) };
+            this.blur_pass.material.uniforms.uInvProj = { value: new THREE.Matrix4().getInverse(camera.projectionMatrix) };
 
             this.scene.add(this.fullscreen_quad);
 
@@ -1098,7 +1103,7 @@ Object.assign(HexaLab.App.prototype, {
         this.set_settings(settings);
 
         // update renderer
-        this.renderer.set_mesh_params(mesh.avg_edge_len());
+        this.renderer.set_mesh_params(mesh.min_edge_len(), mesh.avg_edge_len());
     },
 
     // Animate
