@@ -2,9 +2,15 @@
 <html>
 	<head>
 		<meta charset=utf-8>
+
 		<title>HexaLab</title>
+
+		<link rel="stylesheet" href="css/jquery-ui.css">
 		<link rel="stylesheet" href="css/hexalab.css">
         <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet">
+
+		<script src="js/external/jquery.js"></script>
+		<script src="js/external/jquery-ui.js"></script>
 		<script src="js/external/three.js"></script>
 		<script src="js/external/plotly.js"></script>
 		<script src="js/external/TrackballControls.js"></script> 
@@ -21,9 +27,136 @@
 				<div id="sidenav">
 					<div id="sidenav_content">
                         <a href="javascript:void(0)" id="nav_closer">&times;</a>
-                        <div id="dynamic_gui"></div>
-                        <textarea id="logger" readonly></textarea>
-					</div>
+                        <h1>HexaLab</h1>
+                        <div id="controls_menu">
+                            <h3>Controls</h3>
+                            <div>
+                                <div id="mesh_source_select_wrapper">
+                                    <label for="mesh_source_select">Mesh source</label>
+                                    <select id="mesh_source_select">
+                                        <option value="custom">Local</option>
+                                        <option value="paper">Paper</option>
+                                    </select>
+                                </div>
+                                
+                                <div id="paper_source_div" >
+                                    <div id="paper_select_div" >
+                                        <label for="paper_select">Paper name</label>
+                                        <select id="paper_select">
+                                            <option value="x">Xxx</option>
+                                        </select>
+                                    </div>
+                                    <div id="paper_mesh_select_div" >
+                                        <label for="paper_mesh_select">Mesh name</label>
+                                        <select id="paper_mesh_select">
+                                            <option value="x">Xxx</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div id="custom_source_div" >
+                                    <button id="mesh_pick_button">Select mesh file</button>
+                                </div>
+
+                                <button id="import_settings_button">Import settings</button>
+                                <button id="export_settings_button">Export settings</button>
+                                <button id="snapshot_button">Take snapshot</button>
+                                <button id="camera_reset_button">Reset camera</button>
+                                
+                                <input type="file" id="file_input" style="display:none" />
+                            </div>
+
+                            <h3>Renderer</h3>
+                            <div id="renderer_menu">
+                                <label for="msaa_checkbox">MSAA</label>
+                                <input type="checkbox" id="msaa_checkbox">
+                                <label for="ssao_checkbox">SSAO</label>
+                                <input type="checkbox" id="ssao_checkbox">
+                            </div>
+
+                            <h3>Materials</h3>
+                            <div id="materials_menu">
+                                <h3>Visible</h3>
+                                <div id="visible_material_menu">
+                                    <label for="quality_color_checkbox">Show surface quality</label> 
+                                    <input id="quality_color_checkbox" type="checkbox" />
+                                    <br />
+                                    <label for="surface_color">Surface Color</label> 
+                                    <input id="surface_color" type="color" />
+                                    <br />
+                                    <label for="wireframe_color">Wireframe color</label> 
+                                    <input id="wireframe_color" type="color" />
+                                    <br />
+                                    <label for="wireframe_opacity">Wireframe opacity</label>
+                                    <div id="wireframe_opacity"></div>
+                                </div>
+                                
+                                <h3>Filtered</h3>
+                                <div id="filtered_material_menu">
+                                    <label for="culled_surface_color">Surface color</label>
+                                    <input id="culled_surface_color" type="color" />
+                                    
+                                    <label for="culled_surface_opacity">Surface opacity</label>
+                                    <div id="culled_surface_opacity"></div>
+                                    
+                                    <label for="culled_wireframe_color">Wireframe color</label>
+                                    <input id="culled_wireframe_color" type="color" />
+                                    
+                                    <label for="culled_wireframe_opacity">Wireframe opacity</label>
+                                    <div id="culled_wireframe_opacity"></div>
+                                </div>
+
+                                <h3>Singularity edges</h3>
+                                <div id="singularity_material_menu">
+                                    <label for="singularity_opacity">Opacity</label>
+                                    <div id="singularity_opacity"></div>
+                                </div>
+                            </div>
+
+                            <h3>Filters</h3>
+                            <div id="filters_menu">
+                                <h3>Plane</h3>
+                                <div id="plane_filter_menu">
+                                    <div id="plane_normal_div">
+                                        <fieldset>
+                                            <legend>Normal</legend>
+                                            <input id="plane_normal_x" type="number" />
+                                            <input id="plane_normal_y" type="number" />
+                                            <input id="plane_normal_z" type="number" />
+                                        </fieldset>
+                                    </div>
+                                    <div id="plane_offset_div">
+                                        <fieldset>
+                                            <legend>Offset</legend>
+                                            <input id="plane_offset_number" type="number" />
+                                            <div id="plane_offset_range"></div>
+                                        </fieldset>
+                                    </div>
+                                    <div id="plane_material_div">
+                                        <fieldset>
+                                            <legend>Material</legend>
+                                            <input type="color" id="plane_color" />
+                                            <div id="plane_opacity"></div>
+                                        </fieldset>
+                                    </div>
+                                </div>
+
+                                <h3>Quality</h3>
+                                <div id="quality_filter_menu">
+                                    <label>Quality threshold<input id="quality_threshold" type="number" /></label>
+                                </div>
+                            </div>
+
+                            <h3>Plots</h3>
+                            <div id="plots_menu">
+                                <Button id="quality_plot_button">Jacobian Quality</button>
+                                <div id="quality_plot_div"></div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <textarea id="logger" readonly></textarea>
 				</div>
 				<span id="nav_opener">&#9776;</span>
 			</div>
@@ -35,17 +168,14 @@
 		<!-- Emscripten compiled cpp code -->
 		<script src="js/generated/hexalab.js"></script>
 		<!-- HexaLab -->
-		<script src="js/hexalab.js"></script>
-		<script src="js/views/culling_plane_view.js"></script>
-		<script src="js/views/low_quality_view.js"></script>
-		<script src="js/views/stats_view.js"></script>
-
+        <script src="js/hexalab.js"></script>
+		<script src="js/ui.js"></script>
+		<script src="js/filters/plane_filter.js"></script>
+		<script src="js/filters/quality_filter.js"></script>
+		
 		<script type="text/javascript">
 		    window.onload = function () {
-		        var app = new HexaLab.App('frame', 'dynamic_gui');
-		        app.add_view(HexaLab.CullingPlaneView);
-		        app.add_view(HexaLab.LowQualityView);
-		        app.add_view(HexaLab.StatsView);
+		        var app = new HexaLab.App(document.getElementById('frame'));
 
 		        document.getElementById('nav_opener').addEventListener('click', function () {
 		            document.getElementById('sidenav').style.width = '20%';

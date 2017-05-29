@@ -1,6 +1,7 @@
 "use strict";
 
 var HexaLab = {}
+HexaLab.filters = [];
 
 // --------------------------------------------------------------------------------
 // Utility
@@ -75,371 +76,45 @@ Object.assign(HexaLab.Model.prototype, {
 })
 
 // --------------------------------------------------------------------------------
-// UI Builder
+// Filter Interface
 // --------------------------------------------------------------------------------
-// HTML widgets builder. To be used in views, to create its own custom interface.
-// This is a bit verbose, the upside is that it streamlines the outer interface.
 
-HexaLab.DynamicInterface = function () {
-    this.map = [];
-    this.roots = [];
-}
-
-Object.assign(HexaLab.DynamicInterface.prototype, {
-    color_picker: function (params) {
-        var e = document.createElement('input');
-        e.setAttribute('type', 'color');
-        e.set = function (value) {
-            this.value = value;
-        }
-        e.get = function () {
-            return this.value;
-        }
-        e.hide = function () {
-            this.label ? this.parentNode.style.display = 'none' : this.style.display = 'none';
-        }
-        e.show = function () {
-            this.label ? this.parentNode.style.display = '' : this.style.display = '';
-        }
-        if (params) {
-            if (params.label) e.label = params.label + ' ';
-            if (params.style) e.setAttribute('style', params.style);
-            if (params.callback) e.addEventListener('input', params.callback);
-            if (params.value) e.set(value);
-            if (params.key) this.map[params.key] = e;
-        }
-        return e;
-    },
-    range: function (params) {
-        var e = document.createElement('input');
-        e.setAttribute('type', 'range');
-        e.set = function (value) {
-            this.value = value * 100;
-        }
-        e.get = function () {
-            return parseFloat(this.value) / 100;
-        }
-        e.hide = function () {
-            this.label ? this.parentNode.style.display = 'none' : this.style.display = 'none';
-        }
-        e.show = function () {
-            this.label ? this.parentNode.style.display = '' : this.style.display = '';
-        }
-        if (params) {
-            if (params.label) e.label = params.label + ' ';
-            if (params.style) e.setAttribute('style', params.style);
-            if (params.callback) e.addEventListener('input', params.callback);
-            if (params.value) e.set(value);
-            if (params.key) this.map[params.key] = e;
-        }
-        return e;
-    },
-    checkbox: function (params) {
-        var e = document.createElement('input');
-        e.setAttribute('type', 'checkbox');
-        e.set = function (value) {
-            this.checked = value;
-        }
-        e.get = function () {
-            return this.checked;
-        }
-        e.hide = function () {
-            this.label ? this.parentNode.style.display = 'none' : this.style.display = 'none';
-        }
-        e.show = function () {
-            this.label ? this.parentNode.style.display = '' : this.style.display = '';
-        }
-        if (params) {
-            if (params.label) e.label = params.label + ' ';
-            if (params.style) e.setAttribute('style', params.style);
-            if (params.callback) e.addEventListener('click', params.callback);
-            if (params.value) e.set(value);
-            if (params.key) this.map[params.key] = e;
-        }
-        return e;
-    },
-    numeric: function (params) {
-        var e = document.createElement('input');
-        e.setAttribute('type', 'number');
-        e.set = function (value) {
-            this.value = parseFloat(value.toFixed(3));
-        }
-        e.get = function () {
-            return parseFloat(this.value);
-        }
-        e.hide = function () {
-            this.label ? this.parentNode.style.display = 'none' : this.style.display = 'none';
-        }
-        e.show = function () {
-            this.label ? this.parentNode.style.display = '' : this.style.display = '';
-        }
-        if (params) {
-            if (params.label) e.label = params.label + ' ';
-            if (params.style) e.setAttribute('style', params.style);
-            if (params.callback) e.addEventListener('change', params.callback);
-            if (params.value) e.set(params.value);
-            if (params.key) this.map[params.key] = e;
-        }
-        return e;
-    },
-    button: function (params) {
-        var e = document.createElement('button');
-        e.set = function (value) {
-            this.innerHTML = value;
-        }
-        e.get = function () {
-            return this.innerHTML;
-        }
-        e.hide = function () {
-            this.label ? this.parentNode.style.display = 'none' : this.style.display = 'none';
-        }
-        e.show = function () {
-            this.label ? this.parentNode.style.display = '' : this.style.display = '';
-        }
-        if (params) {
-            if (params.label) e.label = params.label + ' ';
-            if (params.style) e.setAttribute('style', params.style);
-            if (params.callback) e.addEventListener('click', params.callback);
-            if (params.value) e.set(params.value);
-            if (params.key) this.map[params.key] = e;
-        }
-        return e;
-    },
-    select: function (params) {
-        var e = document.createElement('select');
-        if (params) {
-            for (var option in params.options) {
-                var oe = document.createElement('option');
-                if (option.value && option.text) {
-                    oe.value = option.value;
-                    oe.innerHTML = option.text;
-                } else {
-                    oe.value = option;
-                    oe.innerHTML = option;
-                }
-                e.appendChild(oe);
-            }
-            if (params.default) e.selectedIndex = params.default;
-            e.get = function () {
-                return this.options[this.selectedIndex].text;
-            }
-            e.set = function (value) {
-                this.value = value;
-            }
-            e.hide = function () {
-                this.label ? this.parentNode.style.display = 'none' : this.style.display = 'none';
-            }
-            e.show = function () {
-                this.label ? this.parentNode.style.display = '' : this.style.display = '';
-            }
-            e.add = function (value, text) {
-                if (this.options[value]) return;
-                var e = document.createElement('option');
-                e.value = value;
-                text ? e.innerHTML = text : e.innerHTML = value;
-                this.appendChild(e);
-            }
-            e.clear = function () {
-                for (var i = this.options.length - 1 ; i >= 0 ; --i) {
-                    this.remove(i);
-                }
-            }
-            if (params.callback) e.addEventListener('change', params.callback);
-            if (params.label) e.label = params.label + ' ';
-            if (params.key) this.map[params.key] = e;
-        }
-        return e;
-    },
-    file_picker: function (params) {
-        var e = document.createElement('button'); 
-        var file_input = document.createElement('input');
-        file_input.setAttribute('type', 'file');
-        file_input.setAttribute('display', 'none');
-        e.appendChild(file_input);
-
-        e.addEventListener('click', function () {
-            file_input.value = null;
-            file_input.click();
-        });
-        e.hide = function () {
-            this.label ? this.parentNode.style.display = 'none' : this.style.display = 'none';
-        }
-        e.show = function () {
-            this.label ? this.parentNode.style.display = '' : this.style.display = '';
-        }
-        if (params) {
-            if (params.label) e.innerHTML = params.label + ' ';
-            if (params.style) e.setAttribute('style', params.style);
-            if (params.callback) file_input.addEventListener('change', params.callback);
-            if (params.key) this.map[params.key] = e;
-        }
-        return e;
-    },
-    text: function (params) {
-        var e = document.createElement('span'); 
-        e.innerHTML = params.text;
-        if (params) {
-            if (params.style) e.setAttribute('style', params.style);
-            if (params.key) this.map[params.key] = e;
-        }
-        return e;
-    },
-
-    div: function (params) {
-        var e = document.createElement('div');
-        e.append = function (e) {
-            if (e.label) {
-                var label = document.createElement('label');
-                var label_text = document.createElement('div');
-                label_text.className += ' hl_label_text';
-                label_text.innerHTML = e.label;
-                label.appendChild(label_text);
-                label.appendChild(e);
-                e = label;
-            }
-            this.appendChild(e);
-            return this;
-        };
-        e.newline = function () {
-            this.appendChild(document.createElement('br'));
-            return this;
-        }
-        e.hide = function () {
-               this.style.display = 'none';
-        }
-        e.show = function () {
-            this.style.display = '';
-        }
-        if (params) {
-            if (params.style) e.setAttribute('style', params.style);
-            if (params.title) {
-                e.heading = document.createElement('span');
-                e.heading.innerHTML = params.title;
-                if (params.title_style) e.heading.setAttribute('style', title_style);
-                e.append(e.heading).newline();
-            }
-            if (params.key) this.map[params.key] = e;
-        }
-        return e;
-    },
-
-    group: function (params) {
-        var e = this.div(params);
-        e.className += ' hl_group';
-        if (e.heading) e.heading.className += ' hl_group_title';
-        return e;
-    },
-
-    new_frame: function (params) {
-        var e = this.div(params);
-        e.className += ' hl_frame';
-        if (e.heading) e.heading.className += ' hl_frame_title';
-        this.roots.push(e);
-        return e;
-    },
-
-    append_to: function (root) {
-        for (var key in this.roots) {
-            var e = this.roots[key];
-            root.appendChild(e);
-        }
-    }
-});
-
-// --------------------------------------------------------------------------------
-// View Interface
-// --------------------------------------------------------------------------------
-// Creates a gui builder instance and prototypes the basic view interface and api.
-
-HexaLab.View = function (view, name) {
-    this.gui = new HexaLab.DynamicInterface();
-    this.view = view;
+HexaLab.Filter = function (filter, name) {
+    this.filter = filter;
     this.name = name;
+    this.scene = {
+        data: [],
+        add: function (obj) {
+            this.data.push(obj);
+        },
+        remove: function (obj) {
+            var i = this.data.indexOf(obj);
+            if (i != -1) {
+                this.data.splice(i, 1);
+            }
+        }
+    };
 };
 
-Object.assign(HexaLab.View.prototype, {
+Object.assign(HexaLab.Filter.prototype, {
     // Implementation Api
 
-    on_update: function () {
-        console.warn('Function "on_update" not implemented for view ' + this.get_name() + '.');
+    on_mesh_change: function (mesh) {
+        console.warn('Function "on_mesh_change" not implemented for filter ' + this.name + '.');
     },
 
-    on_settings_change: function () {
-        console.warn('Function "on_settings_change" not implemented for view ' + this.get_name() + '.');
-    },
-
-    serialize_settings: function () {
-        console.warn('Function "serialize_settings" not implemented for view ' + this.get_name() + '.');
-    },
-
-    on_resize: function (width, height) {
-        console.warn('Function "on_resize" not implemented for view ' + this.get_name() + '.');
-    },
-
-    // Api
-
-    get_name: function () {
-        return this.name;
+    set_settings: function (settings) {
+        console.warn('Function "set_settings" not implemented for filter ' + this.name + '.');
     },
 
     get_settings: function () {
-        return this.serialize_settings();
+        console.warn('Function "get_settings" not implemented for filter ' + this.name + '.');
     },
-
-    update: function () {
-        this.view.update();
-        this.on_update();
-    },
-
-    resize: function (width, height) {
-        this.on_resize(width, height);
-    }
 });
-
-// --------------------------------------------------------------------------------
-// WebGL View
-// --------------------------------------------------------------------------------
-// The most typical kind of view. Has its own 3d scene, is presented through a 
-// WebGL renderer.
-// The camera_id parameter is the id of the camera this view will be using.
-// Use a unique id for each view if you want separate cameras,
-// otherwise share ids and the respective cameras will be shared.
-// Defaults (no id passed) to a common id called 'default', meaning that by default,
-// there's only one shared camera between all views.
-
-HexaLab.WebGLView = function (view, name) {
-
-    HexaLab.View.call(this, view, name);
-
-    this.models = [];
-    this.meshes = [];
-    this.camera_node = new THREE.Group();
-    this.camera_node.add(new THREE.PointLight(0xffffff));
-    this.scene_node = new THREE.Group();
-    this.scene_node.add(new THREE.AmbientLight(0x404040));
-};
-
-HexaLab.WebGLView.prototype = Object.assign(Object.create(HexaLab.View.prototype), {
-})
-
-// --------------------------------------------------------------------------------
-// HTML View
-// --------------------------------------------------------------------------------
-// Displays an HTML page inside the viewer. Might be useful to embed stuff
-// like graphs?
-
-HexaLab.HTMLView = function (view, name) {
-    HexaLab.View.call(this, view, name);
-    this.content = new HexaLab.DynamicInterface();
-}
-
-HexaLab.HTMLView.prototype = Object.assign(Object.create(HexaLab.View.prototype), {
-})
 
 // --------------------------------------------------------------------------------
 // Renderer
 // --------------------------------------------------------------------------------
-
 
 HexaLab.Renderer = function (width, height) {
     this.width = width;
@@ -514,7 +189,7 @@ HexaLab.Renderer = function (width, height) {
     noise_tex.needsUpdate = true;
 
     // Render depth and normals on an off texture
-    this.pre_pass = {
+    this.normal_pass = {
         material: new THREE.ShaderMaterial({
             vertexShader: THREE.SSAOPre.vertexShader,
             fragmentShader: THREE.SSAOPre.fragmentShader,
@@ -530,9 +205,9 @@ HexaLab.Renderer = function (width, height) {
             depthBuffer: true,
         })
     }
-    this.pre_pass.target.texture.generateMipmaps = false;
-    this.pre_pass.target.depthTexture = new THREE.DepthTexture();
-    this.pre_pass.target.depthTexture.type = THREE.UnsignedShortType;
+    this.normal_pass.target.texture.generateMipmaps = false;
+    this.normal_pass.target.depthTexture = new THREE.DepthTexture();
+    this.normal_pass.target.depthTexture.type = THREE.UnsignedShortType;
 
     this.depth_pass = {
         material: new THREE.MeshDepthMaterial({
@@ -550,7 +225,7 @@ HexaLab.Renderer = function (width, height) {
             fragmentShader: THREE.SSAOEval.fragmentShader,
             uniforms: {
                 tDepth: { value: this.depth_pass.target.texture },
-                tNormals: { value: this.pre_pass.target.texture },
+                tNormals: { value: this.normal_pass.target.texture },
                 uRadius: { value: 0.1 },
                 uSize: { value: new THREE.Vector2(width, height) },
                 uNear: { value: 0.1 },
@@ -579,7 +254,7 @@ HexaLab.Renderer = function (width, height) {
             uniforms: {
                 tSSAO: { value: this.ssao_pass.target.texture },
                 tDepth: { value: this.depth_pass.target.texture },
-                tNormals: { value: this.pre_pass.target.texture },
+                tNormals: { value: this.normal_pass.target.texture },
                 uSize: { value: new THREE.Vector2(width, height) },
                 depthThreshold: { value: 0.01 }
             },
@@ -593,6 +268,17 @@ HexaLab.Renderer = function (width, height) {
         }),
     }
 
+    this.settings = {
+        clear_color: '#ffffff',
+        ssao: false,
+        msaa: true
+    };
+
+    //this.camera_light = new THREE.PointLight();
+    this.camera_light = new THREE.DirectionalLight();
+    this.camera_light.position.set(0, 0, 0);
+    this.ambient = new THREE.AmbientLight();
+
     this.renderer.autoClear = false;
 }
 
@@ -601,12 +287,62 @@ Object.assign(HexaLab.Renderer.prototype, {
         return this.renderer.domElement;
     },
 
+    // Settings
+
     set_clear_color: function (color) {
         this.settings.clear_color = color;
     },
 
+    set_camera_light_color: function (color) {
+        this.camera_light.color.set(color);
+    },
+
+    set_camera_light_intensity: function (intensity) {
+        this.camera_light.intensity = intensity;
+    },
+
+    set_ambient_color: function (color) {
+        this.ambient.color.set(color);
+    },
+
+    set_ambient_intensity: function (intensity) {
+        this.ambient.intensity = intensity;
+    },
+
     set_ssao: function (value) {
-        this.settings.occlusion = value;
+        this.settings.ssao = value;
+    },
+
+    set_msaa: function (value) {
+        this.settings.msaa = value;
+    },
+
+    get_clear_color: function () {
+        return this.settings.clear_color;
+    },
+
+    get_ssao: function () {
+        return this.settings.ssao;
+    },
+
+    get_msaa: function () {
+        return this.settings.msaa;
+    },
+
+    get_camera_light_color: function () {
+        return '#' + this.camera_light.color.getHexString();
+    },
+
+    get_camera_light_intensity: function () {
+        return this.camera_light.intensity;
+    },
+
+    get_ambient_color: function () {
+        return '#' + this.ambient.color.getHexString();
+    },
+
+    get_ambient_intensity: function () {
+        return this.ambient.intensity;
     },
 
     set_mesh_params(min_edge_len, avg_edge_len) {
@@ -624,13 +360,14 @@ Object.assign(HexaLab.Renderer.prototype, {
         this.ssao_pass.material.uniforms.uSize.value.set(width, height);
         this.blur_pass.material.uniforms.uSize.value.set(width, height);
 
-        this.pre_pass.target.setSize(width, height);
+        this.normal_pass.target.setSize(width, height);
+        this.depth_pass.target.setSize(width, height);
         this.ssao_pass.target.setSize(width, height);
 
         this.renderer.setSize(width, height);
     },
 
-    render: function (view, camera, settings) {
+    render: function (models, meshes, camera, settings) {
         var self = this;
         function clear_scene() {
             while (self.scene.children.length > 0) {
@@ -639,18 +376,22 @@ Object.assign(HexaLab.Renderer.prototype, {
         }
         function add_model_surface(model) {
             if (model.surface.geometry.attributes.position) {
-                self.scene.add(new THREE.Mesh(model.surface.geometry, model.surface.material));
+                var mesh = new THREE.Mesh(model.surface.geometry, model.surface.material);
+                self.scene.add(mesh);
+                mesh.frustumCulled = false;
             }
         }
         function add_model_wireframe(model) {
             if (model.wireframe.geometry.attributes.position) {
-                self.scene.add(new THREE.LineSegments(model.wireframe.geometry, model.wireframe.material));
+                var mesh = new THREE.LineSegments(model.wireframe.geometry, model.wireframe.material);
+                self.scene.add(mesh);
+                mesh.frustumCulled = false;
             }
         }
 
         // prepare renderer
-        var do_ssao = settings.occlusion;
-        var clear_color = settings.background_color;
+        var do_ssao = this.settings.ssao;
+        var clear_color = this.settings.clear_color;
         this.renderer.setClearColor(clear_color, 1);
 
         clear_scene();
@@ -658,22 +399,22 @@ Object.assign(HexaLab.Renderer.prototype, {
         // render
         if (do_ssao) {
             // gather opaque surface models
-            for (var k in view.models) {
-                var model = view.models[k];
+            for (var k in models) {
+                var model = models[k];
                 if (model.surface.material && !model.surface.material.transparent) add_model_surface(model);
             }
-            for (var k in view.meshes) {
-                var mesh = view.meshes[k];
+            for (var k in meshes) {
+                var mesh = meshes[k];
                 if (!mesh.material.transparent) this.scene.add(mesh);
             }
             // finish up the scene
-            this.scene.add(view.scene_node);
             this.scene.add(camera);
-            camera.add(view.camera_node);
+            this.scene.add(this.ambient);
+            camera.add(this.camera_light);
             
             // view norm/depth prepass
-            this.scene.overrideMaterial = this.pre_pass.material;
-            this.renderer.render(this.scene, camera, this.pre_pass.target, true);
+            this.scene.overrideMaterial = this.normal_pass.material;
+            this.renderer.render(this.scene, camera, this.normal_pass.target, true);
             this.scene.overrideMaterial = null;
 
             this.scene.overrideMaterial = this.depth_pass.material;
@@ -687,7 +428,7 @@ Object.assign(HexaLab.Renderer.prototype, {
 
             // clean up
             clear_scene();
-            camera.remove(view.camera_node);
+            camera.remove(this.camera_light);
             
             // ssao
             this.ssao_pass.material.uniforms.uProj = { value: camera.projectionMatrix };
@@ -705,40 +446,40 @@ Object.assign(HexaLab.Renderer.prototype, {
             clear_scene();
 
             // gather translucent models (and all wireframes)
-            for (var k in view.models) {
-                var model = view.models[k];
+            for (var k in models) {
+                var model = models[k];
                 if (model.wireframe.material) add_model_wireframe(model);
                 if (model.surface.material && model.surface.material.transparent) add_model_surface(model);
             }
-            for (var k in view.meshes) {
-                var mesh = view.meshes[k];
+            for (var k in meshes) {
+                var mesh = meshes[k];
                 if (mesh.material.transparent) this.scene.add(mesh);
             }
             // finish up the scene
-            this.scene.add(view.scene_node);
             this.scene.add(camera);
-            camera.add(view.camera_node);
+            this.scene.add(this.ambient);
+            camera.add(this.camera_light);
 
             // render translucents
             this.renderer.render(this.scene, camera);
 
             // clean up
             clear_scene();
-            camera.remove(view.camera_node);
+            camera.remove(this.camera_light);
         } else {
             // fill scene
-            for (var k in view.models) {
-                var model = view.models[k];
+            for (var k in models) {
+                var model = models[k];
                 add_model_surface(model);
                 add_model_wireframe(model);
             }
-            for (var k in view.meshes) {
-                var mesh = view.meshes[k];
+            for (var k in meshes) {
+                var mesh = meshes[k];
                 this.scene.add(mesh);
             }
-            this.scene.add(view.scene_node);
             this.scene.add(camera);
-            camera.add(view.camera_node);
+            this.scene.add(this.ambient);
+            camera.add(this.camera_light);
 
             // render
             this.renderer.clear();
@@ -746,7 +487,7 @@ Object.assign(HexaLab.Renderer.prototype, {
 
             // clean up the scene
             clear_scene();
-            camera.remove(view.camera_node);
+            camera.remove(this.camera_light);
         }
 
         // hud
@@ -764,230 +505,197 @@ Object.assign(HexaLab.Renderer.prototype, {
 // Application
 // --------------------------------------------------------------------------------
 
-HexaLab.App = function (frame_id, gui_id) {
+HexaLab.App = function (dom_element) {
 
-    // Fetch page elements
-    this.frame = {
-        element: document.getElementById(frame_id),
-        content: null,
-        clear: function () {
-            while (this.element.firstChild) {
-                this.element.removeChild(this.element.firstChild);
-            }
-        },
-        set_content: function (e) {
-            this.content = e;
-            this.element.appendChild(e);
-        }
-    }
-    this.canvas = {
-        width: this.frame.element.offsetWidth,
-        height: this.frame.element.offsetHeight,
-        element: null
-    };
-    this.html = {
-        element: document.createElement('div'),
-        clear: function () {
-            while (this.element.firstChild) {
-                this.element.removeChild(this.element.firstChild);
-            }
-        }
-    }
-    this.gui_container = document.getElementById(gui_id);
+    this.app = new Module.App();
+    HexaLab.UI.app = this;
+
+    var width = dom_element.offsetWidth;
+    var height = dom_element.offsetHeight;
 
     // Renderer
-    this.renderer = new HexaLab.Renderer(this.canvas.width, this.canvas.height);
-    this.canvas.element = this.renderer.get_element();
+    this.renderer = new HexaLab.Renderer(width, height);
     this.renderer_settings = this.default_renderer_settings;
 
-    // Dynamic interface
-    this.gui = new HexaLab.DynamicInterface();
+    this.default_renderer_settings = {
+        occlusion: false,
+        antialiasing: true
+    };
 
-    var mesh_reader = new FileReader();
-    var settings_reader = new FileReader();
+    this.canvas = {
+        element: this.renderer.get_element(),
+        container: dom_element
+    }
+    dom_element.appendChild(this.canvas.element);
 
-    var self = this;
-    this.gui.new_frame({
-        title: 'HexaLab'
-    }).append(this.gui.group({
-        key: 'general_settings'
-    }).append(this.gui.select({
-        key: 'views_select',
-        label: "View:",
-        values: {},
-        callback: function () {
-            self.set_view(this.get());
-        }
-    })).newline().append(this.gui.file_picker({
-        key: 'mesh_picker',
-        label: 'Load Mesh',
-        callback: function () {
-            var file = this.files[0];
-            mesh_reader.onload = function () {
-                var data = new Int8Array(this.result);
-                HexaLab.FS.make_file(data, file.name);
-                self.import_mesh(file.name);
-            }
-            mesh_reader.readAsArrayBuffer(file, "UTF-8");
-        }
-    })).newline().append(this.gui.file_picker({
-        key: 'settings_picker',
-        label: 'Import Settings',
-        callback: function () {
-            settings_reader.onload = function () {
-                var settings = JSON.parse(this.result);
-                self.set_settings(settings);
-            }
-            settings_reader.readAsText(this.files[0], "UTF-8");
-        }
-    })).newline().append(this.gui.button({
-        key: 'settings_saver',
-        value: 'Export settings',
-        callback: function () {
-            var settings = JSON.stringify(self.get_settings(), null, 4);
-            var blob = new Blob([settings], { type: "text/plain;charset=utf-8" });
-            saveAs(blob, "HLsettings.txt");
-        }
-    }))).newline().append(this.gui.group({
-        key: 'renderer_settings'
-    }).append(this.gui.button({
-        key: 'snapshot',
-        value: 'Snapshot',
-        callback: function () {
-            self.canvas.element.toBlob(function (blob) {
-                saveAs(blob, "HLsnapshot.png");
-            }, "image/png");
-        }
-    })).newline().append(this.gui.button({
-        key: 'reset_camera',
-        value: 'Reset Camera',
-        callback: function () {
-            self.set_camera(self.default_camera_settings);
-        }
-    })).newline().append(this.gui.color_picker({
-        key: 'background_color',
-        label: 'Background',
-        callback: function () {
-            self.set_background_color(this.get());
-        },
-    })).newline().append(this.gui.checkbox({
-        key: 'occlusion',
-        label: 'Occlusion',
-        callback: function () {
-            self.set_occlusion(this.get());
-        }
-    })));
+    // Materials
+    this.visible_surface_material = new THREE.MeshLambertMaterial({
+        polygonOffset: true,
+        polygonOffsetFactor: 0.5
+    });
+    this.visible_wireframe_material = new THREE.MeshBasicMaterial({
+        transparent: true,
+        depthWrite: false
+    });
+    this.filtered_surface_material = new THREE.MeshLambertMaterial({
+        polygonOffset: true,
+        polygonOffsetFactor: 0.5,
+        transparent: true,
+        depthWrite: false
+    });
+    this.filtered_wireframe_material = new THREE.MeshBasicMaterial({
+        transparent: true,
+        depthWrite: false
+    });
+    this.singularity_face_material = new THREE.MeshLambertMaterial({
+        transparent: true,
+        depthWrite: false
+    });
+    this.singularity_edge_material = new THREE.MeshBasicMaterial({
+        transparent: true,
+        depthWrite: false,
+        vertexColors: THREE.VertexColors
+    });
 
-    this.gui.append_to(document.getElementById(gui_id));
+    this.default_material_settings = {
+        visible_surface_color: '#ffee9f',
+        show_quality_on_visible_surface: false,
+        visible_wireframe_color: '#000000',
+        visible_wireframe_opacity: 1,
 
-    // Views
-    this.view_types = [];
-    this.views = {};
+        filtered_surface_color: '#d2de0c',
+        filtered_surface_opacity: 0.28,
+        filtered_wireframe_color: '#000000',
+        filtered_wireframe_opacity: 0.3,
+
+        singularity_opacity: 0.3,
+    }
+
+    // Models
+    this.models = [];
+    this.models.visible = new HexaLab.Model(this.app.get_visible_model(), this.visible_surface_material, this.visible_wireframe_material);
+    this.models.filtered = new HexaLab.Model(this.app.get_filtered_model(), this.filtered_surface_material, this.filtered_wireframe_material);
+    this.models.singularity = new HexaLab.Model(this.app.get_singularity_model(), this.singularity_surface_material, this.singularity_edge_material);
 
     // Camera
-    this.camera = new THREE.PerspectiveCamera(60, this.canvas.width / this.canvas.height, 0.1, 1000);
-    this.controls = new THREE.TrackballControls(this.camera, this.frame.element);
-    this.set_camera(this.default_camera_settings);
+    this.camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000);
+    this.controls = new THREE.TrackballControls(this.camera, dom_element);
 
-    // Stats
-    this.stats = new Stats();
-    this.stats.showPanel(0);
-    //document.body.appendChild(this.stats.dom);
+    this.default_camera_settings = {
+        offset: new THREE.Vector3(0, 0, 0),
+        direction: new THREE.Vector3(0, 0, -1),
+        distance: 2
+    }
 
-    // Hook resize event
+    this.set_camera_settings(this.default_camera_settings);
+
+    // Scene
+    this.default_scene_settings = {
+        background: '#ffffff',
+        ambient_light_color: '#ffffff',
+        ambient_light_intensity: 0.2,
+        camera_light_color: '#ffffff',
+        camera_light_intensity: 1
+    }
+
+    // Filters
+    this.filters = [];
+    for (var k in HexaLab.filters) {
+        this.filters[k] = HexaLab.filters[k];
+        if (this.filters[k].default_settings) {
+            this.filters[k].set_settings(this.filters[k].default_settings);
+        }
+        this.app.add_filter(this.filters[k].filter);
+    }
+
+    // Plots
+    this.plots = [];
+
+    // Resize callback
     window.addEventListener('resize', this.resize.bind(this));
 };
  
 Object.assign(HexaLab.App.prototype, {
-    default_camera_settings: {
-        offset: new THREE.Vector3(0, 0, 0),
-        direction: new THREE.Vector3(0, 0, -1),
-        //distance: 2
-    },
 
-    default_renderer_settings: {
-        occlusion: false,
-        background_color: '#ffffff'
-    },
-
-    // view
-
-    add_view: function (type) {
-        this.view_types.push(type);
-
-        if (this.mesh) {
-            var view = new type(this.mesh);
-            this.views[view.name] = view;
-            this.gui.map.views_select.add(view.name);
-        }
-    },
-
-    set_view: function (view) {
-        var new_view;
-        if (typeof view == 'string' || view instanceof String) {
-            if (!this.views[view]) {
-                alert('View "' + view + '" not found!');
-                return;
-            }
-            new_view = this.views[view];
-        } else if (view instanceof HexaLab.View) {
-            new_view = view;
-        } else {
-            alert('Not a view!');
-        }
-
-        // clear previous gui
-        while (this.gui_container.firstChild) {
-            this.gui_container.removeChild(this.gui_container.firstChild);
-        }
-
-        // create gui
-        this.gui.append_to(this.gui_container);
-        if (new_view instanceof HexaLab.HTMLView) {
-            this.gui.map.renderer_settings.hide();
-        } else {
-            this.gui.map.renderer_settings.show();
-        }
-        new_view.gui.append_to(this.gui_container);
-
-        // update frame content
-        if (new_view instanceof HexaLab.WebGLView && this.frame.content != this.canvas.element) {
-            this.frame.clear();
-            this.frame.set_content(this.canvas.element);
-        } else if (new_view instanceof HexaLab.HTMLView && this.frame.content != this.html.element) {
-            this.html.clear();
-            new_view.content.append_to(this.html.element);
-            this.frame.clear();
-            this.frame.set_content(this.html.element);
-            new_view.resize(this.canvas.width, this.canvas.height);
-        }
-
-        // update selection
-        this.view = new_view;
-        this.view.update();
-        this.gui.map.views_select.set(new_view.name);
-    },
-
-    // settings
+    // Settings
 
     resize: function () {
-        this.canvas.width = this.frame.element.offsetWidth;
-        this.canvas.height = this.frame.element.offsetHeight;
-        this.renderer.resize(this.canvas.width, this.canvas.height);
+        var width = this.canvas.container.offsetWidth;
+        var height = this.canvas.container.offsetHeight;
+        this.renderer.resize(width, height);
 
-        this.camera.aspect = this.canvas.width / this.canvas.height;
+        this.camera.aspect = width / height;
         this.camera.updateProjectionMatrix();
 
-        for (var key in this.views) {
-            this.views[key].resize(this.canvas.width, this.canvas.height);
-        }
-
-        this.renderer.resize(this.canvas.width, this.canvas.height);
-
-        log('Frame resized to ' + this.canvas.width + 'x' + this.canvas.height);
+        log('Frame resized to ' + width + 'x' + height);
     },
 
-    get_camera: function () {
+    set_camera_settings: function (settings) {
+        var size, center;
+        if (this.mesh) {
+            size = this.mesh.get_size();
+            var c = this.mesh.get_center();
+            center = new THREE.Vector3(c.x(), c.y(), c.z());
+            c.delete();
+        } else {
+            size = 1;
+            center = new THREE.Vector3(0, 0, 0);
+        }
+
+        var target = new THREE.Vector3().addVectors(settings.offset, center);
+        var direction = settings.direction;
+        var distance = settings.distance * size;
+
+        this.controls.rotateSpeed = 10;
+        this.controls.dynamicDampingFactor = 1;
+        this.controls.target.set(target.x, target.y, target.z);
+
+        this.camera.position.set(target.x, target.y, target.z);
+        this.camera.up.set(0, 1, 0);
+        this.camera.lookAt(new THREE.Vector3().addVectors(target, direction));
+        this.camera.translateZ(distance);
+    },
+
+    set_renderer_settings: function (settings) {
+        this.set_occlusion(settings.occlusion);
+        this.set_antialiasing(settings.antialiasing);
+    },
+    
+    set_material_settings: function (settings) {
+        this.set_visible_surface_color(settings.visible_surface_color);
+        this.show_visible_quality(settings.show_quality_on_visible_surface);
+        this.set_visible_wireframe_color(settings.visible_wireframe_color);
+        this.set_visible_wireframe_opacity(settings.visible_wireframe_opacity);
+        this.set_filtered_surface_color(settings.filtered_surface_color);
+        this.set_filtered_surface_opacity(settings.filtered_wireframe_opacity);
+        this.set_filtered_wireframe_color(settings.filtered_wireframe_color);
+        this.set_filtered_wireframe_opacity(settings.filtered_wireframe_opacity);
+        this.set_singularity_opacity(settings.singularity_opacity);
+    },
+
+    set_scene_settings: function (settings) {
+        this.renderer.set_clear_color(settings.background);
+        this.renderer.set_camera_light_color(settings.camera_light_color);
+        this.renderer.set_camera_light_intensity(settings.camera_light_intensity);
+        this.renderer.set_ambient_color(settings.ambient_light_color);
+        this.renderer.set_ambient_intensity(settings.ambient_light_intensity);
+    },
+
+    set_settings: function (settings) {
+        this.set_camera_settings(settings.camera);
+        this.set_renderer_settings(settings.renderer);
+        this.set_material_settings(settings.materials);
+        this.set_scene_settings(settings.scene);
+        for (var k in this.filters) {
+            var filter = this.filters[k];
+            if (settings.filters && settings.filters[filter.name]) {
+                filter.set_settings(settings.filters[filter.name]); 
+            }
+        }
+        this.update();
+    },
+
+    get_camera_settings: function () {
         if (this.mesh) {
             var c = this.mesh.get_center();
             var center = new THREE.Vector3(c.x(), c.y(), c.z());
@@ -1003,123 +711,175 @@ Object.assign(HexaLab.App.prototype, {
         else return this.default_camera_settings;
     },
 
-    set_camera: function (settings) {
-        var size, center;
-        if (this.mesh) {
-            size = this.mesh.get_size();
-            var c = this.mesh.get_center();
-            center = new THREE.Vector3(c.x(), c.y(), c.z());
-            c.delete();
-        } else {
-            size = 1;
-            center = new THREE.Vector3(0, 0, 0);
+    get_material_settings: function () {
+        return {
+            visible_surface_color: '#' + this.visible_surface_material.color.getHexString(),
+            show_quality_on_visible_surface: this.visible_surface_material.vertexColors == THREE.VertexColors,
+            visible_wireframe_color: '#' + this.visible_wireframe_material.color.getHexString(),
+            visible_wireframe_opacity: this.visible_wireframe_material.opacity,
+            filtered_surface_color: '#' + this.filtered_surface_material.color.getHexString(),
+            filtered_surface_opacity: this.filtered_surface_material.opacity,
+            filtered_wireframe_color: '#' + this.filtered_wireframe_material.color.getHexString(),
+            filtered_wireframe_opacity: this.filtered_wireframe_material.opacity,
+            singularity_opacity: this.singularity_edge_material.opacity
         }
-
-        var target = new THREE.Vector3().addVectors(settings.offset, center);
-        var direction = settings.direction;
-        var distance = size;
-
-        this.controls.rotateSpeed = 10;
-        this.controls.dynamicDampingFactor = 1;
-        this.controls.target.set(target.x, target.y, target.z);
-
-        this.camera.position.set(target.x, target.y, target.z);
-        this.camera.up.set(0, 1, 0);
-        this.camera.lookAt(new THREE.Vector3().addVectors(target, direction));
-        this.camera.translateZ(distance);
     },
 
-    set_settings: function (settings) {
-        // views
-        for (var key in this.views) {
-            if (settings[key]) {
-                this.views[key].set_settings(settings.views[key]);
-            }
+    get_renderer_settings: function () {
+        return {
+            occlusion: this.renderer.get_ssao(),
+            antialiasing: this.renderer.get_msaa()
         }
-        // camera
-        this.set_camera(settings.camera);
-        // renderer
-        this.set_occlusion(settings.renderer.occlusion);
-        this.set_background_color(settings.renderer.background_color);
-        this.renderer_settings = settings.renderer;
+    },
+
+    get_scene_settings: function () {
+        return {
+            background: this.renderer.get_clear_color(),
+            camera_light_color: this.renderer.get_camera_light_color(),
+            camera_light_intensity: this.renderer.get_camera_light_intensity(),
+            ambient_light_color: this.renderer.get_ambient_color(),
+            ambient_light_intensity: this.renderer.get_ambient_intensity()
+        }
     },
 
     get_settings: function () {
-        var settings = {};
-        // views
-        settings.views = {};
-        for (var key in this.views) {
-            settings.views[key] = this.views[key].get_settings();
+        var filters = {};
+        for (var k in this.filters) {
+            filters[this.filters[k].name] = this.filters[k].get_settings();
         }
-        // camera
-        settings.camera = this.get_camera();
-        // renderer
-        settings.renderer = this.renderer_settings;
-        return settings;
+        return {
+            camera: this.get_camera_settings(),
+            renderer: this.get_renderer_settings(),
+            scene: this.get_scene_settings(),
+            materials: this.get_material_settings(),
+            filters: filters,
+        }
+    },
+
+    show_visible_quality: function (show) {
+        if (show) {
+            this.visible_surface_material.vertexColors = THREE.VertexColors;
+            this._surface_color = '#' + this.visible_surface_material.color.getHexString();
+            this.set_visible_surface_color('#ffffff');
+            HexaLab.UI.visible_surface_color.hide();
+            $("label[for='" + HexaLab.UI.visible_surface_color.attr('id') + "']").hide();
+        } else {
+            this.visible_surface_material.vertexColors = THREE.NoColors;
+            if (this._surface_color) this.set_visible_surface_color(this._surface_color);
+            HexaLab.UI.visible_surface_color.show();
+            $("label[for='" + HexaLab.UI.visible_surface_color.attr('id') + "']").show();
+        }
+        HexaLab.UI.visible_surface_show_quality.prop('checked', show);
+        this.visible_surface_material.needsUpdate = true;
+    },
+
+    set_visible_surface_color: function (color) {
+        this.visible_surface_material.color.set(color);
+        HexaLab.UI.visible_surface_color.val(color);
+    },
+
+    set_visible_wireframe_color: function (color) {
+        this.visible_wireframe_material.color.set(color);
+        HexaLab.UI.visible_wireframe_color.val(color);
+    },
+
+    set_visible_wireframe_opacity: function (opacity) {
+        this.visible_wireframe_material.opacity = opacity;
+        HexaLab.UI.visible_wireframe_opacity.slider('value', opacity * 100);
+    },
+
+    set_filtered_surface_color: function (color) {
+        this.filtered_surface_material.color.set(color);
+        HexaLab.UI.filtered_surface_color.val(color);
+    },
+
+    set_filtered_surface_opacity: function (opacity) {
+        this.filtered_surface_material.opacity = opacity;
+        HexaLab.UI.filtered_surface_opacity.slider('value', opacity * 100);
+    },
+
+    set_filtered_wireframe_color: function (color) {
+        this.filtered_wireframe_material.color.set(color);
+        HexaLab.UI.filtered_wireframe_color.val(color);
+    },
+
+    set_filtered_wireframe_opacity: function (opacity) {
+        this.filtered_wireframe_material.opacity = opacity;
+        HexaLab.UI.filtered_wireframe_opacity.slider('value', opacity * 100);
+    },
+
+    set_singularity_opacity: function (opacity) {
+        this.singularity_face_material.opacity = opacity;
+        this.singularity_edge_material.opacity = opacity;
+        HexaLab.UI.singularity_opacity.slider('value', opacity * 100);
     },
 
     set_occlusion: function (value) {
-        this.renderer_settings.occlusion = value;
-        this.gui.map.occlusion.set(value);
+        this.renderer.set_ssao(value);
+        HexaLab.UI.ssao.prop('checked', value);
     },
 
-    set_background_color: function (value) {
-        this.renderer_settings.background_color = value;
-        this.gui.map.background_color.set(value);
+    set_antialiasing: function (value) {
+        this.renderer.set_msaa(value);
+        HexaLab.UI.msaa.prop('checked', value);
     },
-
-    // mesh
+    
+    // Mesh
 
     import_mesh: function (path) {
-        // prepare new settings
-        var settings = {
-            camera: this.default_camera_settings,
-            renderer: this.default_renderer_settings,
-            views: {}
-        }
-        for (var key in this.views) {
-            var view = this.views[key];
-            settings.views[view.name] = view.default_settings;
-        }
-
-        // import mesh
-        var result = Module.import_mesh(path);
+        var result = this.app.import_mesh(path);
         if (!result) {
             log('error');
         }
 
-        // re create views
-        this.gui.map.views_select.clear();
-        var mesh = Module.get_mesh();
-        for (var key in this.view_types) {
-            var view = new this.view_types[key](mesh);
-            this.views[view.name] = view;
-            this.gui.map.views_select.add(view.name);
+        this.mesh = this.app.get_mesh();
+        this.set_settings({
+            camera: this.default_camera_settings,
+            renderer: this.default_renderer_settings,
+            scene: this.default_scene_settings,
+            materials: this.default_material_settings
+        });
+        this.renderer.set_mesh_params(this.mesh.min_edge_len, this.mesh.avg_edge_len);
+        for (var k in this.filters) {
+            this.filters[k].on_mesh_change(this.mesh);
         }
-        this.set_view(Object.keys(this.views)[0]);
+        this.update();
 
-        // restore settings
-        this.mesh = mesh;
-        this.set_settings(settings);
+        var c = mesh.get_center();
+        var center = THREE.Vector3(c.x(), c.y(), c.z());
+        this.renderer.camera_light.target = center;
+    },
 
-        // update renderer
-        this.renderer.set_mesh_params(mesh.min_edge_len(), mesh.avg_edge_len());
+    // Update
+
+    update: function () {
+        this.app.build_models();
+        this.models.visible.update();
+        this.models.filtered.update();
+        this.models.singularity.update();
     },
 
     // Animate
 
     animate: function () {
 
-        if (this.view) {
-            if (this.view instanceof HexaLab.WebGLView) {
-                this.controls.update();
-                this.stats.begin();
-                this.renderer.render(this.view, this.camera, this.renderer_settings);
-                this.stats.end();
+        this.controls.update();
+        //this.stats.begin();
+    
+        if (this.mesh) {
+            var meshes = [];
+            for (var k in this.filters) {
+                for (var j in this.filters[k].scene.data) {
+                    meshes.push(this.filters[k].scene.data[j]);
+                }
             }
+
+            this.renderer.render(this.models, meshes, this.camera, this.renderer_settings);
+            //this.stats.end();
         }
 
         // queue next frame
         requestAnimationFrame(this.animate.bind(this));
     }
+
 });

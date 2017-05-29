@@ -7,6 +7,10 @@ html, body {
 	font-family: 'Raleway', sans-serif;
 }
 
+.ui-widget {
+	font-family: 'Raleway', sans-serif;
+}
+
 canvas {
     display: block;
 }
@@ -24,9 +28,9 @@ canvas {
 	height: 100%;
 	transition: 0s;
 	border-right: 1px solid black;
-	background: #bbb;
+	background: #fff;
 
-	z-index: 200;
+	/*z-index: 200;*/
 	overflow-x: hidden;
 
 	display: block;
@@ -45,16 +49,13 @@ canvas {
 	align-items: stretch;
 }
 
-#nav_opener {
-    position: fixed;
-    z-index: 100;
-    font-size: 30px;
-    cursor: pointer;
+
+.ui-accordion .ui-accordion-content{
+	padding:1em 1em;
 }
 
-#sidenav_content {
-    padding: 5%;
-	height: 95%;
+.ui-controlgroup {
+	width: 100%;
 }
 
 #sidenav textarea {
@@ -62,20 +63,23 @@ canvas {
     width: 250px;
     height: 200px;
     outline: none;
-    border: 1px solid #333;
-    background: #222;
-    color: #666;
-}
-
-#sidenav button {
-    padding : 5px;
-    border: 1px solid #222;
-    background: #eee;
-    color: #222;
+    border: 1px solid #dddddd;
+	display: block;
+    margin-left: auto;
+    margin-right: auto;
+	width: 100%;
+	margin-top: 1em;
 }
 
 #sidenav input[type="number"] {
 	width: 50px;
+}
+
+#nav_opener {
+    position: fixed;
+    z-index: -1;
+    font-size: 30px;
+    cursor: pointer;
 }
 
 #nav_closer {
@@ -89,44 +93,4 @@ canvas {
     right: 25px;
     font-size: 36px;
     margin-left: 50px;
-}
-
-/* HexaLab */
-
-.hl_frame_title {
-	font-size: 200%;
-}
-
-.hl_group_title {
-	font-weight: bold;
-}
-
-.hl_frame input {
-	margin-top: 4px;
-	margin-bottom: 4px;
-	vertical-align: middle;
-}
-
-.hl_frame {
-	border: 1px solid black;
-	display: block;
-}
-
-.hl_frame input {
-	display: inline-block;
-}
-
-.hl_label_text {
-	width: 40%;
-	max-width: 400px;
-	display: inline-block;
-	font-size: 85%;
-	font-weight: bold;
-}
-
-.hl_group {
-	width: 100%;
-	border: 1px solid red;
-	padding-left: 15px;
-	box-sizing: border-box;
 }
