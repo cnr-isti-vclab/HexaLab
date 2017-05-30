@@ -139,7 +139,7 @@ HexaLab.Renderer = function (width, height) {
         return obj;
     }(1);
 
-    this.hud_camera = new THREE.OrthographicCamera(-this.aspect, this.aspect, 1, -1, -500, 1000);
+    this.hud_camera = new THREE.OrthographicCamera(-1, 1, 1, -1, -500, 1000);
     this.hud_camera.position.set(0, 0, 0);
 
     this.scene = new THREE.Scene();
@@ -492,7 +492,7 @@ Object.assign(HexaLab.Renderer.prototype, {
 
         // hud
         this.scene.add(this.gizmo);
-        this.renderer.setViewport(50, (this.aspect - 1) * 50, 100 * this.aspect, 100);
+        this.renderer.setViewport(50, 50, 100, 100);
         this.hud_camera.setRotationFromMatrix(camera.matrixWorld);
         this.renderer.render(this.scene, this.hud_camera);
         this.scene.remove(this.gizmo);
