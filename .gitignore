@@ -10,3 +10,7 @@ x84
 emcc.bat
 *.vcxproj
 *.filters
+
+*.bc
+js/generated/hexalab.js
+js/generated/hexalab.js.mem
