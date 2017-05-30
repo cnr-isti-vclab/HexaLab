@@ -1,2 +1,0 @@
-Use emscripten to compile cpp to js. 
-em++ --bind -o html/js/generated/hexalab_cpp.js -s TOTAL_MEMORY=500000000 -O3 --memory-init-file 0 cpp/src/hexalab_js.cpp cpp/src/mesh.cpp cpp/src/loader.cpp cpp/src/builder.cpp cpp/src/visualizer.cpp cpp/src/mesh_navigator.cpp -Icpp/include -Icpp/eigen
