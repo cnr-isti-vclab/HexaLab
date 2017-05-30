@@ -12,5 +12,3 @@ emcc.bat
 *.filters
 
 *.bc
-js/generated/hexalab.js
-js/generated/hexalab.js.mem
