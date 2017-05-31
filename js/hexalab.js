@@ -845,9 +845,11 @@ Object.assign(HexaLab.App.prototype, {
         }
         this.update();
 
-        var c = mesh.get_center();
-        var center = THREE.Vector3(c.x(), c.y(), c.z());
-        this.renderer.camera_light.target = center;
+        var c = this.mesh.get_center();
+        var center = new THREE.Vector3(c.x(), c.y(), c.z());
+        var mesh_obj = new THREE.Object3D();
+        mesh_obj.position.set(center.x, center.y, center.z);
+        this.renderer.camera_light.target = mesh_obj;
     },
 
     // Update
