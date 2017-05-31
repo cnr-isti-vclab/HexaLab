@@ -18,6 +18,27 @@ HexaLab.UI = {
 
     file_input: $('#file_input'),   // hidden file input
 
+    // Toolbar
+    load_mesh: $('#load_mesh'),
+    home: $('#home'),
+    plot: $('#plot'),
+    load_settings: $('#load_settings'),
+    save_settings: $('#save_settings'),
+    github: $('#github'),
+    about: $('#about'),
+
+    // Plane
+    plane_offset_slider: $('#plane_offset_slider'),
+
+    // Quality
+    quality_min_slider: $('#quality_min_slider'),
+    quality_max_slider: $('#quality_max_slider'),
+
+    // Rendering
+    filtered_slider: $('#filtered_slider'),
+
+
+    //
 
     menu: $('#controls_menu'),
     mesh_source: $('#mesh_source_select'),
@@ -134,6 +155,13 @@ HexaLab.UI.dragdrop_settings.on('dragbetterleave', function (event) {
 // --------------------------------------------------------------------------------
 // Garbage
 // --------------------------------------------------------------------------------
+
+
+HexaLab.UI.plane_offset_slider.slider();
+HexaLab.UI.quality_min_slider.slider();
+HexaLab.UI.quality_max_slider.slider();
+HexaLab.UI.filtered_slider.slider();
+
 
 HexaLab.UI.menu.accordion({
     heightStyle: "content"

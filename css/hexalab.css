@@ -81,7 +81,108 @@ html, body {
 	font-size: 2vw;
 }
 
-/*  */
+/* Menu */
+
+#menu button {
+	background: rgb(207, 226, 243);
+	border: 1px solid black;
+}
+
+#menu select {
+	height: 26px;
+}
+
+#menu input[type=number] {
+	width: 40px;
+	height: 20px; 
+}
+
+.menu_area {
+	background: rgb(243, 243, 243);
+	border: 1px solid black;
+	margin: 5px;
+	padding: 5px;
+}
+
+/* Title */
+
+.menu_area .menu_title_wrapper {
+	width: 100%;
+	font-weight: bold;
+	overflow:hidden
+}
+
+.menu_area .menu_title_wrapper .menu_title {
+	float:left;
+}
+
+.menu_area .menu_title_wrapper .menu_switch {
+	float: right;
+}
+
+/* Content */
+
+.menu_area .menu_content {
+	clear: both;
+	margin-left: 5px;
+}
+
+.menu_area .menu_content .menu_row {
+	width: 100%;
+	clear: both;
+	line-height: 25px;
+
+	overflow: hidden;
+	display: flex;
+}
+
+.menu_area .menu_content .menu_row .menu_row_label {
+	float: left;
+	margin-right: 10px;
+}
+
+.menu_area .menu_content .menu_row .menu_row_input {
+	display: flex;
+	float: right;
+	flex-grow: 2;
+	justify-content: flex-end;
+	vertical-align: middle;
+}
+
+.menu_area .menu_content .menu_row .menu_row_input .slider {
+	flex-grow: 2;
+	margin-top: 7px;
+}
+
+.menu_area .menu_content .menu_row .menu_row_input_block {
+	margin-left: 10px;
+}
+
+.menu_row_input button {
+	width: 18px;
+	height: 18px;
+	padding:0;
+    margin:0;
+    font-size: 100%;
+}
+
+/* Toolbar */
+
+#toolbar_wrapper {
+	width: 100%;
+	margin: 5px;
+	padding: 5px;
+}
+
+#toolbar button {
+	width: 23px;
+	height: 23px;
+	padding:0;
+    margin:0;
+    font-size: 110%;
+}
+
+/* -- */
 
 canvas {
     display: block;
@@ -146,10 +247,6 @@ canvas {
     margin-right: auto;
 	width: 100%;
 	margin-top: 1em;
-}
-
-#sidenav input[type="number"] {
-	width: 50px;
 }
 
 #nav_opener {
