@@ -74,11 +74,11 @@ html, body {
 }
 
 .drag_drop_content i {
-	font-size: 300%;
+	font-size: 3vw;
 }
 
 .drag_drop_content h1 {
-	font-size: 200%;
+	font-size: 2vw;
 }
 
 /*  */
