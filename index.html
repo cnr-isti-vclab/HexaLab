@@ -10,9 +10,11 @@
     <link rel="stylesheet" href="css/jquery-ui.css">
     <link rel="stylesheet" href="css/hexalab.css">
     <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet">
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    
     <script src="js/external/jquery.js"></script>
     <script src="js/external/jquery-ui.js"></script>
+    <script src="js/external/jquery.dragbetter.js"></script>
     <script src="js/external/three.js"></script>
     <script src="js/external/plotly.js"></script>
     <script src="js/external/TrackballControls.js"></script>
@@ -31,6 +33,7 @@
                 <div id="sidenav_content">
                     <a href="javascript:void(0)" id="nav_closer">&times;</a>
                     <h1>HexaLab</h1>
+
                     <div id="controls_menu">
                         <h3>Controls</h3>
                         <div>
@@ -165,7 +168,28 @@
             </div>
             <span id="nav_opener">&#9776;</span>
         </div>
-        <div id="frame"></div>
+        <div id="frame_wrapper">
+            <div id="frame"></div>
+            <div id="drag_drop_overlay">
+                <div id="mesh_drag_drop_area">
+                    <div id="mesh_drag_drop_quad" class="drag_drop_quad_off">
+                        <div id="mesh_drag_drop_content" class="drag_drop_content">
+                            <h1>Mesh</h1>
+                            <i class="fa fa-upload" aria-hidden="true"></i>
+                        </div>
+                    </div>
+                </div>
+                <div id="settings_drag_drop_area">
+                    <div id="settings_drag_drop_quad" class="drag_drop_quad_off">
+                        <div id="settings_drag_drop_content" class="drag_drop_content">
+                            <h1>Settings</h1>
+                            <i class="fa fa-upload" aria-hidden="true"></i>
+                        </div>
+                    </div>
+                </div>
+                <div style="clear:both"></div>
+            </div>
+        </div>
     </div>
 
     <!-- Emscripten module -->

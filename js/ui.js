@@ -1,31 +1,23 @@
 "use strict";
 
-$.fn.togglepanels = function () {
-    return this.each(function () {
-        $(this).addClass("ui-accordion ui-accordion-icons ui-widget ui-helper-reset")
-      .find("h3")
-        //.addClass("ui-accordion-header ui-helper-reset ui-state-default ui-corner-top ui-corner-bottom")
-        .addClass("ui-accordion-header ui-helper-reset ui-state-default ui-corner-top ui-corner-bottom")
-        .toggleClass("ui-accordion-header-active ui-state-active ui-state-default ui-corner-bottom")
-        .hover(function () { $(this).toggleClass("ui-state-hover"); })
-        .prepend('<span class="ui-icon ui-icon-triangle-1-s"></span>')
-        .click(function () {
-            $(this)
-              .toggleClass("ui-accordion-header-active ui-state-active ui-state-default ui-corner-bottom")
-              .find("> .ui-icon").toggleClass("ui-icon-triangle-1-e ui-icon-triangle-1-s").end()
-              .next().slideToggle();
-            return false;
-        })
-        .next()
-          .addClass("ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom")
-        //.hide()
-    });
-};
-
 HexaLab.UI = {
+    // --------------------------------------------------------------------------------
+    // Internals
+    // --------------------------------------------------------------------------------
     app: null,
     file_reader: new FileReader(),
-    file_input: $('#file_input'),
+
+    // --------------------------------------------------------------------------------
+    // DOM page bindings
+    // --------------------------------------------------------------------------------
+    frame: $('#frame_wrapper'),
+
+    dragdrop_overlay: $('#drag_drop_overlay'),
+    dragdrop_mesh: $('#mesh_drag_drop_quad'),
+    dragdrop_settings: $('#settings_drag_drop_quad'),
+
+    file_input: $('#file_input'),   // hidden file input
+
 
     menu: $('#controls_menu'),
     mesh_source: $('#mesh_source_select'),
@@ -72,8 +64,77 @@ HexaLab.UI = {
     quality_plot: $('#quality_plot_button'),
     quality_plot_div: $('#quality_plot_div'),
 }
- 
-//HexaLab.UI.menu.togglepanels();
+
+// -------------------------------------------------------------------------------- 
+// Mesh/settings file load and dispatch
+// --------------------------------------------------------------------------------
+HexaLab.UI.import_mesh = function (file) {
+    HexaLab.UI.file_reader.onload = function () {
+        var data = new Int8Array(this.result);
+        HexaLab.FS.make_file(data, file.name);
+        HexaLab.UI.app.import_mesh(file.name);
+    }
+    HexaLab.UI.file_reader.readAsArrayBuffer(file, "UTF-8");
+}
+
+HexaLab.UI.import_settings = function (file) {
+    HexaLab.UI.file_reader.onload = function () {
+        var settings = JSON.parse(this.result);
+        HexaLab.UI.app.set_settings(settings);
+    }
+    HexaLab.UI.file_reader.readAsText(file, "UTF-8");
+}
+
+// --------------------------------------------------------------------------------
+// Drag n Drop logic
+// --------------------------------------------------------------------------------
+HexaLab.UI.frame.on('dragbetterenter', function (event) {
+    HexaLab.UI.dragdrop_overlay.show();
+})
+HexaLab.UI.frame.on('dragover', function (event) {
+    event.preventDefault();
+})
+HexaLab.UI.frame.on('drop', function (event) {
+    event.preventDefault();
+})
+HexaLab.UI.frame.on('dragbetterleave', function (event) {
+    HexaLab.UI.dragdrop_overlay.hide();
+})
+
+HexaLab.UI.dragdrop_mesh.on('dragbetterenter', function (event) {
+    $(this).removeClass('drag_drop_quad_off').addClass('drag_drop_quad_on');
+})
+HexaLab.UI.dragdrop_mesh.on('dragover', function (event) {
+    event.preventDefault()
+})
+HexaLab.UI.dragdrop_mesh.on('drop', function (event) {
+    event.preventDefault()
+    var files = event.originalEvent.target.files || event.originalEvent.dataTransfer.files
+    HexaLab.UI.import_mesh(files[0])
+})
+HexaLab.UI.dragdrop_mesh.on('dragbetterleave', function (event) {
+    $(this).removeClass('drag_drop_quad_on').addClass('drag_drop_quad_off');
+})
+
+HexaLab.UI.dragdrop_settings.on('dragbetterenter', function (event) {
+    $(this).removeClass('drag_drop_quad_off').addClass('drag_drop_quad_on');
+})
+HexaLab.UI.dragdrop_settings.on('dragover', function (event) {
+    event.preventDefault()
+})
+HexaLab.UI.dragdrop_settings.on('drop', function (event) {
+    event.preventDefault()
+    var files = event.originalEvent.target.files || event.originalEvent.dataTransfer.files
+    HexaLab.UI.import_settings(files[0])
+})
+HexaLab.UI.dragdrop_settings.on('dragbetterleave', function (event) {
+    $(this).removeClass('drag_drop_quad_on').addClass('drag_drop_quad_off');
+})
+
+// --------------------------------------------------------------------------------
+// Garbage
+// --------------------------------------------------------------------------------
+
 HexaLab.UI.menu.accordion({
     heightStyle: "content"
 });
@@ -106,29 +167,27 @@ HexaLab.UI.paper_mesh.selectmenu().on('selectmenuchange', function () {
     alert('Not yet implemented :(');
 }).parent().hide();
 
+
+
 HexaLab.UI.custom_mesh.button().click(function () {
     HexaLab.UI.file_input.val(null);        // reset value (to later trigger change even if the file is the same as before)
     HexaLab.UI.file_input.off('change').change(function () {
         var file = this.files[0];
-        HexaLab.UI.file_reader.onload = function () {
-            var data = new Int8Array(this.result);
-            HexaLab.FS.make_file(data, file.name);
-            HexaLab.UI.app.import_mesh(file.name);
-        }
-        HexaLab.UI.file_reader.readAsArrayBuffer(file, "UTF-8");
+        HexaLab.UI.import_mesh(file);
     })
     HexaLab.UI.file_input.click();     // open system file picker popup
 })
+
+HexaLab.UI.dragdrop_overlay.hide();
+
+
+
 
 HexaLab.UI.settings_in.button().click(function () {
     HexaLab.UI.file_input.val(null);    // reset value (to later trigger change even if the file is the same as before)
     HexaLab.UI.file_input.off('change').change(function () {
         var file = this.files[0];
-        HexaLab.UI.file_reader.onload = function () {
-            var settings = JSON.parse(this.result);
-            HexaLab.UI.app.set_settings(settings);
-        }
-        HexaLab.UI.file_reader.readAsText(file, "UTF-8");
+        HexaLab.UI.import_settings(file);
     })
     HexaLab.UI.file_input.click();     // open system file picker popup
 });

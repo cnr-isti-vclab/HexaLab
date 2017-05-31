@@ -1,4 +1,10 @@
-/* page (TODO split in 2 files?) */
+/* jquery ui */
+
+.ui-widget {
+	font-family: 'Raleway', sans-serif;
+}
+
+/* page */
 
 html, body { 
     margin: 0;
@@ -7,9 +13,75 @@ html, body {
 	font-family: 'Raleway', sans-serif;
 }
 
-.ui-widget {
-	font-family: 'Raleway', sans-serif;
+/* drag n drop */
+
+#drag_drop_overlay {
+   position:absolute;
+   display: flex;
+   width: 100%;
+   height: 100%;
+   left:0px;
+   top:0px;
+   background-color: rgba(100, 100, 100, 0.5);
+   text-align: center;
 }
+
+#mesh_drag_drop_area {
+	float: left;
+	width: 50%;
+}
+
+#settings_drag_drop_area {
+	width: 50%;
+}
+
+#mesh_drag_drop_quad {
+	margin-left: 20%;
+	margin-right: 15%;
+	top: 0; left: 0; bottom: 0; right: 0;
+	width: 15%;
+	height: 20%;
+}
+
+#settings_drag_drop_quad {
+	margin-left: 15%;
+	margin-right: 20%;
+	top: 0; left: 50%; bottom: 0; right: 0;
+	width: 15%;
+	height: 20%;
+}
+
+.drag_drop_quad_off {
+	display: inline-block;
+   	text-align: center;
+	position: absolute;
+	margin-top: auto;
+	margin-bottom: auto;
+	border-radius: 25px;
+	border: 1px solid grey;
+}
+
+.drag_drop_quad_on {
+	display: inline-block;
+   	text-align: center;
+	position: absolute;
+	margin-top: auto;
+	margin-bottom: auto;
+	border-radius: 25px;
+	border: 1px solid white;
+
+	background-image: repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(255,255,255,.1) 20px, rgba(255,255,255,.1) 40px);
+}
+
+.drag_drop_content i {
+	font-size: 300%;
+}
+
+.drag_drop_content h1 {
+	font-size: 200%;
+}
+
+/*  */
 
 canvas {
     display: block;
@@ -41,6 +113,11 @@ canvas {
 }
 
 #frame {
+	height: 100%;
+	height: 100%;
+}
+
+#frame_wrapper {
 	position: fixed;
 	overflow: auto;
 	height: 100%;
