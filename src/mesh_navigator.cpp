@@ -1,5 +1,3 @@
-#include <mesh_navigator.h>
-
 #include <mesh.h>
 
 namespace HexaLab {

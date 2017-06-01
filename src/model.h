@@ -1,11 +1,7 @@
 #ifndef _HL_MODEL_H_
 #define _HL_MODEL_H_
 
-#include <common.h>
 #include <mesh.h>
-
-#include <vector>
-#include <Eigen/Dense>
 
 namespace HexaLab {
     using namespace Eigen;

@@ -1,11 +1,7 @@
 #ifndef _HL_BUILDER_H_
 #define _HL_BUILDER_H_
 
-#include <common.h>
 #include <mesh.h>
-
-#include <unordered_map>
-#include <algorithm>
 
 namespace HexaLab {
     class Builder {

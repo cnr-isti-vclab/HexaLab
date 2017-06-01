@@ -1,14 +1,17 @@
 #ifndef _HL_MESH_H_
 #define _HL_MESH_H_
 
+#include <vector>
+#include <unordered_map>
+#include <algorithm>
+#include <Eigen/Dense>
+#include <Eigen/Geometry>
+
 #include <common.h>
 #include <dart.h>
 #include <mesh_navigator.h>
 
-#include <vector>
 
-#include <Eigen/Dense>
-#include <Eigen/Geometry>
 
 namespace HexaLab {
     using namespace Eigen;

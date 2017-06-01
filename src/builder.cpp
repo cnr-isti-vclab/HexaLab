@@ -1,7 +1,5 @@
 #include <builder.h>
 
-#include <memory>
-
 namespace HexaLab {
 
     std::unordered_map<Builder::EdgeMapKey, Index> Builder::edges_map;

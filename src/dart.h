@@ -1,8 +1,6 @@
 #ifndef _HL_DART_H_
 #define _HL_DART_H_
 
-#include <common.h>
-
 namespace HexaLab {
     struct Dart {
         Index hexa_neighbor = -1;

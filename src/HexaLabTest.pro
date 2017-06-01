@@ -20,5 +20,8 @@ HEADERS = app.h \
   loader.h\
   mesh_navigator.h\
   ifilter.h\
+  mesh.h \
+  model.h \
+  dart.h \
   plane_filter.h \
   quality_filter.h 

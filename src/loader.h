@@ -1,11 +1,7 @@
 #ifndef _HL_LOADER_H_
 #define _HL_LOADER_H_
 
-#include <common.h>
-
-#include <vector>
-
-#include <Eigen/Dense>
+#include <mesh.h>
 
 namespace HexaLab { 
     using namespace Eigen;

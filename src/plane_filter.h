@@ -5,10 +5,6 @@
 #include <model.h>
 #include <ifilter.h>
 
-#include <string>
-#include <vector>
-#include <Eigen/Dense>
-
 namespace HexaLab {
     class PlaneFilter : public IFilter {
     private:

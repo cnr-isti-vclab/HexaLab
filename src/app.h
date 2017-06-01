@@ -7,9 +7,6 @@
 #include <loader.h>
 #include <builder.h>
 
-#include <string>
-#include <vector>
-
 namespace HexaLab {
 
     class App {

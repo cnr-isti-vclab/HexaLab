@@ -1,15 +1,6 @@
-#include <common.h>
-#include <mesh.h>
-#include <loader.h>
-#include <builder.h>
-#include <model.h>
 #include <app.h>
 #include <plane_filter.h>
 #include <quality_filter.h>
-
-#include <vector>
-#include <Eigen/Dense>
-#include <Eigen/Geometry>
 
 using namespace HexaLab;
 using namespace Eigen;

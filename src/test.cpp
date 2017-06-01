@@ -1,17 +1,10 @@
-#include <common.h>
-#include <mesh.h>
-#include <loader.h>
-#include <builder.h>
 #include <app.h>
 #include <plane_filter.h>
-
-#include <Eigen/Dense>
-#include <Eigen/Geometry>
-
-using namespace HexaLab;
+#include <quality_filter.h>
 
 using namespace std;
 using namespace Eigen;
+using namespace HexaLab;
 
 int main() {
     App app;
