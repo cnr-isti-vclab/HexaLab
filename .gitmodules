@@ -1,3 +1,0 @@
-[submodule "cpp/eigen"]
-	path = cpp/eigen
-	url = https://github.com/RLovelett/eigen
