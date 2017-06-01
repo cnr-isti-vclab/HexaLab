@@ -1,31 +1,28 @@
 "use strict";
 
+// --------------------------------------------------------------------------------
+// UI
+// --------------------------------------------------------------------------------
+HexaLab.UI.plane_enabled = $('#plane_enabled')
+HexaLab.UI.plane_offset_slider = $('#plane_offset_slider').slider()
+HexaLab.UI.plane_offset_number = $('#plane_offset_number')
+HexaLab.UI.plane_nx = $('#plane_nx')
+HexaLab.UI.plane_ny = $('#plane_ny')
+HexaLab.UI.plane_nz = $('#plane_nz')
+HexaLab.UI.plane_snap_nx = $('#plane_snap_nx')
+HexaLab.UI.plane_snap_ny = $('#plane_snap_ny')
+HexaLab.UI.plane_snap_nz = $('#plane_snap_nz')
+HexaLab.UI.plane_snap_camera = $('#plane_snap_camera')
+
+// --------------------------------------------------------------------------------
+// Logic
+// --------------------------------------------------------------------------------
 HexaLab.PlaneFilter = function () {
 
-    // View Constructor
-    HexaLab.Filter.call(this, new Module.PlaneFilter(), 'Plane filter');
+    // Ctor
+    HexaLab.Filter.call(this, new Module.PlaneFilter(), 'Plane');
 
-    this.plane = {
-        material: new THREE.MeshBasicMaterial({
-            transparent: true,
-            side: THREE.DoubleSide,
-            depthWrite: false
-        }),
-        offset: 0,
-        world_offset: 0,
-        position: null,
-        normal: null
-    };
-
-    // Settings
-    this.default_settings = {
-        plane_normal: new THREE.Vector3(1, 0, 0),
-        plane_offset: 0.39,
-        plane_opacity: 0.3,
-        plane_color: "#56bbbb"
-    }
-
-    // UI
+    // Listener
     var self = this;
     HexaLab.UI.plane_nx.change(function () {
         self.set_plane_normal(parseFloat(this.val()), self.plane.normal.y, self.plane.normal.z);
@@ -43,16 +40,37 @@ HexaLab.PlaneFilter = function () {
         self.set_plane_offset(parseFloat($(this).val()));
         HexaLab.UI.app.update();
     })
-    HexaLab.UI.plane_offset_range.slider().on('slide', function (e, ui) {
+    HexaLab.UI.plane_offset_slider.slider().on('slide', function (e, ui) {
         self.set_plane_offset(ui.value / 100);
         HexaLab.UI.app.update();
     })
-    HexaLab.UI.plane_color.change(function () {
+
+    /*HexaLab.UI.plane_color.change(function () {
         self.set_plane_color($(this).val());
     })
     HexaLab.UI.plane_opacity.slider().on('slide', function (e, ui) {
         self.set_plane_opacity(ui.value / 100);
-    })
+    })*/
+
+    // State
+    this.plane = {
+        material: new THREE.MeshBasicMaterial({
+            transparent: true,
+            side: THREE.DoubleSide,
+            depthWrite: false
+        }),
+        offset: 0,
+        world_offset: 0,
+        position: null,
+        normal: null
+    };
+
+    this.default_settings = {
+        plane_normal: new THREE.Vector3(1, 0, 0),
+        plane_offset: 0.39,
+        plane_opacity: 0.3,
+        plane_color: "#56bbbb"
+    }
 };
 
 HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.prototype), {
@@ -86,7 +104,7 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
         this.update_mesh();
     },
 
-    // Setters
+    // State
 
     set_plane_normal: function (nx, ny, nz) {
         this.filter.set_plane_normal(nx, ny, nz);
@@ -107,19 +125,19 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
         this.plane.world_offset = this.filter.get_plane_world_offset();
 
         HexaLab.UI.plane_offset_number.val(this.plane.offset);
-        HexaLab.UI.plane_offset_range.slider('value', this.plane.offset * 100);
+        HexaLab.UI.plane_offset_slider.slider('value', this.plane.offset * 100);
 
         this.update_mesh();
     },
 
     set_plane_opacity: function (opacity) {
         this.plane.material.opacity = opacity;
-        HexaLab.UI.plane_opacity.slider('value', opacity * 100);
+        //HexaLab.UI.plane_opacity.slider('value', opacity * 100);
     },
 
     set_plane_color: function (color) {
         this.plane.material.color.set(color);
-        HexaLab.UI.plane_color.val(color);
+        //HexaLab.UI.plane_color.val(color);
     },
 
     update_mesh: function () {

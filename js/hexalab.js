@@ -761,67 +761,67 @@ Object.assign(HexaLab.App.prototype, {
             this.visible_surface_material.vertexColors = THREE.VertexColors;
             this._surface_color = '#' + this.visible_surface_material.color.getHexString();
             this.set_visible_surface_color('#ffffff');
-            HexaLab.UI.visible_surface_color.hide();
-            $("label[for='" + HexaLab.UI.visible_surface_color.attr('id') + "']").hide();
+            //HexaLab.UI.visible_surface_color.hide();
+            //$("label[for='" + HexaLab.UI.visible_surface_color.attr('id') + "']").hide();
         } else {
             this.visible_surface_material.vertexColors = THREE.NoColors;
             if (this._surface_color) this.set_visible_surface_color(this._surface_color);
-            HexaLab.UI.visible_surface_color.show();
-            $("label[for='" + HexaLab.UI.visible_surface_color.attr('id') + "']").show();
+            //HexaLab.UI.visible_surface_color.show();
+            //$("label[for='" + HexaLab.UI.visible_surface_color.attr('id') + "']").show();
         }
-        HexaLab.UI.visible_surface_show_quality.prop('checked', show);
+        //HexaLab.UI.visible_surface_show_quality.prop('checked', show);
         this.visible_surface_material.needsUpdate = true;
     },
 
     set_visible_surface_color: function (color) {
         this.visible_surface_material.color.set(color);
-        HexaLab.UI.visible_surface_color.val(color);
+        //HexaLab.UI.visible_surface_color.val(color);
     },
 
     set_visible_wireframe_color: function (color) {
         this.visible_wireframe_material.color.set(color);
-        HexaLab.UI.visible_wireframe_color.val(color);
+        //HexaLab.UI.visible_wireframe_color.val(color);
     },
 
     set_visible_wireframe_opacity: function (opacity) {
         this.visible_wireframe_material.opacity = opacity;
-        HexaLab.UI.visible_wireframe_opacity.slider('value', opacity * 100);
+        //HexaLab.UI.visible_wireframe_opacity.slider('value', opacity * 100);
     },
 
     set_filtered_surface_color: function (color) {
         this.filtered_surface_material.color.set(color);
-        HexaLab.UI.filtered_surface_color.val(color);
+        //HexaLab.UI.filtered_surface_color.val(color);
     },
 
     set_filtered_surface_opacity: function (opacity) {
         this.filtered_surface_material.opacity = opacity;
-        HexaLab.UI.filtered_surface_opacity.slider('value', opacity * 100);
+        //HexaLab.UI.filtered_surface_opacity.slider('value', opacity * 100);
     },
 
     set_filtered_wireframe_color: function (color) {
         this.filtered_wireframe_material.color.set(color);
-        HexaLab.UI.filtered_wireframe_color.val(color);
+        //HexaLab.UI.filtered_wireframe_color.val(color);
     },
 
     set_filtered_wireframe_opacity: function (opacity) {
         this.filtered_wireframe_material.opacity = opacity;
-        HexaLab.UI.filtered_wireframe_opacity.slider('value', opacity * 100);
+        //HexaLab.UI.filtered_wireframe_opacity.slider('value', opacity * 100);
     },
 
     set_singularity_opacity: function (opacity) {
         this.singularity_face_material.opacity = opacity;
         this.singularity_edge_material.opacity = opacity;
-        HexaLab.UI.singularity_opacity.slider('value', opacity * 100);
+        //HexaLab.UI.singularity_opacity.slider('value', opacity * 100);
     },
 
     set_occlusion: function (value) {
         this.renderer.set_ssao(value);
-        HexaLab.UI.ssao.prop('checked', value);
+        //HexaLab.UI.ssao.prop('checked', value);
     },
 
     set_antialiasing: function (value) {
         this.renderer.set_msaa(value);
-        HexaLab.UI.msaa.prop('checked', value);
+        //HexaLab.UI.msaa.prop('checked', value);
     },
     
     // Mesh

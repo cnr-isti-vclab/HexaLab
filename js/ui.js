@@ -16,7 +16,16 @@ HexaLab.UI = {
     dragdrop_mesh: $('#mesh_drag_drop_quad'),
     dragdrop_settings: $('#settings_drag_drop_quad'),
 
-    file_input: $('#file_input'),   // hidden file input
+    file_input: $('<input type="file">'),
+
+    // Mesh dialog
+    load_mesh_dialog: $('#load_mesh_dialog'),
+    load_mesh_dialog_mode: $('#load_mesh_dialog_mode_select'),
+    load_mesh_dialog_paper_div: $('#load_mesh_dialog_paper'),
+    load_mesh_dialog_paper_select: $('#load_mesh_dialog_paper_select'),
+    load_mesh_dialog_paper_mesh_div: $('#load_mesh_dialog_paper_mesh'),
+    load_mesh_dialog_paper_mesh_select: $('#load_mesh_dialog_paper_mesh_select'),
+    load_mesh_dialog_ok: $('#load_mesh_dialog_load'),
 
     // Toolbar
     load_mesh: $('#load_mesh'),
@@ -27,67 +36,48 @@ HexaLab.UI = {
     github: $('#github'),
     about: $('#about'),
 
-    // Plane
-    plane_offset_slider: $('#plane_offset_slider'),
-
-    // Quality
-    quality_min_slider: $('#quality_min_slider'),
-    quality_max_slider: $('#quality_max_slider'),
-
     // Rendering
+    surface_color: $('#surface_color'),
     filtered_slider: $('#filtered_slider'),
+}
 
+// --------------------------------------------------------------------------------
+// JQ UI Init
+// --------------------------------------------------------------------------------
 
-    //
+HexaLab.UI.filtered_slider.slider();
 
-    menu: $('#controls_menu'),
-    mesh_source: $('#mesh_source_select'),
-    paper_source_div: $('#paper_source_div'),
-    paper: $('#paper_select'),
-    paper_mesh: $('#paper_mesh_select'),
-    custom_mesh: $('#mesh_pick_button'),
-    settings_in: $('#import_settings_button'),
-    settings_out: $('#export_settings_button'),
-    snapshot: $('#snapshot_button'),
-    camera_reset: $('#camera_reset_button'),
-    msaa: $('#msaa_checkbox'),
-    ssao: $('#ssao_checkbox'),
+HexaLab.UI.surface_color.spectrum();
 
-    materials_menu: $('#materials_menu'),
-    
-    visible_surface_color: $('#surface_color'),
-    visible_surface_show_quality: $('#quality_color_checkbox'),
-    visible_wireframe_color: $('#wireframe_color'),
-    visible_wireframe_opacity: $('#wireframe_opacity'),
-    
-    filtered_surface_color: $('#culled_surface_color'),
-    filtered_surface_opacity: $('#culled_surface_opacity'),
-    filtered_wireframe_color: $('#culled_wireframe_color'),
-    filtered_wireframe_opacity: $('#culled_wireframe_opacity'),
+// -------------------------------------------------------------------------------- 
+// Mesh/settings load/save trigger functions
+// --------------------------------------------------------------------------------
+HexaLab.UI.mesh_load_trigger = function () {
+    HexaLab.UI.file_input.val(null);
+    HexaLab.UI.file_input.off('change').change(function () {
+        var file = this.files[0];
+        HexaLab.UI.import_mesh(file);
+    })
+    HexaLab.UI.file_input.click();
+}
 
-    singularity_opacity: $('#singularity_opacity'),
+HexaLab.UI.settings_load_trigger = function () {
+    HexaLab.UI.file_input.val(null);
+    HexaLab.UI.file_input.off('change').change(function () {
+        var file = this.files[0];
+        HexaLab.UI.import_settings(file);
+    })
+    HexaLab.UI.file_input.click();
+}
 
-    filters_div: $('#filters_menu'),
-    filters_menu: $('#filters_menu'),
-
-    plane_nx: $('#plane_normal_x'),
-    plane_ny: $('#plane_normal_y'),
-    plane_nz: $('#plane_normal_z'),
-    plane_normal_div: $('#plane_normal_div'),
-    plane_offset_number: $('#plane_offset_number'),
-    plane_offset_range: $('#plane_offset_range'),
-    plane_offset_div: $('#plane_offset_div'),
-    plane_color: $('#plane_color'),
-    plane_opacity: $('#plane_opacity'),
-
-    quality_threshold: $('#quality_threshold'),
-
-    quality_plot: $('#quality_plot_button'),
-    quality_plot_div: $('#quality_plot_div'),
+HexaLab.UI.settings_save_trigger = function () {
+    var settings = JSON.stringify(HexaLab.UI.app.get_settings(), null, 4);
+    var blob = new Blob([settings], { type: "text/plain;charset=utf-8" });
+    saveAs(blob, "HLsettings.txt");
 }
 
 // -------------------------------------------------------------------------------- 
-// Mesh/settings file load and dispatch
+// Mesh/settings file bind and dispatch
 // --------------------------------------------------------------------------------
 HexaLab.UI.import_mesh = function (file) {
     HexaLab.UI.file_reader.onload = function () {
@@ -107,8 +97,39 @@ HexaLab.UI.import_settings = function (file) {
 }
 
 // --------------------------------------------------------------------------------
+// Mesh load dialog
+// --------------------------------------------------------------------------------
+
+HexaLab.UI.load_mesh_dialog.dialog({
+    autoOpen: false,
+    modal: true,
+    title: 'Mesh Import'
+})
+
+HexaLab.UI.load_mesh_dialog_ok.button().on('click', function () {
+    HexaLab.UI.mesh_load_trigger();
+    HexaLab.UI.load_mesh_dialog.dialog('close');
+});
+HexaLab.UI.load_mesh_dialog_paper_div.hide();
+HexaLab.UI.load_mesh_dialog_paper_mesh_div.hide();
+
+HexaLab.UI.load_mesh_dialog_mode.on('change', function () {
+    if ($(this).val() == 'local') {
+        HexaLab.UI.load_mesh_dialog_paper_div.hide();
+        HexaLab.UI.load_mesh_dialog_paper_mesh_div.hide();
+        HexaLab.UI.load_mesh_dialog_ok.show();
+    } else if ($(this).val() == 'paper') {
+        HexaLab.UI.load_mesh_dialog_paper_div.show();
+        HexaLab.UI.load_mesh_dialog_paper_mesh_div.hide();
+        HexaLab.UI.load_mesh_dialog_ok.hide();
+    }
+})
+
+// --------------------------------------------------------------------------------
 // Drag n Drop logic
 // --------------------------------------------------------------------------------
+HexaLab.UI.dragdrop_overlay.hide();
+
 HexaLab.UI.frame.on('dragbetterenter', function (event) {
     HexaLab.UI.dragdrop_overlay.show();
 })
@@ -152,17 +173,72 @@ HexaLab.UI.dragdrop_settings.on('dragbetterleave', function (event) {
     $(this).removeClass('drag_drop_quad_on').addClass('drag_drop_quad_off');
 })
 
+// Plot
+
+HexaLab.UI.quality_plot = function(container) {
+    var x = [];
+    HexaLab.UI.quality_plot_dialog.dialog({
+        resize: function () {
+            Plotly.Plots.resize(container);
+        },
+        title: 'Jacobian Quality',
+        width: 800,
+        height: 500
+    });
+    var quality = HexaLab.UI.app.app.get_hexa_quality();
+    var data = new Float32Array(Module.HEAPU8.buffer, quality.data(), quality.size());
+    for (var i = 0; i < quality.size() ; i++) {
+        x[i] = data[i];
+    }
+    var plot_data = [{
+        x: x,
+        type: 'histogram',
+        marker: {
+            color: 'rgba(0,0,0,0.7)',
+        },
+    }];
+    Plotly.newPlot(container, plot_data);
+}
+
+// --------------------------------------------------------------------------------
+// Toolbar listeners
+// --------------------------------------------------------------------------------
+
+HexaLab.UI.load_mesh.on('click', function () {
+    //HexaLab.UI.load_mesh_dialog.dialog('open')
+    HexaLab.UI.mesh_load_trigger();
+})
+
+HexaLab.UI.home.on('click', function () {
+    HexaLab.UI.app.set_camera_settings(HexaLab.UI.app.default_camera_settings)
+})
+
+HexaLab.UI.plot.on('click', function () {
+    HexaLab.UI.quality_plot(HexaLab.UI.quality_plot_dialog[0]);
+})
+
+HexaLab.UI.load_settings.on('click', function () {
+    HexaLab.UI.settings_load_trigger();
+})
+
+HexaLab.UI.save_settings.on('click', function () {
+    HexaLab.UI.settings_save_trigger();
+})
+
+HexaLab.UI.github.on('click', function () {
+    window.open('https://github.com/cnr-isti-vclab/HexaLab', '_blank');
+})
+
+HexaLab.UI.about.on('click', function () {
+    $('<div title="About">\\m/</div>').dialog();
+})
+
+
 // --------------------------------------------------------------------------------
 // Garbage
 // --------------------------------------------------------------------------------
 
-
-HexaLab.UI.plane_offset_slider.slider();
-HexaLab.UI.quality_min_slider.slider();
-HexaLab.UI.quality_max_slider.slider();
-HexaLab.UI.filtered_slider.slider();
-
-
+/*
 HexaLab.UI.menu.accordion({
     heightStyle: "content"
 });
@@ -318,4 +394,4 @@ HexaLab.UI.quality_plot.button().click(function () {
     }
 
     plot();
-});
+});*/

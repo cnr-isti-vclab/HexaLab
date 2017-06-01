@@ -8,6 +8,7 @@
     <title>HexaLab</title>
 
     <link rel="stylesheet" href="css/jquery-ui.css">
+    <link rel="stylesheet" href="css/spectrum.css">
     <link rel="stylesheet" href="css/hexalab.css">
     <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -15,6 +16,7 @@
     <script src="js/external/jquery.js"></script>
     <script src="js/external/jquery-ui.js"></script>
     <script src="js/external/jquery.dragbetter.js"></script>
+    <script src="js/external/spectrum.js"></script>
     <script src="js/external/three.js"></script>
     <script src="js/external/plotly.js"></script>
     <script src="js/external/TrackballControls.js"></script>
@@ -86,6 +88,9 @@
                                         <button id="plane_swap_sign">
                                             <i class="fa fa-exchange"></i>
                                         </button>
+                                        <button id="plane_snap_camera">
+                                            <i class="fa fa-eye"></i>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -117,19 +122,11 @@
                                 </div>
                             </div>
                             <div class="menu_row">
-                                <div class="menu_row_label">Min</div>
+                                <div class="menu_row_label">Range</div>
                                 <div class="menu_row_input">
-                                    <div class="slider" id="quality_min_slider"></div>
+                                    <div class="slider" id="quality_range_slider"></div>
                                     <div class="menu_row_input_block">
                                         <input type="number" id="quality_min_number">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="menu_row">
-                                <div class="menu_row_label">Max</div>
-                                <div class="menu_row_input">
-                                    <div class="slider" id="quality_max_slider"></div>
-                                    <div class="menu_row_input_block">
                                         <input type="number" id="quality_max_number">
                                     </div>
                                 </div>
@@ -145,7 +142,7 @@
                             <div class="menu_row">
                                 <div class="menu_row_label">Surface</div>
                                 <div class="menu_row_input">
-                                    <input type="color" id="surface_color">
+                                    <input type="text" id="surface_color">
                                 </div>
                             </div>
                             <div class="menu_row">
@@ -162,6 +159,7 @@
                             </div>
                         </div>
                     </div>
+
                 </div>
 
                 <textarea id="logger" readonly></textarea>
@@ -190,6 +188,25 @@
                 <div style="clear:both"></div>
             </div>
         </div>
+    </div>
+
+    <div id="load_mesh_dialog">
+        <p><label>Source <select id="load_mesh_dialog_mode_select">
+            <option value="local" selected="selected">Local</option>
+            <option value="paper">Paper</option>
+        </select></label></p>
+
+        <p id="load_mesh_dialog_paper">
+            <label>Paper <select id="load_mesh_dialog_paper_select"></select></label>
+        </p>
+        
+        <p id="load_mesh_dialog_paper_mesh">
+            <label>Mesh <select id="load_mesh_dialog_paper_mesh_select"></select></label>
+        </p>
+
+        <p>
+            <button id="load_mesh_dialog_load">Load</button>
+        </p>
     </div>
 
     <!-- Emscripten module -->
