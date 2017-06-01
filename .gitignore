@@ -11,3 +11,5 @@ cpp/src/*.user
 cpp/src/.qmake.stash
 build-*/
 
+
+js/generated/hexalab.js

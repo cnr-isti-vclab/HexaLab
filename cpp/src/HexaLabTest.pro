@@ -14,3 +14,11 @@ SOURCES += app.cpp \
   quality_filter.cpp \
   test.cpp \
   hexalab_js.cpp 
+
+HEADERS = ../include/app.h \
+  ../include/builder.h\
+  ../include/loader.h\
+  ../include/mesh_navigator.h\
+  ../include/ifilter.h\
+  ../include/plane_filter.h \
+  ../include/quality_filter.h 

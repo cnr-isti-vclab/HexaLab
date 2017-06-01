@@ -5,8 +5,8 @@
 #include <app.h>
 #include <plane_filter.h>
 
-#include <eigen/dense>
-#include <eigen/geometry>
+#include <Eigen/Dense>
+#include <Eigen/Geometry>
 
 using namespace HexaLab;
 
