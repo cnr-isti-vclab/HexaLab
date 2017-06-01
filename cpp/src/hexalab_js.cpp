@@ -8,8 +8,8 @@
 #include <quality_filter.h>
 
 #include <vector>
-#include <eigen/dense>
-#include <eigen/geometry>
+#include <Eigen/Dense>
+#include <Eigen/Geometry>
 
 using namespace HexaLab;
 using namespace Eigen;
@@ -40,6 +40,7 @@ vector<Vector3f>* get_surface_vert_color(Model& model) { return &model.surface_v
 vector<Vector3f>* get_wireframe_vert_pos(Model& model) { return &model.wireframe_vert_pos; }
 vector<Vector3f>* get_wireframe_vert_color(Model& model) { return &model.wireframe_vert_color; }
 
+#ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #include <emscripten/bind.h>
 using namespace emscripten;
@@ -117,3 +118,4 @@ EMSCRIPTEN_BINDINGS(HexaLab) {
         ;
 
 }
+#endif

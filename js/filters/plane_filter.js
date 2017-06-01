@@ -12,6 +12,7 @@ HexaLab.UI.plane_nz = $('#plane_nz')
 HexaLab.UI.plane_snap_nx = $('#plane_snap_nx')
 HexaLab.UI.plane_snap_ny = $('#plane_snap_ny')
 HexaLab.UI.plane_snap_nz = $('#plane_snap_nz')
+HexaLab.UI.plane_swap = $('#plane_swap_sign')
 HexaLab.UI.plane_snap_camera = $('#plane_snap_camera')
 
 // --------------------------------------------------------------------------------
@@ -25,23 +26,46 @@ HexaLab.PlaneFilter = function () {
     // Listener
     var self = this;
     HexaLab.UI.plane_nx.change(function () {
-        self.set_plane_normal(parseFloat(this.val()), self.plane.normal.y, self.plane.normal.z);
+        self.set_plane_normal(parseFloat(this.value), self.plane.normal.y, self.plane.normal.z);
         HexaLab.UI.app.update();
     })
     HexaLab.UI.plane_ny.change(function () {
-        self.set_plane_normal(self.plane.normal.x, parseFloat($(this).val()), self.plane.normal.z);
+        self.set_plane_normal(self.plane.normal.x, parseFloat(this.value), self.plane.normal.z);
         HexaLab.UI.app.update();
     })
     HexaLab.UI.plane_nz.change(function () {
-        self.set_plane_normal(self.plane.normal.x, self.plane.normal.y, parseFloat($(this).val()));
+        self.set_plane_normal(self.plane.normal.x, self.plane.normal.y, parseFloat(this.value));
         HexaLab.UI.app.update();
     })
     HexaLab.UI.plane_offset_number.change(function () {
-        self.set_plane_offset(parseFloat($(this).val()));
+        self.set_plane_offset(parseFloat(this.value));
         HexaLab.UI.app.update();
     })
     HexaLab.UI.plane_offset_slider.slider().on('slide', function (e, ui) {
         self.set_plane_offset(ui.value / 100);
+        HexaLab.UI.app.update();
+    })
+    HexaLab.UI.plane_snap_nx.on('click', function () {
+        self.set_plane_normal(1, 0, 0);
+        HexaLab.UI.app.update();
+    })
+    HexaLab.UI.plane_snap_ny.on('click', function () {
+        self.set_plane_normal(0, 1, 0);
+        HexaLab.UI.app.update();
+    })
+    HexaLab.UI.plane_snap_nz.on('click', function () {
+        self.set_plane_normal(0, 0, 1);
+        HexaLab.UI.app.update();
+    })
+    HexaLab.UI.plane_swap.on('click', function () {
+        var n = self.plane.normal.clone().negate();
+        self.set_plane_offset(1 - self.plane.offset);
+        self.set_plane_normal(n.x, n.y, n.z);
+        HexaLab.UI.app.update();
+    })
+    HexaLab.UI.plane_snap_camera.on('click', function () {
+        var camera_dir = HexaLab.UI.app.camera.getWorldDirection();
+        self.set_plane_normal(camera_dir.x, camera_dir.y, camera_dir.z);
         HexaLab.UI.app.update();
     })
 
@@ -109,12 +133,12 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
     set_plane_normal: function (nx, ny, nz) {
         this.filter.set_plane_normal(nx, ny, nz);
         var n = this.filter.get_plane_normal();
-        this.plane.normal = new THREE.Vector3(n.x(), n.y(), n.z());
+        this.plane.normal = new THREE.Vector3(nx, ny, nz);
         n.delete(); // TODO don't allocate at all, just read memory?
 
-        HexaLab.UI.plane_nx.val(this.plane.normal.x);
-        HexaLab.UI.plane_ny.val(this.plane.normal.y);
-        HexaLab.UI.plane_nz.val(this.plane.normal.z);
+        HexaLab.UI.plane_nx.val(nx.toFixed(3));
+        HexaLab.UI.plane_ny.val(ny.toFixed(3));
+        HexaLab.UI.plane_nz.val(nz.toFixed(3));
 
         this.update_mesh();
     },

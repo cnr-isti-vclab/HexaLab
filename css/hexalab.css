@@ -13,6 +13,15 @@ html, body {
 	font-family: 'Raleway', sans-serif;
 }
 
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+input[type="number"] {
+    -moz-appearance: textfield;
+}
+
 /* drag n drop */
 
 #drag_drop_overlay {

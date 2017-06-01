@@ -173,7 +173,11 @@ HexaLab.UI.dragdrop_settings.on('dragbetterleave', function (event) {
     $(this).removeClass('drag_drop_quad_on').addClass('drag_drop_quad_off');
 })
 
+// --------------------------------------------------------------------------------
 // Plot
+// --------------------------------------------------------------------------------
+
+HexaLab.UI.quality_plot_dialog = $('<div></div>')
 
 HexaLab.UI.quality_plot = function(container) {
     var x = [];

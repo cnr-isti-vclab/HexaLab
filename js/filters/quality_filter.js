@@ -10,7 +10,6 @@ HexaLab.UI.quality_range_slider = $('#quality_range_slider').slider({
 })
 HexaLab.UI.quality_min_number = $('#quality_min_number')
 HexaLab.UI.quality_max_number = $('#quality_max_number')
-HexaLab.UI.quality_plot_dialog = $('<div></div>')
 
 // --------------------------------------------------------------------------------
 // Logic
