@@ -29,7 +29,7 @@ LIBS =
 %.bc: %.cpp
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-hexalab.js: $(OBJ) $(LIBS)
+hexalab_asm.js: $(OBJ) $(LIBS)
 	$(CC) -o ../../js/generated/$@ $^ $(CFLAGS)
 
 clean:
