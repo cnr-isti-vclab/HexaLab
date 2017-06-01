@@ -7,8 +7,8 @@ x84
 *.filters
 
 *.bc
-cpp/src/*.user
-cpp/src/.qmake.stash
+src/*.user
+src/.qmake.stash
 build-*/
 
 

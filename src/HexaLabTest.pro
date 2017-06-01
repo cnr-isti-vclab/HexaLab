@@ -1,5 +1,5 @@
-DEPENDPATH += . ../eigen ../include
-INCLUDEPATH += . ../eigen ../include
+DEPENDPATH += . ./eigen .
+INCLUDEPATH += . ./eigen .
 CONFIG += console stl c++11
 
 TEMPLATE = app
@@ -15,10 +15,10 @@ SOURCES += app.cpp \
   test.cpp \
   hexalab_js.cpp 
 
-HEADERS = ../include/app.h \
-  ../include/builder.h\
-  ../include/loader.h\
-  ../include/mesh_navigator.h\
-  ../include/ifilter.h\
-  ../include/plane_filter.h \
-  ../include/quality_filter.h 
+HEADERS = app.h \
+  builder.h\
+  loader.h\
+  mesh_navigator.h\
+  ifilter.h\
+  plane_filter.h \
+  quality_filter.h 
