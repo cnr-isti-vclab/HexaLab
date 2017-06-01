@@ -1,13 +1,8 @@
 .vscode/
-cpp/src/hexalab_c.cpp
-data
-html/js/generated/*
-!html/js/generated/README.txt
 Debug
 Release
 x86
 x84
-emcc.bat
 *.vcxproj
 *.filters
 
