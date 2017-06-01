@@ -530,6 +530,7 @@ HexaLab.App = function (dom_element) {
 
     // Materials
     this.visible_surface_material = new THREE.MeshLambertMaterial({
+        emissive: '0x202020',
         polygonOffset: true,
         polygonOffsetFactor: 0.5
     });
@@ -568,7 +569,7 @@ HexaLab.App = function (dom_element) {
         filtered_wireframe_color: '#000000',
         filtered_wireframe_opacity: 0.3,
 
-        singularity_opacity: 0.3,
+        singularity_opacity: 0.8,
     }
 
     // Models
