@@ -7,8 +7,8 @@
 
 #include <vector>
 
-#include <eigen/dense>
-#include <eigen/geometry>
+#include <Eigen/Dense>
+#include <Eigen/Geometry>
 
 namespace HexaLab {
     using namespace Eigen;

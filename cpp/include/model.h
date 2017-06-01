@@ -5,7 +5,7 @@
 #include <mesh.h>
 
 #include <vector>
-#include <eigen/dense>
+#include <Eigen/Dense>
 
 namespace HexaLab {
     using namespace Eigen;

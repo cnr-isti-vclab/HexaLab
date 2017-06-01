@@ -7,7 +7,7 @@
 
 #include <string>
 #include <vector>
-#include <eigen/dense>
+#include <Eigen/Dense>
 
 namespace HexaLab {
     class PlaneFilter : public IFilter {
