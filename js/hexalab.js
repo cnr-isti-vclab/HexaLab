@@ -110,6 +110,10 @@ Object.assign(HexaLab.Filter.prototype, {
     get_settings: function () {
         console.warn('Function "get_settings" not implemented for filter ' + this.name + '.');
     },
+
+    sync: function () {
+        console.warn('Function "sync" not implemented for filter ' + this.name + '.');
+    },
 });
 
 // --------------------------------------------------------------------------------
@@ -512,7 +516,9 @@ HexaLab.App = function (dom_element) {
 
     // UI
     var self = this;
-    HexaLab.UI.surface_color.spectrum().on('change.spectrum', function (color) {
+    HexaLab.UI.surface_color.spectrum({
+        cancelText: ''
+    }).on('change.spectrum', function (color) {
         self.set_visible_surface_color($(this).spectrum('get').toHexString());
         self.set_siltered_surface_color($(this).spectrum('get').toHexString());
     })
@@ -525,6 +531,9 @@ HexaLab.App = function (dom_element) {
     })
     HexaLab.UI.quality.on('click', function () {
         self.show_visible_quality(this.checked);
+    })
+    HexaLab.UI.color_map.on('change', function () {
+        self.set_color_map(this.options[this.selectedIndex].value);
     })
 
     var width = dom_element.offsetWidth;
@@ -587,6 +596,8 @@ HexaLab.App = function (dom_element) {
         filtered_wireframe_opacity: 0.3,
 
         singularity_opacity: 0.8,
+
+        color_map: 'rgb'
     }
 
     // Models
@@ -635,60 +646,74 @@ HexaLab.App = function (dom_element) {
  
 Object.assign(HexaLab.App.prototype, {
 
+    sync: function () {
+        var settings = this.get_settings();
+        HexaLab.UI.surface_color.spectrum('set', settings.materials.visible_surface_color)
+        HexaLab.UI.filtered_opacity.slider('value', settings.materials.filtered_surface_opacity * 100)
+        HexaLab.UI.quality.prop('checked', settings.materials.show_quality_on_visible_surface)
+        HexaLab.UI.occlusion.prop('checked', settings.renderer.occlusion)
+        HexaLab.UI.color_map.val(settings.materials.color_map)
+
+        for (var k in this.filters) {
+            this.filters[k].sync()
+        }
+    },
+
     // Settings
 
     resize: function () {
-        var width = this.canvas.container.offsetWidth;
-        var height = this.canvas.container.offsetHeight;
-        this.renderer.resize(width, height);
+        var width = this.canvas.container.offsetWidth
+        var height = this.canvas.container.offsetHeight
+        this.renderer.resize(width, height)
 
-        this.camera.aspect = width / height;
-        this.camera.updateProjectionMatrix();
+        this.camera.aspect = width / height
+        this.camera.updateProjectionMatrix()
 
-        log('Frame resized to ' + width + 'x' + height);
+        log('Frame resized to ' + width + 'x' + height)
     },
 
     set_camera_settings: function (settings) {
-        var size, center;
+        var size, center
         if (this.mesh) {
-            size = this.mesh.get_size();
-            var c = this.mesh.get_center();
-            center = new THREE.Vector3(c.x(), c.y(), c.z());
+            size = this.mesh.get_size()
+            var c = this.mesh.get_center()
+            center = new THREE.Vector3(c.x(), c.y(), c.z())
             c.delete();
         } else {
             size = 1;
-            center = new THREE.Vector3(0, 0, 0);
+            center = new THREE.Vector3(0, 0, 0)
         }
 
-        var target = new THREE.Vector3().addVectors(settings.offset, center);
-        var direction = settings.direction;
-        var distance = settings.distance * size;
+        var target = new THREE.Vector3().addVectors(settings.offset, center)
+        var direction = settings.direction
+        var distance = settings.distance * size
 
-        this.controls.rotateSpeed = 10;
-        this.controls.dynamicDampingFactor = 1;
-        this.controls.target.set(target.x, target.y, target.z);
+        this.controls.rotateSpeed = 10
+        this.controls.dynamicDampingFactor = 1
+        this.controls.target.set(target.x, target.y, target.z)
 
-        this.camera.position.set(target.x, target.y, target.z);
-        this.camera.up.set(0, 1, 0);
-        this.camera.lookAt(new THREE.Vector3().addVectors(target, direction));
-        this.camera.translateZ(distance);
+        this.camera.position.set(target.x, target.y, target.z)
+        this.camera.up.set(0, 1, 0)
+        this.camera.lookAt(new THREE.Vector3().addVectors(target, direction))
+        this.camera.translateZ(distance)
     },
 
     set_renderer_settings: function (settings) {
-        this.set_occlusion(settings.occlusion);
-        this.set_antialiasing(settings.antialiasing);
+        this.set_occlusion(settings.occlusion)
+        this.set_antialiasing(settings.antialiasing)
     },
     
     set_material_settings: function (settings) {
-        this.set_visible_surface_color(settings.visible_surface_color);
-        this.show_visible_quality(settings.show_quality_on_visible_surface);
-        this.set_visible_wireframe_color(settings.visible_wireframe_color);
-        this.set_visible_wireframe_opacity(settings.visible_wireframe_opacity);
-        this.set_filtered_surface_color(settings.filtered_surface_color);
-        this.set_filtered_surface_opacity(settings.filtered_wireframe_opacity);
-        this.set_filtered_wireframe_color(settings.filtered_wireframe_color);
-        this.set_filtered_wireframe_opacity(settings.filtered_wireframe_opacity);
-        this.set_singularity_opacity(settings.singularity_opacity);
+        this.set_visible_surface_color(settings.visible_surface_color)
+        this.show_visible_quality(settings.show_quality_on_visible_surface)
+        this.set_visible_wireframe_color(settings.visible_wireframe_color)
+        this.set_visible_wireframe_opacity(settings.visible_wireframe_opacity)
+        this.set_filtered_surface_color(settings.filtered_surface_color)
+        this.set_filtered_surface_opacity(settings.filtered_wireframe_opacity)
+        this.set_filtered_wireframe_color(settings.filtered_wireframe_color)
+        this.set_filtered_wireframe_opacity(settings.filtered_wireframe_opacity)
+        this.set_singularity_opacity(settings.singularity_opacity)
+        this.set_color_map(settings.color_map)
     },
 
     set_scene_settings: function (settings) {
@@ -710,11 +735,13 @@ Object.assign(HexaLab.App.prototype, {
                 filter.set_settings(settings.filters[filter.name]); 
             }
         }
+        this.sync()
         this.update();
     },
 
     get_camera_settings: function () {
         if (this.mesh) {
+            var c = this.mesh.get_center();
             return {
                 offset: new THREE.Vector3().subVectors(this.controls.target, new THREE.Vector3(c.x(), c.y(), c.z())),
                 direction: this.camera.getWorldDirection(),
@@ -734,7 +761,8 @@ Object.assign(HexaLab.App.prototype, {
             filtered_surface_opacity: this.filtered_surface_material.opacity,
             filtered_wireframe_color: '#' + this.filtered_wireframe_material.color.getHexString(),
             filtered_wireframe_opacity: this.filtered_wireframe_material.opacity,
-            singularity_opacity: this.singularity_edge_material.opacity
+            singularity_opacity: this.singularity_edge_material.opacity,
+            color_map: '' // TODO
         }
     },
 
@@ -767,6 +795,10 @@ Object.assign(HexaLab.App.prototype, {
             materials: this.get_material_settings(),
             filters: filters,
         }
+    },
+
+    set_color_map: function (map) {
+        // TODO
     },
 
     show_visible_quality: function (show) {

@@ -161,9 +161,9 @@ input[type="number"] {
 .menu_area .menu_content .menu_row .menu_row_input .slider {
 	flex-grow: 2;
 	margin-bottom: 2px;
-	margin-top: 7px;
-	margin-left: 5px;
-	margin-right: 5px;
+	margin-top: 8px;
+	margin-left: 10px;
+	margin-right: 10px;
 }
 
 .menu_area .menu_content .menu_row .menu_row_input_block {
