@@ -24,7 +24,7 @@ HexaLab.QualityFilter = function () {
     var self = this;
     HexaLab.UI.quality_min_number.change(function () {
         self.set_quality_threshold(parseFloat($(this).val()));
-        HexaLab.UI.app.update();
+        HexaLab.app.update();
     })
 
     // State

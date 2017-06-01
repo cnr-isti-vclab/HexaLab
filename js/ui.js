@@ -1,5 +1,7 @@
 "use strict";
 
+var HexaLab = {}
+
 HexaLab.UI = {
     // --------------------------------------------------------------------------------
     // Internals
@@ -29,7 +31,7 @@ HexaLab.UI = {
 
     // Toolbar
     load_mesh: $('#load_mesh'),
-    home: $('#home'),
+    reset_camera: $('#home'),
     plot: $('#plot'),
     load_settings: $('#load_settings'),
     save_settings: $('#save_settings'),
@@ -38,16 +40,10 @@ HexaLab.UI = {
 
     // Rendering
     surface_color: $('#surface_color'),
-    filtered_slider: $('#filtered_slider'),
+    filtered_opacity: $('#filtered_slider'),
+    quality: $("#show_quality"),
+    occlusion: $("#show_occlusion"),
 }
-
-// --------------------------------------------------------------------------------
-// JQ UI Init
-// --------------------------------------------------------------------------------
-
-HexaLab.UI.filtered_slider.slider();
-
-HexaLab.UI.surface_color.spectrum();
 
 // -------------------------------------------------------------------------------- 
 // Mesh/settings load/save trigger functions
@@ -71,7 +67,7 @@ HexaLab.UI.settings_load_trigger = function () {
 }
 
 HexaLab.UI.settings_save_trigger = function () {
-    var settings = JSON.stringify(HexaLab.UI.app.get_settings(), null, 4);
+    var settings = JSON.stringify(HexaLab.app.get_settings(), null, 4);
     var blob = new Blob([settings], { type: "text/plain;charset=utf-8" });
     saveAs(blob, "HLsettings.txt");
 }
@@ -83,7 +79,7 @@ HexaLab.UI.import_mesh = function (file) {
     HexaLab.UI.file_reader.onload = function () {
         var data = new Int8Array(this.result);
         HexaLab.FS.make_file(data, file.name);
-        HexaLab.UI.app.import_mesh(file.name);
+        HexaLab.app.import_mesh(file.name);
     }
     HexaLab.UI.file_reader.readAsArrayBuffer(file, "UTF-8");
 }
@@ -91,7 +87,7 @@ HexaLab.UI.import_mesh = function (file) {
 HexaLab.UI.import_settings = function (file) {
     HexaLab.UI.file_reader.onload = function () {
         var settings = JSON.parse(this.result);
-        HexaLab.UI.app.set_settings(settings);
+        HexaLab.app.set_settings(settings);
     }
     HexaLab.UI.file_reader.readAsText(file, "UTF-8");
 }
@@ -189,7 +185,7 @@ HexaLab.UI.quality_plot = function(container) {
         width: 800,
         height: 500
     });
-    var quality = HexaLab.UI.app.app.get_hexa_quality();
+    var quality = HexaLab.app.app.get_hexa_quality();
     var data = new Float32Array(Module.HEAPU8.buffer, quality.data(), quality.size());
     for (var i = 0; i < quality.size() ; i++) {
         x[i] = data[i];
@@ -213,8 +209,8 @@ HexaLab.UI.load_mesh.on('click', function () {
     HexaLab.UI.mesh_load_trigger();
 })
 
-HexaLab.UI.home.on('click', function () {
-    HexaLab.UI.app.set_camera_settings(HexaLab.UI.app.default_camera_settings)
+HexaLab.UI.reset_camera.on('click', function () {
+    HexaLab.app.set_camera_settings(HexaLab.app.default_camera_settings)
 })
 
 HexaLab.UI.plot.on('click', function () {
@@ -236,166 +232,3 @@ HexaLab.UI.github.on('click', function () {
 HexaLab.UI.about.on('click', function () {
     $('<div title="About">\\m/</div>').dialog();
 })
-
-
-// --------------------------------------------------------------------------------
-// Garbage
-// --------------------------------------------------------------------------------
-
-/*
-HexaLab.UI.menu.accordion({
-    heightStyle: "content"
-});
-HexaLab.UI.materials_menu.accordion({
-    heightStyle: "content"
-});
-HexaLab.UI.filters_menu.accordion({
-    heightStyle: "content"
-});
-
-// controls
-
-HexaLab.UI.mesh_source.selectmenu().hide().on('selectmenuchange', function () {
-    if ($(this).val() == 'custom') {
-        HexaLab.UI.custom_mesh.show();
-        HexaLab.UI.paper_source_div.hide();
-    } else if ($(this).val() == 'paper') {
-        HexaLab.UI.paper_source_div.show();
-        HexaLab.UI.custom_mesh.hide();
-    }
-})
-
-HexaLab.UI.paper_source_div.hide();
-
-HexaLab.UI.paper.selectmenu().on('selectmenuchange', function () {
-    HexaLab.UI.paper_mesh.parent().show();
-})
-
-HexaLab.UI.paper_mesh.selectmenu().on('selectmenuchange', function () {
-    alert('Not yet implemented :(');
-}).parent().hide();
-
-
-
-HexaLab.UI.custom_mesh.button().click(function () {
-    HexaLab.UI.file_input.val(null);        // reset value (to later trigger change even if the file is the same as before)
-    HexaLab.UI.file_input.off('change').change(function () {
-        var file = this.files[0];
-        HexaLab.UI.import_mesh(file);
-    })
-    HexaLab.UI.file_input.click();     // open system file picker popup
-})
-
-HexaLab.UI.dragdrop_overlay.hide();
-
-
-
-
-HexaLab.UI.settings_in.button().click(function () {
-    HexaLab.UI.file_input.val(null);    // reset value (to later trigger change even if the file is the same as before)
-    HexaLab.UI.file_input.off('change').change(function () {
-        var file = this.files[0];
-        HexaLab.UI.import_settings(file);
-    })
-    HexaLab.UI.file_input.click();     // open system file picker popup
-});
-
-HexaLab.UI.settings_out.button().click(function () {
-    var settings = JSON.stringify(HexaLab.UI.app.get_settings(), null, 4);
-    var blob = new Blob([settings], { type: "text/plain;charset=utf-8" });
-    saveAs(blob, "HLsettings.txt");
-});
-
-HexaLab.UI.snapshot.button().click(function () {
-    HexaLab.UI.app.canvas.element.toBlob(function (blob) {
-        saveAs(blob, "HLsnapshot.png");
-    }, "image/png");
-});
-HexaLab.UI.camera_reset.button().click(function () {
-    HexaLab.UI.app.set_camera_settings(HexaLab.UI.app.default_camera_settings)
-});
-
-// renderer
-
-HexaLab.UI.msaa.checkboxradio({
-    icon: false
-}).click(function () {
-    HexaLab.UI.app.set_antialiasing(HexaLab.UI.msaa.prop('checked'));
-});
-HexaLab.UI.ssao.checkboxradio({
-    icon: false
-}).click(function () {
-    HexaLab.UI.app.set_occlusion(HexaLab.UI.ssao.prop('checked'));
-});
-
-// materials
-
-HexaLab.UI.visible_surface_color.change(function () {
-    HexaLab.UI.app.set_visible_surface_color($(this).val());
-})
-
-HexaLab.UI.visible_surface_show_quality.checkboxradio({
-    icon: false
-}).change(function () {
-    HexaLab.UI.app.show_visible_quality(HexaLab.UI.visible_surface_show_quality.prop('checked'));
-})
-
-HexaLab.UI.visible_wireframe_color.change(function () {
-    HexaLab.UI.app.set_visible_wireframe_color($(this).val());
-})
-
-HexaLab.UI.visible_wireframe_opacity.slider().on('slide', function (e, ui) {
-    HexaLab.UI.app.set_visible_wireframe_opacity(ui.value / 100);
-})
-
-HexaLab.UI.filtered_surface_color.change(function () {
-    HexaLab.UI.app.set_filtered_surface_color($(this).val());
-})
-
-HexaLab.UI.filtered_surface_opacity.slider().on('slide', function (e, ui) {
-    HexaLab.UI.app.set_filtered_surface_opacity(ui.value / 100);
-})
-
-HexaLab.UI.filtered_wireframe_color.change(function () {
-    HexaLab.UI.app.set_filtered_wireframe_color($(this).val());
-})
-
-HexaLab.UI.filtered_wireframe_opacity.slider().on('slide', function (e, ui) {
-    HexaLab.UI.app.set_filtered_wireframe_opacity(ui.value / 100);
-})
-
-HexaLab.UI.singularity_opacity.slider().on('slide', function (e, ui) {
-    HexaLab.UI.app.set_singularity_opacity(ui.value / 100);
-})
-
-HexaLab.UI.plane_normal_div.controlgroup();
-HexaLab.UI.plane_offset_div.controlgroup();
-
-HexaLab.UI.quality_plot.button().click(function () {
-    function plot() {
-        var x = [];
-        HexaLab.UI.quality_plot_div.dialog({
-            resize: function () {
-                Plotly.Plots.resize(HexaLab.UI.quality_plot_div[0]);
-            },
-            title: 'Jacobian Quality',
-            width: 800,
-            height: 500
-        });
-        var quality = HexaLab.UI.app.app.get_hexa_quality();
-        var data = new Float32Array(Module.HEAPU8.buffer, quality.data(), quality.size());
-        for (var i = 0; i < quality.size() ; i++) {
-            x[i] = data[i];
-        }
-        var plot_data = [{
-            x: x,
-            type: 'histogram',
-            marker: {
-                color: 'rgba(0,0,0,0.7)',
-            },
-        }];
-        Plotly.newPlot(HexaLab.UI.quality_plot_div[0], plot_data);
-    }
-
-    plot();
-});*/

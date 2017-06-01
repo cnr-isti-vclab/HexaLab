@@ -34,6 +34,7 @@
             <div id="sidenav">
                 <div id="menu">
                     <div id="toolbar_wrapper">
+                        <h1>HexaLab</h1>
                         <div id="toolbar">
                             <button id="load_mesh">
                                 <i class="fa fa-folder-open"></i>
@@ -152,6 +153,18 @@
                                 </div>
                             </div>
                             <div class="menu_row">
+                                <div class="menu_row_label">Quality</div>
+                                <div class="menu_row_input">
+                                    <input type="checkbox" id="show_quality">
+                                </div>
+                            </div>
+                            <div class="menu_row">
+                                <div class="menu_row_label">Occlusion</div>
+                                <div class="menu_row_input">
+                                    <input type="checkbox" id="show_occlusion">
+                                </div>
+                            </div>
+                            <div class="menu_row">
                                 <div class="menu_row_label">ColorMap</div>
                                 <div class="menu_row_input">
                                     <select id="color_map"></select>
@@ -160,9 +173,15 @@
                         </div>
                     </div>
 
+                    <div id="log_menu" class="menu_area">
+                        <div class="menu_title_wrapper">
+                            <div class="menu_title">Log output</div>
+                        </div>
+                        <div class="menu_content">
+                            <textarea id="logger" readonly></textarea>
+                        </div>
+                    </div>
                 </div>
-
-                <textarea id="logger" readonly></textarea>
             </div>
             <span id="nav_opener">&#9776;</span>
         </div>
@@ -214,8 +233,8 @@
     <!-- Emscripten compiled cpp code -->
     <script src="js/generated/hexalab.js"></script>
     <!-- HexaLab -->
-    <script src="js/hexalab.js"></script>
     <script src="js/ui.js"></script>
+    <script src="js/hexalab.js"></script>
     <script src="js/filters/plane_filter.js"></script>
     <script src="js/filters/quality_filter.js"></script>
 

@@ -1,6 +1,6 @@
 "use strict";
 
-var HexaLab = {}
+//var HexaLab = {}
 HexaLab.filters = [];
 
 // --------------------------------------------------------------------------------
@@ -508,7 +508,24 @@ Object.assign(HexaLab.Renderer.prototype, {
 HexaLab.App = function (dom_element) {
 
     this.app = new Module.App();
-    HexaLab.UI.app = this;
+    HexaLab.app = this;
+
+    // UI
+    var self = this;
+    HexaLab.UI.surface_color.spectrum().on('change.spectrum', function (color) {
+        self.set_visible_surface_color($(this).spectrum('get').toHexString());
+        self.set_siltered_surface_color($(this).spectrum('get').toHexString());
+    })
+    HexaLab.UI.filtered_opacity.slider().on('slide', function (e, ui) {
+        self.set_filtered_surface_opacity(ui.value / 100);
+        self.set_filtered_wireframe_opacity(ui.value / 100);
+    })
+    HexaLab.UI.occlusion.on('click', function () {
+        self.set_occlusion(this.checked);
+    })
+    HexaLab.UI.quality.on('click', function () {
+        self.show_visible_quality(this.checked);
+    })
 
     var width = dom_element.offsetWidth;
     var height = dom_element.offsetHeight;
@@ -698,11 +715,6 @@ Object.assign(HexaLab.App.prototype, {
 
     get_camera_settings: function () {
         if (this.mesh) {
-            var c = this.mesh.get_center();
-            var center = new THREE.Vector3(c.x(), c.y(), c.z());
-            var offset = new THREE.Vector3().subVectors(this.controls.target, center);
-            var distance = this.camera.getWorldDirection();
-            var direction = this.camera.position.distanceTo(this.controls.target) / this.mesh.get_size();
             return {
                 offset: new THREE.Vector3().subVectors(this.controls.target, new THREE.Vector3(c.x(), c.y(), c.z())),
                 direction: this.camera.getWorldDirection(),

@@ -27,46 +27,46 @@ HexaLab.PlaneFilter = function () {
     var self = this;
     HexaLab.UI.plane_nx.change(function () {
         self.set_plane_normal(parseFloat(this.value), self.plane.normal.y, self.plane.normal.z);
-        HexaLab.UI.app.update();
+        HexaLab.app.update();
     })
     HexaLab.UI.plane_ny.change(function () {
         self.set_plane_normal(self.plane.normal.x, parseFloat(this.value), self.plane.normal.z);
-        HexaLab.UI.app.update();
+        HexaLab.app.update();
     })
     HexaLab.UI.plane_nz.change(function () {
         self.set_plane_normal(self.plane.normal.x, self.plane.normal.y, parseFloat(this.value));
-        HexaLab.UI.app.update();
+        HexaLab.app.update();
     })
     HexaLab.UI.plane_offset_number.change(function () {
         self.set_plane_offset(parseFloat(this.value));
-        HexaLab.UI.app.update();
+        HexaLab.app.update();
     })
     HexaLab.UI.plane_offset_slider.slider().on('slide', function (e, ui) {
         self.set_plane_offset(ui.value / 100);
-        HexaLab.UI.app.update();
+        HexaLab.app.update();
     })
     HexaLab.UI.plane_snap_nx.on('click', function () {
         self.set_plane_normal(1, 0, 0);
-        HexaLab.UI.app.update();
+        HexaLab.app.update();
     })
     HexaLab.UI.plane_snap_ny.on('click', function () {
         self.set_plane_normal(0, 1, 0);
-        HexaLab.UI.app.update();
+        HexaLab.app.update();
     })
     HexaLab.UI.plane_snap_nz.on('click', function () {
         self.set_plane_normal(0, 0, 1);
-        HexaLab.UI.app.update();
+        HexaLab.app.update();
     })
     HexaLab.UI.plane_swap.on('click', function () {
         var n = self.plane.normal.clone().negate();
         self.set_plane_offset(1 - self.plane.offset);
         self.set_plane_normal(n.x, n.y, n.z);
-        HexaLab.UI.app.update();
+        HexaLab.app.update();
     })
     HexaLab.UI.plane_snap_camera.on('click', function () {
-        var camera_dir = HexaLab.UI.app.camera.getWorldDirection();
+        var camera_dir = HexaLab.app.camera.getWorldDirection();
         self.set_plane_normal(camera_dir.x, camera_dir.y, camera_dir.z);
-        HexaLab.UI.app.update();
+        HexaLab.app.update();
     })
 
     /*HexaLab.UI.plane_color.change(function () {
