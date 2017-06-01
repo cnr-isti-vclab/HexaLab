@@ -530,7 +530,7 @@ HexaLab.App = function (dom_element) {
 
     // Materials
     this.visible_surface_material = new THREE.MeshLambertMaterial({
-        emissive: '0x202020',
+        emissive: '#202020',
         polygonOffset: true,
         polygonOffsetFactor: 0.5
     });
