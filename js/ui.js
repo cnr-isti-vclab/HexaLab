@@ -81,6 +81,7 @@ HexaLab.UI.import_mesh = function (file) {
         var data = new Int8Array(this.result);
         HexaLab.FS.make_file(data, file.name);
         HexaLab.app.import_mesh(file.name);
+        HexaLab.UI.quality_plot_update()
     }
     HexaLab.UI.file_reader.readAsArrayBuffer(file, "UTF-8");
 }
@@ -176,29 +177,66 @@ HexaLab.UI.dragdrop_settings.on('dragbetterleave', function (event) {
 
 HexaLab.UI.quality_plot_dialog = $('<div></div>')
 
-HexaLab.UI.quality_plot = function(container) {
+HexaLab.UI.quality_plot_update = function () {
+    if (HexaLab.UI.plot_overlay) {
+        var axis = HexaLab.UI.plot_overlay[0].axis
+        HexaLab.UI.quality_plot(HexaLab.UI.plot_overlay[0], axis)
+    }
+}
+
+HexaLab.UI.quality_plot = function(container, axis) {
     var x = [];
-    HexaLab.UI.quality_plot_dialog.dialog({
+    /*HexaLab.UI.quality_plot_dialog.dialog({
         resize: function () {
             Plotly.Plots.resize(container);
         },
         title: 'Jacobian Quality',
         width: 800,
         height: 500
-    });
+    });*/
     var quality = HexaLab.app.app.get_hexa_quality();
     var data = new Float32Array(Module.HEAPU8.buffer, quality.data(), quality.size());
     for (var i = 0; i < quality.size() ; i++) {
         x[i] = data[i];
     }
+
     var plot_data = [{
-        x: x,
         type: 'histogram',
         marker: {
             color: 'rgba(0,0,0,0.7)',
         },
     }];
-    Plotly.newPlot(container, plot_data);
+    plot_data[0][axis] = x;
+
+    var layout = { 
+        xaxis: {
+            fixedrange: true
+        }
+    };
+
+    var options = {
+        modeBarButtons: [
+            [{
+                name: 'Rotate',
+                icon: Plotly.Icons['3d_rotate'],
+                click: function() {
+                    if (axis == 'x') {
+                        HexaLab.UI.quality_plot(container, 'y')
+                    } else if (axis == 'y') {
+                        HexaLab.UI.quality_plot(container, 'x')
+                    }
+                }
+            }],
+            [
+              'toImage',
+            ]
+        ],
+        displaylogo: false
+    }
+
+    container.axis = axis
+
+    Plotly.newPlot(container, plot_data, layout, options);
 }
 
 // --------------------------------------------------------------------------------
@@ -215,7 +253,17 @@ HexaLab.UI.reset_camera.on('click', function () {
 })
 
 HexaLab.UI.plot.on('click', function () {
-    HexaLab.UI.quality_plot(HexaLab.UI.quality_plot_dialog[0]);
+    if (HexaLab.UI.plot_overlay) {
+        HexaLab.UI.plot_overlay.remove()
+        delete HexaLab.UI.plot_overlay
+    } else {
+        HexaLab.UI.plot_overlay = HexaLab.UI.overlay(400, 100, 500, 800, '').appendTo(document.body)
+        HexaLab.UI.quality_plot(HexaLab.UI.plot_overlay[0], 'y')
+        HexaLab.UI.plot_overlay.on('resize', function () {
+            Plotly.Plots.resize(HexaLab.UI.plot_overlay[0]);
+        })
+    }
+    //HexaLab.UI.quality_plot(HexaLab.UI.quality_plot_dialog[0]);
 })
 
 HexaLab.UI.load_settings.on('click', function () {
@@ -230,6 +278,36 @@ HexaLab.UI.github.on('click', function () {
     window.open('https://github.com/cnr-isti-vclab/HexaLab', '_blank');
 })
 
+HexaLab.UI.overlay = function (x, y, width, height, content) {
+    var x = jQuery(
+        [
+            '<div id="overlay" style="',
+            'left:', x, 'px;',
+            'top:', y, 'px;',
+            'width:', width, 'px;',
+            'height:', height, 'px;',
+            'position:fixed;',
+            ' ">', content, ' </div>'
+        ].join(''))
+    return x.resizable().draggable();
+}
+
 HexaLab.UI.about.on('click', function () {
-    $('<div title="About">\\m/</div>').dialog();
+    if (HexaLab.UI.about_dialog) {
+        HexaLab.UI.about_dialog.dialog('close')
+        delete HexaLab.UI.about_dialog;
+    } else {
+        HexaLab.UI.about_dialog = $('<div title="About">\\m/</div>').dialog({
+            close: function()
+            {
+                $(this).dialog('destroy').remove()
+            }
+        });
+    }
+    /*if (HexaLab.UI.about_overlay) {
+        HexaLab.UI.about_overlay.remove()
+        delete HexaLab.UI.about_overlay
+    } else {
+        HexaLab.UI.about_overlay = HexaLab.UI.overlay(100, 100, 100, 100, '\\m/').appendTo(document.body)
+    }*/
 })
