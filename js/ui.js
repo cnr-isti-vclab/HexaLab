@@ -218,7 +218,7 @@ HexaLab.UI.quality_plot = function(container, axis) {
     var options = {
         modeBarButtons: [
             [{
-                name: 'Rotate',
+                name: 'Flip axis',
                 icon: Plotly.Icons['3d_rotate'],
                 click: function() {
                     if (axis == 'x') {
