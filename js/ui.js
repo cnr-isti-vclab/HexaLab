@@ -37,6 +37,7 @@ HexaLab.UI = {
     save_settings: $('#save_settings'),
     github: $('#github'),
     about: $('#about'),
+    snapshot: $('#snapshot'),
 
     // Rendering
     surface_color: $('#surface_color'),
@@ -310,4 +311,10 @@ HexaLab.UI.about.on('click', function () {
     } else {
         HexaLab.UI.about_overlay = HexaLab.UI.overlay(100, 100, 100, 100, '\\m/').appendTo(document.body)
     }*/
+})
+
+HexaLab.UI.snapshot.on('click', function () {
+    HexaLab.app.canvas.element.toBlob(function (blob) {
+        saveAs(blob, "HLsnapshot.png");
+    }, "image/png");
 })
