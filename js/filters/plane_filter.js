@@ -42,8 +42,11 @@ HexaLab.PlaneFilter = function () {
         self.sync()
         HexaLab.app.update()
     })
-    HexaLab.UI.plane_offset_slider.slider().on('slide', function (e, ui) {
-        self.set_plane_offset(ui.value / 100);
+    HexaLab.UI.plane_offset_slider.slider({
+        min: 0,
+        max: 1000
+    }).on('slide', function (e, ui) {
+        self.set_plane_offset(ui.value / 1000);
         self.sync()
         HexaLab.app.update()
     })
@@ -136,7 +139,7 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
     },
 
     sync: function () {
-        HexaLab.UI.plane_offset_slider.slider('value', this.plane.offset * 100)
+        HexaLab.UI.plane_offset_slider.slider('value', this.plane.offset * 1000)
         HexaLab.UI.plane_offset_number.val(this.plane.offset);
 
         HexaLab.UI.plane_nx.val(this.plane.normal.x.toFixed(3));
