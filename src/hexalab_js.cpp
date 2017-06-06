@@ -40,6 +40,7 @@ EMSCRIPTEN_BINDINGS(HexaLab) {
     class_<App>("App")
         .constructor<>()
         .function("build_models", &App::build_models)
+        .function("set_color_map", &App::set_color_map)
         .function("import_mesh", &App::import_mesh)
         .function("add_filter", &App::add_filter, allow_raw_pointers())
         .function("get_mesh", &App::get_mesh, allow_raw_pointers())
@@ -47,6 +48,16 @@ EMSCRIPTEN_BINDINGS(HexaLab) {
         .function("get_filtered_model", &App::get_filtered_model, allow_raw_pointers())
         .function("get_singularity_model", &App::get_singularity_model, allow_raw_pointers())
         .function("get_hexa_quality", &hexa_quality, allow_raw_pointers())
+        ;
+
+    enum_<App::ColorMap>("ColorMap")
+        .value("RGB", App::ColorMap::RGB)
+        .value("Test", App::ColorMap::Test)
+        ;
+
+    enum_<QualityFilter::Operator>("QualityFilterOperator")
+        .value("Inside", QualityFilter::Operator::Inside)
+        .value("Outside", QualityFilter::Operator::Outside)
         ;
 
     class_<Model>("Model")
@@ -69,6 +80,7 @@ EMSCRIPTEN_BINDINGS(HexaLab) {
         ;
 
     class_<IFilter>("Filter")
+        .property("enabled", &IFilter::enabled)
         ;
 
     class_<PlaneFilter, base<IFilter>>("PlaneFilter")
@@ -86,7 +98,9 @@ EMSCRIPTEN_BINDINGS(HexaLab) {
         .constructor<>()
         .function("filter", &QualityFilter::filter)
         .function("on_mesh_set", static_cast<void(QualityFilter::*)(Mesh&)>(&IFilter::on_mesh_set))
-        .property("quality_threshold", &QualityFilter::quality_threshold)
+        .property("quality_threshold_min", &QualityFilter::quality_threshold_min)
+        .property("quality_threshold_max", &QualityFilter::quality_threshold_max)
+        .property("operator", &QualityFilter::op)
         ;
 
     class_<Vector3f>("float3")

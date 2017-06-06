@@ -7,7 +7,14 @@
 namespace HexaLab {
     class QualityFilter : public IFilter {
     public:
-        float quality_threshold;
+    	enum class Operator {
+    		Inside,
+    		Outside
+    	};
+
+        float quality_threshold_min;
+        float quality_threshold_max;
+        Operator op = Operator::Inside;
         void filter(Mesh& mesh);
     };
 }

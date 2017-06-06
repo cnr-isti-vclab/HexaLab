@@ -212,6 +212,9 @@ HexaLab.UI.quality_plot = function(container, axis) {
     var layout = { 
         xaxis: {
             fixedrange: true
+        },
+        yaxis: {
+            fixedrange: true
         }
     };
 
@@ -290,7 +293,9 @@ HexaLab.UI.overlay = function (x, y, width, height, content) {
             'position:fixed;',
             ' ">', content, ' </div>'
         ].join(''))
-    return x.resizable().draggable();
+    return x.resizable().draggable({
+        cursor: "move"
+    });
 }
 
 HexaLab.UI.about.on('click', function () {

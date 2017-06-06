@@ -25,6 +25,16 @@ HexaLab.PlaneFilter = function () {
 
     // Listener
     var self = this;
+    HexaLab.UI.plane_enabled.change(function () {
+        var enabled = $(this).is(':checked')
+        self.filter.enabled = enabled
+        if (enabled) {
+            self.scene.add(self.plane.mesh)
+        } else {
+            self.scene.remove(self.plane.mesh)
+        }
+        HexaLab.app.update()
+    })
     HexaLab.UI.plane_nx.change(function () {
         self.set_plane_normal(parseFloat(this.value), self.plane.normal.y, self.plane.normal.z)
         HexaLab.app.update()
@@ -145,6 +155,8 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
         HexaLab.UI.plane_nx.val(this.plane.normal.x.toFixed(3));
         HexaLab.UI.plane_ny.val(this.plane.normal.y.toFixed(3));
         HexaLab.UI.plane_nz.val(this.plane.normal.z.toFixed(3));
+
+        HexaLab.UI.plane_enabled.prop('checked', this.filter.enabled)
 
         //HexaLab.UI.plane_opacity.slider('value', opacity * 100);
         //HexaLab.UI.plane_color.val(color);

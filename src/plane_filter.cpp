@@ -14,6 +14,9 @@ namespace HexaLab {
     }
 
     void PlaneFilter::filter(Mesh& mesh) {
+        if (!this->enabled)
+            return;
+
         for (unsigned int i = 0; i < mesh.hexas.size(); ++i) {
             Hexa& hexa = mesh.hexas[i];
 

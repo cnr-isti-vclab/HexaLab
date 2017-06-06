@@ -72,7 +72,15 @@ namespace HexaLab {
             visible_model.surface_vert_norm.push_back(normal);
             visible_model.surface_vert_norm.push_back(normal);
 
-            Vector3f color = Vector3f(1 - nav.hexa().scaled_jacobian, 0, nav.hexa().scaled_jacobian);
+            Vector3f color;
+            switch(this->color_map) {
+            case ColorMap::RGB:
+                color = Vector3f(1 - nav.hexa().scaled_jacobian, 0, nav.hexa().scaled_jacobian);
+                break;
+            case ColorMap::Test:
+                color = Vector3f(1 - nav.hexa().scaled_jacobian, nav.hexa().scaled_jacobian, 0);
+                break;
+            }
             visible_model.surface_vert_color.push_back(color);
             visible_model.surface_vert_color.push_back(color);
             visible_model.surface_vert_color.push_back(color);
@@ -123,6 +131,8 @@ namespace HexaLab {
     }
 
     void App::build_models() {
+        if (mesh == nullptr) return;
+        
         auto t_start = sample_time();
 
         mesh->mark++;
@@ -156,5 +166,10 @@ namespace HexaLab {
         }
 
     }
+
+    void App::set_color_map(ColorMap map) {
+        this->color_map = map;
+    }
+
 
 }

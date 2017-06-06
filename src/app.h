@@ -21,12 +21,19 @@ namespace HexaLab {
         vector<float> hexa_quality;
 
     public:
+        enum class ColorMap {
+            RGB,
+            Test
+        };
+
         bool import_mesh(string path);
         Mesh* get_mesh() { return mesh; }
         
         void add_filter(IFilter* filter) {
             filters.push_back(filter);
         }
+
+        void set_color_map(ColorMap map);
 
         Model* get_visible_model() { return &this->visible_model; }
         Model* get_filtered_model() { return &this->filtered_model; }
@@ -37,6 +44,8 @@ namespace HexaLab {
         void build_models();
 
     private:
+        ColorMap color_map;
+
         void add_visible_face(Dart& dart, float normal_sign);
         void add_visible_wireframe(Dart& dart);
         void add_filtered_face(Dart& dart);

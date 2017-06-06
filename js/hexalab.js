@@ -519,21 +519,22 @@ HexaLab.App = function (dom_element) {
     HexaLab.UI.surface_color.spectrum({
         cancelText: ''
     }).on('change.spectrum', function (color) {
-        self.set_visible_surface_color($(this).spectrum('get').toHexString());
-        self.set_siltered_surface_color($(this).spectrum('get').toHexString());
+        self.set_visible_surface_color($(this).spectrum('get').toHexString())
+        self.set_filtered_surface_color($(this).spectrum('get').toHexString())
     })
     HexaLab.UI.filtered_opacity.slider().on('slide', function (e, ui) {
-        self.set_filtered_surface_opacity(ui.value / 100);
-        self.set_filtered_wireframe_opacity(ui.value / 100);
+        self.set_filtered_surface_opacity(ui.value / 100)
+        self.set_filtered_wireframe_opacity(ui.value / 100)
     })
     HexaLab.UI.occlusion.on('click', function () {
-        self.set_occlusion(this.checked);
+        self.set_occlusion(this.checked)
     })
     HexaLab.UI.quality.on('click', function () {
-        self.show_visible_quality(this.checked);
+        self.show_visible_quality(this.checked)
     })
     HexaLab.UI.color_map.on('change', function () {
-        self.set_color_map(this.options[this.selectedIndex].value);
+        self.set_color_map(this.options[this.selectedIndex].value)
+        self.update()
     })
 
     var width = dom_element.offsetWidth;
@@ -762,7 +763,7 @@ Object.assign(HexaLab.App.prototype, {
             filtered_wireframe_color: '#' + this.filtered_wireframe_material.color.getHexString(),
             filtered_wireframe_opacity: this.filtered_wireframe_material.opacity,
             singularity_opacity: this.singularity_edge_material.opacity,
-            color_map: '' // TODO
+            color_map: this.color_map
         }
     },
 
@@ -798,7 +799,11 @@ Object.assign(HexaLab.App.prototype, {
     },
 
     set_color_map: function (map) {
-        // TODO
+        if (map == 'rgb')
+            this.app.set_color_map(Module.ColorMap.RGB)
+        else if (map == 'test')
+            this.app.set_color_map(Module.ColorMap.Test)
+        this.color_map = map
     },
 
     show_visible_quality: function (show) {
