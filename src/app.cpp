@@ -24,6 +24,7 @@ namespace HexaLab {
             MeshNavigator nav = mesh->navigate(mesh->edges[i]);
             if (nav.edge().face_count == 4) continue;
             if (nav.edge().surface) continue;
+            // add edge
             for (int j = 0; j < 2; ++j) {
                 singularity_model.wireframe_vert_pos.push_back(mesh->verts[nav.dart().vert].position);
                 nav = nav.flip_vert();
@@ -42,6 +43,29 @@ namespace HexaLab {
             }
             singularity_model.wireframe_vert_color.push_back(color);
             singularity_model.wireframe_vert_color.push_back(color);
+            // add adjacent faces
+            Face& begin = nav.face();
+            do {
+                for (int k = 0; k < 2; ++k) {
+                    int j = 0;
+                    for (; j < 2; ++j) {
+                        singularity_model.surface_vert_pos.push_back(mesh->verts[nav.dart().vert].position);
+                        for (int n = 0; n < 2; ++n) {
+                            singularity_model.wireframe_vert_pos.push_back(mesh->verts[nav.dart().vert].position);
+                            nav = nav.flip_vert();
+                        }
+                        singularity_model.wireframe_vert_color.push_back(Vector3f(0, 0, 0));
+                        singularity_model.wireframe_vert_color.push_back(Vector3f(0, 0, 0));
+                        nav = nav.rotate_on_face();
+                    }
+                    singularity_model.surface_vert_pos.push_back(mesh->verts[nav.dart().vert].position);
+
+                    singularity_model.surface_vert_color.push_back(color);
+                    singularity_model.surface_vert_color.push_back(color);
+                    singularity_model.surface_vert_color.push_back(color);
+                }
+                nav = nav.rotate_on_edge();
+            } while (nav.face() != begin);
         }
 
         for (size_t i = 0; i < filters.size(); ++i) {

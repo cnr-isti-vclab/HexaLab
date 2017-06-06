@@ -575,9 +575,11 @@ HexaLab.App = function (dom_element) {
         transparent: true,
         depthWrite: false
     });
-    this.singularity_face_material = new THREE.MeshLambertMaterial({
+    this.singularity_face_material = new THREE.MeshBasicMaterial({
         transparent: true,
-        depthWrite: false
+        depthWrite: false,
+        vertexColors: THREE.VertexColors,
+        side: THREE.DoubleSide,
     });
     this.singularity_edge_material = new THREE.MeshBasicMaterial({
         transparent: true,
@@ -605,7 +607,7 @@ HexaLab.App = function (dom_element) {
     this.models = [];
     this.models.visible = new HexaLab.Model(this.app.get_visible_model(), this.visible_surface_material, this.visible_wireframe_material);
     this.models.filtered = new HexaLab.Model(this.app.get_filtered_model(), this.filtered_surface_material, this.filtered_wireframe_material);
-    this.models.singularity = new HexaLab.Model(this.app.get_singularity_model(), this.singularity_surface_material, this.singularity_edge_material);
+    this.models.singularity = new HexaLab.Model(this.app.get_singularity_model(), this.singularity_face_material, this.singularity_edge_material);
 
     // Camera
     this.camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000);
