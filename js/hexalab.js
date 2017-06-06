@@ -526,6 +526,10 @@ HexaLab.App = function (dom_element) {
         self.set_filtered_surface_opacity(ui.value / 100)
         self.set_filtered_wireframe_opacity(ui.value / 100)
     })
+    HexaLab.UI.singularity_opacity.slider().on('slide', function (e, ui) {
+        self.set_singularity_surface_opacity(ui.value / 100)
+        self.set_singularity_wireframe_opacity(ui.value / 100)
+    })
     HexaLab.UI.occlusion.on('click', function () {
         self.set_occlusion(this.checked)
     })
@@ -575,13 +579,13 @@ HexaLab.App = function (dom_element) {
         transparent: true,
         depthWrite: false
     });
-    this.singularity_face_material = new THREE.MeshBasicMaterial({
+    this.singularity_surface_material = new THREE.MeshBasicMaterial({
         transparent: true,
         depthWrite: false,
         vertexColors: THREE.VertexColors,
         side: THREE.DoubleSide,
     });
-    this.singularity_edge_material = new THREE.MeshBasicMaterial({
+    this.singularity_wireframe_material = new THREE.MeshBasicMaterial({
         transparent: true,
         depthWrite: false,
         vertexColors: THREE.VertexColors
@@ -598,7 +602,8 @@ HexaLab.App = function (dom_element) {
         filtered_wireframe_color: '#000000',
         filtered_wireframe_opacity: 0.3,
 
-        singularity_opacity: 0.8,
+        singularity_surface_opacity: 0.8,
+        singularity_wireframe_opacity: 0.8,
 
         color_map: 'rgb'
     }
@@ -607,7 +612,7 @@ HexaLab.App = function (dom_element) {
     this.models = [];
     this.models.visible = new HexaLab.Model(this.app.get_visible_model(), this.visible_surface_material, this.visible_wireframe_material);
     this.models.filtered = new HexaLab.Model(this.app.get_filtered_model(), this.filtered_surface_material, this.filtered_wireframe_material);
-    this.models.singularity = new HexaLab.Model(this.app.get_singularity_model(), this.singularity_face_material, this.singularity_edge_material);
+    this.models.singularity = new HexaLab.Model(this.app.get_singularity_model(), this.singularity_surface_material, this.singularity_wireframe_material);
 
     // Camera
     this.camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000);
@@ -653,6 +658,7 @@ Object.assign(HexaLab.App.prototype, {
         var settings = this.get_settings();
         HexaLab.UI.surface_color.spectrum('set', settings.materials.visible_surface_color)
         HexaLab.UI.filtered_opacity.slider('value', settings.materials.filtered_surface_opacity * 100)
+        HexaLab.UI.singularity_opacity.slider('value', settings.materials.singularity_surface_opacity * 100)
         HexaLab.UI.quality.prop('checked', settings.materials.show_quality_on_visible_surface)
         HexaLab.UI.occlusion.prop('checked', settings.renderer.occlusion)
         HexaLab.UI.color_map.val(settings.materials.color_map)
@@ -715,7 +721,8 @@ Object.assign(HexaLab.App.prototype, {
         this.set_filtered_surface_opacity(settings.filtered_wireframe_opacity)
         this.set_filtered_wireframe_color(settings.filtered_wireframe_color)
         this.set_filtered_wireframe_opacity(settings.filtered_wireframe_opacity)
-        this.set_singularity_opacity(settings.singularity_opacity)
+        this.set_singularity_surface_opacity(settings.singularity_surface_opacity)
+        this.set_singularity_wireframe_opacity(settings.singularity_wireframe_opacity)
         this.set_color_map(settings.color_map)
     },
 
@@ -764,7 +771,8 @@ Object.assign(HexaLab.App.prototype, {
             filtered_surface_opacity: this.filtered_surface_material.opacity,
             filtered_wireframe_color: '#' + this.filtered_wireframe_material.color.getHexString(),
             filtered_wireframe_opacity: this.filtered_wireframe_material.opacity,
-            singularity_opacity: this.singularity_edge_material.opacity,
+            singularity_surface_opacity: this.singularity_surface_material.opacity,
+            singularity_wireframe_opacity: this.singularity_wireframe_material.opacity,
             color_map: this.color_map
         }
     },
@@ -860,10 +868,14 @@ Object.assign(HexaLab.App.prototype, {
         //HexaLab.UI.filtered_wireframe_opacity.slider('value', opacity * 100);
     },
 
-    set_singularity_opacity: function (opacity) {
-        this.singularity_face_material.opacity = opacity;
-        this.singularity_edge_material.opacity = opacity;
-        //HexaLab.UI.singularity_opacity.slider('value', opacity * 100);
+    set_singularity_surface_opacity: function (opacity) {
+        this.singularity_surface_material.opacity = opacity;
+        //HexaLab.UI.filtered_surface_opacity.slider('value', opacity * 100);
+    },
+
+    set_singularity_wireframe_opacity: function (opacity) {
+        this.singularity_wireframe_material.opacity = opacity;
+        //HexaLab.UI.filtered_wireframe_color.val(color);
     },
 
     set_occlusion: function (value) {

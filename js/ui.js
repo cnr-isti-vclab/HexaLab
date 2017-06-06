@@ -44,7 +44,8 @@ HexaLab.UI = {
     filtered_opacity: $('#filtered_slider'),
     quality: $("#show_quality"),
     occlusion: $("#show_occlusion"),
-    color_map: $('#color_map')
+    color_map: $('#color_map'),
+    singularity_opacity: $('#singularity_slider')
 }
 
 // -------------------------------------------------------------------------------- 
