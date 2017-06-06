@@ -207,7 +207,7 @@ namespace HexaLab {
     void Builder::build(Mesh& mesh, const vector<Vector3f>& vertices, const vector<Index>& indices) {
         assert(indices.size() % 8 == 0);
 
-        HL_LOG("Building %d darts...", indices.size() / 8 * 48);
+        HL_LOG("[Builder] Building %d darts...\n", indices.size() / 8 * 48);
 
         auto t0 = sample_time();
 
