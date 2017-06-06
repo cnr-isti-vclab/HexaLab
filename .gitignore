@@ -10,6 +10,3 @@ x84
 src/*.user
 src/.qmake.stash
 build-*/
-
-
-js/generated/hexalab_asm.js
