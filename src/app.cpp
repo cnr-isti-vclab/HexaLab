@@ -72,7 +72,7 @@ namespace HexaLab {
             filters[i]->on_mesh_set(*mesh);
         }
 
-        for (int i = 0; i < mesh->hexas.size(); ++i) {
+        for (auto i = 0; i < mesh->hexas.size(); ++i) {
             hexa_quality.push_back(mesh->hexas[i].scaled_jacobian);
         }
 
