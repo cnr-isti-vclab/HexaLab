@@ -66,6 +66,7 @@ input[type="number"] {
 	position: absolute;
 	margin-top: auto;
 	margin-bottom: auto;
+	border-radius: 25px;
 	border: 1px solid grey;
 }
 
