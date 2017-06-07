@@ -13,6 +13,9 @@
     <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     
+    <script type="text/javascript" id="cookiebanner" src="js/external/cookiebanner.js" 
+                data-height="20px" data-position="top" data-mask="true" 
+                data-message="We use technical, statistical and third parties-cookies to improve HexaLab experience. <br>We DO NOT use profiling and advertising cookies.<br>We reserve the right of tracking your usage of HexaLab for collecting statistical information in aggregate anonymous way. <br><b>Your 3D models will always stay only on your client and NO 3D data is ever transmitted</b>.<br><br>Click anywhere to acknowledge this info and start using HexaLab. " ></script>  
     <script src="js/external/jquery.js"></script>
     <script src="js/external/jquery-ui.min.js"></script>
     <script src="js/external/jquery.dragbetter.js"></script>
@@ -36,14 +39,14 @@
                     <div id="toolbar_wrapper">
                         <h1>HexaLab</h1>
                         <div id="toolbar">
-                            <button id="load_mesh">
-                                <i class="fa fa-folder-open"></i>
+                            <button id="load_mesh" >
+                                <i class="fa fa-folder-open" title="Open a hexahedral mesh from a local file"></i>
                             </button>
                             <button id="home">
-                                <i class="fa fa-home"></i>
+                                <i class="fa fa-home" title="Reset Camera"></i>
                             </button>
                             <button id="plot">
-                                <i class="fa fa-bar-chart"></i>
+                                <i class="fa fa-bar-chart" title="Toggle Hex-Quality Histogram"></i>
                             </button>
                             <button id="load_settings">
                                 <i class="fa fa-gear"></i>
@@ -66,7 +69,7 @@
                     <div id="plane_menu" class="menu_area">
                         <div class="menu_title_wrapper">
                             <div class="menu_title">Plane</div>
-                            <input type="checkbox" class="menu_switch" id="plane_enabled">
+                            <input type="checkbox" class="menu_switch" id="plane_enabled" title="Toggle the filtering of cells beyond a given plane">
                         </div>
                         <div class="menu_content">
                             <div class="menu_row">
@@ -271,7 +274,15 @@
             app.animate();
         }
     </script>
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
 
+      ga('create', 'UA-8044669-5', 'auto');
+      ga('send', 'pageview');
+    </script>
 </body>
 
 </html>
