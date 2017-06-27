@@ -452,8 +452,8 @@ Object.assign(HexaLab.Renderer.prototype, {
             // gather translucent models (and all wireframes)
             for (var k in models) {
                 var model = models[k];
-                if (model.wireframe.material) add_model_wireframe(model);
                 if (model.surface.material && model.surface.material.transparent) add_model_surface(model);
+                if (model.wireframe.material) add_model_wireframe(model);
             }
             for (var k in meshes) {
                 var mesh = meshes[k];

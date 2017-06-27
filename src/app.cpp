@@ -81,7 +81,10 @@ namespace HexaLab {
 
     void App::add_visible_face(Dart& dart, float normal_sign) {
         MeshNavigator nav = mesh->navigate(dart);
-
+        if (normal_sign == -1) {
+            nav = nav.flip_hexa().flip_edge();
+        }
+        
         for (int i = 0; i < 2; ++i) {
             int j = 0;
             for (; j < 2; ++j) {
@@ -179,16 +182,15 @@ namespace HexaLab {
             } else if (nav.hexa().filter_mark == mesh->mark 
                 && nav.dart().hexa_neighbor != -1 
                 && nav.flip_hexa().hexa().filter_mark != mesh->mark) {
-                nav = nav.flip_hexa().flip_edge();
                 add_visible_face(nav.dart(), -1);
+//                add_filtered_face(nav.dart());
                 // face was culled by the plane, is surface
             } else if (nav.hexa().filter_mark == mesh->mark 
-                && (nav.flip_hexa().hexa().filter_mark != mesh->mark 
+                && (nav.flip_hexa().hexa().filter_mark != mesh->mark
                     || nav.dart().hexa_neighbor == -1)) {
                 add_filtered_face(nav.dart());
             }
         }
-
     }
 
     void App::set_color_map(ColorMap map) {
