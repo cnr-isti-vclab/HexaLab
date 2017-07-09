@@ -1,6 +1,7 @@
 #include <app.h>
 #include <plane_filter.h>
 #include <quality_filter.h>
+#include <color_map.h>
 
 using namespace HexaLab;
 using namespace Eigen;
@@ -31,6 +32,14 @@ vector<Vector3f>* get_surface_vert_color(Model& model) { return &model.surface_v
 vector<Vector3f>* get_wireframe_vert_pos(Model& model) { return &model.wireframe_vert_pos; }
 vector<Vector3f>* get_wireframe_vert_color(Model& model) { return &model.wireframe_vert_color; }
 
+void set_color_map(App& app, ColorMap::Palette palette) {
+    app.color_map = ColorMap(palette);
+}
+
+Vector3f map_to_color(App& app, float value) {
+    return app.color_map.get(value);
+}
+
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #include <emscripten/bind.h>
@@ -40,7 +49,6 @@ EMSCRIPTEN_BINDINGS(HexaLab) {
     class_<App>("App")
         .constructor<>()
         .function("build_models", &App::build_models)
-        .function("set_color_map", &App::set_color_map)
         .function("import_mesh", &App::import_mesh)
         .function("add_filter", &App::add_filter, allow_raw_pointers())
         .function("get_mesh", &App::get_mesh, allow_raw_pointers())
@@ -48,11 +56,14 @@ EMSCRIPTEN_BINDINGS(HexaLab) {
         .function("get_filtered_model", &App::get_filtered_model, allow_raw_pointers())
         .function("get_singularity_model", &App::get_singularity_model, allow_raw_pointers())
         .function("get_hexa_quality", &hexa_quality, allow_raw_pointers())
+        .function("set_color_map", &set_color_map)
+        .function("map_to_color", &map_to_color);
         ;
 
-    enum_<App::ColorMap>("ColorMap")
-        .value("RGB", App::ColorMap::RGB)
-        .value("Test", App::ColorMap::Test)
+    enum_<ColorMap::Palette>("ColorMap")
+        .value("Jet", ColorMap::Palette::Jet)
+        .value("Parula", ColorMap::Palette::Parula)
+        .value("RedGreen", ColorMap::Palette::RedGreen)
         ;
 
     enum_<QualityFilter::Operator>("QualityFilterOperator")

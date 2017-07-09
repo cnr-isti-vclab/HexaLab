@@ -278,8 +278,7 @@ HexaLab.Renderer = function (width, height) {
         msaa: true
     };
 
-    //this.camera_light = new THREE.PointLight();
-    this.camera_light = new THREE.DirectionalLight();
+    this.camera_light = new THREE.PointLight();
     this.camera_light.position.set(0, 0, 0);
     this.ambient = new THREE.AmbientLight();
 
@@ -539,6 +538,7 @@ HexaLab.App = function (dom_element) {
     HexaLab.UI.color_map.on('change', function () {
         self.set_color_map(this.options[this.selectedIndex].value)
         self.update()
+        HexaLab.UI.quality_plot_update()
     })
 
     var width = dom_element.offsetWidth;
@@ -605,7 +605,7 @@ HexaLab.App = function (dom_element) {
         singularity_surface_opacity: 0.8,
         singularity_wireframe_opacity: 0.8,
 
-        color_map: 'rgb'
+        color_map: 'Parula'
     }
 
     // Models
@@ -809,10 +809,12 @@ Object.assign(HexaLab.App.prototype, {
     },
 
     set_color_map: function (map) {
-        if (map == 'rgb')
-            this.app.set_color_map(Module.ColorMap.RGB)
-        else if (map == 'test')
-            this.app.set_color_map(Module.ColorMap.Test)
+        if (map == 'Jet')
+            this.app.set_color_map(Module.ColorMap.Jet)
+        else if (map == 'Parula')
+            this.app.set_color_map(Module.ColorMap.Parula)
+        else if (map == 'RedGreen')
+            this.app.set_color_map(Module.ColorMap.RedGreen)
         this.color_map = map
     },
 

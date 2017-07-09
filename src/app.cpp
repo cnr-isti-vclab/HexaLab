@@ -99,15 +99,7 @@ namespace HexaLab {
             visible_model.surface_vert_norm.push_back(normal);
             visible_model.surface_vert_norm.push_back(normal);
 
-            Vector3f color;
-            switch(this->color_map) {
-            case ColorMap::RGB:
-                color = Vector3f(1 - nav.hexa().scaled_jacobian, 0, nav.hexa().scaled_jacobian);
-                break;
-            case ColorMap::Test:
-                color = Vector3f(1 - nav.hexa().scaled_jacobian, nav.hexa().scaled_jacobian, 0);
-                break;
-            }
+            Vector3f color = color_map.get(nav.hexa().scaled_jacobian);
             visible_model.surface_vert_color.push_back(color);
             visible_model.surface_vert_color.push_back(color);
             visible_model.surface_vert_color.push_back(color);
@@ -192,10 +184,4 @@ namespace HexaLab {
             }
         }
     }
-
-    void App::set_color_map(ColorMap map) {
-        this->color_map = map;
-    }
-
-
 }

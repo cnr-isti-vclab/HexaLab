@@ -188,27 +188,45 @@ HexaLab.UI.quality_plot_update = function () {
 
 HexaLab.UI.quality_plot = function(container, axis) {
     var x = [];
-    /*HexaLab.UI.quality_plot_dialog.dialog({
-        resize: function () {
-            Plotly.Plots.resize(container);
-        },
-        title: 'Jacobian Quality',
-        width: 800,
-        height: 500
-    });*/
+    var c = [];
+    var p = [];
+
     var quality = HexaLab.app.app.get_hexa_quality();
     var data = new Float32Array(Module.HEAPU8.buffer, quality.data(), quality.size());
     for (var i = 0; i < quality.size() ; i++) {
-        x[i] = data[i];
+        x[i] = data[i]
+    }
+
+    var bins = 100
+    for (var i = 0; i < bins ; i++) {
+        c[i] = i
+    }
+
+    for (var i = 0; i <= 10; ++i) {
+        var v = i / 10
+        var rgb = HexaLab.app.app.map_to_color(v)
+        var r = (rgb.x() * 255).toFixed(0)
+        var g = (rgb.y() * 255).toFixed(0)
+        var b = (rgb.z() * 255).toFixed(0)
+        p[i] = [v.toString(), 'rgb(' + r + ',' + g + ',' + b + ')']
     }
 
     var plot_data = [{
         type: 'histogram',
         marker: {
-            color: 'rgba(0,0,0,0.7)',
+            cmax: bins - 1,
+            cmin: 0, 
+            color: c,
+            colorscale: p
         },
     }];
     plot_data[0][axis] = x;
+    var bk = axis.concat('bins')
+    plot_data[0][bk] = {
+        size: 1 / bins,
+        start: 0,   
+        end: 1,
+    };
 
     var layout = { 
         xaxis: {
