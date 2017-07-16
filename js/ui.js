@@ -235,7 +235,14 @@ HexaLab.UI.quality_plot = function(container, axis) {
         },
         yaxis: {
             fixedrange: true
-        }
+        },
+        margin: {
+            l: 40,
+            r: 40,
+            b: 40,
+            t: 40,
+            pad: 4
+        },
     };
 
     var options = {
