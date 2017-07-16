@@ -621,6 +621,7 @@ HexaLab.App = function (dom_element) {
     this.default_camera_settings = {
         offset: new THREE.Vector3(0, 0, 0),
         direction: new THREE.Vector3(0, 0, -1),
+        up: new THREE.Vector3(0, 1, 0),
         distance: 2
     }
 
@@ -695,6 +696,7 @@ Object.assign(HexaLab.App.prototype, {
 
         var target = new THREE.Vector3().addVectors(settings.offset, center)
         var direction = settings.direction
+        var up = settings.up
         var distance = settings.distance * size
 
         this.controls.rotateSpeed = 10
@@ -702,7 +704,7 @@ Object.assign(HexaLab.App.prototype, {
         this.controls.target.set(target.x, target.y, target.z)
 
         this.camera.position.set(target.x, target.y, target.z)
-        this.camera.up.set(0, 1, 0)
+        this.camera.up.set(up.x, up.y, up.z)
         this.camera.lookAt(new THREE.Vector3().addVectors(target, direction))
         this.camera.translateZ(distance)
     },
@@ -755,6 +757,7 @@ Object.assign(HexaLab.App.prototype, {
             return {
                 offset: new THREE.Vector3().subVectors(this.controls.target, new THREE.Vector3(c.x(), c.y(), c.z())),
                 direction: this.camera.getWorldDirection(),
+                up: this.camera.up,
                 distance: this.camera.position.distanceTo(this.controls.target) / this.mesh.get_size(),
             }
         }
