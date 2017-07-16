@@ -213,6 +213,7 @@ HexaLab.UI.quality_plot = function(container, axis) {
 
     var plot_data = [{
         type: 'histogram',
+        histnorm: 'probability',
         marker: {
             cmax: bins - 1,
             cmin: 0, 
