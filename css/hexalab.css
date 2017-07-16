@@ -239,7 +239,7 @@ canvas {
     position: fixed;
 	top: 0;
 	bottom: 0;
-	width: 20%;
+	width: 25%;
 
 	height: 100%;
 	transition: 0s;
@@ -265,8 +265,8 @@ canvas {
 	position: fixed;
 	overflow: auto;
 	height: 100%;
-	width: 80%;
-	margin-left: 20%;
+	width: 75%;
+	margin-left: 25%;
 	align-items: stretch;
 }
 

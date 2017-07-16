@@ -15,9 +15,9 @@ namespace HexaLab {
         Builder::build(*mesh, verts, indices);
 
         HL_LOG("Validating...\n");
-        if (!Builder::validate(*mesh)) {
-            return false;
-        }
+        //if (!Builder::validate(*mesh)) {
+            //return false;
+        //}
         
         singularity_model.clear();
         for (size_t i = 0; i < mesh->edges.size(); ++i) {
@@ -108,14 +108,14 @@ namespace HexaLab {
 
     void App::add_visible_wireframe(Dart& dart) {
         MeshNavigator nav = mesh->navigate(dart);
-        if (nav.edge().mark != mesh->mark) {
+        //if (nav.edge().mark != mesh->mark) {
             nav.edge().mark = mesh->mark;
             MeshNavigator edge_nav = nav;
             for (int v = 0; v < 2; ++v) {
                 visible_model.wireframe_vert_pos.push_back(mesh->verts[edge_nav.dart().vert].position);
                 edge_nav = edge_nav.flip_vert();
             }
-        }
+        //}
     }
 
     void App::add_filtered_face(Dart& dart) {
@@ -139,14 +139,14 @@ namespace HexaLab {
 
     void App::add_filtered_wireframe(Dart& dart) {
         MeshNavigator nav = mesh->navigate(dart);
-        if (nav.edge().mark != mesh->mark) {
+        //if (nav.edge().mark != mesh->mark) {
             nav.edge().mark = mesh->mark;
             MeshNavigator edge_nav = nav;
             for (int v = 0; v < 2; ++v) {
                 filtered_model.wireframe_vert_pos.push_back(mesh->verts[edge_nav.dart().vert].position);
                 edge_nav = edge_nav.flip_vert();
             }
-        }
+        //}
     }
 
     void App::build_models() {

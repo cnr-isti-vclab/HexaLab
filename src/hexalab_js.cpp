@@ -73,7 +73,6 @@ EMSCRIPTEN_BINDINGS(HexaLab) {
 
     class_<Model>("Model")
         .constructor<>()
-        .property("dirty", &Model::dirty_flag)
         .function("surface_pos", &get_surface_vert_pos, allow_raw_pointers())
         .function("surface_norm", &get_surface_vert_norm, allow_raw_pointers())
         .function("surface_color", &get_surface_vert_color, allow_raw_pointers())
