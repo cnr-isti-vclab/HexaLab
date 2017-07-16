@@ -581,7 +581,9 @@ HexaLab.App = function (dom_element) {
     });
     this.singularity_surface_material = new THREE.MeshBasicMaterial({
         transparent: true,
-        depthWrite: false,
+        depthWrite: true,
+        polygonOffset: true,
+        polygonOffsetFactor: 0.5,
         vertexColors: THREE.VertexColors,
         side: THREE.DoubleSide,
     });
