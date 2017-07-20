@@ -19,6 +19,7 @@ CFLAGS= -I ./ -I ./eigen -s TOTAL_MEMORY=536870912 --memory-init-file 0 -std=c++
 OBJ = hexalab_js.bc \
       app.bc \
       builder.bc \
+      color_map.cpp \
       loader.bc \
       plane_filter.bc \
       quality_filter.bc \
