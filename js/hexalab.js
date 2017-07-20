@@ -278,8 +278,7 @@ HexaLab.Renderer = function (width, height) {
         msaa: true
     };
 
-    //this.camera_light = new THREE.PointLight();
-    this.camera_light = new THREE.DirectionalLight();
+    this.camera_light = new THREE.PointLight();
     this.camera_light.position.set(0, 0, 0);
     this.ambient = new THREE.AmbientLight();
 
@@ -452,8 +451,8 @@ Object.assign(HexaLab.Renderer.prototype, {
             // gather translucent models (and all wireframes)
             for (var k in models) {
                 var model = models[k];
-                if (model.wireframe.material) add_model_wireframe(model);
                 if (model.surface.material && model.surface.material.transparent) add_model_surface(model);
+                if (model.wireframe.material) add_model_wireframe(model);
             }
             for (var k in meshes) {
                 var mesh = meshes[k];
@@ -539,6 +538,7 @@ HexaLab.App = function (dom_element) {
     HexaLab.UI.color_map.on('change', function () {
         self.set_color_map(this.options[this.selectedIndex].value)
         self.update()
+        HexaLab.UI.quality_plot_update()
     })
 
     var width = dom_element.offsetWidth;
@@ -581,7 +581,9 @@ HexaLab.App = function (dom_element) {
     });
     this.singularity_surface_material = new THREE.MeshBasicMaterial({
         transparent: true,
-        depthWrite: false,
+        depthWrite: true,
+        polygonOffset: true,
+        polygonOffsetFactor: 0.5,
         vertexColors: THREE.VertexColors,
         side: THREE.DoubleSide,
     });
@@ -605,7 +607,7 @@ HexaLab.App = function (dom_element) {
         singularity_surface_opacity: 0.8,
         singularity_wireframe_opacity: 0.8,
 
-        color_map: 'rgb'
+        color_map: 'Parula'
     }
 
     // Models
@@ -621,6 +623,7 @@ HexaLab.App = function (dom_element) {
     this.default_camera_settings = {
         offset: new THREE.Vector3(0, 0, 0),
         direction: new THREE.Vector3(0, 0, -1),
+        up: new THREE.Vector3(0, 1, 0),
         distance: 2
     }
 
@@ -695,6 +698,7 @@ Object.assign(HexaLab.App.prototype, {
 
         var target = new THREE.Vector3().addVectors(settings.offset, center)
         var direction = settings.direction
+        var up = settings.up
         var distance = settings.distance * size
 
         this.controls.rotateSpeed = 10
@@ -702,7 +706,7 @@ Object.assign(HexaLab.App.prototype, {
         this.controls.target.set(target.x, target.y, target.z)
 
         this.camera.position.set(target.x, target.y, target.z)
-        this.camera.up.set(0, 1, 0)
+        this.camera.up.set(up.x, up.y, up.z)
         this.camera.lookAt(new THREE.Vector3().addVectors(target, direction))
         this.camera.translateZ(distance)
     },
@@ -755,6 +759,7 @@ Object.assign(HexaLab.App.prototype, {
             return {
                 offset: new THREE.Vector3().subVectors(this.controls.target, new THREE.Vector3(c.x(), c.y(), c.z())),
                 direction: this.camera.getWorldDirection(),
+                up: this.camera.up,
                 distance: this.camera.position.distanceTo(this.controls.target) / this.mesh.get_size(),
             }
         }
@@ -809,10 +814,12 @@ Object.assign(HexaLab.App.prototype, {
     },
 
     set_color_map: function (map) {
-        if (map == 'rgb')
-            this.app.set_color_map(Module.ColorMap.RGB)
-        else if (map == 'test')
-            this.app.set_color_map(Module.ColorMap.Test)
+        if (map == 'Jet')
+            this.app.set_color_map(Module.ColorMap.Jet)
+        else if (map == 'Parula')
+            this.app.set_color_map(Module.ColorMap.Parula)
+        else if (map == 'RedGreen')
+            this.app.set_color_map(Module.ColorMap.RedGreen)
         this.color_map = map
     },
 

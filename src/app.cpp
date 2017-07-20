@@ -15,9 +15,9 @@ namespace HexaLab {
         Builder::build(*mesh, verts, indices);
 
         HL_LOG("Validating...\n");
-        if (!Builder::validate(*mesh)) {
-            return false;
-        }
+        //if (!Builder::validate(*mesh)) {
+            //return false;
+        //}
         
         singularity_model.clear();
         for (size_t i = 0; i < mesh->edges.size(); ++i) {
@@ -81,7 +81,10 @@ namespace HexaLab {
 
     void App::add_visible_face(Dart& dart, float normal_sign) {
         MeshNavigator nav = mesh->navigate(dart);
-
+        if (normal_sign == -1) {
+            nav = nav.flip_hexa().flip_edge();
+        }
+        
         for (int i = 0; i < 2; ++i) {
             int j = 0;
             for (; j < 2; ++j) {
@@ -96,15 +99,7 @@ namespace HexaLab {
             visible_model.surface_vert_norm.push_back(normal);
             visible_model.surface_vert_norm.push_back(normal);
 
-            Vector3f color;
-            switch(this->color_map) {
-            case ColorMap::RGB:
-                color = Vector3f(1 - nav.hexa().scaled_jacobian, 0, nav.hexa().scaled_jacobian);
-                break;
-            case ColorMap::Test:
-                color = Vector3f(1 - nav.hexa().scaled_jacobian, nav.hexa().scaled_jacobian, 0);
-                break;
-            }
+            Vector3f color = color_map.get(nav.hexa().scaled_jacobian);
             visible_model.surface_vert_color.push_back(color);
             visible_model.surface_vert_color.push_back(color);
             visible_model.surface_vert_color.push_back(color);
@@ -113,14 +108,14 @@ namespace HexaLab {
 
     void App::add_visible_wireframe(Dart& dart) {
         MeshNavigator nav = mesh->navigate(dart);
-        if (nav.edge().mark != mesh->mark) {
+        //if (nav.edge().mark != mesh->mark) {
             nav.edge().mark = mesh->mark;
             MeshNavigator edge_nav = nav;
             for (int v = 0; v < 2; ++v) {
                 visible_model.wireframe_vert_pos.push_back(mesh->verts[edge_nav.dart().vert].position);
                 edge_nav = edge_nav.flip_vert();
             }
-        }
+        //}
     }
 
     void App::add_filtered_face(Dart& dart) {
@@ -144,14 +139,14 @@ namespace HexaLab {
 
     void App::add_filtered_wireframe(Dart& dart) {
         MeshNavigator nav = mesh->navigate(dart);
-        if (nav.edge().mark != mesh->mark) {
+        //if (nav.edge().mark != mesh->mark) {
             nav.edge().mark = mesh->mark;
             MeshNavigator edge_nav = nav;
             for (int v = 0; v < 2; ++v) {
                 filtered_model.wireframe_vert_pos.push_back(mesh->verts[edge_nav.dart().vert].position);
                 edge_nav = edge_nav.flip_vert();
             }
-        }
+        //}
     }
 
     void App::build_models() {
@@ -179,21 +174,14 @@ namespace HexaLab {
             } else if (nav.hexa().filter_mark == mesh->mark 
                 && nav.dart().hexa_neighbor != -1 
                 && nav.flip_hexa().hexa().filter_mark != mesh->mark) {
-                nav = nav.flip_hexa().flip_edge();
                 add_visible_face(nav.dart(), -1);
+//                add_filtered_face(nav.dart());
                 // face was culled by the plane, is surface
             } else if (nav.hexa().filter_mark == mesh->mark 
-                && (nav.flip_hexa().hexa().filter_mark != mesh->mark 
+                && (nav.flip_hexa().hexa().filter_mark != mesh->mark
                     || nav.dart().hexa_neighbor == -1)) {
                 add_filtered_face(nav.dart());
             }
         }
-
     }
-
-    void App::set_color_map(ColorMap map) {
-        this->color_map = map;
-    }
-
-
 }

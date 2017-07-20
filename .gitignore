@@ -10,3 +10,4 @@ x84
 src/*.user
 src/.qmake.stash
 build-*/
+/nbproject

@@ -14,6 +14,7 @@ HexaLab.UI.plane_snap_ny = $('#plane_snap_ny')
 HexaLab.UI.plane_snap_nz = $('#plane_snap_nz')
 HexaLab.UI.plane_swap = $('#plane_swap_sign')
 HexaLab.UI.plane_snap_camera = $('#plane_snap_camera')
+HexaLab.UI.plane_visibility = $('#plane_visibility')
 
 // --------------------------------------------------------------------------------
 // Logic
@@ -88,6 +89,16 @@ HexaLab.PlaneFilter = function () {
         self.sync()
         HexaLab.app.update()
     })
+    HexaLab.UI.plane_visibility.change(function () {
+        var visible = $(this).is(':checked')
+        if (visible) {
+            self.plane.material.opacity = self.opacity
+        } else {
+            self.opacity = self.plane.material.opacity
+            self.plane.material.opacity = 0
+        }
+        HexaLab.app.update()
+    })
 
     /*HexaLab.UI.plane_color.change(function () {
         self.set_plane_color($(this).val());
@@ -157,6 +168,7 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
         HexaLab.UI.plane_nz.val(this.plane.normal.z.toFixed(3));
 
         HexaLab.UI.plane_enabled.prop('checked', this.filter.enabled)
+        HexaLab.UI.plane_visibility.prop('checked', this.opacity > 0)
 
         //HexaLab.UI.plane_opacity.slider('value', opacity * 100);
         //HexaLab.UI.plane_color.val(color);
@@ -182,7 +194,8 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
     },
 
     set_plane_opacity: function (opacity) {
-        this.plane.material.opacity = opacity;
+        this.plane.material.opacity = opacity
+        this.opacity = opacity
     },
 
     set_plane_color: function (color) {
