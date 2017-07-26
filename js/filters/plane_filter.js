@@ -92,10 +92,9 @@ HexaLab.PlaneFilter = function () {
     HexaLab.UI.plane_visibility.change(function () {
         var visible = $(this).is(':checked')
         if (visible) {
-            self.plane.material.opacity = self.opacity
+            self.plane.mesh.visible = true
         } else {
-            self.opacity = self.plane.material.opacity
-            self.plane.material.opacity = 0
+            self.plane.mesh.visible = false
         }
         HexaLab.app.update()
     })
@@ -156,6 +155,7 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
         this.plane.mesh = new THREE.Mesh(geometry, this.plane.material);
         this.scene.add(this.plane.mesh);
         this.set_settings(this.get_settings());
+        this.sync()
         this.update_mesh();
     },
 
@@ -168,7 +168,11 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
         HexaLab.UI.plane_nz.val(this.plane.normal.z.toFixed(3));
 
         HexaLab.UI.plane_enabled.prop('checked', this.filter.enabled)
-        HexaLab.UI.plane_visibility.prop('checked', this.opacity > 0)
+        if (!this.plane.mesh) {
+            HexaLab.UI.plane_visibility.prop('checked', false)
+        } else {
+            HexaLab.UI.plane_visibility.prop('checked', this.plane.mesh.visible)
+        }
 
         //HexaLab.UI.plane_opacity.slider('value', opacity * 100);
         //HexaLab.UI.plane_color.val(color);
@@ -195,7 +199,6 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
 
     set_plane_opacity: function (opacity) {
         this.plane.material.opacity = opacity
-        this.opacity = opacity
     },
 
     set_plane_color: function (color) {
