@@ -12,7 +12,11 @@ HexaLab.UI = {
     // --------------------------------------------------------------------------------
     // DOM page bindings
     // --------------------------------------------------------------------------------
-    frame: $('#frame_wrapper'),
+    frame: $('#frame'),
+
+    menu: $('#GUI'),
+
+    display: $('#display'),
 
     dragdrop_overlay: $('#drag_drop_overlay'),
     dragdrop_mesh: $('#mesh_drag_drop_quad'),
@@ -271,7 +275,23 @@ HexaLab.UI.quality_plot = function(container, axis) {
 }
 
 // --------------------------------------------------------------------------------
-// Toolbar listeners
+// Side menu resize
+// --------------------------------------------------------------------------------
+HexaLab.UI.menu.resizable({
+    handles: 'e',
+    minWidth: 300,
+    maxWidth: 600
+})
+
+HexaLab.UI.menu.on('resize', function () {
+    var width = HexaLab.UI.display.width() - HexaLab.UI.menu.width()
+    HexaLab.UI.frame.css('margin-left', HexaLab.UI.menu.width()) 
+    HexaLab.UI.frame.width(width)
+    HexaLab.app.resize()
+})
+
+// --------------------------------------------------------------------------------
+// Toolbar
 // --------------------------------------------------------------------------------
 
 HexaLab.UI.load_mesh.on('click', function () {
@@ -330,10 +350,11 @@ HexaLab.UI.about.on('click', function () {
         HexaLab.UI.about_dialog.dialog('close')
         delete HexaLab.UI.about_dialog;
     } else {
-        HexaLab.UI.about_dialog = $('<div title="About">\\m/</div>').dialog({
+        HexaLab.UI.about_dialog = $('<div title="About"></div>').dialog({
             close: function()
             {
-                $(this).dialog('destroy').remove()
+                $(this).dialog('close')
+                delete HexaLab.UI.about_dialog;
             }
         });
     }

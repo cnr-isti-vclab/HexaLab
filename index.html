@@ -39,33 +39,36 @@
                     <div id="toolbar_wrapper">
                         <h1>HexaLab</h1>
                         <div id="toolbar">
-                            <button id="load_mesh" >
-                                <i class="fa fa-folder-open" title="Open a hexahedral mesh from a local file"></i>
+                            <button id="load_mesh" title="Open a hexahedral mesh from a local file">
+                                <i class="fa fa-folder-open"></i>
                             </button>
-                            <button id="home">
-                                <i class="fa fa-home" title="Reset Camera"></i>
+                            <button id="home" title="Reset Camera">
+                                <i class="fa fa-home"></i>
                             </button>
-                            <button id="plot">
-                                <i class="fa fa-bar-chart" title="Toggle Hex-Quality Histogram"></i>
+                            <button id="plot" title="Toggle Hex-Quality Histogram">
+                                <i class="fa fa-bar-chart"></i>
                             </button>
-                            <button id="load_settings">
+                            <button id="load_settings" title="Load settings">
                                 <i class="fa fa-gear"></i>
                             </button>
-                            <button id="save_settings">
+                            <button id="save_settings" title="Store current settings">
                                 <i class="fa fa-floppy-o"></i>
                             </button>
-                            <button id="snapshot">
+                            <button id="snapshot" title="Take a snapshot">
                                 <i class="fa fa-camera"></i>
                             </button>
-                            <button id="github">
+                            <button id="github" title="GitHub page">
                                 <i class="fa fa-github"></i>
+                            </button>
+                            <button id="about" title="About">
+                                <i class="fa fa-question"></i>
                             </button>
                         </div>
                     </div>
 
                     <div id="plane_menu" class="menu_area">
                         <div class="menu_title_wrapper">
-                            <div class="menu_title">Plane</div>
+                            <div class="menu_title">Clipping plane</div>
                             <input type="checkbox" class="menu_switch" id="plane_enabled" title="Toggle the filtering of cells beyond a given plane">
                         </div>
                         <div class="menu_content">
@@ -86,13 +89,13 @@
                                         <input type="number" id="plane_offset_number">
                                     </div>
                                     <div class="menu_row_input_block">
-                                        <button id="plane_snap_nx">X</button>
-                                        <button id="plane_snap_ny">Y</button>
-                                        <button id="plane_snap_nz">Z</button>
-                                        <button id="plane_swap_sign">
+                                        <button id="plane_snap_nx" title="Align normal vector with the X axis">X</button>
+                                        <button id="plane_snap_ny" title="Align normal vector with the Y axis">Y</button>
+                                        <button id="plane_snap_nz" title="Align normal vector with the Z axis">Z</button>
+                                        <button id="plane_swap_sign" title="Swap clipping side">
                                             <i class="fa fa-exchange"></i>
                                         </button>
-                                        <button id="plane_snap_camera">
+                                        <button id="plane_snap_camera" title="Align normal vector with camera">
                                             <i class="fa fa-eye"></i>
                                         </button>
                                     </div>
@@ -125,7 +128,7 @@
                                         <select id="quality_type">
                                             <option>Scaled Jacobian</option>
                                         </select>
-                                        <button id="quality_swap_range">
+                                        <button id="quality_swap_range" title="Swap quality range">
                                             <i class="fa fa-exchange"></i>
                                         </button>
                                     </div>
@@ -194,7 +197,7 @@
 
                     <div id="log_menu" class="menu_area">
                         <div class="menu_title_wrapper">
-                            <div class="menu_title">Log output</div>
+                            <div class="menu_title">Log</div>
                         </div>
                         <div class="menu_content">
                             <textarea id="logger" readonly></textarea>
@@ -204,8 +207,7 @@
             </div>
             <span id="nav_opener">&#9776;</span>
         </div>
-        <div id="frame_wrapper">
-            <div id="frame"></div>
+        <div id="frame">
             <div id="drag_drop_overlay">
                 <div id="mesh_drag_drop_area">
                     <div id="mesh_drag_drop_quad" class="drag_drop_quad_off">

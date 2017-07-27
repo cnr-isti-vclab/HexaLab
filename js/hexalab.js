@@ -125,6 +125,8 @@ HexaLab.Renderer = function (width, height) {
     this.height = height;
     this.aspect = width / height;
 
+    this.empty = true
+
     this.gizmo = function (size) {
         var obj = new THREE.Object3D();
         obj.position.set(0, 0, 0);
@@ -283,6 +285,9 @@ HexaLab.Renderer = function (width, height) {
     this.ambient = new THREE.AmbientLight();
 
     this.renderer.autoClear = false;
+
+    this.renderer.setClearColor(0x000000)
+    this.renderer.clear()
 }
 
 Object.assign(HexaLab.Renderer.prototype, {
@@ -368,6 +373,10 @@ Object.assign(HexaLab.Renderer.prototype, {
         this.ssao_pass.target.setSize(width, height);
 
         this.renderer.setSize(width, height);
+
+        if (this.empty) {
+            this.renderer.clear()
+        }
     },
 
     render: function (models, meshes, camera, settings) {
@@ -391,6 +400,8 @@ Object.assign(HexaLab.Renderer.prototype, {
                 mesh.frustumCulled = false;
             }
         }
+
+        this.empty = false
 
         // prepare renderer
         var do_ssao = this.settings.ssao;
@@ -546,7 +557,6 @@ HexaLab.App = function (dom_element) {
 
     // Renderer
     this.renderer = new HexaLab.Renderer(width, height);
-    this.renderer_settings = this.default_renderer_settings;
 
     this.default_renderer_settings = {
         occlusion: false,
@@ -557,7 +567,7 @@ HexaLab.App = function (dom_element) {
         element: this.renderer.get_element(),
         container: dom_element
     }
-    dom_element.appendChild(this.canvas.element);
+    this.canvas.container.appendChild(this.canvas.element);
 
     // Materials
     this.visible_surface_material = new THREE.MeshLambertMaterial({
