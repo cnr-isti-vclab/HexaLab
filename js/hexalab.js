@@ -203,7 +203,7 @@ HexaLab.Renderer = function (width, height) {
             },
         }),
         target: new THREE.WebGLRenderTarget(width, height, {
-            format: THREE.RGBFormat,
+            format: THREE.RGBAFormat,
             type: THREE.FloatType,
             minFilter: THREE.NearestFilter,
             magFilter: THREE.NearestFilter,
@@ -379,7 +379,7 @@ Object.assign(HexaLab.Renderer.prototype, {
         }
     },
 
-    render: function (models, meshes, camera, settings) {
+    render: function (models, meshes, camera) {
         var self = this;
         function clear_scene() {
             while (self.scene.children.length > 0) {
@@ -412,6 +412,8 @@ Object.assign(HexaLab.Renderer.prototype, {
 
         // render
         if (do_ssao) {
+            this.renderer.setRenderTarget()
+
             // gather opaque surface models
             for (var k in models) {
                 var model = models[k];
@@ -436,10 +438,10 @@ Object.assign(HexaLab.Renderer.prototype, {
             this.scene.overrideMaterial = null;
 
             // render opaque models
-            this.renderer.setRenderTarget(null);
+            this.renderer.setRenderTarget();
             this.renderer.clear();
             this.renderer.render(this.scene, camera);
-
+            
             // clean up
             clear_scene();
             camera.remove(this.camera_light);
@@ -481,6 +483,9 @@ Object.assign(HexaLab.Renderer.prototype, {
             clear_scene();
             camera.remove(this.camera_light);
         } else {
+            this.renderer.setRenderTarget();
+            this.renderer.clear();
+
             // fill scene
             for (var k in models) {
                 var model = models[k];
@@ -560,7 +565,7 @@ HexaLab.App = function (dom_element) {
 
     this.default_renderer_settings = {
         occlusion: false,
-        antialiasing: true
+        antialiasing: true,
     };
 
     this.canvas = {
@@ -846,63 +851,51 @@ Object.assign(HexaLab.App.prototype, {
             //HexaLab.UI.visible_surface_color.show();
             //$("label[for='" + HexaLab.UI.visible_surface_color.attr('id') + "']").show();
         }
-        //HexaLab.UI.visible_surface_show_quality.prop('checked', show);
         this.visible_surface_material.needsUpdate = true;
     },
 
     set_visible_surface_color: function (color) {
         this.visible_surface_material.color.set(color);
-        //HexaLab.UI.visible_surface_color.val(color);
     },
 
     set_visible_wireframe_color: function (color) {
         this.visible_wireframe_material.color.set(color);
-        //HexaLab.UI.visible_wireframe_color.val(color);
     },
 
     set_visible_wireframe_opacity: function (opacity) {
         this.visible_wireframe_material.opacity = opacity;
-        //HexaLab.UI.visible_wireframe_opacity.slider('value', opacity * 100);
     },
 
     set_filtered_surface_color: function (color) {
         this.filtered_surface_material.color.set(color);
-        //HexaLab.UI.filtered_surface_color.val(color);
     },
 
     set_filtered_surface_opacity: function (opacity) {
         this.filtered_surface_material.opacity = opacity;
-        //HexaLab.UI.filtered_surface_opacity.slider('value', opacity * 100);
     },
 
     set_filtered_wireframe_color: function (color) {
         this.filtered_wireframe_material.color.set(color);
-        //HexaLab.UI.filtered_wireframe_color.val(color);
     },
 
     set_filtered_wireframe_opacity: function (opacity) {
         this.filtered_wireframe_material.opacity = opacity;
-        //HexaLab.UI.filtered_wireframe_opacity.slider('value', opacity * 100);
     },
 
     set_singularity_surface_opacity: function (opacity) {
         this.singularity_surface_material.opacity = opacity;
-        //HexaLab.UI.filtered_surface_opacity.slider('value', opacity * 100);
     },
 
     set_singularity_wireframe_opacity: function (opacity) {
         this.singularity_wireframe_material.opacity = opacity;
-        //HexaLab.UI.filtered_wireframe_color.val(color);
     },
 
     set_occlusion: function (value) {
         this.renderer.set_ssao(value);
-        //HexaLab.UI.ssao.prop('checked', value);
     },
 
     set_antialiasing: function (value) {
         this.renderer.set_msaa(value);
-        //HexaLab.UI.msaa.prop('checked', value);
     },
     
     // Mesh
@@ -957,7 +950,7 @@ Object.assign(HexaLab.App.prototype, {
                 }
             }
 
-            this.renderer.render(this.models, meshes, this.camera, this.renderer_settings);
+            this.renderer.render(this.models, meshes, this.camera);
             //this.stats.end();
         }
 
