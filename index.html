@@ -66,6 +66,36 @@
                         </div>
                     </div>
 
+                    <div id="model_menu" class="menu_area">
+                        <div class="menu_title_wrapper">
+                            <div class="menu_title">Hex model</div>
+                        </div>
+                        <div class="menu_content">
+                            <div class="menu_row">
+                                <div class="menu_row_label">Source</div>
+                                <div class="menu_row_input">
+                                    <select id="mesh_source">
+                                        <option selected="selected">From File</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="menu_row">
+                                <div id="mesh_info_1" class="menu_row_infobox">
+                                </div>
+                            </div>
+                            <div class="menu_row">
+                                <div class="menu_row_input">
+                                    <select id="paper_mesh_picker">
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="menu_row">
+                                <div id="mesh_info_2" class="menu_row_infobox">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div id="plane_menu" class="menu_area">
                         <div class="menu_title_wrapper">
                             <div class="menu_title">Clipping plane</div>
@@ -229,25 +259,6 @@
         </div>
     </div>
 
-    <div id="load_mesh_dialog">
-        <p><label>Source <select id="load_mesh_dialog_mode_select">
-            <option value="local" selected="selected">Local</option>
-            <option value="paper">Paper</option>
-        </select></label></p>
-
-        <p id="load_mesh_dialog_paper">
-            <label>Paper <select id="load_mesh_dialog_paper_select"></select></label>
-        </p>
-        
-        <p id="load_mesh_dialog_paper_mesh">
-            <label>Mesh <select id="load_mesh_dialog_paper_mesh_select"></select></label>
-        </p>
-
-        <p>
-            <button id="load_mesh_dialog_load">Load</button>
-        </p>
-    </div>
-
     <!-- Emscripten module -->
     <script src="js/module.js"></script>
     <!-- Emscripten compiled cpp code -->
@@ -261,21 +272,6 @@
     <script type="text/javascript">
         window.onload = function () {
             var app = new HexaLab.App(document.getElementById('frame'));
-/*
-            document.getElementById('nav_opener').addEventListener('click', function () {
-                document.getElementById('sidenav').style.width = '20%';
-                document.getElementById('frame').style.width = '80%';
-                document.getElementById('frame').style.marginLeft = '20%';
-                app.resize();
-            })
-
-            document.getElementById('nav_closer').addEventListener('click', function () {
-                document.getElementById('sidenav').style.width = '0';
-                document.getElementById('frame').style.width = '100%';
-                document.getElementById('frame').style.marginLeft = '0';
-                app.resize();
-            })
-*/
             app.animate();
         }
     </script>

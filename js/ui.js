@@ -25,13 +25,10 @@ HexaLab.UI = {
     file_input: $('<input type="file">'),
 
     // Mesh dialog
-    load_mesh_dialog: $('#load_mesh_dialog'),
-    load_mesh_dialog_mode: $('#load_mesh_dialog_mode_select'),
-    load_mesh_dialog_paper_div: $('#load_mesh_dialog_paper'),
-    load_mesh_dialog_paper_select: $('#load_mesh_dialog_paper_select'),
-    load_mesh_dialog_paper_mesh_div: $('#load_mesh_dialog_paper_mesh'),
-    load_mesh_dialog_paper_mesh_select: $('#load_mesh_dialog_paper_mesh_select'),
-    load_mesh_dialog_ok: $('#load_mesh_dialog_load'),
+    mesh_info_1: $('#mesh_info_1'),
+    mesh_info_2: $('#mesh_info_2'),
+    mesh_source: $('#mesh_source'),
+    paper_mesh_picker: $('#paper_mesh_picker'),
 
     // Toolbar
     load_mesh: $('#load_mesh'),
@@ -84,50 +81,23 @@ HexaLab.UI.settings_save_trigger = function () {
 // --------------------------------------------------------------------------------
 HexaLab.UI.import_mesh = function (file) {
     HexaLab.UI.file_reader.onload = function () {
-        var data = new Int8Array(this.result);
-        HexaLab.FS.make_file(data, file.name);
-        HexaLab.app.import_mesh(file.name);
+        var data = new Int8Array(this.result)
+        HexaLab.FS.make_file(data, file.name)
+        HexaLab.app.import_mesh(file.name)
         HexaLab.UI.quality_plot_update()
+        HexaLab.UI.mesh_info_1.show()
+        HexaLab.UI.mesh_info_1.text(file.name)
     }
-    HexaLab.UI.file_reader.readAsArrayBuffer(file, "UTF-8");
+    HexaLab.UI.file_reader.readAsArrayBuffer(file, "UTF-8")
 }
 
 HexaLab.UI.import_settings = function (file) {
     HexaLab.UI.file_reader.onload = function () {
-        var settings = JSON.parse(this.result);
-        HexaLab.app.set_settings(settings);
+        var settings = JSON.parse(this.result)
+        HexaLab.app.set_settings(settings)
     }
-    HexaLab.UI.file_reader.readAsText(file, "UTF-8");
+    HexaLab.UI.file_reader.readAsText(file, "UTF-8")
 }
-
-// --------------------------------------------------------------------------------
-// Mesh load dialog
-// --------------------------------------------------------------------------------
-
-HexaLab.UI.load_mesh_dialog.dialog({
-    autoOpen: false,
-    modal: true,
-    title: 'Mesh Import'
-})
-
-HexaLab.UI.load_mesh_dialog_ok.button().on('click', function () {
-    HexaLab.UI.mesh_load_trigger();
-    HexaLab.UI.load_mesh_dialog.dialog('close');
-});
-HexaLab.UI.load_mesh_dialog_paper_div.hide();
-HexaLab.UI.load_mesh_dialog_paper_mesh_div.hide();
-
-HexaLab.UI.load_mesh_dialog_mode.on('change', function () {
-    if ($(this).val() == 'local') {
-        HexaLab.UI.load_mesh_dialog_paper_div.hide();
-        HexaLab.UI.load_mesh_dialog_paper_mesh_div.hide();
-        HexaLab.UI.load_mesh_dialog_ok.show();
-    } else if ($(this).val() == 'paper') {
-        HexaLab.UI.load_mesh_dialog_paper_div.show();
-        HexaLab.UI.load_mesh_dialog_paper_mesh_div.hide();
-        HexaLab.UI.load_mesh_dialog_ok.hide();
-    }
-})
 
 // --------------------------------------------------------------------------------
 // Drag n Drop logic
