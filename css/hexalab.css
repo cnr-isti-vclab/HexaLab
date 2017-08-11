@@ -184,13 +184,31 @@ input {
 .menu_area .menu_content .menu_row .menu_row_infobox {
 	border: 1px solid #c5c5c5;
 	background-color: white;
-	padding-left: 5px;
-	padding-right: 5px;
+	padding: 5px;
 	width: 100%;
+	line-height: 100%;
 	margin-top: 5px;
 	margin-bottom: 5px;
 	font-size: 90%;
 }
+
+.menu_area .menu_content .menu_row .menu_row_infobox .mesh-name {
+	font-weight: bold;
+}
+
+.menu_area .menu_content .menu_row .menu_row_infobox .paper-title {
+	font-weight: bold;
+}
+
+.menu_area .menu_content .menu_row .menu_row_infobox .paper-authors {
+	font-size: 80%;
+}
+
+.menu_area .menu_content .menu_row .menu_row_infobox .paper-venue {
+	font-size: 80%;
+	font-style: italic;
+}
+
 
 .menu_area .menu_content .menu_row #mesh_source {
 	font-style: italic;

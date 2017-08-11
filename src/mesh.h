@@ -94,9 +94,6 @@ class Mesh {
 
         uint64_t mark = 0;
         AlignedBox3f aabb;
-        float min_edge_len;
-        float max_edge_len;
-        float avg_edge_len;
         
         MeshNavigator navigate(Dart& dart) { return MeshNavigator(dart, *this); }
         MeshNavigator navigate(Hexa& hexa) { Dart& d = darts[hexa.dart]; return navigate(d); }

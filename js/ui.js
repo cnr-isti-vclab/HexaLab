@@ -86,20 +86,16 @@ HexaLab.UI = {
 // -------------------------------------------------------------------------------- 
 // Mesh/settings load/save trigger functions
 // --------------------------------------------------------------------------------
-HexaLab.UI.mesh_load_trigger = function () {
-    HexaLab.UI.file_input.val(null);
-    HexaLab.UI.file_input.off('change').change(function () {
-        var file = this.files[0];
-        HexaLab.UI.import_mesh(file);
+HexaLab.UI.mesh_local_load_trigger = function () {
+    HexaLab.UI.file_input.val(null).off('change').change(function () {
+        HexaLab.UI.import_local_mesh(this.files[0]);
     })
     HexaLab.UI.file_input.click();
 }
 
 HexaLab.UI.settings_load_trigger = function () {
-    HexaLab.UI.file_input.val(null);
-    HexaLab.UI.file_input.off('change').change(function () {
-        var file = this.files[0];
-        HexaLab.UI.import_settings(file);
+    HexaLab.UI.file_input.val(null).off('change').change(function () {
+        HexaLab.UI.import_settings(this.files[0]);
     })
     HexaLab.UI.file_input.click();
 }
@@ -113,20 +109,47 @@ HexaLab.UI.settings_save_trigger = function () {
 // -------------------------------------------------------------------------------- 
 // Mesh/settings file bind and dispatch
 // --------------------------------------------------------------------------------
-HexaLab.UI.import_mesh = function (file) {
+HexaLab.UI.import_mesh = function (byte_array, name, ui_callback) {
+    HexaLab.FS.make_file(byte_array, name)
+    HexaLab.app.import_mesh(name)
+    HexaLab.UI.quality_plot_update()
+    ui_callback()
+}
+
+HexaLab.UI.import_local_mesh = function (file) {
     HexaLab.UI.file_reader.onload = function () {
         var data = new Int8Array(this.result)
-        HexaLab.FS.make_file(data, file.name)
-        HexaLab.app.import_mesh(file.name)
-        HexaLab.UI.quality_plot_update()
-        HexaLab.UI.mesh_source.val("-1")
-        HexaLab.UI.mesh_info_1.show()
-        HexaLab.UI.mesh_info_1.text(file.name)
-        HexaLab.UI.paper_mesh_picker.hide()
-        HexaLab.UI.mesh_info_2.hide()
-        HexaLab.UI.mesh_source.css('font-style', 'normal')
+        HexaLab.UI.import_mesh(data, file.name, function () {
+            var stats = HexaLab.app.app.get_mesh_stats()
+
+            HexaLab.UI.mesh_source.val("-1").css('font-style', 'normal')
+            HexaLab.UI.mesh_info_1.empty().append('<span class="mesh-name">' + file.name + '</span>' + '<br/>' + 
+                '<span>' + stats.vert_count + ' vertices ' + '</span>' + '<br />' +
+                '<span>' + stats.hexa_count + ' hexas ' + '</span>').show()
+            HexaLab.UI.paper_mesh_picker.hide()
+            HexaLab.UI.mesh_info_2.hide()
+        })
     }
     HexaLab.UI.file_reader.readAsArrayBuffer(file, "UTF-8")
+}
+
+HexaLab.UI.import_remote_mesh = function (source, name) {
+    var request = new XMLHttpRequest();
+    request.open('GET', 'datasets/' + source.path + '/' + name, true);
+    request.responseType = 'arraybuffer';
+    request.onload = function(e) {
+        var data = new Uint8Array(this.response); 
+        HexaLab.UI.import_mesh(data, name, function () {
+            var stats = HexaLab.app.app.get_mesh_stats()
+            HexaLab.UI.mesh_info_2.empty().append(stats.vert_count + ' vertices <br />' +
+                stats.hexa_count + ' hexas </span>')
+        })
+    };
+    request.send();
+
+    HexaLab.UI.mesh_info_2.text('Loading...')
+    HexaLab.UI.paper_mesh_picker.css('font-style', 'normal')
+    HexaLab.UI.mesh_info_2.show()
 }
 
 HexaLab.UI.import_settings = function (file) {
@@ -142,10 +165,10 @@ HexaLab.UI.import_settings = function (file) {
 // --------------------------------------------------------------------------------
 
 $.ajax({
-    url: 'datasets/index.json'
-}).done(function(text) {
-    HexaLab.UI.datasets_index = JSON.parse(text)
-    console.log(HexaLab.UI.datasets_index)
+    url: 'datasets/index.json',
+    dataType: 'json'
+}).done(function(data) {
+    HexaLab.UI.datasets_index = data
 
     $.each(HexaLab.UI.datasets_index.sources, function (i, source) {
         HexaLab.UI.mesh_source.append($('<option>', { 
@@ -160,12 +183,14 @@ HexaLab.UI.mesh_source.on("change", function () {
 
     var v = this.options[this.selectedIndex].value
     if (v == "-1") {
-        HexaLab.UI.mesh_load_trigger()
+        HexaLab.UI.mesh_local_load_trigger()
     } else {
         var i = parseInt(v)
         var source = HexaLab.UI.datasets_index.sources[i]
 
-        HexaLab.UI.mesh_info_1.text(source.paper.title)
+        HexaLab.UI.mesh_info_1.empty().append('<span class="paper-title">' + source.paper.title + '</span>' + '<br />' +
+            '<span class="paper-authors">' + source.paper.authors + '</span>' + ' - ' + 
+            '<span class="paper-venue">' + source.paper.venue + ' (' + source.paper.year + ') ' + '</span>')
         HexaLab.UI.mesh_info_1.show()
 
         HexaLab.UI.paper_mesh_picker.empty().css('font-style', 'italic')
@@ -192,21 +217,7 @@ HexaLab.UI.paper_mesh_picker.on("change", function () {
     var source = HexaLab.UI.datasets_index.sources[j]
     var mesh = source.data[i]
 
-    var request = new XMLHttpRequest();
-    request.open('GET', 'datasets/' + source.path + '/' + mesh, true);
-    request.responseType = 'arraybuffer';
-    request.onload = function(e) {
-        var data = new Uint8Array(this.response); 
-        HexaLab.FS.make_file(data, mesh)
-        HexaLab.app.import_mesh(mesh)
-        HexaLab.UI.quality_plot_update()
-        HexaLab.UI.mesh_info_2.text(mesh)
-    };
-    request.send();
-
-    HexaLab.UI.mesh_info_2.text('Loading...')
-    HexaLab.UI.paper_mesh_picker.css('font-style', 'normal')
-    HexaLab.UI.mesh_info_2.show()
+    HexaLab.UI.import_remote_mesh(source, mesh)
 })
 
 // --------------------------------------------------------------------------------
@@ -236,7 +247,7 @@ HexaLab.UI.dragdrop_mesh.on('dragover', function (event) {
 HexaLab.UI.dragdrop_mesh.on('drop', function (event) {
     event.preventDefault()
     var files = event.originalEvent.target.files || event.originalEvent.dataTransfer.files
-    HexaLab.UI.import_mesh(files[0])
+    HexaLab.UI.import_local_mesh(files[0])
 })
 HexaLab.UI.dragdrop_mesh.on('dragbetterleave', function (event) {
     $(this).removeClass('drag_drop_quad_on').addClass('drag_drop_quad_off');
@@ -376,7 +387,7 @@ HexaLab.UI.menu.on('resize', function () {
 
 HexaLab.UI.load_mesh.on('click', function () {
     //HexaLab.UI.load_mesh_dialog.dialog('open')
-    HexaLab.UI.mesh_load_trigger()
+    HexaLab.UI.mesh_local_load_trigger()
 })
 
 HexaLab.UI.reset_camera.on('click', function () {

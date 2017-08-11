@@ -891,7 +891,8 @@ Object.assign(HexaLab.App.prototype, {
             scene: this.default_scene_settings,
             materials: this.default_material_settings
         });
-        this.renderer.set_mesh_params(this.mesh.min_edge_len, this.mesh.avg_edge_len);
+        this.mesh_stats = this.app.get_mesh_stats();
+        this.renderer.set_mesh_params(this.mesh_stats.min_edge_len, this.mesh_stats.avg_edge_len);
         for (var k in this.filters) {
             this.filters[k].on_mesh_change(this.mesh);
         }
