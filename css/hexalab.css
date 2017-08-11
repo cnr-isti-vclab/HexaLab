@@ -192,6 +192,19 @@ input {
 	font-size: 90%;
 }
 
+.menu_area .menu_content .menu_row #mesh_source {
+	font-style: italic;
+	width: 80%;
+}
+
+.menu_area .menu_content .menu_row #mesh_source option {
+	font-style: normal;
+}
+
+.menu_area .menu_content .menu_row #paper_mesh_picker {
+	width: 60%;
+}
+
 .menu_area .menu_content .menu_row #mesh_info_1 {
 	display: none;
 }

@@ -1,0 +1,23 @@
+{
+	"sources": [
+		{
+			"paper": {
+				"title": "Practical Hex-Mesh Optimization via Edge-Cone Rectification",
+				"venue": "ACM Transactions on Graphics",
+				"authors": "Marco Livesu, Alla Sheffer, Nicholas Vining, Marco Tarini",
+				"year": "2015",
+				"link": "http://www.cs.ubc.ca/labs/imager/tr/2015/untangler",
+				"bibtex": ""
+			},
+			"path" : "Practical Hex-Mesh Optimization via Edge-Cone Rectification",
+			"label" : "Practical Hex-Mesh Optimization via Edge-Cone Rectification",
+			"data": [
+				"armadillo_out.mesh",
+				"block_out.mesh",
+				"bunny_out.mesh",
+				"cap_out.mesh",
+				"dragon_out.mesh"
+			]
+		}
+	]
+}

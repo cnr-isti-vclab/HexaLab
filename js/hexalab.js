@@ -4,28 +4,6 @@
 HexaLab.filters = [];
 
 // --------------------------------------------------------------------------------
-// Utility
-// --------------------------------------------------------------------------------
-// File utility routines
-
-HexaLab.FS = {
-    file_exists: function (path) {
-        var stat = FS.stat(path);
-        if (!stat) return false;
-        return FS.isFile(stat.mode);
-    },
-    make_file: function (data, name) {
-        try {
-            if (HexaLab.FS.file_exists("/" + name)) {
-                FS.unlink('/' + name);
-            }
-        } catch (err) {
-        }
-        FS.createDataFile("/", name, data, true, true);
-    }
-};
-
-// --------------------------------------------------------------------------------
 // Model
 // --------------------------------------------------------------------------------
 // Maps straight to a cpp model class. Pass the cpp model instance and the 
