@@ -881,7 +881,7 @@ Object.assign(HexaLab.App.prototype, {
     import_mesh: function (path) {
         var result = this.app.import_mesh(path);
         if (!result) {
-            log('error');
+            throw false
         }
 
         this.mesh = this.app.get_mesh();

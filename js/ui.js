@@ -111,26 +111,35 @@ HexaLab.UI.settings_save_trigger = function () {
 // --------------------------------------------------------------------------------
 HexaLab.UI.import_mesh = function (byte_array, name, ui_callback) {
     HexaLab.FS.make_file(byte_array, name)
-    HexaLab.app.import_mesh(name)
+    try {
+        HexaLab.app.import_mesh(name)
+    } catch(e) {
+        ui_callback(false)
+        return
+    }
     HexaLab.UI.quality_plot_update()
-    ui_callback()
+    ui_callback(true)
 }
 
 HexaLab.UI.import_local_mesh = function (file) {
     HexaLab.UI.file_reader.onload = function () {
         var data = new Int8Array(this.result)
-        HexaLab.UI.import_mesh(data, file.name, function () {
+        HexaLab.UI.import_mesh(data, file.name, function (result) {
+            if (!result){
+                HexaLab.UI.mesh_info_1.empty().append('<span>Can\'t parse the file.</span>').show() 
+                return
+            }
             var stats = HexaLab.app.app.get_mesh_stats()
 
-            HexaLab.UI.mesh_source.val("-1").css('font-style', 'normal')
             HexaLab.UI.mesh_info_1.empty().append('<span class="mesh-name">' + file.name + '</span>' + '<br/>' + 
                 '<span>' + stats.vert_count + ' vertices ' + '</span>' + '<br />' +
                 '<span>' + stats.hexa_count + ' hexas ' + '</span>').show()
-            HexaLab.UI.paper_mesh_picker.hide()
-            HexaLab.UI.mesh_info_2.hide()
         })
     }
     HexaLab.UI.file_reader.readAsArrayBuffer(file, "UTF-8")
+    HexaLab.UI.mesh_info_1.empty().append('<span>Loading...</span>').show()
+    HexaLab.UI.paper_mesh_picker.hide()
+    HexaLab.UI.mesh_info_2.hide()
 }
 
 HexaLab.UI.import_remote_mesh = function (source, name) {
@@ -139,7 +148,11 @@ HexaLab.UI.import_remote_mesh = function (source, name) {
     request.responseType = 'arraybuffer';
     request.onload = function(e) {
         var data = new Uint8Array(this.response); 
-        HexaLab.UI.import_mesh(data, name, function () {
+        HexaLab.UI.import_mesh(data, name, function (result) {
+            if (!result){
+                HexaLab.UI.mesh_info_2.empty().append('<span>Can\'t parse the file.</span>').show() 
+                return
+            }
             var stats = HexaLab.app.app.get_mesh_stats()
             HexaLab.UI.mesh_info_2.empty().append(stats.vert_count + ' vertices <br />' +
                 stats.hexa_count + ' hexas </span>')
