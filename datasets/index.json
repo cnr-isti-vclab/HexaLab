@@ -18,6 +18,35 @@
 				"cap_out.mesh",
 				"dragon_out.mesh"
 			]
+		},
+		{
+			"paper": {
+				"title": "Skeleton-driven Adaptive Hexahedral Meshing of Tubular Shapes",
+				"venue": "Computer Graphics Forum 35 (7),",
+				"authors": "Marco Livesu, Alessandro Muntoni, Enrico Puppo, Riccardo Scateni",
+				"year": "2016",
+				"link": "http://pers.ge.imati.cnr.it/livesu/papers/ULPTS15/ULPTS15.html",
+				"bibtex": ""
+			},
+			"path" : "Skeleton-driven Adaptive Hexahedral Meshing of Tubular Shapes",
+			"label" : "Skeleton-driven Adaptive Hexahedral Meshing of Tubular Shapes",
+			"data": [
+				"armadillo.mesh",
+				"big_buddy.mesh",
+				"block.mesh",
+				"blood_vessel.mesh",
+				"cactus.mesh",
+				"dino_graded.mesh",
+				"dino.mesh",
+				"dinopet_graded.mesh",
+				"dinopet.mesh",
+				"fertility.mesh",
+				"octopus.mesh",
+				"rocker_arm.mesh",
+				"santa.mesh",
+				"warrior_graded.mesh",
+				"warrior.mesh"
+		]
 		}
 	]
 }
