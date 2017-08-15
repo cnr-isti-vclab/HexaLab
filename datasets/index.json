@@ -3,11 +3,12 @@
 		{
 			"paper": {
 				"title": "Practical Hex-Mesh Optimization via Edge-Cone Rectification",
-				"venue": "ACM Transactions on Graphics",
+				"venue": "ACM Transactions on Graphics Volume 34 Issue 4",
 				"authors": "Marco Livesu, Alla Sheffer, Nicholas Vining, Marco Tarini",
 				"year": "2015",
 				"link": "http://www.cs.ubc.ca/labs/imager/tr/2015/untangler",
-				"bibtex": ""
+				"bibtex": "",
+                                "DOI":"10.1145/2766905"
 			},
 			"path" : "Practical Hex-Mesh Optimization via Edge-Cone Rectification",
 			"label" : "Practical Hex-Mesh Optimization via Edge-Cone Rectification",
@@ -26,7 +27,8 @@
 				"authors": "Marco Livesu, Alessandro Muntoni, Enrico Puppo, Riccardo Scateni",
 				"year": "2016",
 				"link": "http://pers.ge.imati.cnr.it/livesu/papers/ULPTS15/ULPTS15.html",
-				"bibtex": ""
+				"bibtex": "",
+                                "DOI":"10.1111/cgf.13021"
 			},
 			"path" : "Skeleton-driven Adaptive Hexahedral Meshing of Tubular Shapes",
 			"label" : "Skeleton-driven Adaptive Hexahedral Meshing of Tubular Shapes",
@@ -47,6 +49,46 @@
 				"warrior_graded.mesh",
 				"warrior.mesh"
 		]
-		}
+		},
+                {
+                    "paper": {
+				"title": "Structured Volume Decomposition via Generalized Sweeping",
+				"venue": "IEEE Transactions on Visualization and Computer Graphics, Volume 22, Issue 7",
+				"authors": "Xifeng Gao, Tobias Martin, Sai Deng, Elaine Cohen, Zhigang Deng and Guoning Chen",
+				"year": "2016",
+				"link": "https://gaoxifeng.github.io/research.html",
+				"bibtex": "",
+                                "DOI":"10.1109/TVCG.2015.2473835"
+			},
+			"path" : "Structured Volume Decomposition via Generalized Sweeping",
+			"label" : "Structured Volume Decomposition via Generalized Sweeping",
+			"data": [
+				"hex_mesh/bunny/bunny_1.mesh",
+				"hex_mesh/bunny/bunny_2.mesh",
+				"hex_mesh/bunny/bunny_3.mesh",
+				"hex_mesh/bunny6/bunny6_1.mesh",
+				"hex_mesh/bunny6/bunny6_2.mesh",
+				"hex_mesh/bunny6/bunny6_3.mesh",
+                                "hex_mesh/cat/cat_1.mesh",
+				"hex_mesh/cat/cat_2_padded.mesh",
+				"hex_mesh/cat/cat_2.mesh",
+				"hex_mesh/cat/cat_3.mesh",
+                                "hex_mesh/Dolphin/Dolphin_1.mesh",
+				"hex_mesh/Dolphin/Dolphin_2.mesh",
+				"hex_mesh/Dolphin/Dolphin_3.mesh",
+				"hex_mesh/Dolphin/Dolphin_padded.mesh",
+                                "hex_mesh/femur1/femur1_1.mesh",
+				"hex_mesh/femur1/femur1_2.mesh",
+				"hex_mesh/femur1/femur1_3.mesh",
+				"hex_mesh/femur1/femur1_padded.mesh",
+                                "hex_mesh/fertility/fertility_1.mesh",
+				"hex_mesh/fertility/fertility_2.mesh",
+				"hex_mesh/fertility/fertility_3.mesh",
+				"hex_mesh/hand/hand7_1.mesh",
+				"hex_mesh/hand/hand7_2.mesh",
+				"hex_mesh/hand/hand7_3.mesh",
+				"hex_mesh/hand/hand7_padded.mesh"
+			]
+                }
 	]
 }
