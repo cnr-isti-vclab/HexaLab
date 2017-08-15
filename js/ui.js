@@ -22,6 +22,15 @@ HexaLab.FS = {
         }
         FS.createDataFile("/", name, data, true, true);
     },
+    delete_file: function (name) { 
+        try {
+            if (HexaLab.FS.file_exists("/" + name)) {
+                FS.unlink('/' + name);
+            }
+        } catch (err) {
+        }
+        FS.createDataFile("/", name, data, true, true);
+    },
     open_dir: function (path) {
         var lookup = FS.lookupPath(path)
         console.log(lookup)
@@ -109,16 +118,18 @@ HexaLab.UI.settings_save_trigger = function () {
 // -------------------------------------------------------------------------------- 
 // Mesh/settings file bind and dispatch
 // --------------------------------------------------------------------------------
-HexaLab.UI.import_mesh = function (byte_array, name, ui_callback) {
-    HexaLab.FS.make_file(byte_array, name)
+HexaLab.UI.import_mesh = function (byte_array, longName, ui_callback) {
+    var name = longName.substring(longName.lastIndexOf('/') + 1);
+    HexaLab.FS.make_file(byte_array, name);
     try {
-        HexaLab.app.import_mesh(name)
+        HexaLab.app.import_mesh(name);
     } catch(e) {
-        ui_callback(false)
-        return
+        ui_callback(false);
+        return;
     }
-    HexaLab.UI.quality_plot_update()
-    ui_callback(true)
+    HexaLab.UI.quality_plot_update();
+    HexaLab.FS.delete_file(name);
+    ui_callback(true);
 }
 
 HexaLab.UI.import_local_mesh = function (file) {
