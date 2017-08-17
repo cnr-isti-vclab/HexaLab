@@ -6,9 +6,9 @@
 				"venue": "ACM Transactions on Graphics Volume 34 Issue 4",
 				"authors": "Marco Livesu, Alla Sheffer, Nicholas Vining, Marco Tarini",
 				"year": "2015",
-				"link": "http://www.cs.ubc.ca/labs/imager/tr/2015/untangler",
-				"bibtex": "",
-                                "DOI":"10.1145/2766905"
+				"PDF": "http://www.cs.ubc.ca/labs/imager/tr/2015/untangler/downloads/untangler.pdf",
+				"web": "http://www.cs.ubc.ca/labs/imager/tr/2015/untangler/",
+				"DOI": "10.1145/2766905"
 			},
 			"path" : "Practical Hex-Mesh Optimization via Edge-Cone Rectification",
 			"label" : "Practical Hex-Mesh Optimization via Edge-Cone Rectification",
@@ -33,9 +33,8 @@
 				"venue": "Computer Graphics Forum 35 (7),",
 				"authors": "Marco Livesu, Alessandro Muntoni, Enrico Puppo, Riccardo Scateni",
 				"year": "2016",
-				"link": "http://pers.ge.imati.cnr.it/livesu/papers/ULPTS15/ULPTS15.html",
-				"bibtex": "",
-                                "DOI":"10.1111/cgf.13021"
+				"web": "http://pers.ge.imati.cnr.it/livesu/papers/ULPTS15/ULPTS15.html",
+				"DOI":"10.1111/cgf.13021"
 			},
 			"path" : "Skeleton-driven Adaptive Hexahedral Meshing of Tubular Shapes",
 			"label" : "Skeleton-driven Adaptive Hexahedral Meshing of Tubular Shapes",
@@ -55,17 +54,16 @@
 				"santa.mesh",
 				"warrior_graded.mesh",
 				"warrior.mesh"
-		]
+			]
 		},
-                {
-                    "paper": {
+        {
+            "paper": {
 				"title": "Structured Volume Decomposition via Generalized Sweeping",
 				"venue": "IEEE Transactions on Visualization and Computer Graphics, Volume 22, Issue 7",
 				"authors": "Xifeng Gao, Tobias Martin, Sai Deng, Elaine Cohen, Zhigang Deng and Guoning Chen",
 				"year": "2016",
-				"link": "https://gaoxifeng.github.io/research.html",
-				"bibtex": "",
-                                "DOI":"10.1109/TVCG.2015.2473835"
+				"web": "https://gaoxifeng.github.io/research.html",
+				"DOI":"10.1109/TVCG.2015.2473835"
 			},
 			"path" : "Structured Volume Decomposition via Generalized Sweeping",
 			"label" : "Structured Volume Decomposition via Generalized Sweeping",
@@ -111,9 +109,7 @@
 				"hex_mesh/rockerarm/rockerarm_3.mesh",
 				"hex_mesh/rotellipse/rotellipse_padded.mesh",
                                 "hex_mesh/twistedu/twistedu.mesh"
-				
-                                
 			]
-                }
+        }
 	]
 }

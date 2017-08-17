@@ -184,14 +184,40 @@ input {
 }
 
 .menu_area .menu_content .menu_row .menu_row_infobox {
-	border: 1px solid #c5c5c5;
 	background-color: white;
-	padding: 5px;
 	width: 100%;
 	line-height: 100%;
 	margin-top: 5px;
 	margin-bottom: 5px;
 	font-size: 90%;
+	display: flex;
+}
+
+.menu_area .menu_content .menu_row .menu_row_infobox .box_text {
+	border: 1px solid #c5c5c5;
+	padding: 5px;
+	width: 100%;
+}
+
+.menu_area .menu_content .menu_row .menu_row_infobox .box_buttons {
+	flex: 1;
+	flex-direction: column;
+	display: flex;
+	justify-content: center;
+}
+
+.menu_area .menu_content .menu_row .menu_row_infobox .box_buttons button {
+	border: 1px solid #c5c5c5 !important;
+	font-size: 80%;
+	padding: 0;
+	height: 20px;
+	width: 30px;
+	outline: none;
+}
+
+.menu_area .menu_content .menu_row .menu_row_infobox .box_buttons .inactive {
+	background-color: rgb(243, 243, 243) !important;
+	color: #c5c5c5 !important;
 }
 
 .menu_area .menu_content .menu_row .menu_row_infobox .mesh-name {
