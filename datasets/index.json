@@ -94,7 +94,25 @@
 				"hex_mesh/hand/hand7_1.mesh",
 				"hex_mesh/hand/hand7_2.mesh",
 				"hex_mesh/hand/hand7_3.mesh",
-				"hex_mesh/hand/hand7_padded.mesh"
+				"hex_mesh/hand/hand7_padded.mesh",
+                                "hex_mesh/kitten/kitten_1.mesh",
+				"hex_mesh/kitten/kitten_2.mesh",
+				"hex_mesh/kitten/kitten_3.mesh",
+				"hex_mesh/kitten_with_bifur/kitten_with_bifur_1.mesh",
+				"hex_mesh/kitten_with_bifur/kitten_with_bifur_2.mesh",
+				"hex_mesh/kitten_with_bifur/kitten_with_bifur_3.mesh",
+				"hex_mesh/kitten_with_bifur/Kitten_with_bifur_padded.mesh",
+				"hex_mesh/rabbit/rabbit_1.mesh",
+				"hex_mesh/rabbit/rabbit_2.mesh",
+				"hex_mesh/rabbit/rabbit_3.mesh",
+				"hex_mesh/rabbit/rabbit_padded.mesh",
+                                "hex_mesh/rockerarm/rockerarm_1.mesh",
+				"hex_mesh/rockerarm/rockerarm_2.mesh",
+				"hex_mesh/rockerarm/rockerarm_3.mesh",
+				"hex_mesh/rotellipse/rotellipse_padded.mesh",
+                                "hex_mesh/twistedu/twistedu.mesh"
+				
+                                
 			]
                 }
 	]

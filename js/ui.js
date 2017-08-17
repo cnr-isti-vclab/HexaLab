@@ -28,8 +28,7 @@ HexaLab.FS = {
                 FS.unlink('/' + name);
             }
         } catch (err) {
-        }
-        FS.createDataFile("/", name, data, true, true);
+        }       
     },
     open_dir: function (path) {
         var lookup = FS.lookupPath(path)

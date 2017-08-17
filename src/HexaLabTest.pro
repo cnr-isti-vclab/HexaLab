@@ -13,6 +13,7 @@ SOURCES += app.cpp \
   plane_filter.cpp \
   quality_filter.cpp \
   test.cpp \
+  color_map.cpp \
   hexalab_js.cpp 
 
 HEADERS = app.h \

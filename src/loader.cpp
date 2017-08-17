@@ -39,7 +39,7 @@ namespace HexaLab {
                     vertices.push_back(v);
                 }
             // Quad indices
-            } else if (header.compare("Quadrilaterals") == 0) {
+            } else if (header.compare("Quadrilaterals")==0 || header.compare("Quads") == 0) {
                 int quads_count;
                 HL_ASSERT_LOG(stream >> quads_count, "ERROR: malformed mesh file. Unexpected value after quads tag.\n");
                 HL_LOG("[Loader] Reading %d quads... (unused)\n", quads_count);
