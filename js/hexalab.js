@@ -4,28 +4,6 @@
 HexaLab.filters = [];
 
 // --------------------------------------------------------------------------------
-// Utility
-// --------------------------------------------------------------------------------
-// File utility routines
-
-HexaLab.FS = {
-    file_exists: function (path) {
-        var stat = FS.stat(path);
-        if (!stat) return false;
-        return FS.isFile(stat.mode);
-    },
-    make_file: function (data, name) {
-        try {
-            if (HexaLab.FS.file_exists("/" + name)) {
-                FS.unlink('/' + name);
-            }
-        } catch (err) {
-        }
-        FS.createDataFile("/", name, data, true, true);
-    }
-};
-
-// --------------------------------------------------------------------------------
 // Model
 // --------------------------------------------------------------------------------
 // Maps straight to a cpp model class. Pass the cpp model instance and the 
@@ -125,6 +103,8 @@ HexaLab.Renderer = function (width, height) {
     this.height = height;
     this.aspect = width / height;
 
+    this.empty = true
+
     this.gizmo = function (size) {
         var obj = new THREE.Object3D();
         obj.position.set(0, 0, 0);
@@ -201,7 +181,7 @@ HexaLab.Renderer = function (width, height) {
             },
         }),
         target: new THREE.WebGLRenderTarget(width, height, {
-            format: THREE.RGBFormat,
+            format: THREE.RGBAFormat,
             type: THREE.FloatType,
             minFilter: THREE.NearestFilter,
             magFilter: THREE.NearestFilter,
@@ -283,6 +263,9 @@ HexaLab.Renderer = function (width, height) {
     this.ambient = new THREE.AmbientLight();
 
     this.renderer.autoClear = false;
+
+    this.renderer.setClearColor(0x000000)
+    this.renderer.clear()
 }
 
 Object.assign(HexaLab.Renderer.prototype, {
@@ -368,9 +351,13 @@ Object.assign(HexaLab.Renderer.prototype, {
         this.ssao_pass.target.setSize(width, height);
 
         this.renderer.setSize(width, height);
+
+        if (this.empty) {
+            this.renderer.clear()
+        }
     },
 
-    render: function (models, meshes, camera, settings) {
+    render: function (models, meshes, camera) {
         var self = this;
         function clear_scene() {
             while (self.scene.children.length > 0) {
@@ -392,6 +379,8 @@ Object.assign(HexaLab.Renderer.prototype, {
             }
         }
 
+        this.empty = false
+
         // prepare renderer
         var do_ssao = this.settings.ssao;
         var clear_color = this.settings.clear_color;
@@ -401,6 +390,8 @@ Object.assign(HexaLab.Renderer.prototype, {
 
         // render
         if (do_ssao) {
+            this.renderer.setRenderTarget()
+
             // gather opaque surface models
             for (var k in models) {
                 var model = models[k];
@@ -425,10 +416,10 @@ Object.assign(HexaLab.Renderer.prototype, {
             this.scene.overrideMaterial = null;
 
             // render opaque models
-            this.renderer.setRenderTarget(null);
+            this.renderer.setRenderTarget();
             this.renderer.clear();
             this.renderer.render(this.scene, camera);
-
+            
             // clean up
             clear_scene();
             camera.remove(this.camera_light);
@@ -470,6 +461,9 @@ Object.assign(HexaLab.Renderer.prototype, {
             clear_scene();
             camera.remove(this.camera_light);
         } else {
+            this.renderer.setRenderTarget();
+            this.renderer.clear();
+
             // fill scene
             for (var k in models) {
                 var model = models[k];
@@ -546,18 +540,17 @@ HexaLab.App = function (dom_element) {
 
     // Renderer
     this.renderer = new HexaLab.Renderer(width, height);
-    this.renderer_settings = this.default_renderer_settings;
 
     this.default_renderer_settings = {
         occlusion: false,
-        antialiasing: true
+        antialiasing: true,
     };
 
     this.canvas = {
         element: this.renderer.get_element(),
         container: dom_element
     }
-    dom_element.appendChild(this.canvas.element);
+    this.canvas.container.appendChild(this.canvas.element);
 
     // Materials
     this.visible_surface_material = new THREE.MeshLambertMaterial({
@@ -836,63 +829,51 @@ Object.assign(HexaLab.App.prototype, {
             //HexaLab.UI.visible_surface_color.show();
             //$("label[for='" + HexaLab.UI.visible_surface_color.attr('id') + "']").show();
         }
-        //HexaLab.UI.visible_surface_show_quality.prop('checked', show);
         this.visible_surface_material.needsUpdate = true;
     },
 
     set_visible_surface_color: function (color) {
         this.visible_surface_material.color.set(color);
-        //HexaLab.UI.visible_surface_color.val(color);
     },
 
     set_visible_wireframe_color: function (color) {
         this.visible_wireframe_material.color.set(color);
-        //HexaLab.UI.visible_wireframe_color.val(color);
     },
 
     set_visible_wireframe_opacity: function (opacity) {
         this.visible_wireframe_material.opacity = opacity;
-        //HexaLab.UI.visible_wireframe_opacity.slider('value', opacity * 100);
     },
 
     set_filtered_surface_color: function (color) {
         this.filtered_surface_material.color.set(color);
-        //HexaLab.UI.filtered_surface_color.val(color);
     },
 
     set_filtered_surface_opacity: function (opacity) {
         this.filtered_surface_material.opacity = opacity;
-        //HexaLab.UI.filtered_surface_opacity.slider('value', opacity * 100);
     },
 
     set_filtered_wireframe_color: function (color) {
         this.filtered_wireframe_material.color.set(color);
-        //HexaLab.UI.filtered_wireframe_color.val(color);
     },
 
     set_filtered_wireframe_opacity: function (opacity) {
         this.filtered_wireframe_material.opacity = opacity;
-        //HexaLab.UI.filtered_wireframe_opacity.slider('value', opacity * 100);
     },
 
     set_singularity_surface_opacity: function (opacity) {
         this.singularity_surface_material.opacity = opacity;
-        //HexaLab.UI.filtered_surface_opacity.slider('value', opacity * 100);
     },
 
     set_singularity_wireframe_opacity: function (opacity) {
         this.singularity_wireframe_material.opacity = opacity;
-        //HexaLab.UI.filtered_wireframe_color.val(color);
     },
 
     set_occlusion: function (value) {
         this.renderer.set_ssao(value);
-        //HexaLab.UI.ssao.prop('checked', value);
     },
 
     set_antialiasing: function (value) {
         this.renderer.set_msaa(value);
-        //HexaLab.UI.msaa.prop('checked', value);
     },
     
     // Mesh
@@ -900,7 +881,7 @@ Object.assign(HexaLab.App.prototype, {
     import_mesh: function (path) {
         var result = this.app.import_mesh(path);
         if (!result) {
-            log('error');
+            throw false
         }
 
         this.mesh = this.app.get_mesh();
@@ -910,7 +891,8 @@ Object.assign(HexaLab.App.prototype, {
             scene: this.default_scene_settings,
             materials: this.default_material_settings
         });
-        this.renderer.set_mesh_params(this.mesh.min_edge_len, this.mesh.avg_edge_len);
+        this.mesh_stats = this.app.get_mesh_stats();
+        this.renderer.set_mesh_params(this.mesh_stats.min_edge_len, this.mesh_stats.avg_edge_len);
         for (var k in this.filters) {
             this.filters[k].on_mesh_change(this.mesh);
         }
@@ -947,7 +929,7 @@ Object.assign(HexaLab.App.prototype, {
                 }
             }
 
-            this.renderer.render(this.models, meshes, this.camera, this.renderer_settings);
+            this.renderer.render(this.models, meshes, this.camera);
             //this.stats.end();
         }
 

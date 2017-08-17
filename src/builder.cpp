@@ -247,20 +247,6 @@ namespace HexaLab {
             }
         }
 
-        float max = std::numeric_limits<float>::lowest(), min = std::numeric_limits<float>::max(), avg = 0;
-        for (size_t i = 0; i < mesh.edges.size(); ++i) {
-            MeshNavigator nav = mesh.navigate(mesh.edges[i]);
-            Vector3f edge = nav.vert().position - nav.flip_vert().vert().position;
-            float len = edge.norm();
-            if (len < min) min = len;
-            if (len > max) max = len;
-            avg += len;
-        }
-        avg /= mesh.edges.size();
-        mesh.min_edge_len = min;
-        mesh.max_edge_len = max;
-        mesh.avg_edge_len = avg;
-
         for (size_t i = 0; i < mesh.edges.size(); ++i) {
             MeshNavigator nav = mesh.navigate(mesh.edges[i]);
             Face& begin = nav.face();

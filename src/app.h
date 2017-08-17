@@ -10,8 +10,17 @@
 
 namespace HexaLab {
 
+    struct MeshStats {
+        size_t vert_count = 0;
+        size_t hexa_count = 0;
+        float min_edge_len = 0;
+        float max_edge_len = 0;
+        float avg_edge_len = 0;
+    };
+
     class App {
         Mesh* mesh = nullptr;
+        MeshStats mesh_stats;
 
         vector<IFilter*> filters;
 
@@ -24,6 +33,7 @@ namespace HexaLab {
     public:
         bool import_mesh(string path);
         Mesh* get_mesh() { return mesh; }
+        MeshStats* get_mesh_stats() { return &mesh_stats; }
         
         void add_filter(IFilter* filter) {
             filters.push_back(filter);

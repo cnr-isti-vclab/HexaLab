@@ -39,33 +39,67 @@
                     <div id="toolbar_wrapper">
                         <h1>HexaLab</h1>
                         <div id="toolbar">
-                            <button id="load_mesh" >
-                                <i class="fa fa-folder-open" title="Open a hexahedral mesh from a local file"></i>
+                            <button id="load_mesh" title="Open a hexahedral mesh from a local file">
+                                <i class="fa fa-folder-open"></i>
                             </button>
-                            <button id="home">
-                                <i class="fa fa-home" title="Reset Camera"></i>
+                            <button id="home" title="Reset Camera">
+                                <i class="fa fa-home"></i>
                             </button>
-                            <button id="plot">
-                                <i class="fa fa-bar-chart" title="Toggle Hex-Quality Histogram"></i>
+                            <button id="plot" title="Toggle Hex-Quality Histogram">
+                                <i class="fa fa-bar-chart"></i>
                             </button>
-                            <button id="load_settings">
+                            <button id="load_settings" title="Load settings">
                                 <i class="fa fa-gear"></i>
                             </button>
-                            <button id="save_settings">
+                            <button id="save_settings" title="Store current settings">
                                 <i class="fa fa-floppy-o"></i>
                             </button>
-                            <button id="snapshot">
+                            <button id="snapshot" title="Take a snapshot">
                                 <i class="fa fa-camera"></i>
                             </button>
-                            <button id="github">
+                            <button id="github" title="GitHub page">
                                 <i class="fa fa-github"></i>
                             </button>
+                            <button id="about" title="About">
+                                <i class="fa fa-question"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="model_menu" class="menu_area">
+                        <div class="menu_title_wrapper">
+                            <div class="menu_title">Hex model</div>
+                        </div>
+                        <div class="menu_content">
+                            <div class="menu_row">
+                                <div class="menu_row_label">Source</div>
+                                <div class="menu_row_input">
+                                    <select id="mesh_source">
+                                        <option value="-2" selected="selected" style="display: none;">Select a source for the mesh</option>
+                                        <option value="-1">From File</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="menu_row">
+                                <div id="mesh_info_1" class="menu_row_infobox">
+                                </div>
+                            </div>
+                            <div class="menu_row">
+                                <div class="menu_row_input">
+                                    <select id="paper_mesh_picker">
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="menu_row">
+                                <div id="mesh_info_2" class="menu_row_infobox">
+                                </div>
+                            </div>
                         </div>
                     </div>
 
                     <div id="plane_menu" class="menu_area">
                         <div class="menu_title_wrapper">
-                            <div class="menu_title">Plane</div>
+                            <div class="menu_title">Clipping plane</div>
                             <input type="checkbox" class="menu_switch" id="plane_enabled" title="Toggle the filtering of cells beyond a given plane">
                         </div>
                         <div class="menu_content">
@@ -86,13 +120,13 @@
                                         <input type="number" id="plane_offset_number">
                                     </div>
                                     <div class="menu_row_input_block">
-                                        <button id="plane_snap_nx">X</button>
-                                        <button id="plane_snap_ny">Y</button>
-                                        <button id="plane_snap_nz">Z</button>
-                                        <button id="plane_swap_sign">
+                                        <button id="plane_snap_nx" title="Align normal vector with the X axis">X</button>
+                                        <button id="plane_snap_ny" title="Align normal vector with the Y axis">Y</button>
+                                        <button id="plane_snap_nz" title="Align normal vector with the Z axis">Z</button>
+                                        <button id="plane_swap_sign" title="Swap clipping side">
                                             <i class="fa fa-exchange"></i>
                                         </button>
-                                        <button id="plane_snap_camera">
+                                        <button id="plane_snap_camera" title="Align normal vector with camera">
                                             <i class="fa fa-eye"></i>
                                         </button>
                                     </div>
@@ -114,7 +148,7 @@
 
                     <div id="quality_menu" class="menu_area">
                         <div class="menu_title_wrapper">
-                            <div class="menu_title">Quality</div>
+                            <div class="menu_title">Hexahedral quality</div>
                             <input type="checkbox" class="menu_switch" id="quality_enabled">
                         </div>
                         <div class="menu_content">
@@ -125,7 +159,7 @@
                                         <select id="quality_type">
                                             <option>Scaled Jacobian</option>
                                         </select>
-                                        <button id="quality_swap_range">
+                                        <button id="quality_swap_range" title="Swap quality range">
                                             <i class="fa fa-exchange"></i>
                                         </button>
                                     </div>
@@ -194,7 +228,7 @@
 
                     <div id="log_menu" class="menu_area">
                         <div class="menu_title_wrapper">
-                            <div class="menu_title">Log output</div>
+                            <div class="menu_title">Log</div>
                         </div>
                         <div class="menu_content">
                             <textarea id="logger" readonly></textarea>
@@ -202,10 +236,8 @@
                     </div>
                 </div>
             </div>
-            <span id="nav_opener">&#9776;</span>
         </div>
-        <div id="frame_wrapper">
-            <div id="frame"></div>
+        <div id="frame">
             <div id="drag_drop_overlay">
                 <div id="mesh_drag_drop_area">
                     <div id="mesh_drag_drop_quad" class="drag_drop_quad_off">
@@ -228,25 +260,6 @@
         </div>
     </div>
 
-    <div id="load_mesh_dialog">
-        <p><label>Source <select id="load_mesh_dialog_mode_select">
-            <option value="local" selected="selected">Local</option>
-            <option value="paper">Paper</option>
-        </select></label></p>
-
-        <p id="load_mesh_dialog_paper">
-            <label>Paper <select id="load_mesh_dialog_paper_select"></select></label>
-        </p>
-        
-        <p id="load_mesh_dialog_paper_mesh">
-            <label>Mesh <select id="load_mesh_dialog_paper_mesh_select"></select></label>
-        </p>
-
-        <p>
-            <button id="load_mesh_dialog_load">Load</button>
-        </p>
-    </div>
-
     <!-- Emscripten module -->
     <script src="js/module.js"></script>
     <!-- Emscripten compiled cpp code -->
@@ -260,21 +273,6 @@
     <script type="text/javascript">
         window.onload = function () {
             var app = new HexaLab.App(document.getElementById('frame'));
-/*
-            document.getElementById('nav_opener').addEventListener('click', function () {
-                document.getElementById('sidenav').style.width = '20%';
-                document.getElementById('frame').style.width = '80%';
-                document.getElementById('frame').style.marginLeft = '20%';
-                app.resize();
-            })
-
-            document.getElementById('nav_closer').addEventListener('click', function () {
-                document.getElementById('sidenav').style.width = '0';
-                document.getElementById('frame').style.width = '100%';
-                document.getElementById('frame').style.marginLeft = '0';
-                app.resize();
-            })
-*/
             app.animate();
         }
     </script>

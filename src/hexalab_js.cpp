@@ -57,7 +57,8 @@ EMSCRIPTEN_BINDINGS(HexaLab) {
         .function("get_singularity_model", &App::get_singularity_model, allow_raw_pointers())
         .function("get_hexa_quality", &hexa_quality, allow_raw_pointers())
         .function("set_color_map", &set_color_map)
-        .function("map_to_color", &map_to_color);
+        .function("map_to_color", &map_to_color)
+        .function("get_mesh_stats", &App::get_mesh_stats, allow_raw_pointers())
         ;
 
     enum_<ColorMap::Palette>("ColorMap")
@@ -84,9 +85,6 @@ EMSCRIPTEN_BINDINGS(HexaLab) {
         .constructor<>()
         .function("get_size", &mesh_size)
         .function("get_center", &mesh_center)
-        .property("min_edge_len", &Mesh::min_edge_len)
-        .property("max_edge_len", &Mesh::max_edge_len)
-        .property("avg_edge_len", &Mesh::avg_edge_len)
         ;
 
     class_<IFilter>("Filter")
@@ -111,6 +109,14 @@ EMSCRIPTEN_BINDINGS(HexaLab) {
         .property("quality_threshold_min", &QualityFilter::quality_threshold_min)
         .property("quality_threshold_max", &QualityFilter::quality_threshold_max)
         .property("operator", &QualityFilter::op)
+        ;
+
+    class_<MeshStats>("MeshStats")
+        .property("vert_count", &MeshStats::vert_count)
+        .property("hexa_count", &MeshStats::hexa_count)
+        .property("min_edge_len", &MeshStats::min_edge_len)
+        .property("max_edge_len", &MeshStats::max_edge_len)
+        .property("avg_edge_len", &MeshStats::avg_edge_len)
         ;
 
     class_<Vector3f>("float3")
