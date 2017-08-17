@@ -203,7 +203,7 @@ input {
 	flex: 1;
 	flex-direction: column;
 	display: flex;
-	justify-content: center;
+	justify-content: start;
 }
 
 .menu_area .menu_content .menu_row .menu_row_infobox .box_buttons button {
