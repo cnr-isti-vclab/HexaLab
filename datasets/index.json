@@ -14,10 +14,17 @@
 			"label" : "Practical Hex-Mesh Optimization via Edge-Cone Rectification",
 			"data": [
 				"armadillo_out.mesh",
+				"armadillo_stresstest_out.mesh",
 				"block_out.mesh",
+				"block_stressed_out.mesh",
 				"bunny_out.mesh",
+				"bust_out.mesh",
 				"cap_out.mesh",
-				"dragon_out.mesh"
+				"dancingchildren_out.mesh",
+				"dragon_out.mesh",
+				"hanger_stresstest_out.mesh",
+				"impeller_stresstest_out.mesh",
+				"KingKong_out.mesh"
 			]
 		},
 		{
