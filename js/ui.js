@@ -65,7 +65,13 @@ HexaLab.UI = {
 
     // Mesh dialog
     mesh_info_1: $('#mesh_info_1'),
+    mesh_info_1_text: $('#mesh_info_1 .box_text'),
+    mesh_info_1_buttons: $('#mesh_info_1 .box_buttons'),
     mesh_info_2: $('#mesh_info_2'),
+    mesh_info_2_text: $('#mesh_info_2 .box_text'),
+    mesh_source_pdf_button: $('#source_pdf'),
+    mesh_source_web_button: $('#source_web'),
+    mesh_source_doi_button: $('#source_doi'),
     mesh_source: $('#mesh_source'),
     paper_mesh_picker: $('#paper_mesh_picker'),
 
@@ -136,18 +142,20 @@ HexaLab.UI.import_local_mesh = function (file) {
         var data = new Int8Array(this.result)
         HexaLab.UI.import_mesh(data, file.name, function (result) {
             if (!result){
-                HexaLab.UI.mesh_info_1.empty().append('<span>Can\'t parse the file.</span>').show() 
+                HexaLab.UI.mesh_info_1_text.empty().append('<span>Can\'t parse the file.</span>')
                 return
             }
             var stats = HexaLab.app.app.get_mesh_stats()
 
-            HexaLab.UI.mesh_info_1.empty().append('<span class="mesh-name">' + file.name + '</span>' + '<br/>' + 
+            HexaLab.UI.mesh_info_1_text.empty().append('<span class="mesh-name">' + file.name + '</span>' + '<br/>' + 
                 '<span>' + stats.vert_count + ' vertices ' + '</span>' + '<br />' +
-                '<span>' + stats.hexa_count + ' hexas ' + '</span>').show()
+                '<span>' + stats.hexa_count + ' hexas ' + '</span>')
         })
     }
     HexaLab.UI.file_reader.readAsArrayBuffer(file, "UTF-8")
-    HexaLab.UI.mesh_info_1.empty().append('<span>Loading...</span>').show()
+    HexaLab.UI.mesh_info_1_text.empty().append('<span>Loading...</span>').show()
+    HexaLab.UI.mesh_info_1_buttons.hide()
+    HexaLab.UI.mesh_info_1.show().css('display', 'flex');
     HexaLab.UI.paper_mesh_picker.hide()
     HexaLab.UI.mesh_info_2.hide()
 }
@@ -160,19 +168,19 @@ HexaLab.UI.import_remote_mesh = function (source, name) {
         var data = new Uint8Array(this.response); 
         HexaLab.UI.import_mesh(data, name, function (result) {
             if (!result){
-                HexaLab.UI.mesh_info_2.empty().append('<span>Can\'t parse the file.</span>').show() 
+                HexaLab.UI.mesh_info_2_text.empty().append('<span>Can\'t parse the file.</span>') 
                 return
             }
             var stats = HexaLab.app.app.get_mesh_stats()
-            HexaLab.UI.mesh_info_2.empty().append(stats.vert_count + ' vertices <br />' +
+            HexaLab.UI.mesh_info_2_text.empty().append(stats.vert_count + ' vertices <br />' +
                 stats.hexa_count + ' hexas </span>')
         })
     };
     request.send();
 
-    HexaLab.UI.mesh_info_2.text('Loading...')
+    HexaLab.UI.mesh_info_2_text.text('Loading...')
     HexaLab.UI.paper_mesh_picker.css('font-style', 'normal')
-    HexaLab.UI.mesh_info_2.show()
+    HexaLab.UI.mesh_info_2.show().css('display', 'flex');
 }
 
 HexaLab.UI.import_settings = function (file) {
@@ -211,10 +219,29 @@ HexaLab.UI.mesh_source.on("change", function () {
         var i = parseInt(v)
         var source = HexaLab.UI.datasets_index.sources[i]
 
-        HexaLab.UI.mesh_info_1.empty().append('<span class="paper-title">' + source.paper.title + '</span>' + '<br />' +
+        HexaLab.UI.mesh_info_1_text.empty().append('<span class="paper-title">' + source.paper.title + '</span>' + '<br />' +
             '<span class="paper-authors">' + source.paper.authors + '</span>' + ' - ' + 
             '<span class="paper-venue">' + source.paper.venue + ' (' + source.paper.year + ') ' + '</span>')
-        HexaLab.UI.mesh_info_1.show()
+        HexaLab.UI.mesh_info_1.show().css('display', 'flex');
+        HexaLab.UI.mesh_info_1_buttons.show().css('display', 'flex');
+
+        if (source.paper.PDF) {
+            HexaLab.UI.mesh_source_pdf_button.removeClass('inactive').off('click').on('click', function() { window.open(source.paper.PDF) })
+        } else {
+            HexaLab.UI.mesh_source_pdf_button.addClass('inactive')
+        }
+
+        if (source.paper.web) {
+            HexaLab.UI.mesh_source_web_button.removeClass('inactive').off('click').on('click', function() { window.open(source.paper.web) })
+        } else {
+            HexaLab.UI.mesh_source_web_button.addClass('inactive')
+        }
+
+        if (source.paper.DOI) {
+            HexaLab.UI.mesh_source_doi_button.removeClass('inactive').off('click').on('click', function() { window.open('http://doi.org/' + source.paper.DOI) })
+        } else {
+            HexaLab.UI.mesh_source_doi_button.addClass('inactive')
+        }
 
         HexaLab.UI.paper_mesh_picker.empty().css('font-style', 'italic')
         HexaLab.UI.paper_mesh_picker.append($('<option>', { 
@@ -464,7 +491,15 @@ HexaLab.UI.about.on('click', function () {
         HexaLab.UI.about_dialog.dialog('close')
         delete HexaLab.UI.about_dialog;
     } else {
-        HexaLab.UI.about_dialog = $('<div title="About"></div>').dialog({
+        HexaLab.UI.about_dialog = $('<div title="About"><h3><b>HexaLab</b></h3>\n\
+A webgl, client based, hexahedral mesh viewer. \n\
+Developed by <a href="https://github.com/c4stan">Matteo Bracci</a> as part of his Bachelor Thesis \n\
+in Computer Science, under the supervision of <a href="http://vcg.isti.cnr.it/~cignoni">Paolo Cignoni</a> \n\
+and <a href="http://vcg.isti.cnr.it/~pietroni">Nico Pietroni</a>.<br><br>  \n\
+Copyright (C) 2017  <br>\
+<a href="http://vcg.isti.cnr.it">Visual Computing Lab</a>  <br>\
+<a href="http://www.isti.cnr.it">ISTI</a> - <a href="http://www.cnr.it">Italian National Research Council</a> <br><br> \n\
+<i>All the shown datasets are copyrighted by the referred paper authors</i>.</div>').dialog({
             close: function()
             {
                 $(this).dialog('close')
