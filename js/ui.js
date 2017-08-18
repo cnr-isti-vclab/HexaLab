@@ -491,7 +491,15 @@ HexaLab.UI.about.on('click', function () {
         HexaLab.UI.about_dialog.dialog('close')
         delete HexaLab.UI.about_dialog;
     } else {
-        HexaLab.UI.about_dialog = $('<div title="About"></div>').dialog({
+        HexaLab.UI.about_dialog = $('<div title="About"><h3><b>HexaLab</b></h3>\n\
+A webgl, client based, hexahedral mesh viewer. \n\
+Developed by <a href="https://github.com/c4stan">Matteo Bracci</a> as part of his Bachelor Thesis \n\
+in Computer Science, under the supervision of <a href="http://vcg.isti.cnr.it/~cignoni">Paolo Cignoni</a> \n\
+and <a href="http://vcg.isti.cnr.it/~pietroni">Nico Pietroni</a>.<br><br>  \n\
+Copyright (C) 2017  <br>\
+<a href="http://vcg.isti.cnr.it">Visual Computing Lab</a>  <br>\
+<a href="http://www.isti.cnr.it">ISTI</a> - <a href="http://www.cnr.it">Italian National Research Council</a> <br><br> \n\
+<i>All the shown datasets are copyrighted by the referred paper authors</i>.</div>').dialog({
             close: function()
             {
                 $(this).dialog('close')
