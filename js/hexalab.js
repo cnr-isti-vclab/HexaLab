@@ -610,14 +610,14 @@ HexaLab.App = function (dom_element) {
     this.models.singularity = new HexaLab.Model(this.app.get_singularity_model(), this.singularity_surface_material, this.singularity_wireframe_material);
 
     // Camera
-    this.camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000);
+    this.camera = new THREE.PerspectiveCamera(30, width / height, 0.1, 1000);
     this.controls = new THREE.TrackballControls(this.camera, dom_element);
 
     this.default_camera_settings = {
         offset: new THREE.Vector3(0, 0, 0),
         direction: new THREE.Vector3(0, 0, -1),
         up: new THREE.Vector3(0, 1, 0),
-        distance: 2
+        distance: 1.5
     }
 
     this.set_camera_settings(this.default_camera_settings);
