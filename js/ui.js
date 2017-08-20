@@ -415,7 +415,7 @@ HexaLab.UI.quality_plot = function(container, axis) {
                 }
             }],
             [
-              'toImage',
+              'toImage'
             ]
         ],
         displaylogo: false

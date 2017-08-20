@@ -14,7 +14,8 @@ HexaLab.UI.plane_snap_ny = $('#plane_snap_ny')
 HexaLab.UI.plane_snap_nz = $('#plane_snap_nz')
 HexaLab.UI.plane_swap = $('#plane_swap_sign')
 HexaLab.UI.plane_snap_camera = $('#plane_snap_camera')
-HexaLab.UI.plane_visibility = $('#plane_visibility')
+HexaLab.UI.plane_color_visibility = $('#plane_color_visibility')
+HexaLab.UI.plane_edge_visibility = $('#plane_edge_visibility')
 
 // --------------------------------------------------------------------------------
 // Logic
@@ -89,12 +90,21 @@ HexaLab.PlaneFilter = function () {
         self.sync()
         HexaLab.app.update()
     })
-    HexaLab.UI.plane_visibility.change(function () {
+    HexaLab.UI.plane_color_visibility.change(function () {
         var visible = $(this).is(':checked')
         if (visible) {
             self.plane.mesh.visible = true
         } else {
             self.plane.mesh.visible = false
+        }
+        HexaLab.app.update()
+    })
+    HexaLab.UI.plane_edge_visibility.change(function () {
+        var visible = $(this).is(':checked')
+        if (visible) {
+            self.plane.edges.visible = true
+        } else {
+            self.plane.edges.visible = false
         }
         HexaLab.app.update()
     })
@@ -116,8 +126,10 @@ HexaLab.PlaneFilter = function () {
         offset: 0,
         world_offset: 0,
         position: null,
-        normal: null
+        normal: null,
+        object: new THREE.Object3D()
     };
+    this.scene.add(this.plane.object)
 
     this.default_settings = {
         plane_normal: new THREE.Vector3(1, 0, 0),
@@ -150,10 +162,17 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
         this.mesh = mesh;
         this.filter.on_mesh_set(mesh);
 
-        this.scene.remove(this.plane.mesh);
+        this.scene.remove(this.plane.object);
+        this.plane.object = new THREE.Object3D()
         var geometry = new THREE.PlaneGeometry(this.mesh.get_size(), this.mesh.get_size());
+        var edges = new THREE.EdgesGeometry(geometry)
         this.plane.mesh = new THREE.Mesh(geometry, this.plane.material);
-        this.scene.add(this.plane.mesh);
+        this.plane.edges = new THREE.LineSegments(edges, new THREE.LineBasicMaterial( { color: 0x000000 } ))
+
+        this.scene.add(this.plane.object)
+        this.plane.object.add(this.plane.mesh)
+        this.plane.object.add(this.plane.edges)
+        
         this.set_settings(this.get_settings());
         this.sync()
         this.update_mesh();
@@ -169,9 +188,14 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
 
         HexaLab.UI.plane_enabled.prop('checked', this.filter.enabled)
         if (!this.plane.mesh) {
-            HexaLab.UI.plane_visibility.prop('checked', false)
+            HexaLab.UI.plane_color_visibility.prop('checked', false)
         } else {
-            HexaLab.UI.plane_visibility.prop('checked', this.plane.mesh.visible)
+            HexaLab.UI.plane_color_visibility.prop('checked', this.plane.mesh.visible)
+        }
+        if (!this.plane.edges) {
+            HexaLab.UI.plane_edge_visibility.prop('checked', false)
+        } else {
+            HexaLab.UI.plane_edge_visibility.prop('checked', this.plane.edges.visible)
         }
 
         //HexaLab.UI.plane_opacity.slider('value', opacity * 100);
@@ -206,12 +230,12 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
     },
 
     update_mesh: function () {
-        if (this.plane.mesh) {
+        if (this.mesh) {
             var pos = this.mesh.get_center();
-            this.plane.mesh.position.set(pos.x(), pos.y(), pos.z());
-            var dir = new THREE.Vector3().addVectors(this.plane.mesh.position, this.plane.normal);
-            this.plane.mesh.lookAt(dir);
-            this.plane.mesh.translateZ(-this.plane.world_offset);
+            this.plane.object.position.set(pos.x(), pos.y(), pos.z());
+            var dir = new THREE.Vector3().addVectors(this.plane.object.position, this.plane.normal);
+            this.plane.object.lookAt(dir);
+            this.plane.object.translateZ(-this.plane.world_offset);
         }
     }
 });
