@@ -45,7 +45,7 @@
 				"armadillo_out.mesh",
 				"armadillo_stresstest_out.mesh",
 				"block_out.mesh",
-				"block_stressed_out.mesh",
+				"block_stresstest_out.mesh",
 				"bunny_out.mesh",
 				"bust_out.mesh",
 				"cap_out.mesh",
