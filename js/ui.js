@@ -47,6 +47,7 @@ HexaLab.UI = {
     // --------------------------------------------------------------------------------
     app: null,
     file_reader: new FileReader(),
+    first_mesh: true,
 
     // --------------------------------------------------------------------------------
     // DOM page bindings
@@ -58,6 +59,7 @@ HexaLab.UI = {
     display: $('#display'),
 
     dragdrop_overlay: $('#drag_drop_overlay'),
+    dragdrop_header: $('#drag_drop_header'),
     dragdrop_mesh: $('#mesh_drag_drop_quad'),
     dragdrop_settings: $('#settings_drag_drop_quad'),
 
@@ -123,6 +125,13 @@ HexaLab.UI.settings_save_trigger = function () {
 // -------------------------------------------------------------------------------- 
 // Mesh/settings file bind and dispatch
 // --------------------------------------------------------------------------------
+HexaLab.UI.on_first_mesh = function () {
+    HexaLab.UI.dragdrop_header.html('Drag&Drop mesh or settings files<br/>in the boxes below.')
+    HexaLab.UI.dragdrop_overlay.removeClass('first_drag_drop').hide();
+    HexaLab.UI.dragdrop_mesh.css('margin-left', '20%');
+    HexaLab.UI.dragdrop_settings.show();
+}
+
 HexaLab.UI.import_mesh = function (byte_array, longName, ui_callback) {
     var name = longName.substring(longName.lastIndexOf('/') + 1);
     HexaLab.FS.make_file(byte_array, name);
@@ -135,6 +144,11 @@ HexaLab.UI.import_mesh = function (byte_array, longName, ui_callback) {
     HexaLab.UI.quality_plot_update();
     HexaLab.FS.delete_file(name);
     ui_callback(true);
+
+    if (HexaLab.UI.first_mesh) {
+        HexaLab.UI.on_first_mesh()
+        HexaLab.UI.first_mesh = false
+    }
 }
 
 HexaLab.UI.import_local_mesh = function (file) {
@@ -273,8 +287,6 @@ HexaLab.UI.paper_mesh_picker.on("change", function () {
 // --------------------------------------------------------------------------------
 // Drag n Drop logic
 // --------------------------------------------------------------------------------
-HexaLab.UI.dragdrop_overlay.hide();
-
 HexaLab.UI.frame.on('dragbetterenter', function (event) {
     HexaLab.UI.dragdrop_overlay.show();
 })
@@ -285,7 +297,7 @@ HexaLab.UI.frame.on('drop', function (event) {
     event.preventDefault();
 })
 HexaLab.UI.frame.on('dragbetterleave', function (event) {
-    HexaLab.UI.dragdrop_overlay.hide();
+    if (!HexaLab.UI.first_mesh) HexaLab.UI.dragdrop_overlay.hide();
 })
 
 HexaLab.UI.dragdrop_mesh.on('dragbetterenter', function (event) {
