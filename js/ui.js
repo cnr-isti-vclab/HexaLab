@@ -45,7 +45,6 @@ HexaLab.UI = {
     // --------------------------------------------------------------------------------
     // Internals
     // --------------------------------------------------------------------------------
-    app: null,
     file_reader: new FileReader(),
     first_mesh: true,
 
@@ -461,7 +460,13 @@ HexaLab.UI.plot.on('click', function () {
         HexaLab.UI.plot_overlay.remove()
         delete HexaLab.UI.plot_overlay
     } else {
-        HexaLab.UI.plot_overlay = HexaLab.UI.overlay(400, 100, 500, 800, '').appendTo(document.body)
+        var size = HexaLab.app.get_canvas_size()
+        var x = HexaLab.UI.menu.width() + 50
+        var y = size.height / 10
+        var width = size.width / 4
+        var height = size.height - 2 * y
+        // TODO
+        HexaLab.UI.plot_overlay = HexaLab.UI.overlay(x, y, width, height, '').appendTo(document.body)
         HexaLab.UI.quality_plot(HexaLab.UI.plot_overlay[0], 'y')
         HexaLab.UI.plot_overlay.on('resize', function () {
             Plotly.Plots.resize(HexaLab.UI.plot_overlay[0]);
@@ -491,6 +496,7 @@ HexaLab.UI.overlay = function (x, y, width, height, content) {
             'width:', width, 'px;',
             'height:', height, 'px;',
             'position:fixed;',
+            'border: 1px solid black;',
             ' ">', content, ' </div>'
         ].join(''))
     return x.resizable().draggable({

@@ -666,6 +666,13 @@ Object.assign(HexaLab.App.prototype, {
 
     // Settings
 
+    get_canvas_size() {
+        return {
+            width: this.canvas.container.offsetWidth,
+            height: this.canvas.container.offsetHeight
+        }
+    },
+
     resize: function () {
         var width = this.canvas.container.offsetWidth
         var height = this.canvas.container.offsetHeight
