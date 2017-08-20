@@ -6,12 +6,12 @@
 				"venue": "ACM Transactions on Graphics Volume 31 Issue 6",
 				"authors": "Yufei Li, Yang Liu, Weiwei Xu, Wenping Wang, Baining Guo",
 				"year": "2012",
-				"PDF": "http://www.cs.ubc.ca/labs/imager/tr/2015/untangler/downloads/untangler.pdf",
+				"PDF": "http://i.cs.hku.hk/~yfli/All-hex/allhex.pdf",
 				"web": "http://www.cs.ubc.ca/labs/imager/tr/2015/untangler/",
 				"DOI": "10.1145/2366145.2366196"
 			},
 			"path" : "All-hex Meshing Using Singularity-restricted Field",
-			"label" : "2012 - All-hex Meshing Using Singularity-restricted Field",
+			"label" : "2012 - All-Hex Meshing Using Singularity-Restricted Field",
 			"data": [
 				"bone/bone.mesh",
 				"bunny/bunny.mesh",
