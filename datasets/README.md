@@ -4,6 +4,7 @@ Current datasets came from the following papers:
 
 - [All-Hex Meshing Using Singularity-Restricted Field](http://doi.org/10.1145/2366145.2366196)
 - [Practical Hex-Mesh Optimization via Edge-Cone Rectification](http://doi.org/10.1145/2766905)
+- [Efficient Volumetric PolyCube-Map Construction](http://doi.org/10.1111/cgf.13007)
 - [Skeleton-driven Adaptive Hexahedral Meshing of Tubular Shapes](http://doi.org/10.1111/cgf.13021)
 - [Structured Volume Decomposition via Generalized Sweeping](http://doi.org/10.1109/TVCG.2015.2473835) 
 

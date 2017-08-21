@@ -29,7 +29,8 @@
                                 "sculpture/sculpture-A.mesh",
                                 "sculpture/sculpture-B.mesh"
 			]
-		},{
+		},
+                {
 			"paper": {
 				"title": "Practical Hex-Mesh Optimization via Edge-Cone Rectification",
 				"venue": "ACM Transactions on Graphics Volume 34 Issue 4",
@@ -58,8 +59,41 @@
 		},
 		{
 			"paper": {
+				"title": "Efficient Volumetric PolyCube-Map Construction",
+				"venue": "Computer Graphics Forum, Volume 35, Issue 7",
+				"authors": "Xiao-Ming Fu, Chong-Yang Bai, Yang Liu",
+				"year": "2016",
+				"PDF": "http://pan.baidu.com/s/1qYAKqqK",
+				"web": "http://staff.ustc.edu.cn/~fuxm/projects/EfficientPolyCube/index.html",
+				"DOI": "10.1111/cgf.13007"
+			},
+			"path" : "Efficient Volumetric PolyCube-Map Construction",
+			"label" : "2016 - Efficient Volumetric PolyCube-Map Construction",
+			"data": [
+				"Armadillo_hex-a.mesh",
+                                "Armadillo_hex-b.mesh",
+                                "Bimba_hex-c.mesh",
+                                "Bimba_hex-d.mesh",
+                                "Blade_hex.mesh",
+                                "Bunny_hex.mesh",
+                                "Buste_hex.mesh",
+                                "Carter_hex.mesh",
+                                "Dancing_Children_hex.mesh",
+                                "Dragon_hex.mesh",
+                                "Elephant_hex.mesh",
+                                "Fertility_hex-largel.mesh",
+                                "Fertility_hex-small.mesh",
+                                "Greek_Sculpture_hex.mesh",
+                                "Kiss_hex.mesh",
+                                "Rocker_hex.mesh",
+                                "Sphinx_hex-e.mesh",
+                                "Sphinx_hex-f.mesh"
+			]
+		},
+		{
+			"paper": {
 				"title": "Skeleton-driven Adaptive Hexahedral Meshing of Tubular Shapes",
-				"venue": "Computer Graphics Forum 35 (7),",
+				"venue": "Computer Graphics Forum, 35 (7),",
 				"authors": "Marco Livesu, Alessandro Muntoni, Enrico Puppo, Riccardo Scateni",
 				"year": "2016",
 				"web": "http://pers.ge.imati.cnr.it/livesu/papers/ULPTS15/ULPTS15.html",
