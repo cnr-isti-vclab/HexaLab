@@ -32,8 +32,10 @@ HexaLab.PlaneFilter = function () {
         self.filter.enabled = enabled
         if (enabled) {
             self.scene.add(self.plane.mesh)
+            self.scene.add(self.plane.edges)
         } else {
             self.scene.remove(self.plane.mesh)
+            self.scene.remove(self.plane.edges)
         }
         HexaLab.app.update()
     })
@@ -169,9 +171,9 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
         this.plane.mesh = new THREE.Mesh(geometry, this.plane.material);
         this.plane.edges = new THREE.LineSegments(edges, new THREE.LineBasicMaterial( { color: 0x000000 } ))
 
-        this.scene.add(this.plane.object)
-        this.plane.object.add(this.plane.mesh)
-        this.plane.object.add(this.plane.edges)
+        //this.scene.add(this.plane.object)
+        this.scene.add(this.plane.mesh)
+        this.scene.add(this.plane.edges)
         
         this.set_settings(this.get_settings());
         this.sync()
@@ -231,11 +233,13 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
 
     update_mesh: function () {
         if (this.mesh) {
-            var pos = this.mesh.get_center();
-            this.plane.object.position.set(pos.x(), pos.y(), pos.z());
-            var dir = new THREE.Vector3().addVectors(this.plane.object.position, this.plane.normal);
-            this.plane.object.lookAt(dir);
-            this.plane.object.translateZ(-this.plane.world_offset);
+            for (var x of [this.plane.mesh, this.plane.edges]) {
+                var pos = this.mesh.get_center();
+                x.position.set(pos.x(), pos.y(), pos.z());
+                var dir = new THREE.Vector3().addVectors(x.position, this.plane.normal);
+                x.lookAt(dir);
+                x.translateZ(-this.plane.world_offset);
+            }
         }
     }
 });
