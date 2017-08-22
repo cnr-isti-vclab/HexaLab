@@ -67,7 +67,20 @@ input {
    top:0px;
    background-color: rgba(100, 100, 100, 0.5);
    text-align: center;
-   display: none;
+}
+
+.first_drag_drop {
+   background-color: rgba(177, 177, 177, 1) !important;
+}
+
+#drag_drop_header {
+	position:absolute;
+	width: 100%;
+	text-align: center;
+	font-size: 2vw;
+	font-style: italic;
+	top: 200px;
+	opacity: 0.5
 }
 
 #mesh_drag_drop_area {
@@ -80,7 +93,7 @@ input {
 }
 
 #mesh_drag_drop_quad {
-	margin-left: 20%;
+	margin-left: 40%;
 	margin-right: 15%;
 	top: 0; left: 0; bottom: 0; right: 0;
 	width: 15%;
@@ -88,6 +101,7 @@ input {
 }
 
 #settings_drag_drop_quad {
+	display: none;
 	margin-left: 15%;
 	margin-right: 20%;
 	top: 0; left: 50%; bottom: 0; right: 0;

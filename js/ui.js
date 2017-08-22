@@ -45,8 +45,8 @@ HexaLab.UI = {
     // --------------------------------------------------------------------------------
     // Internals
     // --------------------------------------------------------------------------------
-    app: null,
     file_reader: new FileReader(),
+    first_mesh: true,
 
     // --------------------------------------------------------------------------------
     // DOM page bindings
@@ -58,6 +58,7 @@ HexaLab.UI = {
     display: $('#display'),
 
     dragdrop_overlay: $('#drag_drop_overlay'),
+    dragdrop_header: $('#drag_drop_header'),
     dragdrop_mesh: $('#mesh_drag_drop_quad'),
     dragdrop_settings: $('#settings_drag_drop_quad'),
 
@@ -123,6 +124,13 @@ HexaLab.UI.settings_save_trigger = function () {
 // -------------------------------------------------------------------------------- 
 // Mesh/settings file bind and dispatch
 // --------------------------------------------------------------------------------
+HexaLab.UI.on_first_mesh = function () {
+    HexaLab.UI.dragdrop_header.html('Drag&Drop mesh or settings files<br/>in the boxes below.')
+    HexaLab.UI.dragdrop_overlay.removeClass('first_drag_drop').hide();
+    HexaLab.UI.dragdrop_mesh.css('margin-left', '20%');
+    HexaLab.UI.dragdrop_settings.show();
+}
+
 HexaLab.UI.import_mesh = function (byte_array, longName, ui_callback) {
     var name = longName.substring(longName.lastIndexOf('/') + 1);
     HexaLab.FS.make_file(byte_array, name);
@@ -135,6 +143,11 @@ HexaLab.UI.import_mesh = function (byte_array, longName, ui_callback) {
     HexaLab.UI.quality_plot_update();
     HexaLab.FS.delete_file(name);
     ui_callback(true);
+
+    if (HexaLab.UI.first_mesh) {
+        HexaLab.UI.on_first_mesh()
+        HexaLab.UI.first_mesh = false
+    }
 }
 
 HexaLab.UI.import_local_mesh = function (file) {
@@ -273,8 +286,6 @@ HexaLab.UI.paper_mesh_picker.on("change", function () {
 // --------------------------------------------------------------------------------
 // Drag n Drop logic
 // --------------------------------------------------------------------------------
-HexaLab.UI.dragdrop_overlay.hide();
-
 HexaLab.UI.frame.on('dragbetterenter', function (event) {
     HexaLab.UI.dragdrop_overlay.show();
 })
@@ -285,7 +296,7 @@ HexaLab.UI.frame.on('drop', function (event) {
     event.preventDefault();
 })
 HexaLab.UI.frame.on('dragbetterleave', function (event) {
-    HexaLab.UI.dragdrop_overlay.hide();
+    if (!HexaLab.UI.first_mesh) HexaLab.UI.dragdrop_overlay.hide();
 })
 
 HexaLab.UI.dragdrop_mesh.on('dragbetterenter', function (event) {
@@ -404,7 +415,7 @@ HexaLab.UI.quality_plot = function(container, axis) {
                 }
             }],
             [
-              'toImage',
+              'toImage'
             ]
         ],
         displaylogo: false
@@ -449,7 +460,13 @@ HexaLab.UI.plot.on('click', function () {
         HexaLab.UI.plot_overlay.remove()
         delete HexaLab.UI.plot_overlay
     } else {
-        HexaLab.UI.plot_overlay = HexaLab.UI.overlay(400, 100, 500, 800, '').appendTo(document.body)
+        var size = HexaLab.app.get_canvas_size()
+        var x = HexaLab.UI.menu.width() + 50
+        var y = size.height / 10
+        var width = size.width / 4
+        var height = size.height - 2 * y
+        // TODO
+        HexaLab.UI.plot_overlay = HexaLab.UI.overlay(x, y, width, height, '').appendTo(document.body)
         HexaLab.UI.quality_plot(HexaLab.UI.plot_overlay[0], 'y')
         HexaLab.UI.plot_overlay.on('resize', function () {
             Plotly.Plots.resize(HexaLab.UI.plot_overlay[0]);
@@ -479,6 +496,7 @@ HexaLab.UI.overlay = function (x, y, width, height, content) {
             'width:', width, 'px;',
             'height:', height, 'px;',
             'position:fixed;',
+            'border: 1px solid black;',
             ' ">', content, ' </div>'
         ].join(''))
     return x.resizable().draggable({

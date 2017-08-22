@@ -147,9 +147,15 @@
                                 </div>
                             </div>
                             <div class="menu_row">
-                                <div class="menu_row_label">Visible</div>
+                                <div class="menu_row_label">Color</div>
                                 <div class="menu_row_input">
-                                    <input type="checkbox" id="plane_visibility"></input>    
+                                    <input type="checkbox" id="plane_color_visibility"></input>
+                                </div>
+                            </div>
+                            <div class="menu_row">
+                                <div class="menu_row_label">Edge</div>
+                                <div class="menu_row_input">
+                                    <input type="checkbox" id="plane_edge_visibility"></input>
                                 </div>
                             </div>
                         </div>
@@ -247,7 +253,10 @@
             </div>
         </div>
         <div id="frame">
-            <div id="drag_drop_overlay">
+            <div id="drag_drop_overlay" class="first_drag_drop">
+                <div>
+                    <span id="drag_drop_header">Drag&Drop a mesh file in the box below<br/> or use the toolbar to the left.</span>
+                </div>
                 <div id="mesh_drag_drop_area">
                     <div id="mesh_drag_drop_quad" class="drag_drop_quad_off">
                         <div id="mesh_drag_drop_content" class="drag_drop_content">

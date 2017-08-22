@@ -2,6 +2,36 @@
 	"sources": [
 		{
 			"paper": {
+				"title": "All-hex Meshing Using Singularity-restricted Field",
+				"venue": "ACM Transactions on Graphics Volume 31 Issue 6",
+				"authors": "Yufei Li, Yang Liu, Weiwei Xu, Wenping Wang, Baining Guo",
+				"year": "2012",
+				"PDF": "http://i.cs.hku.hk/~yfli/All-hex/allhex.pdf",
+				"web": "http://www.cs.ubc.ca/labs/imager/tr/2015/untangler/",
+				"DOI": "10.1145/2366145.2366196"
+			},
+			"path" : "All-hex Meshing Using Singularity-restricted Field",
+			"label" : "2012 - All-Hex Meshing Using Singularity-Restricted Field",
+			"data": [
+				"bone/bone.mesh",
+				"bunny/bunny.mesh",
+				"double torus/double torus.mesh",
+				"ellipsoid/ellipsoid-A.mesh",
+				"ellipsoid/ellipsoid-B.mesh",
+				"ellipsoid/ellipsoid-C.mesh",
+				"fandisk/fandisk.mesh",
+				"fertility/fertility.mesh",
+				"hanger/hanger.mesh",
+				"impeller/impeller.mesh",
+				"joint/joint.mesh",
+                                "rockerarm/rockerarm.mesh",
+                                "rod/rod.mesh",
+                                "sculpture/sculpture-A.mesh",
+                                "sculpture/sculpture-B.mesh"
+			]
+		},
+                {
+			"paper": {
 				"title": "Practical Hex-Mesh Optimization via Edge-Cone Rectification",
 				"venue": "ACM Transactions on Graphics Volume 34 Issue 4",
 				"authors": "Marco Livesu, Alla Sheffer, Nicholas Vining, Marco Tarini",
@@ -11,12 +41,12 @@
 				"DOI": "10.1145/2766905"
 			},
 			"path" : "Practical Hex-Mesh Optimization via Edge-Cone Rectification",
-			"label" : "Practical Hex-Mesh Optimization via Edge-Cone Rectification",
+			"label" : "2015 - Practical Hex-Mesh Optimization via Edge-Cone Rectification",
 			"data": [
 				"armadillo_out.mesh",
 				"armadillo_stresstest_out.mesh",
 				"block_out.mesh",
-				"block_stressed_out.mesh",
+				"block_stresstest_out.mesh",
 				"bunny_out.mesh",
 				"bust_out.mesh",
 				"cap_out.mesh",
@@ -29,15 +59,48 @@
 		},
 		{
 			"paper": {
+				"title": "Efficient Volumetric PolyCube-Map Construction",
+				"venue": "Computer Graphics Forum, Volume 35, Issue 7",
+				"authors": "Xiao-Ming Fu, Chong-Yang Bai, Yang Liu",
+				"year": "2016",
+				"PDF": "http://pan.baidu.com/s/1qYAKqqK",
+				"web": "http://staff.ustc.edu.cn/~fuxm/projects/EfficientPolyCube/index.html",
+				"DOI": "10.1111/cgf.13007"
+			},
+			"path" : "Efficient Volumetric PolyCube-Map Construction",
+			"label" : "2016 - Efficient Volumetric PolyCube-Map Construction",
+			"data": [
+				"Armadillo_hex-a.mesh",
+                                "Armadillo_hex-b.mesh",
+                                "Bimba_hex-c.mesh",
+                                "Bimba_hex-d.mesh",
+                                "Blade_hex.mesh",
+                                "Bunny_hex.mesh",
+                                "Buste_hex.mesh",
+                                "Carter_hex.mesh",
+                                "Dancing_Children_hex.mesh",
+                                "Dragon_hex.mesh",
+                                "Elephant_hex.mesh",
+                                "Fertility_hex-largel.mesh",
+                                "Fertility_hex-small.mesh",
+                                "Greek_Sculpture_hex.mesh",
+                                "Kiss_hex.mesh",
+                                "Rocker_hex.mesh",
+                                "Sphinx_hex-e.mesh",
+                                "Sphinx_hex-f.mesh"
+			]
+		},
+		{
+			"paper": {
 				"title": "Skeleton-driven Adaptive Hexahedral Meshing of Tubular Shapes",
-				"venue": "Computer Graphics Forum 35 (7),",
+				"venue": "Computer Graphics Forum, 35 (7),",
 				"authors": "Marco Livesu, Alessandro Muntoni, Enrico Puppo, Riccardo Scateni",
 				"year": "2016",
 				"web": "http://pers.ge.imati.cnr.it/livesu/papers/ULPTS15/ULPTS15.html",
 				"DOI":"10.1111/cgf.13021"
 			},
 			"path" : "Skeleton-driven Adaptive Hexahedral Meshing of Tubular Shapes",
-			"label" : "Skeleton-driven Adaptive Hexahedral Meshing of Tubular Shapes",
+			"label" : "2016 - Skeleton-driven Adaptive Hexahedral Meshing of Tubular Shapes",
 			"data": [
 				"armadillo.mesh",
 				"big_buddy.mesh",
@@ -66,7 +129,7 @@
 				"DOI":"10.1109/TVCG.2015.2473835"
 			},
 			"path" : "Structured Volume Decomposition via Generalized Sweeping",
-			"label" : "Structured Volume Decomposition via Generalized Sweeping",
+			"label" : "2016 - Structured Volume Decomposition via Generalized Sweeping",
 			"data": [
 				"hex_mesh/bunny/bunny_1.mesh",
 				"hex_mesh/bunny/bunny_2.mesh",
