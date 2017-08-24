@@ -48,6 +48,7 @@ namespace HexaLab {
         vector<float>& get_hexa_quality() { return hexa_quality; }
 
         void build_models();
+        void build_singularity_model();
 
     private:
         void add_visible_face(Dart& dart, float normal_sign);

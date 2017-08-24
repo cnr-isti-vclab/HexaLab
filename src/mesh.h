@@ -19,9 +19,9 @@ namespace HexaLab {
 
     struct Hexa {
         Index dart = -1;
-        uint64_t filter_mark = 0;
+        uint32_t _mark = 0;
         float scaled_jacobian = 0;
-        int hexa_count = 0;
+        //int hexa_count = 0;
 
         Hexa(){}
         Hexa(Index dart) { this->dart = dart; }
@@ -49,9 +49,9 @@ namespace HexaLab {
 
     struct Edge {
         Index dart = -1;
-        uint64_t mark = 0;
-        int face_count = 0;
-        bool surface = false;
+//        uint64_t mark = 0;
+//        int face_count = 0;
+        bool surface_flag = false;
 
         Edge(){}
         Edge(int32_t dart) { this->dart = dart; }
@@ -84,16 +84,22 @@ namespace HexaLab {
 
 class Mesh {
     friend class Builder;
+private:
+    uint32_t mark = 0;
 
-    public:
+public:
         vector<Hexa> hexas;
         vector<Face> faces;
         vector<Edge> edges;
         vector<Vert> verts;
         vector<Dart> darts;
 
-        uint64_t mark = 0;
         AlignedBox3f aabb;
+        
+        void unmark_all() { ++mark; }
+        bool is_hexa_marked(const Hexa &hexa) const  {return hexa._mark == mark; }
+        void unmark_hexa(Hexa &hexa) const { hexa._mark = mark-1; }
+        void mark_hexa  (Hexa &hexa) const { hexa._mark = mark; }
         
         MeshNavigator navigate(Dart& dart) { return MeshNavigator(dart, *this); }
         MeshNavigator navigate(Hexa& hexa) { Dart& d = darts[hexa.dart]; return navigate(d); }

@@ -15,7 +15,7 @@ namespace HexaLab {
         		break;
         	}
             if (is_filtered) {
-                mesh.hexas[i].filter_mark = mesh.mark;
+                mesh.mark_hexa(mesh.hexas[i]);
             }
         }
     }

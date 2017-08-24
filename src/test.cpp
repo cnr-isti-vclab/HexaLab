@@ -9,6 +9,12 @@ using namespace HexaLab;
 using json = nlohmann::json; // for json reading
 
 int main() {    
+  printf("Size of Hexa %i\n",sizeof(Hexa));
+  printf("Size of Face %i\n",sizeof(Face));
+  printf("Size of Edge %i\n",sizeof(Edge));
+  printf("Size of Vert %i\n",sizeof(Vert));
+  printf("Size of Dart %i\n",sizeof(Dart));
+  
   std::ifstream istr("../datasets/index.json");
   json job;
   istr >> job;
@@ -32,6 +38,7 @@ int main() {
       string basepath="../datasets/";
       bool ret = app.import_mesh(basepath+path+"/"+filename);
       if(!ret) ++failCnt;
+      fflush(stdout);
     }    
   }
   printf("%i meshes in the archive (%i fails to load)\n",meshCnt,failCnt);

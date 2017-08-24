@@ -23,12 +23,12 @@ namespace HexaLab {
             // front face plane cull check
             MeshNavigator nav = mesh.navigate(hexa);
             if (plane_cull_test(nav.face())) { 
-                nav.hexa().filter_mark = mesh.mark;
+                mesh.mark_hexa(nav.hexa());
                 continue;
             }
             nav = nav.rotate_on_hexa().rotate_on_hexa();
             if (plane_cull_test(nav.face())) { 
-                nav.hexa().filter_mark = mesh.mark;
+                mesh.mark_hexa(nav.hexa());
                 continue;
             }
         }

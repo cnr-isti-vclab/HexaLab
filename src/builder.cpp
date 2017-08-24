@@ -203,6 +203,14 @@ namespace HexaLab {
             mesh.darts[base + i + link_offset + 1].face_neighbor = base + i;
         }
     }
+    
+    /**
+     * @brief Builder::build
+     * @param mesh an empty mesh to be filled 
+     * @param vertices a set of vertices
+     * @param indices a set of 8*n indexes representing the hexahedra
+     * 
+     */
 
     void Builder::build(Mesh& mesh, const vector<Vector3f>& vertices, const vector<Index>& indices) {
         assert(indices.size() % 8 == 0);
@@ -238,13 +246,13 @@ namespace HexaLab {
                 vertices[indices[i * 8 + 7]]
             );
             // count neighbors
-            MeshNavigator nav = mesh.navigate(mesh.hexas[i]);
-            for (int j = 0; j < 6; ++j) {
-                if (nav.dart().hexa_neighbor != -1) {
-                    ++nav.hexa().hexa_count;
-                }
-                nav = nav.next_hexa_face();
-            }
+//            MeshNavigator nav = mesh.navigate(mesh.hexas[i]);
+//            for (int j = 0; j < 6; ++j) {
+//                if (nav.dart().hexa_neighbor != -1) {
+//                    ++nav.hexa().hexa_count;
+//                }
+//                nav = nav.next_hexa_face();
+//            }
         }
 
         for (size_t i = 0; i < mesh.edges.size(); ++i) {
@@ -252,10 +260,10 @@ namespace HexaLab {
             Face& begin = nav.face();
             do {
                 if (nav.dart().hexa_neighbor == -1) {
-                    nav.edge().surface = true;
+                    nav.edge().surface_flag = true;
                 }
                 nav = nav.rotate_on_edge();
-                ++mesh.edges[i].face_count;
+//                ++mesh.edges[i].face_count;
             } while (nav.face() != begin);
         }
 
