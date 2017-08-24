@@ -81,6 +81,9 @@ HexaLab.QualityFilter.prototype = Object.assign(Object.create(HexaLab.Filter.pro
         HexaLab.UI.quality_max_number.val(this.filter.quality_threshold_max.toFixed(3))
         HexaLab.UI.quality_enabled.prop('checked', this.filter.enabled)
     },
+    
+    on_mesh_change: function (mesh) {
+    },
 
     // State
 

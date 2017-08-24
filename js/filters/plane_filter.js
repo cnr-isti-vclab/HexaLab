@@ -131,7 +131,7 @@ HexaLab.PlaneFilter = function () {
         normal: null,
         object: new THREE.Object3D()
     };
-    this.scene.add(this.plane.object)
+    //this.scene.add(this.plane.object)
 
     this.default_settings = {
         plane_normal: new THREE.Vector3(1, 0, 0),
@@ -164,14 +164,14 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
         this.mesh = mesh;
         this.filter.on_mesh_set(mesh);
 
-        this.scene.remove(this.plane.object);
-        this.plane.object = new THREE.Object3D()
+        this.scene.remove(this.plane.mesh);
+        this.scene.remove(this.plane.edges);
+        
         var geometry = new THREE.PlaneGeometry(this.mesh.get_size(), this.mesh.get_size());
         var edges = new THREE.EdgesGeometry(geometry)
         this.plane.mesh = new THREE.Mesh(geometry, this.plane.material);
         this.plane.edges = new THREE.LineSegments(edges, new THREE.LineBasicMaterial( { color: 0x000000 } ))
 
-        //this.scene.add(this.plane.object)
         this.scene.add(this.plane.mesh)
         this.scene.add(this.plane.edges)
         
