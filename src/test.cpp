@@ -1,6 +1,7 @@
 #include <app.h>
 #include <plane_filter.h>
 #include <quality_filter.h>
+#include <peeling_filter.h>
 #include "json.hpp"
 #include <fstream>
 
@@ -38,6 +39,9 @@ int main() {
       string basepath="../datasets/";
       bool ret = app.import_mesh(basepath+path+"/"+filename);
       if(!ret) ++failCnt;
+      PeelingFilter pf;
+      pf.on_mesh_set(*app.get_mesh());
+      
       fflush(stdout);
     }    
   }

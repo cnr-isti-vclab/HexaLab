@@ -54,6 +54,11 @@ namespace HexaLab {
     Face& MeshNavigator::face() { return _mesh->faces[_dart->face]; }
     Edge& MeshNavigator::edge() { return _mesh->edges[_dart->edge]; }
     Vert& MeshNavigator::vert() { return _mesh->verts[_dart->vert]; }
+    Index MeshNavigator::hexa_index() { return _dart->hexa; }
+    Index MeshNavigator::face_index() { return _dart->face; }
+    Index MeshNavigator::edge_index() { return _dart->edge; }
+    Index MeshNavigator::vert_index() { return _dart->vert; }
+    Index MeshNavigator::dart_index() { return std::distance(&*_mesh->darts.begin(),_dart); }
     const Dart& MeshNavigator::dart() const { return *_dart; }
     Dart& MeshNavigator::dart() { return *_dart; }
 }

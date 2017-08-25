@@ -37,6 +37,13 @@ namespace HexaLab {
         Edge& edge();
         Vert& vert();
         Dart& dart();
+        Index hexa_index();
+        Index face_index();
+        Index edge_index();
+        Index vert_index();
+        Index dart_index();
+        
+        
         const Dart& dart() const;
         bool operator==(const MeshNavigator& other) const {
           return this->_dart == other._dart

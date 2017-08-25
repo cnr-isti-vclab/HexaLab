@@ -14,7 +14,8 @@ SOURCES += app.cpp \
   quality_filter.cpp \
   test.cpp \
   color_map.cpp \
-  hexalab_js.cpp 
+  hexalab_js.cpp \ 
+    peeling_filter.cpp
 
 HEADERS = app.h \
   builder.h\
@@ -25,4 +26,5 @@ HEADERS = app.h \
   model.h \
   dart.h \
   plane_filter.h \
-  quality_filter.h 
+  quality_filter.h \ 
+    peeling_filter.h
