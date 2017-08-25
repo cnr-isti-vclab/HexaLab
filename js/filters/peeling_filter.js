@@ -28,12 +28,17 @@ HexaLab.PeelingFilter = function () {
         HexaLab.app.update()
     })
     HexaLab.UI.peeling_depth_number.change(function () {
-        self.set_peeling_depth(parseFloat($(this).val()))
+        var value = parseFloat($(this).val())
+        var max = HexaLab.UI.peeling_depth_slider.slider('option', 'max')
+        var min = HexaLab.UI.peeling_depth_slider.slider('option', 'min')
+        if (value >  max) value = max
+        if (value <  min) value = min
+        self.set_peeling_depth(value)
         self.sync()
         HexaLab.app.update()
     })
     HexaLab.UI.peeling_depth_slider.on('slide', function (e, ui) {
-        self.set_peeling_depth(ui.values[0] / 100)
+        self.set_peeling_depth(ui.value)
         self.sync()
         HexaLab.app.update()
     })
@@ -58,7 +63,7 @@ HexaLab.PeelingFilter.prototype = Object.assign(Object.create(HexaLab.Filter.pro
     },
 
     sync: function () {
-        HexaLab.UI.peeling_depth_slider.slider('option', 'value', this.filter.peeling_depth)
+        HexaLab.UI.peeling_depth_slider.slider('value', this.filter.peeling_depth)
         HexaLab.UI.peeling_depth_number.val(this.filter.peeling_depth)
         HexaLab.UI.peeling_enabled.prop('checked', this.filter.enabled)
     },
