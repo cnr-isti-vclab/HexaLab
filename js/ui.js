@@ -386,6 +386,8 @@ HexaLab.UI.quality_plot = function(container, axis) {
     };
 
     var layout = { 
+        paper_bgcolor: 'rgba(0,0,0,0)',
+        plot_bgcolor: 'rgba(0,0,0,0)',
         xaxis: {
             fixedrange: true
         },
@@ -461,10 +463,10 @@ HexaLab.UI.plot.on('click', function () {
         delete HexaLab.UI.plot_overlay
     } else {
         var size = HexaLab.app.get_canvas_size()
-        var x = HexaLab.UI.menu.width() + 50
-        var y = size.height / 10
+        var x = HexaLab.UI.menu.width()
+        var y = 0
         var width = size.width / 4
-        var height = size.height - 2 * y
+        var height = size.height - 2
         // TODO
         HexaLab.UI.plot_overlay = HexaLab.UI.overlay(x, y, width, height, '').appendTo(document.body)
         HexaLab.UI.quality_plot(HexaLab.UI.plot_overlay[0], 'y')
@@ -496,7 +498,7 @@ HexaLab.UI.overlay = function (x, y, width, height, content) {
             'width:', width, 'px;',
             'height:', height, 'px;',
             'position:fixed;',
-            'border: 1px solid black;',
+            'border: 1px solid rgba(64, 64, 64, .25);',
             ' ">', content, ' </div>'
         ].join(''))
     return x.resizable().draggable({
