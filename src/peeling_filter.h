@@ -12,7 +12,8 @@ namespace HexaLab {
         Mesh* mesh;
 
     public:
-        int  depth_threshold=0; // all the hexa with a depth lower than this are filtered
+        int depth_threshold = 0; // all the hexa with a depth lower than this are filtered
+        int max_depth = 0;
         void filter(Mesh& mesh);
         void on_mesh_set(Mesh& _mesh);
 

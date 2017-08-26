@@ -117,6 +117,7 @@ EMSCRIPTEN_BINDINGS(HexaLab) {
         .function("filter", &PeelingFilter::filter)
         .function("on_mesh_set", static_cast<void(PeelingFilter::*)(Mesh&)>(&IFilter::on_mesh_set))
         .property("peeling_depth", &PeelingFilter::depth_threshold)
+        .property("max_depth", &PeelingFilter::max_depth)
         ;
 
     class_<MeshStats>("MeshStats")

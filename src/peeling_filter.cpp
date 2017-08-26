@@ -57,6 +57,9 @@ namespace HexaLab {
         }
         std::swap(toBeProcessed,toBeProcessedNext); 
       }
+      this->max_depth = curDepth;
+      if (this->depth_threshold > curDepth) 
+        this->depth_threshold = curDepth;
       printf("Max Depth %i ",curDepth);
       for(size_t i=0;i<hn;++i) { 
         assert (HexaDepth[i]>=0); 

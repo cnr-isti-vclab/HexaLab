@@ -69,6 +69,8 @@ HexaLab.PeelingFilter.prototype = Object.assign(Object.create(HexaLab.Filter.pro
     },
     
     on_mesh_change: function (mesh) {
+        HexaLab.UI.peeling_depth_slider.slider('option', 'max', this.filter.max_depth)
+        this.sync()
     },
 
     // State
