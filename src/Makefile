@@ -22,6 +22,7 @@ OBJ = hexalab_js.bc \
       color_map.cpp \
       loader.bc \
       plane_filter.bc \
+      peeling_filter.bc \
       quality_filter.bc \
       mesh_navigator.bc
 
