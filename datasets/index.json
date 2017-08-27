@@ -10,7 +10,7 @@
 				"web": "http://www.cs.ubc.ca/labs/imager/tr/2015/untangler/",
 				"DOI": "10.1145/2366145.2366196"
 			},
-			"path" : "All-hex Meshing Using Singularity-restricted Field",
+			"path" : "All-hex Meshing using Singularity-Restricted Field",
 			"label" : "2012 - All-Hex Meshing Using Singularity-Restricted Field",
 			"data": [
 				"bone/bone.mesh",
