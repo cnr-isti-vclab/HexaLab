@@ -14,7 +14,7 @@ CC=emcc
 # -s TOTAL_MEMORY=1073741824 
 
 
-CFLAGS= -I ./ -I ./eigen -s TOTAL_MEMORY=536870912 --memory-init-file 0 -std=c++11 -s PRECISE_F32=1 -s DEMANGLE_SUPPORT=1 --bind  -s LINKABLE=1 -Os
+CFLAGS= -I ./ -I ./eigen -s TOTAL_MEMORY=1073741824 --memory-init-file 0 -std=c++11 -s PRECISE_F32=1 -s DEMANGLE_SUPPORT=1 --bind  -s LINKABLE=1 -Os
 
 OBJ = hexalab_js.bc \
       app.bc \
@@ -22,6 +22,7 @@ OBJ = hexalab_js.bc \
       color_map.cpp \
       loader.bc \
       plane_filter.bc \
+      peeling_filter.bc \
       quality_filter.bc \
       mesh_navigator.bc
 

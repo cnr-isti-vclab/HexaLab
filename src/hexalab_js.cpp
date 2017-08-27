@@ -1,6 +1,7 @@
 #include <app.h>
 #include <plane_filter.h>
 #include <quality_filter.h>
+#include <peeling_filter.h>
 #include <color_map.h>
 
 using namespace HexaLab;
@@ -109,6 +110,14 @@ EMSCRIPTEN_BINDINGS(HexaLab) {
         .property("quality_threshold_min", &QualityFilter::quality_threshold_min)
         .property("quality_threshold_max", &QualityFilter::quality_threshold_max)
         .property("operator", &QualityFilter::op)
+        ;
+
+    class_<PeelingFilter, base<IFilter>>("PeelingFilter")
+        .constructor<>()
+        .function("filter", &PeelingFilter::filter)
+        .function("on_mesh_set", static_cast<void(PeelingFilter::*)(Mesh&)>(&IFilter::on_mesh_set))
+        .property("peeling_depth", &PeelingFilter::depth_threshold)
+        .property("max_depth", &PeelingFilter::max_depth)
         ;
 
     class_<MeshStats>("MeshStats")

@@ -8,7 +8,7 @@ namespace HexaLab {
     public:
     	bool enabled = true;
 
-        void on_mesh_set(Mesh& mesh) {}
+        virtual void on_mesh_set(Mesh& mesh) {}
         virtual void filter(Mesh& mesh) = 0;
     };
 }

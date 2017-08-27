@@ -192,7 +192,23 @@
                             </div>
                         </div>
                     </div>
-
+                    <div id="peeling_menu" class="menu_area">
+                        <div class="menu_title_wrapper">
+                            <div class="menu_title">Hexahedral Peeling</div>
+                            <input type="checkbox" class="menu_switch" id="peeling_enabled">
+                        </div>
+                        <div class="menu_content">
+                            <div class="menu_row">
+                                <div class="menu_row_label">Depth</div>
+                                <div class="menu_row_input">
+                                    <div class="slider" id="peeling_depth_slider"></div>
+                                    <div class="menu_row_input_block">
+                                        <input type="number" id="peeling_depth_number">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <div id="rendering_menu" class="menu_area">
                         <div class="menu_title_wrapper">
                             <div class="menu_title">Rendering</div>
@@ -287,6 +303,7 @@
     <script src="js/hexalab.js"></script>
     <script src="js/filters/plane_filter.js"></script>
     <script src="js/filters/quality_filter.js"></script>
+    <script src="js/filters/peeling_filter.js"></script>
 
     <script type="text/javascript">
         window.onload = function () {

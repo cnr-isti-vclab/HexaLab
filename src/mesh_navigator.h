@@ -7,6 +7,7 @@ namespace HexaLab {
     struct Face;
     struct Edge;
     struct Vert;
+    struct Dart;
 
     class MeshNavigator {
     private:
@@ -27,12 +28,27 @@ namespace HexaLab {
         MeshNavigator rotate_on_hexa();
         
         MeshNavigator next_hexa_face();
-
+        bool is_face_boundary() const { return (_dart->hexa_neighbor == -1); }
+        int incident_face_on_edge_num() const;
+        void collect_face_vertex_position_vector(std::vector<Eigen::Vector3f> &posVec) const;
+        
         Hexa& hexa();
         Face& face();
         Edge& edge();
         Vert& vert();
         Dart& dart();
+        Index hexa_index();
+        Index face_index();
+        Index edge_index();
+        Index vert_index();
+        Index dart_index();
+        
+        
+        const Dart& dart() const;
+        bool operator==(const MeshNavigator& other) const {
+          return this->_dart == other._dart
+              && this->_mesh == other._mesh;          
+        }
     };
 }
 

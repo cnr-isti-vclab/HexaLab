@@ -28,15 +28,8 @@ HexaLab.PlaneFilter = function () {
     // Listener
     var self = this;
     HexaLab.UI.plane_enabled.change(function () {
-        var enabled = $(this).is(':checked')
-        self.filter.enabled = enabled
-        if (enabled) {
-            self.scene.add(self.plane.mesh)
-            self.scene.add(self.plane.edges)
-        } else {
-            self.scene.remove(self.plane.mesh)
-            self.scene.remove(self.plane.edges)
-        }
+        self.filter.enabled = $(this).is(':checked')
+        self.update_visibility()
         HexaLab.app.update()
     })
     HexaLab.UI.plane_nx.change(function () {
@@ -93,21 +86,13 @@ HexaLab.PlaneFilter = function () {
         HexaLab.app.update()
     })
     HexaLab.UI.plane_color_visibility.change(function () {
-        var visible = $(this).is(':checked')
-        if (visible) {
-            self.plane.mesh.visible = true
-        } else {
-            self.plane.mesh.visible = false
-        }
+        self.visible_color = $(this).is(':checked')
+        self.update_visibility()
         HexaLab.app.update()
     })
     HexaLab.UI.plane_edge_visibility.change(function () {
-        var visible = $(this).is(':checked')
-        if (visible) {
-            self.plane.edges.visible = true
-        } else {
-            self.plane.edges.visible = false
-        }
+        self.visible_edge = $(this).is(':checked')
+        self.update_visibility()
         HexaLab.app.update()
     })
 
@@ -128,10 +113,11 @@ HexaLab.PlaneFilter = function () {
         offset: 0,
         world_offset: 0,
         position: null,
-        normal: null,
-        object: new THREE.Object3D()
+        normal: null
     };
-    this.scene.add(this.plane.object)
+    self.visible_color = true
+    self.visible_edge = true
+    //this.scene.add(this.plane.object)
 
     this.default_settings = {
         plane_normal: new THREE.Vector3(1, 0, 0),
@@ -164,16 +150,17 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
         this.mesh = mesh;
         this.filter.on_mesh_set(mesh);
 
-        this.scene.remove(this.plane.object);
-        this.plane.object = new THREE.Object3D()
+        this.scene.remove(this.plane.mesh);
+        this.scene.remove(this.plane.edges);
+        
         var geometry = new THREE.PlaneGeometry(this.mesh.get_size(), this.mesh.get_size());
         var edges = new THREE.EdgesGeometry(geometry)
         this.plane.mesh = new THREE.Mesh(geometry, this.plane.material);
         this.plane.edges = new THREE.LineSegments(edges, new THREE.LineBasicMaterial( { color: 0x000000 } ))
 
-        //this.scene.add(this.plane.object)
         this.scene.add(this.plane.mesh)
         this.scene.add(this.plane.edges)
+        this.update_visibility()
         
         this.set_settings(this.get_settings());
         this.sync()
@@ -192,12 +179,12 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
         if (!this.plane.mesh) {
             HexaLab.UI.plane_color_visibility.prop('checked', false)
         } else {
-            HexaLab.UI.plane_color_visibility.prop('checked', this.plane.mesh.visible)
+            HexaLab.UI.plane_color_visibility.prop('checked', this.visible_color)
         }
         if (!this.plane.edges) {
             HexaLab.UI.plane_edge_visibility.prop('checked', false)
         } else {
-            HexaLab.UI.plane_edge_visibility.prop('checked', this.plane.edges.visible)
+            HexaLab.UI.plane_edge_visibility.prop('checked', this.visible_edge)
         }
 
         //HexaLab.UI.plane_opacity.slider('value', opacity * 100);
@@ -229,6 +216,24 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
 
     set_plane_color: function (color) {
         this.plane.material.color.set(color);
+    },
+
+    update_visibility: function () {
+        if (this.filter.enabled) {
+            if (this.visible_color) {
+                this.plane.mesh.visible = true
+            } else {
+                this.plane.mesh.visible = false
+            }
+            if (this.visible_edge) {
+                this.plane.edges.visible = true
+            } else {
+                this.plane.edges.visible = false
+            }
+        } else {
+            this.plane.mesh.visible = false
+            this.plane.edges.visible = false
+        }
     },
 
     update_mesh: function () {
