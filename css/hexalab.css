@@ -153,6 +153,7 @@ input {
 #menu input[type=number] {
 	width: 40px;
 	height: 20px; 
+	padding: 0;
 }
 
 .menu_area {
@@ -358,7 +359,7 @@ input {
 input:checked + .switch-slider {
     background-color: rgb(114, 137, 218);
 	background: rgb(207, 226, 243);
-	background: #86c9f3;
+	background: #a6cce4;
 }
 
 input:checked + .switch-slider:before {
