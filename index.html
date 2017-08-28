@@ -109,7 +109,10 @@
                     <div id="plane_menu" class="menu_area">
                         <div class="menu_title_wrapper">
                             <div class="menu_title">Clipping plane</div>
-                            <input type="checkbox" class="menu_switch" id="plane_enabled" title="Toggle the filtering of cells beyond a given plane">
+                            <label class="switch menu_switch" title="Toggle the filtering of cells beyond a given plane">
+                                <input type="checkbox" id="plane_enabled">
+                                <span class="switch-slider"></span>
+                            </label>
                         </div>
                         <div class="menu_content">
                             <div class="menu_row">
@@ -164,7 +167,10 @@
                     <div id="quality_menu" class="menu_area">
                         <div class="menu_title_wrapper">
                             <div class="menu_title">Hexahedral quality</div>
-                            <input type="checkbox" class="menu_switch" id="quality_enabled">
+                            <label class="switch menu_switch" title="Toggle the filtering of cells based on their estimated quality">
+                                <input type="checkbox" id="quality_enabled">
+                                <span class="switch-slider"></span>
+                            </label>
                         </div>
                         <div class="menu_content">
                             <div class="menu_row">
@@ -195,7 +201,10 @@
                     <div id="peeling_menu" class="menu_area">
                         <div class="menu_title_wrapper">
                             <div class="menu_title">Hexahedral Peeling</div>
-                            <input type="checkbox" class="menu_switch" id="peeling_enabled">
+                            <label class="switch menu_switch" title="Toggle the filtering of cells based on their depth">
+                                <input type="checkbox" id="peeling_enabled">
+                                <span class="switch-slider"></span>
+                            </label>
                         </div>
                         <div class="menu_content">
                             <div class="menu_row">
