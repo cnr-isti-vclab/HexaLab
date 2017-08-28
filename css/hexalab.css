@@ -168,7 +168,6 @@ input {
 	width: 100%;
 	font-weight: bold;
 	overflow:hidden;
-	line-height: 1.5;
 	padding-bottom: 2px;
 }
 
@@ -323,8 +322,8 @@ input {
 .switch {
   position: relative;
   display: inline-block;
-  width: 40px;
-  height: 22px;
+  width: 34px;
+  height: 18px;
   vertical-align: middle;
 }
 
@@ -347,8 +346,8 @@ input {
 .switch-slider:before {
   position: absolute;
   content: "";
-  height: 16px;
-  width: 16px;
+  height: 12px;
+  width: 12px;
   left: 4px;
   bottom: 3px;
   background-color: rgb(243, 243, 243);
@@ -363,7 +362,7 @@ input:checked + .switch-slider {
 }
 
 input:checked + .switch-slider:before {
-  transform: translateX(16px);
+  transform: translateX(14px);
 }
 
 /* Rounded sliders */
