@@ -153,6 +153,7 @@ input {
 #menu input[type=number] {
 	width: 40px;
 	height: 20px; 
+	padding: 0;
 }
 
 .menu_area {
@@ -167,7 +168,8 @@ input {
 .menu_area .menu_title_wrapper {
 	width: 100%;
 	font-weight: bold;
-	overflow:hidden
+	overflow:hidden;
+	padding-bottom: 2px;
 }
 
 .menu_area .menu_title_wrapper .menu_title {
@@ -313,6 +315,64 @@ input {
 	width: 100%;
 	height: 200px;
 	margin-top: 5px;
+}
+
+/* SWITCH */
+
+/* The switch - the box around the slider */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 34px;
+  height: 18px;
+  vertical-align: middle;
+}
+
+/* Hide default HTML checkbox */
+.switch input {display:none;}
+
+/* The slider */
+.switch-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #c1c1c1;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.switch-slider:before {
+  position: absolute;
+  content: "";
+  height: 12px;
+  width: 12px;
+  left: 4px;
+  bottom: 3px;
+  background-color: rgb(243, 243, 243);
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .switch-slider {
+    background-color: rgb(114, 137, 218);
+	background: rgb(207, 226, 243);
+	background: #a6cce4;
+}
+
+input:checked + .switch-slider:before {
+  transform: translateX(14px);
+}
+
+/* Rounded sliders */
+.switch-slider {
+  border-radius: 34px;
+}
+
+.switch-slider:before {
+  border-radius: 50%;
 }
 
 /* Toolbar */

@@ -125,6 +125,7 @@
 				"venue": "IEEE Transactions on Visualization and Computer Graphics, Volume 22, Issue 7",
 				"authors": "Xifeng Gao, Tobias Martin, Sai Deng, Elaine Cohen, Zhigang Deng and Guoning Chen",
 				"year": "2016",
+                                "PDF":"http://www2.cs.uh.edu/~chengu/hex_meshing/hex-meshing.pdf",
 				"web": "https://gaoxifeng.github.io/research.html",
 				"DOI":"10.1109/TVCG.2015.2473835"
 			},
@@ -172,6 +173,24 @@
 				"hex_mesh/rockerarm/rockerarm_3.mesh",
 				"hex_mesh/rotellipse/rotellipse_padded.mesh",
                                 "hex_mesh/twistedu/twistedu.mesh"
+			]
+        },
+        {
+            "paper": {
+				"title": "Hexahedral Mesh Generation via Constrained Quadrilateralization",
+				"venue": " PLoS ONE, Volume 12 Issue 5",
+				"authors": "Feifei Shang, Yangke Gan, and Yufei Guo",
+				"year": "2017",
+                                "PDF":"http://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0177603&type=printable",
+				"web": "http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0177603",
+				"DOI":"10.1371/journal.pone.0177603"
+			},
+			"path" : "Hexahedral Mesh Generation via Constrained Quadrilateralization",
+			"label" : "2017 - Hexahedral Mesh Generation via Constrained Quadrilateralization",
+			"data": [
+				"cube - pone.0177603.s001.mesh",
+                                "fandisk - pone.0177603.s002.mesh",
+                                "joint - pone.0177603.s003.mesh"
 			]
         }
 	]
