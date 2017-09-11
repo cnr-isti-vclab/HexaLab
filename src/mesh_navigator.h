@@ -28,7 +28,7 @@ namespace HexaLab {
         MeshNavigator rotate_on_hexa();
         
         MeshNavigator next_hexa_face();
-        bool is_face_boundary() const { return (_dart->hexa_neighbor == -1); }
+        bool is_face_boundary() const;
         int incident_face_on_edge_num() const;
         void collect_face_vertex_position_vector(std::vector<Eigen::Vector3f> &posVec) const;
         

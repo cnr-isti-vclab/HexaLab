@@ -42,7 +42,8 @@ namespace HexaLab {
 
         float msj = *std::min_element(alpha, alpha + 9);
 
-        if (msj > 1.1) msj = -1.0;
+        if (msj > 1.01) 
+          msj = -1.0;
 
         return msj;
     }
@@ -232,10 +233,10 @@ namespace HexaLab {
         for (size_t h = 0; h < hexa_count; ++h) {
             add_hexa(mesh, &indices[h * 8]);
         }
-
+        mesh.hexa_quality.resize(hexa_count);
         for (size_t i = 0; i < hexa_count; ++i) {
             // compute quality
-            mesh.hexas[i].scaled_jacobian =  scaled_jacobian(
+            mesh.hexa_quality[i] =  scaled_jacobian(
                 vertices[indices[i * 8 + 0]],
                 vertices[indices[i * 8 + 1]],
                 vertices[indices[i * 8 + 2]],

@@ -8,7 +8,6 @@
 #include <Eigen/Geometry>
 
 #include <common.h>
-#include <dart.h>
 #include <mesh_navigator.h>
 
 
@@ -17,10 +16,56 @@ namespace HexaLab {
     using namespace Eigen;
     using namespace std;
 
+  typedef int32_t DartIndex;
+
+  struct Dart {
+      DartIndex hexa_neighbor = -1;
+      DartIndex face_neighbor = -1;
+      DartIndex edge_neighbor = -1;
+      DartIndex vert_neighbor = -1;
+      Index hexa = -1;
+      Index face = -1;
+      Index edge = -1;
+      Index vert = -1;
+  
+      Dart(){}
+      Dart(Index hexa, Index face, Index edge, Index vert) {
+          this->hexa = hexa;
+          this->face = face;
+          this->edge = edge;
+          this->vert = vert;
+      }
+  
+      Dart(const Dart& other) = delete;
+  
+      Dart(const Dart&& other) {
+          this->hexa_neighbor = other.hexa_neighbor;
+          this->face_neighbor = other.face_neighbor;
+          this->edge_neighbor = other.edge_neighbor;
+          this->vert_neighbor = other.vert_neighbor;
+          this->hexa = other.hexa;
+          this->face = other.face;
+          this->edge = other.edge;
+          this->vert = other.vert;
+      }
+  
+      bool operator==(const Dart& other) const {
+          // Might limit the comparison to the hexa/face/edeg/vert fields
+          return this->hexa_neighbor == other.hexa_neighbor
+              && this->face_neighbor == other.face_neighbor
+              && this->edge_neighbor == other.edge_neighbor
+              && this->vert_neighbor == other.vert_neighbor
+              && this->hexa == other.hexa
+              && this->face == other.face
+              && this->edge == other.edge
+              && this->vert == other.vert;
+      }
+  };
+ 
+
     struct Hexa {
-        Index dart = -1;
+        DartIndex dart = -1;
         uint32_t _mark = 0;
-        float scaled_jacobian = 0;
         //int hexa_count = 0;
 
         Hexa(){}
@@ -100,6 +145,8 @@ public:
         bool is_hexa_marked(const Hexa &hexa) const  {return hexa._mark == mark; }
         void unmark_hexa(Hexa &hexa) const { hexa._mark = mark-1; }
         void mark_hexa  (Hexa &hexa) const { hexa._mark = mark; }
+
+        vector<float> hexa_quality;
         
         MeshNavigator navigate(Dart& dart) { return MeshNavigator(dart, *this); }
         MeshNavigator navigate(Hexa& hexa) { Dart& d = darts[hexa.dart]; return navigate(d); }

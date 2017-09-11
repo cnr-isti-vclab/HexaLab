@@ -8,10 +8,10 @@ namespace HexaLab {
         	bool is_filtered;
         	switch(this->op) {
         	case Operator::Inside:
-        		is_filtered = mesh.hexas[i].scaled_jacobian < quality_threshold_min || mesh.hexas[i].scaled_jacobian > quality_threshold_max;
+        		is_filtered = mesh.hexa_quality[i] < quality_threshold_min || mesh.hexa_quality[i] > quality_threshold_max;
         		break;
         	case Operator::Outside:
-        		is_filtered = mesh.hexas[i].scaled_jacobian > quality_threshold_min && mesh.hexas[i].scaled_jacobian < quality_threshold_max;
+        		is_filtered = mesh.hexa_quality[i] > quality_threshold_min && mesh.hexa_quality[i] < quality_threshold_max;
         		break;
         	}
             if (is_filtered) {
@@ -19,4 +19,18 @@ namespace HexaLab {
             }
         }
     }
+//    void QualityFilter::on_mesh_set(Mesh& _mesh) {
+      
+//      printf("QualityFilter %i %i on_mesh_set\n",_mesh.hexas.size(),HexaDepth.size());
+//      mesh = &_mesh;
+//      const size_t hn=this->mesh->hexas.size();
+//      ScaledJacobian.clear();
+//      ScaledJacobian.resize(hn,0);
+//      for (auto i = 0; i < mesh->hexas.size(); ++i) {
+//          ScaledJacobian[i];
+//      }
+      
+      
+      
+    
 }

@@ -10,11 +10,11 @@ using namespace HexaLab;
 using json = nlohmann::json; // for json reading
 
 int main() {    
-  printf("Size of Hexa %i\n",sizeof(Hexa));
-  printf("Size of Face %i\n",sizeof(Face));
-  printf("Size of Edge %i\n",sizeof(Edge));
-  printf("Size of Vert %i\n",sizeof(Vert));
-  printf("Size of Dart %i\n",sizeof(Dart));
+  printf("Size of Hexa %lu\n",sizeof(Hexa));
+  printf("Size of Face %lu\n",sizeof(Face));
+  printf("Size of Edge %lu\n",sizeof(Edge));
+  printf("Size of Vert %lu\n",sizeof(Vert));
+  printf("Size of Dart %lu\n",sizeof(Dart));
   
   std::ifstream istr("../datasets/index.json");
   json job;
@@ -36,7 +36,7 @@ int main() {
       ++meshCnt;
       string filename = dataVec[j];
       App app;
-      string basepath="../datasets/";
+      const string basepath="../datasets/";
       bool ret = app.import_mesh(basepath+path+"/"+filename);
       if(!ret) ++failCnt;
       PeelingFilter pf;

@@ -44,9 +44,9 @@ namespace HexaLab {
             filters[i]->on_mesh_set(*mesh);
         }
 
-        for (auto i = 0; i < mesh->hexas.size(); ++i) {
-            hexa_quality.push_back(mesh->hexas[i].scaled_jacobian);
-        }
+//        for (auto i = 0; i < mesh->hexas.size(); ++i) {
+//            mesh->hexa_quality.push_back(mesh->hexas[i].scaled_jacobian);
+//        }
 
         return true;
     }
@@ -129,7 +129,7 @@ namespace HexaLab {
             visible_model.surface_vert_norm.push_back(normal);
             visible_model.surface_vert_norm.push_back(normal);
 
-            Vector3f color = color_map.get(nav.hexa().scaled_jacobian);
+            Vector3f color = color_map.get(mesh->hexa_quality[nav.hexa_index()]);
             visible_model.surface_vert_color.push_back(color);
             visible_model.surface_vert_color.push_back(color);
             visible_model.surface_vert_color.push_back(color);

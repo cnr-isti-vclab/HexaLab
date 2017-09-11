@@ -7,6 +7,10 @@ namespace HexaLab {
     using namespace Eigen;
     using namespace std;
     
+    // This class is used to prepare/manage buffers for rendering stuff 
+    // For sake of simplicity there is the huge assumption that everything is NOT indexed
+    // Motivation: hopefully rendering will not be an issue....
+
     struct Model {
         vector<Vector3f> surface_vert_pos;
         vector<Vector3f> surface_vert_norm;

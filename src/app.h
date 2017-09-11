@@ -2,6 +2,7 @@
 #define _HL_APP_H_
 
 #include <mesh.h>
+#include <mesh_navigator.h>
 #include <ifilter.h>
 #include <model.h>
 #include <loader.h>
@@ -28,7 +29,6 @@ namespace HexaLab {
         Model filtered_model;
         Model singularity_model;
 
-        vector<float> hexa_quality;
 
     public:
         bool import_mesh(string path);
@@ -45,7 +45,7 @@ namespace HexaLab {
         Model* get_filtered_model() { return &this->filtered_model; }
         Model* get_singularity_model() { return &this->singularity_model; }
 
-        vector<float>& get_hexa_quality() { return hexa_quality; }
+        vector<float>& get_hexa_quality() { return mesh->hexa_quality; }
 
         void build_models();
         void build_singularity_model();

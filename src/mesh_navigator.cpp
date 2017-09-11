@@ -48,6 +48,7 @@ namespace HexaLab {
       } while(!(nav == *this));
       assert(posVec.size()==4);
     }
+    bool MeshNavigator::is_face_boundary() const { return (_dart->hexa_neighbor == -1); }
     
     
     Hexa& MeshNavigator::hexa() { return _mesh->hexas[_dart->hexa]; }

@@ -7,6 +7,8 @@
 namespace HexaLab {
     class QualityFilter : public IFilter {
     public:
+      std::vector<float> ScaledJacobian;
+      
     	enum class Operator {
     		Inside,
     		Outside
