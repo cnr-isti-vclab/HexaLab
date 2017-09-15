@@ -51,6 +51,27 @@ namespace HexaLab {
         return true;
     }
 
+    void App::compute_hexa_quality(App::quality_measure_fun* fun) {
+        mesh->hexa_quality.resize(mesh->hexas.size());
+        Vector3f v[8];
+        for (size_t i = 0; i < mesh->hexas.size(); ++i) {
+            int j = 0;
+            MeshNavigator nav = mesh->navigate(mesh->hexas[i]);
+            Vert& a = nav.vert();
+            do {
+                v[j++] = nav.vert().position;
+                nav = nav.rotate_on_face();
+            } while(nav.vert() != a);
+            nav = nav.rotate_on_hexa().rotate_on_hexa().flip_vert();
+            Vert& b = nav.vert();
+            do {
+                v[j++] = nav.vert().position;
+                nav = nav.rotate_on_face();
+            } while(nav.vert() != b);
+            mesh->hexa_quality[i] = fun(v[4], v[5], v[6], v[7], v[0], v[1], v[2], v[3]);
+        }
+    }
+
     void App::build_singularity_model() {
       singularity_model.clear();
       for (size_t i = 0; i < mesh->edges.size(); ++i) {

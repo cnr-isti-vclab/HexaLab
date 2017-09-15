@@ -600,7 +600,8 @@ HexaLab.App = function (dom_element) {
         singularity_surface_opacity: 0.8,
         singularity_wireframe_opacity: 0.8,
 
-        color_map: 'Parula'
+        color_map: 'Parula',
+        quality_measure: 'Scaled Jacobian'  // TODO move this?
     }
 
     // Models
@@ -728,6 +729,7 @@ Object.assign(HexaLab.App.prototype, {
         this.set_singularity_surface_opacity(settings.singularity_surface_opacity)
         this.set_singularity_wireframe_opacity(settings.singularity_wireframe_opacity)
         this.set_color_map(settings.color_map)
+        this.set_quality_measure(settings.quality_measure)
     },
 
     set_scene_settings: function (settings) {
@@ -823,6 +825,17 @@ Object.assign(HexaLab.App.prototype, {
         this.color_map = map
     },
 
+    set_quality_measure: function (measure) {
+        if (measure == "Scaled Jacobian")
+            this.app.compute_hexa_quality(Module.QualityMeasure.ScaledJacobian)
+        else if (measure == "Diagonal Ratio")
+            this.app.compute_hexa_quality(Module.QualityMeasure.DiagonalRatio)
+        else if (measure == "Edge Ratio")
+            this.app.compute_hexa_quality(Module.QualityMeasure.EdgeRatio)
+        this.quality_measure = measure
+        this.update();  // TODO move this out into the caller
+    },
+
     show_visible_quality: function (show) {
         if (show) {
             this.visible_surface_material.vertexColors = THREE.VertexColors;
@@ -900,6 +913,7 @@ Object.assign(HexaLab.App.prototype, {
         });
         this.mesh_stats = this.app.get_mesh_stats();
         this.renderer.set_mesh_params(this.mesh_stats.min_edge_len, this.mesh_stats.avg_edge_len);
+        this.set_quality_measure(this.quality_measure)
         for (var k in this.filters) {
             this.filters[k].on_mesh_change(this.mesh);
         }

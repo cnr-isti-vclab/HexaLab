@@ -199,8 +199,8 @@ namespace HexaLab {
         mesh.hexa_quality.resize(hexa_count);
         for (size_t i = 0; i < hexa_count; ++i) {
             // compute quality
-            mesh.hexa_quality[i] =  diagonal_ratio(
-//            mesh.hexa_quality[i] =  scaled_jacobian(
+//            mesh.hexa_quality[i] =  diagonal_ratio(
+            /*mesh.hexa_quality[i] =  scaled_jacobian(
                 vertices[indices[i * 8 + 0]],
                 vertices[indices[i * 8 + 1]],
                 vertices[indices[i * 8 + 2]],
@@ -209,7 +209,7 @@ namespace HexaLab {
                 vertices[indices[i * 8 + 5]],
                 vertices[indices[i * 8 + 6]],
                 vertices[indices[i * 8 + 7]]
-            );
+            );*/
             // count neighbors
 //            MeshNavigator nav = mesh.navigate(mesh.hexas[i]);
 //            for (int j = 0; j < 6; ++j) {

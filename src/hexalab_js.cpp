@@ -3,6 +3,7 @@
 #include <quality_filter.h>
 #include <peeling_filter.h>
 #include <color_map.h>
+#include <hex_quality.h>
 
 using namespace HexaLab;
 using namespace Eigen;
@@ -41,6 +42,28 @@ Vector3f map_to_color(App& app, float value) {
     return app.color_map.get(value);
 }
 
+enum class QualityMeasure {
+    ScaledJacobian,
+    DiagonalRatio,
+    EdgeRatio
+};
+
+void compute_hexa_quality(App& app, QualityMeasure measure) {
+    App::quality_measure_fun* fun;
+    switch(measure) {
+    case QualityMeasure::ScaledJacobian:
+        fun = &scaled_jacobian;
+        break;
+    case QualityMeasure::DiagonalRatio:
+        fun = &diagonal_ratio;
+        break;
+    case QualityMeasure::EdgeRatio:
+        fun = &edge_ratio;
+        break;
+    }
+    app.compute_hexa_quality(fun);
+}
+
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #include <emscripten/bind.h>
@@ -60,6 +83,7 @@ EMSCRIPTEN_BINDINGS(HexaLab) {
         .function("set_color_map", &set_color_map)
         .function("map_to_color", &map_to_color)
         .function("get_mesh_stats", &App::get_mesh_stats, allow_raw_pointers())
+        .function("compute_hexa_quality", &compute_hexa_quality);
         ;
 
     enum_<ColorMap::Palette>("ColorMap")
@@ -71,6 +95,12 @@ EMSCRIPTEN_BINDINGS(HexaLab) {
     enum_<QualityFilter::Operator>("QualityFilterOperator")
         .value("Inside", QualityFilter::Operator::Inside)
         .value("Outside", QualityFilter::Operator::Outside)
+        ;
+
+    enum_<QualityMeasure>("QualityMeasure")
+        .value("ScaledJacobian", QualityMeasure::ScaledJacobian)
+        .value("DiagonalRatio", QualityMeasure::DiagonalRatio)
+        .value("EdgeRatio", QualityMeasure::EdgeRatio)
         ;
 
     class_<Model>("Model")

@@ -95,7 +95,10 @@ HexaLab.UI = {
     singularity_opacity: $('#singularity_slider'),
 
     // Mesh sources
-    datasets_index: {}
+    datasets_index: {},
+
+    // Mesh quality TODO move this somewhere
+    quality_type: $('#quality_type')
 }
 
 // -------------------------------------------------------------------------------- 
@@ -451,6 +454,11 @@ HexaLab.UI.menu.on('resize', function () {
 HexaLab.UI.load_mesh.on('click', function () {
     //HexaLab.UI.load_mesh_dialog.dialog('open')
     HexaLab.UI.mesh_local_load_trigger()
+})
+
+HexaLab.UI.quality_type.on('change', function () {
+    var v = this.options[this.selectedIndex].value
+    HexaLab.app.set_quality_measure(v);
 })
 
 HexaLab.UI.reset_camera.on('click', function () {

@@ -5,7 +5,8 @@ namespace HexaLab {
         if (!this->enabled)
         	return;
         for (size_t i = 0; i < mesh.hexas.size(); ++i) {
-        	bool is_filtered;
+        	//printf("%f\n", mesh.hexa_quality[i]);
+            bool is_filtered;
         	switch(this->op) {
         	case Operator::Inside:
         		is_filtered = mesh.hexa_quality[i] < quality_threshold_min || mesh.hexa_quality[i] > quality_threshold_max;
