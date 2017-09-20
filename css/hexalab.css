@@ -323,8 +323,8 @@ input {
 .switch {
   position: relative;
   display: inline-block;
-  width: 34px;
-  height: 18px;
+  width: 28px;
+  height: 14px;
   vertical-align: middle;
 }
 
@@ -347,10 +347,10 @@ input {
 .switch-slider:before {
   position: absolute;
   content: "";
-  height: 12px;
-  width: 12px;
-  left: 4px;
-  bottom: 3px;
+  height: 10px;
+  width: 10px;
+  left: 2px;
+  bottom: 2px;
   background-color: rgb(243, 243, 243);
   -webkit-transition: .4s;
   transition: .4s;
@@ -368,11 +368,9 @@ input:checked + .switch-slider:before {
 
 /* Rounded sliders */
 .switch-slider {
-  border-radius: 34px;
 }
 
 .switch-slider:before {
-  border-radius: 50%;
 }
 
 /* Toolbar */
