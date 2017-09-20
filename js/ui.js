@@ -87,11 +87,12 @@ HexaLab.UI = {
     snapshot: $('#snapshot'),
 
     // Rendering
+    surface_color_source: $('#surface_color_source'),
     surface_color: $('#surface_color'),
+    color_map: $('#color_map'),
     filtered_opacity: $('#filtered_slider'),
     quality: $("#show_quality"),
     occlusion: $("#show_occlusion"),
-    color_map: $('#color_map'),
     singularity_opacity: $('#singularity_slider'),
 
     // Mesh sources

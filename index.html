@@ -149,16 +149,18 @@
                                     <div class="slider" id="plane_offset_slider"></div>    
                                 </div>
                             </div>
-                            <div class="menu_row">
-                                <div class="menu_row_label">Color</div>
-                                <div class="menu_row_input">
-                                    <input type="checkbox" id="plane_color_visibility"></input>
+                            <div class="menu_row2">
+                                <div class="menu_row2_slot">
+                                    <div class="menu_row_label">Color</div>
+                                    <div class="menu_row_input">
+                                        <input type="checkbox" id="plane_color_visibility"></input>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="menu_row">
-                                <div class="menu_row_label">Edge</div>
-                                <div class="menu_row_input">
-                                    <input type="checkbox" id="plane_edge_visibility"></input>
+                                <div class="menu_row2_slot">
+                                    <div class="menu_row_label">Edge</div>
+                                    <div class="menu_row_input">
+                                        <input type="checkbox" id="plane_edge_visibility"></input>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -228,7 +230,20 @@
                             <div class="menu_row">
                                 <div class="menu_row_label">Surface</div>
                                 <div class="menu_row_input">
+                                    <select id="surface_color_source">
+                                        <option value="Shaded" selected="selected">Shaded</option>
+                                        <option value="ColorMap">Quality Color Map</option>
+                                    </select>
+                                </div>
+                                <div class="menu_row_input" id="surface_color_input">
                                     <input type="text" id="surface_color">
+                                </div>
+                                <div class="menu_row_input" id="surface_colormap_input">
+                                    <select id="color_map">
+                                        <option value="Parula" selected="selected">Parula</option>
+                                        <option value="Jet">Jet</option>
+                                        <option value="RedGreen">Red Green</option>
+                                    </select>
                                 </div>
                             </div>
                             <div class="menu_row">
@@ -244,25 +259,9 @@
                                 </div>
                             </div>
                             <div class="menu_row">
-                                <div class="menu_row_label">Quality</div>
-                                <div class="menu_row_input">
-                                    <input type="checkbox" id="show_quality">
-                                </div>
-                            </div>
-                            <div class="menu_row">
                                 <div class="menu_row_label">Occlusion</div>
                                 <div class="menu_row_input">
                                     <input type="checkbox" id="show_occlusion">
-                                </div>
-                            </div>
-                            <div class="menu_row">
-                                <div class="menu_row_label">ColorMap</div>
-                                <div class="menu_row_input">
-                                    <select id="color_map">
-                                        <option value="Parula" selected="selected">Parula</option>
-                                        <option value="Jet">Jet</option>
-                                        <option value="RedGreen">Red Green</option>
-                                    </select>
                                 </div>
                             </div>
                         </div>

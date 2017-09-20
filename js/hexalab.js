@@ -509,6 +509,18 @@ HexaLab.App = function (dom_element) {
 
     // UI
     var self = this;
+    HexaLab.UI.surface_color_source.on("change", function () {
+        var value = this.options[this.selectedIndex].value
+        if (value == "Shaded") {
+            $("#surface_color_input").show();
+            $("#surface_colormap_input").hide();
+            self.show_visible_quality(false)
+        } else if (value == "ColorMap") {
+            $("#surface_color_input").hide();
+            $("#surface_colormap_input").css('display', 'flex');
+            self.show_visible_quality(true)
+        }
+    })
     HexaLab.UI.surface_color.spectrum({
         cancelText: ''
     }).on('change.spectrum', function (color) {
@@ -525,9 +537,6 @@ HexaLab.App = function (dom_element) {
     })
     HexaLab.UI.occlusion.on('click', function () {
         self.set_occlusion(this.checked)
-    })
-    HexaLab.UI.quality.on('click', function () {
-        self.show_visible_quality(this.checked)
     })
     HexaLab.UI.color_map.on('change', function () {
         self.set_color_map(this.options[this.selectedIndex].value)

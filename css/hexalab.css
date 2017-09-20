@@ -194,7 +194,22 @@ input {
 	display: flex;
 }
 
+
+.menu_area .menu_content .menu_row2 {
+	display: flex;
+	line-height: 25px;
+}
+
+.menu_area .menu_content .menu_row2 .menu_row2_slot {
+	flex: 1;
+}
+
 .menu_area .menu_content .menu_row .menu_row_label {
+	float: left;
+	margin-right: 10px;
+}
+
+.menu_area .menu_content .menu_row2 .menu_row_label {
 	float: left;
 	margin-right: 10px;
 }
@@ -253,6 +268,9 @@ input {
 	font-style: italic;
 }
 
+.menu_area .menu_content .menu_row #surface_colormap_input {
+	display: none;
+}
 
 .menu_area .menu_content .menu_row #mesh_source {
 	font-style: italic;
@@ -313,7 +331,7 @@ input {
 	resize: none;
     outline: none;
 	width: 100%;
-	height: 200px;
+	height: 100px;
 	margin-top: 5px;
 }
 
