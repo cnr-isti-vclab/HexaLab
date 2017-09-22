@@ -489,7 +489,7 @@ Object.assign(HexaLab.Renderer.prototype, {
 
         // hud
         this.scene.add(this.gizmo);
-        this.renderer.setViewport(50, 50, 100, 100);
+        this.renderer.setViewport(10, 10, 100, 100);
         this.hud_camera.setRotationFromMatrix(camera.matrixWorld);
         this.renderer.render(this.scene, this.hud_camera);
         this.scene.remove(this.gizmo);

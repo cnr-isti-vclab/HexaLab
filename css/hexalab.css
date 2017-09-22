@@ -78,7 +78,6 @@ input {
 	width: 100%;
 	text-align: center;
 	font-size: 2vw;
-	font-style: italic;
 	top: 200px;
 	opacity: 0.5
 }
@@ -235,6 +234,7 @@ input {
 	flex-direction: column;
 	display: flex;
 	justify-content: start;
+    background: rgb(243, 243, 243);
 }
 
 .menu_area .menu_content .menu_row .menu_row_infobox .box_buttons button {
@@ -282,7 +282,7 @@ input {
 }
 
 .menu_area .menu_content .menu_row #paper_mesh_picker {
-	width: 60%;
+	width: 100%;
 }
 
 .menu_area .menu_content .menu_row #mesh_info_1 {
@@ -293,8 +293,17 @@ input {
 	display: none;
 }
 
-.menu_area .menu_content .menu_row #mesh_info_2 {
-	display: none;
+#mesh_info_2 {
+	position: absolute;
+	top: 10px;
+	background-color: rgba(0, 0, 0, 0);
+	line-height: 100%;
+	margin-top: 5px;
+	margin-bottom: 5px;
+	font-size: 90%;
+	z-index: 100;
+	cursor: default;
+	user-select: none;
 }
 
 .menu_area .menu_content .menu_row .menu_row_input {

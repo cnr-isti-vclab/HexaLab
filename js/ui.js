@@ -102,6 +102,8 @@ HexaLab.UI = {
     quality_type: $('#quality_type')
 }
 
+$('#mesh_info_2').css('left', (HexaLab.UI.menu.width() + 10).toString().concat('px'))
+
 // -------------------------------------------------------------------------------- 
 // Mesh/settings load/save trigger functions
 // --------------------------------------------------------------------------------
@@ -263,7 +265,7 @@ HexaLab.UI.mesh_source.on("change", function () {
         HexaLab.UI.paper_mesh_picker.empty().css('font-style', 'italic')
         HexaLab.UI.paper_mesh_picker.append($('<option>', { 
                 value: "-1",
-                text : 'Select a mesh file',
+                text : 'Select a mesh',
                 style: 'display:none;'
             }));
         $.each(source.data, function (i, name) {
@@ -446,6 +448,7 @@ HexaLab.UI.menu.on('resize', function () {
     HexaLab.UI.frame.css('margin-left', HexaLab.UI.menu.width()) 
     HexaLab.UI.frame.width(width)
     HexaLab.app.resize()
+    $('#mesh_info_2').css('left', (HexaLab.UI.menu.width() + 10).toString().concat('px'))
 })
 
 // --------------------------------------------------------------------------------
