@@ -20,6 +20,7 @@ namespace HexaLab {
     };
 
     class App {
+    private:
         Mesh* mesh = nullptr;
         MeshStats mesh_stats;
 
@@ -34,19 +35,20 @@ namespace HexaLab {
         bool import_mesh(string path);
         Mesh* get_mesh() { return mesh; }
         MeshStats* get_mesh_stats() { return &mesh_stats; }
-        
+
         void add_filter(IFilter* filter) {
             filters.push_back(filter);
         }
 
         ColorMap color_map;
+        bool do_show_color_map = false;
 
         Model* get_visible_model() { return &this->visible_model; }
         Model* get_filtered_model() { return &this->filtered_model; }
         Model* get_singularity_model() { return &this->singularity_model; }
 
         vector<float>& get_hexa_quality() { return mesh->hexa_quality; }
-        typedef float (quality_measure_fun)(const Vector3f&, const Vector3f&, const Vector3f&, 
+        typedef float (quality_measure_fun)(const Vector3f&, const Vector3f&, const Vector3f&,
             const Vector3f&, const Vector3f&, const Vector3f&, const Vector3f&, const Vector3f&);
         void compute_hexa_quality(quality_measure_fun* fun);
 

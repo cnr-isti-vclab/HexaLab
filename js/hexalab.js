@@ -6,7 +6,7 @@ HexaLab.filters = [];
 // --------------------------------------------------------------------------------
 // Model
 // --------------------------------------------------------------------------------
-// Maps straight to a cpp model class. Pass the cpp model instance and the 
+// Maps straight to a cpp model class. Pass the cpp model instance and the
 // three.js materials for both surface and wframe as parameters.
 // Update fetches the new buffers from the model backend.
 
@@ -405,7 +405,7 @@ Object.assign(HexaLab.Renderer.prototype, {
             this.scene.add(camera);
             this.scene.add(this.ambient);
             camera.add(this.camera_light);
-            
+
             // view norm/depth prepass
             this.scene.overrideMaterial = this.normal_pass.material;
             this.renderer.render(this.scene, camera, this.normal_pass.target, true);
@@ -419,11 +419,11 @@ Object.assign(HexaLab.Renderer.prototype, {
             this.renderer.setRenderTarget();
             this.renderer.clear();
             this.renderer.render(this.scene, camera);
-            
+
             // clean up
             clear_scene();
             camera.remove(this.camera_light);
-            
+
             // ssao
             this.ssao_pass.material.uniforms.uProj = { value: camera.projectionMatrix };
             this.ssao_pass.material.uniforms.uInvProj = { value: new THREE.Matrix4().getInverse(camera.projectionMatrix) };
@@ -433,7 +433,7 @@ Object.assign(HexaLab.Renderer.prototype, {
 
             this.fullscreen_quad.material = this.ssao_pass.material;
             this.renderer.render(this.scene, this.ortho_camera, this.ssao_pass.target, true);
-            
+
             this.fullscreen_quad.material = this.blur_pass.material;
             this.renderer.render(this.scene, this.ortho_camera);
 
@@ -511,21 +511,13 @@ HexaLab.App = function (dom_element) {
     var self = this;
     HexaLab.UI.surface_color_source.on("change", function () {
         var value = this.options[this.selectedIndex].value
-        if (value == "Shaded") {
-            $("#surface_color_input").show();
+        if (value == "Default") {
             $("#surface_colormap_input").hide();
             self.show_visible_quality(false)
         } else if (value == "ColorMap") {
-            $("#surface_color_input").hide();
             $("#surface_colormap_input").css('display', 'flex');
             self.show_visible_quality(true)
         }
-    })
-    HexaLab.UI.surface_color.spectrum({
-        cancelText: ''
-    }).on('change.spectrum', function (color) {
-        self.set_visible_surface_color($(this).spectrum('get').toHexString())
-        self.set_filtered_surface_color($(this).spectrum('get').toHexString())
     })
     HexaLab.UI.filtered_opacity.slider().on('slide', function (e, ui) {
         self.set_filtered_surface_opacity(ui.value / 100)
@@ -565,7 +557,8 @@ HexaLab.App = function (dom_element) {
     this.visible_surface_material = new THREE.MeshLambertMaterial({
         emissive: '#202020',
         polygonOffset: true,
-        polygonOffsetFactor: 0.5
+        polygonOffsetFactor: 0.5,
+        vertexColors: THREE.VertexColors
     });
     this.visible_wireframe_material = new THREE.MeshBasicMaterial({
         transparent: true,
@@ -596,7 +589,6 @@ HexaLab.App = function (dom_element) {
     });
 
     this.default_material_settings = {
-        visible_surface_color: '#ffee9f',
         show_quality_on_visible_surface: false,
         visible_wireframe_color: '#000000',
         visible_wireframe_opacity: 1,
@@ -657,12 +649,11 @@ HexaLab.App = function (dom_element) {
     // Resize callback
     window.addEventListener('resize', this.resize.bind(this));
 };
- 
+
 Object.assign(HexaLab.App.prototype, {
 
     sync: function () {
         var settings = this.get_settings();
-        HexaLab.UI.surface_color.spectrum('set', settings.materials.visible_surface_color)
         HexaLab.UI.filtered_opacity.slider('value', settings.materials.filtered_surface_opacity * 100)
         HexaLab.UI.singularity_opacity.slider('value', settings.materials.singularity_surface_opacity * 100)
         HexaLab.UI.quality.prop('checked', settings.materials.show_quality_on_visible_surface)
@@ -725,9 +716,8 @@ Object.assign(HexaLab.App.prototype, {
         this.set_occlusion(settings.occlusion)
         this.set_antialiasing(settings.antialiasing)
     },
-    
+
     set_material_settings: function (settings) {
-        this.set_visible_surface_color(settings.visible_surface_color)
         this.show_visible_quality(settings.show_quality_on_visible_surface)
         this.set_visible_wireframe_color(settings.visible_wireframe_color)
         this.set_visible_wireframe_opacity(settings.visible_wireframe_opacity)
@@ -757,7 +747,7 @@ Object.assign(HexaLab.App.prototype, {
         for (var k in this.filters) {
             var filter = this.filters[k];
             if (settings.filters && settings.filters[filter.name]) {
-                filter.set_settings(settings.filters[filter.name]); 
+                filter.set_settings(settings.filters[filter.name]);
             }
         }
         this.sync()
@@ -779,7 +769,6 @@ Object.assign(HexaLab.App.prototype, {
 
     get_material_settings: function () {
         return {
-            visible_surface_color: '#' + this.visible_surface_material.color.getHexString(),
             show_quality_on_visible_surface: this.visible_surface_material.vertexColors == THREE.VertexColors,
             visible_wireframe_color: '#' + this.visible_wireframe_material.color.getHexString(),
             visible_wireframe_opacity: this.visible_wireframe_material.opacity,
@@ -846,23 +835,9 @@ Object.assign(HexaLab.App.prototype, {
     },
 
     show_visible_quality: function (show) {
-        if (show) {
-            this.visible_surface_material.vertexColors = THREE.VertexColors;
-            this._surface_color = '#' + this.visible_surface_material.color.getHexString();
-            this.set_visible_surface_color('#ffffff');
-            //HexaLab.UI.visible_surface_color.hide();
-            //$("label[for='" + HexaLab.UI.visible_surface_color.attr('id') + "']").hide();
-        } else {
-            this.visible_surface_material.vertexColors = THREE.NoColors;
-            if (this._surface_color) this.set_visible_surface_color(this._surface_color);
-            //HexaLab.UI.visible_surface_color.show();
-            //$("label[for='" + HexaLab.UI.visible_surface_color.attr('id') + "']").show();
-        }
+        this.app.do_show_color_map = show;
         this.visible_surface_material.needsUpdate = true;
-    },
-
-    set_visible_surface_color: function (color) {
-        this.visible_surface_material.color.set(color);
+        this.update();
     },
 
     set_visible_wireframe_color: function (color) {
@@ -904,7 +879,7 @@ Object.assign(HexaLab.App.prototype, {
     set_antialiasing: function (value) {
         this.renderer.set_msaa(value);
     },
-    
+
     // Mesh
 
     import_mesh: function (path) {
@@ -950,7 +925,7 @@ Object.assign(HexaLab.App.prototype, {
 
         this.controls.update();
         //this.stats.begin();
-    
+
         if (this.mesh) {
             var meshes = [];
             for (var k in this.filters) {

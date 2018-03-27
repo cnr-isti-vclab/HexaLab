@@ -36,10 +36,10 @@ namespace HexaLab {
         //if (!Builder::validate(*mesh)) {
             //return false;
         //}
-        
-        
+
+
         build_singularity_model();
-        
+
         for (size_t i = 0; i < filters.size(); ++i) {
             filters[i]->on_mesh_set(*mesh);
         }
@@ -90,21 +90,21 @@ namespace HexaLab {
           case  5:   color = Vector3f(0, 1, 0);  break;
           default:   color = Vector3f(0, 0, 1);
           }
-                    
+
 //          Face& begin = nav.face();
 //          do {
 //            vector<Vector3f> facePos;
 //            nav.collect_face_vertex_position_vector(facePos);
-//              singularity_model.surface_vert_pos.push_back(facePos[i]);  
+//              singularity_model.surface_vert_pos.push_back(facePos[i]);
 //              singularity_model.surface_vert_color.push_back(color);
 //              singularity_model.wireframe_vert_pos.push_back(facePos[i]);
 //              singularity_model.wireframe_vert_pos.push_back(facePos[(i+1)%facePos.size()]);
 //              singularity_model.wireframe_vert_color.push_back(Vector3f(0, 0, 0));
 //              singularity_model.wireframe_vert_color.push_back(Vector3f(0, 0, 0));
-//            }            
+//            }
 //            nav = nav.rotate_on_edge();
 //          } while (nav.face() != begin);
-          
+
           singularity_model.wireframe_vert_color.push_back(color);
           singularity_model.wireframe_vert_color.push_back(color);
           // add adjacent faces
@@ -117,7 +117,7 @@ namespace HexaLab {
                       singularity_model.surface_vert_color.push_back(color);
                       for (int n = 0; n < 2; ++n) {
                           singularity_model.wireframe_vert_pos.push_back(mesh->verts[nav.dart().vert].position);
-                          singularity_model.wireframe_vert_color.push_back(Vector3f(0, 0, 0));                          
+                          singularity_model.wireframe_vert_color.push_back(Vector3f(0, 0, 0));
                           nav = nav.flip_vert();
                       }
                       nav = nav.rotate_on_face();
@@ -135,7 +135,7 @@ namespace HexaLab {
         if (normal_sign == -1) {
             nav = nav.flip_hexa().flip_edge();
         }
-        
+
         for (int i = 0; i < 2; ++i) {
             int j = 0;
             for (; j < 2; ++j) {
@@ -150,7 +150,14 @@ namespace HexaLab {
             visible_model.surface_vert_norm.push_back(normal);
             visible_model.surface_vert_norm.push_back(normal);
 
-            Vector3f color = color_map.get(mesh->hexa_quality[nav.hexa_index()]);
+            // If hexa quality display is enabled, fetch the color from there.
+            // Otherwise use the defautl coloration (white for outer faces, yellow for everything else)
+            Vector3f color;
+            if (do_show_color_map) {
+                color = color_map.get(mesh->hexa_quality[nav.hexa_index()]);
+            } else {
+                color = nav.is_face_boundary() ? Vector3f(1, 1, 1) : Vector3f(1, 1, 0);
+            }
             visible_model.surface_vert_color.push_back(color);
             visible_model.surface_vert_color.push_back(color);
             visible_model.surface_vert_color.push_back(color);
@@ -202,7 +209,7 @@ namespace HexaLab {
 
     void App::build_models() {
         if (mesh == nullptr) return;
-        
+
         auto t_start = sample_time();
 
         mesh->unmark_all();
@@ -213,22 +220,22 @@ namespace HexaLab {
         for (size_t i = 0; i < filters.size(); ++i) {
             filters[i]->filter(*mesh);
         }
-        
+
         for (size_t i = 0; i < mesh->faces.size(); ++i) {
             MeshNavigator nav = mesh->navigate(mesh->faces[i]);
             // hexa a visible, hexa b not existing or not visible
-            if (! mesh->is_hexa_marked(nav.hexa()) 
-                && (nav.dart().hexa_neighbor == -1 
+            if (! mesh->is_hexa_marked(nav.hexa())
+                && (nav.dart().hexa_neighbor == -1
                     || mesh->is_hexa_marked(nav.flip_hexa().hexa()))) {
                 add_visible_face(nav.dart(), 1);
                 // hexa a invisible, hexa b existing and visible
-            } else if ( mesh->is_hexa_marked(nav.hexa()) 
-                && nav.dart().hexa_neighbor != -1 
+            } else if ( mesh->is_hexa_marked(nav.hexa())
+                && nav.dart().hexa_neighbor != -1
                 && !mesh->is_hexa_marked(nav.flip_hexa().hexa())) {
                 add_visible_face(nav.dart(), -1);
 //                add_filtered_face(nav.dart());
                 // face was culled by the plane, is surface
-            } else if ( mesh->is_hexa_marked(nav.hexa())   
+            } else if ( mesh->is_hexa_marked(nav.hexa())
                     && nav.dart().hexa_neighbor == -1) {
                 add_filtered_face(nav.dart());
             }
