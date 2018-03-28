@@ -57,18 +57,18 @@ Object.assign(HexaLab.Model.prototype, {
 // Filter Interface
 // --------------------------------------------------------------------------------
 
-HexaLab.Filter = function (filter, name) {
-    this.filter = filter;
+HexaLab.Filter = function (filter_backend, name) {
+    this.backend = filter_backend;
     this.name = name;
     this.scene = {
-        data: [],
+        objects: [],
         add: function (obj) {
-            this.data.push(obj);
+            this.objects.push(obj);
         },
         remove: function (obj) {
-            var i = this.data.indexOf(obj);
+            var i = this.objects.indexOf(obj);
             if (i != -1) {
-                this.data.splice(i, 1);
+                this.objects.splice(i, 1);
             }
         }
     };
@@ -596,7 +596,7 @@ HexaLab.App = function (dom_element) {
         filtered_surface_color: '#d2de0c',
         filtered_surface_opacity: 0.28,
         filtered_wireframe_color: '#000000',
-        filtered_wireframe_opacity: 0.3,
+        filtered_wireframe_opacity: 0,
 
         singularity_surface_opacity: 0.8,
         singularity_wireframe_opacity: 0.8,
@@ -640,7 +640,7 @@ HexaLab.App = function (dom_element) {
         if (this.filters[k].default_settings) {
             this.filters[k].set_settings(this.filters[k].default_settings);
         }
-        this.app.add_filter(this.filters[k].filter);
+        this.app.add_filter(this.filters[k].backend);
     }
 
     // Plots
@@ -722,7 +722,7 @@ Object.assign(HexaLab.App.prototype, {
         this.set_visible_wireframe_color(settings.visible_wireframe_color)
         this.set_visible_wireframe_opacity(settings.visible_wireframe_opacity)
         this.set_filtered_surface_color(settings.filtered_surface_color)
-        this.set_filtered_surface_opacity(settings.filtered_wireframe_opacity)
+        this.set_filtered_surface_opacity(settings.filtered_surface_opacity)
         this.set_filtered_wireframe_color(settings.filtered_wireframe_color)
         this.set_filtered_wireframe_opacity(settings.filtered_wireframe_opacity)
         this.set_singularity_surface_opacity(settings.singularity_surface_opacity)
@@ -862,6 +862,11 @@ Object.assign(HexaLab.App.prototype, {
 
     set_filtered_wireframe_opacity: function (opacity) {
         this.filtered_wireframe_material.opacity = opacity;
+        if (opacity == 0) {
+            this.filtered_wireframe_material.visible = false;
+        } else {
+            this.filtered_wireframe_material.visible = true;
+        }
     },
 
     set_singularity_surface_opacity: function (opacity) {
@@ -934,8 +939,8 @@ Object.assign(HexaLab.App.prototype, {
         if (this.mesh) {
             var meshes = [];
             for (var k in this.filters) {
-                for (var j in this.filters[k].scene.data) {
-                    meshes.push(this.filters[k].scene.data[j]);
+                for (var j in this.filters[k].scene.objects) {
+                    meshes.push(this.filters[k].scene.objects[j]);
                 }
             }
 

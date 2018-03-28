@@ -14,8 +14,6 @@ HexaLab.UI.plane_snap_ny = $('#plane_snap_ny')
 HexaLab.UI.plane_snap_nz = $('#plane_snap_nz')
 HexaLab.UI.plane_swap = $('#plane_swap_sign')
 HexaLab.UI.plane_snap_camera = $('#plane_snap_camera')
-HexaLab.UI.plane_color_visibility = $('#plane_color_visibility')
-HexaLab.UI.plane_edge_visibility = $('#plane_edge_visibility')
 
 // --------------------------------------------------------------------------------
 // Logic
@@ -56,6 +54,14 @@ HexaLab.PlaneFilter = function () {
         self.set_plane_offset(ui.value / 1000);
         self.sync()
         HexaLab.app.update()
+    }).on('slidestart', function(e, ui) {
+        self.visible_color = true
+        self.visible_edge = true
+        self.update_visibility()
+    }).on('slidestop', function(e, ui) {
+        self.visible_color = false
+        self.visible_edge = false
+        self.update_visibility()
     })
     HexaLab.UI.plane_snap_nx.on('click', function () {
         self.set_plane_normal(1, 0, 0)
@@ -85,16 +91,6 @@ HexaLab.PlaneFilter = function () {
         self.sync()
         HexaLab.app.update()
     })
-    HexaLab.UI.plane_color_visibility.change(function () {
-        self.visible_color = $(this).is(':checked')
-        self.update_visibility()
-        HexaLab.app.update()
-    })
-    HexaLab.UI.plane_edge_visibility.change(function () {
-        self.visible_edge = $(this).is(':checked')
-        self.update_visibility()
-        HexaLab.app.update()
-    })
 
     /*HexaLab.UI.plane_color.change(function () {
         self.set_plane_color($(this).val());
@@ -115,13 +111,13 @@ HexaLab.PlaneFilter = function () {
         position: null,
         normal: null
     };
-    self.visible_color = true
-    self.visible_edge = true
-    //this.scene.add(this.plane.object)
+
+    self.visible_color = false
+    self.visible_edge = false
 
     this.default_settings = {
         plane_normal: new THREE.Vector3(1, 0, 0),
-        plane_offset: 0.39,
+        plane_offset: 0,
         plane_opacity: 0.3,
         plane_color: "#56bbbb"
     }
@@ -148,20 +144,20 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
 
     on_mesh_change: function (mesh) {
         this.mesh = mesh;
-        this.filter.on_mesh_set(mesh);
+        this.backend.on_mesh_set(mesh);
 
         this.scene.remove(this.plane.mesh);
         this.scene.remove(this.plane.edges);
-        
+
         var geometry = new THREE.PlaneGeometry(this.mesh.get_size(), this.mesh.get_size());
         var edges = new THREE.EdgesGeometry(geometry)
         this.plane.mesh = new THREE.Mesh(geometry, this.plane.material);
-        this.plane.edges = new THREE.LineSegments(edges, new THREE.LineBasicMaterial( { color: 0x000000 } ))
+        this.plane.edges = new THREE.LineSegments(edges, new THREE.LineBasicMaterial( { color: this.plane.material.color } ))
 
         this.scene.add(this.plane.mesh)
         this.scene.add(this.plane.edges)
         this.update_visibility()
-        
+
         this.set_settings(this.get_settings());
         this.sync()
         this.update_mesh();
@@ -175,17 +171,7 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
         HexaLab.UI.plane_ny.val(this.plane.normal.y.toFixed(3));
         HexaLab.UI.plane_nz.val(this.plane.normal.z.toFixed(3));
 
-        HexaLab.UI.plane_enabled.prop('checked', this.filter.enabled)
-        if (!this.plane.mesh) {
-            HexaLab.UI.plane_color_visibility.prop('checked', false)
-        } else {
-            HexaLab.UI.plane_color_visibility.prop('checked', this.visible_color)
-        }
-        if (!this.plane.edges) {
-            HexaLab.UI.plane_edge_visibility.prop('checked', false)
-        } else {
-            HexaLab.UI.plane_edge_visibility.prop('checked', this.visible_edge)
-        }
+        HexaLab.UI.plane_enabled.prop('checked', this.backend.enabled)
 
         //HexaLab.UI.plane_opacity.slider('value', opacity * 100);
         //HexaLab.UI.plane_color.val(color);
@@ -194,8 +180,8 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
     // State
 
     set_plane_normal: function (nx, ny, nz) {
-        this.filter.set_plane_normal(nx, ny, nz);
-        var n = this.filter.get_plane_normal();
+        this.backend.set_plane_normal(nx, ny, nz);
+        var n = this.backend.get_plane_normal();
         this.plane.normal = new THREE.Vector3(nx, ny, nz);
         n.delete(); // TODO don't allocate at all, just read memory?
 
@@ -203,9 +189,9 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
     },
 
     set_plane_offset: function (offset) {
-        this.filter.set_plane_offset(offset);
+        this.backend.set_plane_offset(offset);
         this.plane.offset = offset;
-        this.plane.world_offset = this.filter.get_plane_world_offset();
+        this.plane.world_offset = this.backend.get_plane_world_offset();
 
         this.update_mesh();
     },
@@ -216,10 +202,11 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
 
     set_plane_color: function (color) {
         this.plane.material.color.set(color);
+        this.plane.edges.color.set(color);
     },
 
     update_visibility: function () {
-        if (this.filter.enabled) {
+        if (this.backend.enabled) {
             if (this.visible_color) {
                 this.plane.mesh.visible = true
             } else {

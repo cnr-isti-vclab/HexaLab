@@ -16,7 +16,7 @@ HexaLab.UI.quality_swap_range = $('#quality_swap_range')
 // --------------------------------------------------------------------------------
 
 HexaLab.QualityFilter = function () {
-    
+
     // Ctor
     HexaLab.Filter.call(this, new Module.QualityFilter(), 'Quality')
 
@@ -63,8 +63,8 @@ HexaLab.QualityFilter.prototype = Object.assign(Object.create(HexaLab.Filter.pro
     // Api
     get_settings: function () {
         return {
-            min: this.filter.quality_threshold_min,
-            max: this.filter.quality_threshold_max,
+            min: this.backend.quality_threshold_min,
+            max: this.backend.quality_threshold_max,
             op: this.op
         }
     },
@@ -76,35 +76,35 @@ HexaLab.QualityFilter.prototype = Object.assign(Object.create(HexaLab.Filter.pro
     },
 
     sync: function () {
-        HexaLab.UI.quality_range_slider.slider('option', 'values', [this.filter.quality_threshold_min * 100, this.filter.quality_threshold_max * 100])
-        HexaLab.UI.quality_min_number.val(this.filter.quality_threshold_min.toFixed(3))
-        HexaLab.UI.quality_max_number.val(this.filter.quality_threshold_max.toFixed(3))
-        HexaLab.UI.quality_enabled.prop('checked', this.filter.enabled)
+        HexaLab.UI.quality_range_slider.slider('option', 'values', [this.backend.quality_threshold_min * 100, this.backend.quality_threshold_max * 100])
+        HexaLab.UI.quality_min_number.val(this.backend.quality_threshold_min.toFixed(3))
+        HexaLab.UI.quality_max_number.val(this.backend.quality_threshold_max.toFixed(3))
+        HexaLab.UI.quality_enabled.prop('checked', this.backend.enabled)
     },
-    
+
     on_mesh_change: function (mesh) {
     },
 
     // State
 
     set_quality_threshold_min: function (threshold) {
-        this.filter.quality_threshold_min = threshold
+        this.backend.quality_threshold_min = threshold
     },
 
     set_quality_threshold_max: function (threshold) {
-        this.filter.quality_threshold_max = threshold
+        this.backend.quality_threshold_max = threshold
     },
 
     set_operator: function (op) {
         this.op = op
         if (op == 'inside') {
-            this.filter.operator = Module.QualityFilterOperator.Inside
+            this.backend.operator = Module.QualityFilterOperator.Inside
             HexaLab.UI.quality_range_slider.css('background', '#ffffff')
             HexaLab.UI.quality_range_slider.find('div').css('background', '#e9e9e9')
         } else if (op == 'outside') {
             HexaLab.UI.quality_range_slider.css('background', '#e9e9e9')
             HexaLab.UI.quality_range_slider.find('div').css('background', '#ffffff')
-            this.filter.operator = Module.QualityFilterOperator.Outside
+            this.backend.operator = Module.QualityFilterOperator.Outside
         }
         HexaLab.app.update()
     },

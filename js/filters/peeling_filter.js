@@ -17,7 +17,7 @@ HexaLab.UI.peeling_depth_slider = $('#peeling_depth_slider').slider({
 // --------------------------------------------------------------------------------
 
 HexaLab.PeelingFilter = function () {
-    
+
     // Ctor
     HexaLab.Filter.call(this, new Module.PeelingFilter(), 'Peeling')
 
@@ -42,7 +42,7 @@ HexaLab.PeelingFilter = function () {
         self.sync()
         HexaLab.app.update()
     })
-    
+
     // State
     this.default_settings = {
         depth: 0
@@ -54,7 +54,7 @@ HexaLab.PeelingFilter.prototype = Object.assign(Object.create(HexaLab.Filter.pro
     // Api
     get_settings: function () {
         return {
-            depth: this.filter.peeling_depth,
+            depth: this.backend.peeling_depth,
         }
     },
 
@@ -63,20 +63,20 @@ HexaLab.PeelingFilter.prototype = Object.assign(Object.create(HexaLab.Filter.pro
     },
 
     sync: function () {
-        HexaLab.UI.peeling_depth_slider.slider('value', this.filter.peeling_depth)
-        HexaLab.UI.peeling_depth_number.val(this.filter.peeling_depth)
-        HexaLab.UI.peeling_enabled.prop('checked', this.filter.enabled)
+        HexaLab.UI.peeling_depth_slider.slider('value', this.backend.peeling_depth)
+        HexaLab.UI.peeling_depth_number.val(this.backend.peeling_depth)
+        HexaLab.UI.peeling_enabled.prop('checked', this.backend.enabled)
     },
-    
+
     on_mesh_change: function (mesh) {
-        HexaLab.UI.peeling_depth_slider.slider('option', 'max', this.filter.max_depth)
+        HexaLab.UI.peeling_depth_slider.slider('option', 'max', this.backend.max_depth)
         this.sync()
     },
 
     // State
 
     set_peeling_depth: function (depth) {
-        this.filter.peeling_depth = depth
+        this.backend.peeling_depth = depth
     },
 });
 
