@@ -866,6 +866,11 @@ Object.assign(HexaLab.App.prototype, {
 
     set_singularity_surface_opacity: function (opacity) {
         this.singularity_surface_material.opacity = opacity;
+        if (opacity == 0) {
+            this.singularity_surface_material.visible = false;
+        } else {
+            this.singularity_surface_material.visible = true;
+        }
     },
 
     set_singularity_wireframe_opacity: function (opacity) {
