@@ -106,6 +106,42 @@ HexaLab.UI = {
 $('#mesh_info_2').css('left', (HexaLab.UI.menu.width() + 10).toString().concat('px'))
 
 // --------------------------------------------------------------------------------
+// Rendering options
+// --------------------------------------------------------------------------------
+HexaLab.UI.surface_color_source.on("change", function () {
+    var value = this.options[this.selectedIndex].value
+    if (value == "Default") {
+        $("#surface_colormap_input").hide();
+        HexaLab.app.show_visible_quality(false)
+    } else if (value == "ColorMap") {
+        $("#surface_colormap_input").css('display', 'flex');
+        HexaLab.app.show_visible_quality(true)
+    }
+})
+HexaLab.UI.filtered_opacity.slider().on('slide', function (e, ui) {
+    HexaLab.app.set_filtered_surface_opacity(ui.value / 100)
+})
+HexaLab.UI.wireframe_opacity.slider().on('slide', function (e, ui) {
+    HexaLab.app.set_visible_wireframe_opacity(ui.value / 100)
+})
+HexaLab.UI.singularity_mode.slider({
+    value: 0,
+    min: 0,
+    max: 4,
+    step: 1
+}).on('slide', function (e, ui) {
+    HexaLab.app.set_singularity_mode(ui.value)
+})
+HexaLab.UI.occlusion.on('click', function () {
+    HexaLab.app.set_occlusion(this.checked)
+})
+HexaLab.UI.color_map.on('change', function () {
+    HexaLab.app.set_color_map(this.options[this.selectedIndex].value)
+    HexaLab.app.update()
+    HexaLab.UI.quality_plot_update()
+})
+
+// --------------------------------------------------------------------------------
 // Mesh/settings load/save trigger functions
 // --------------------------------------------------------------------------------
 HexaLab.UI.mesh_local_load_trigger = function () {

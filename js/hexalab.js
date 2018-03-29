@@ -506,7 +506,7 @@ Object.assign(HexaLab.Renderer.prototype, {
             // Set the outer silhouette alpha values
             add_model_surface(models.filtered)
             this.scene.overrideMaterial = this.alpha_pass.material
-            this.scene.overrideMaterial.uniforms.uAlpha = { value: 0.3 }
+            this.scene.overrideMaterial.uniforms.uAlpha = { value: models.filtered.surface.material.opacity }
             this.scene.overrideMaterial.depthWrite = false;
             this.scene.overrideMaterial.depthTest = true;
             this.backend.context.colorMask(false, false, false, true);
@@ -569,47 +569,21 @@ Object.assign(HexaLab.Renderer.prototype, {
 // --------------------------------------------------------------------------------
 // Application
 // --------------------------------------------------------------------------------
+/*
+    Creating an instance of the an App object also creates a global ref to the
+    object in the HexaLab namespace. This is needed for the ui and the filters.
+    The ui.js file has bindings for all the main hexalab ui components,meaning,
+    everything except the filters components. Those are handled directly from
+    the DOM by the filters themselves. The ui.js file also contains the handlers
+    for all the application events. The global app reference is used from these
+    handlers, to message changes from the ui to the application.
+
+*/
 
 HexaLab.App = function (dom_element) {
 
     this.backend = new Module.App();
     HexaLab.app = this;
-
-    // UI
-    var self = this;
-    HexaLab.UI.surface_color_source.on("change", function () {
-        var value = this.options[this.selectedIndex].value
-        if (value == "Default") {
-            $("#surface_colormap_input").hide();
-            self.show_visible_quality(false)
-        } else if (value == "ColorMap") {
-            $("#surface_colormap_input").css('display', 'flex');
-            self.show_visible_quality(true)
-        }
-    })
-    HexaLab.UI.filtered_opacity.slider().on('slide', function (e, ui) {
-        self.set_filtered_surface_opacity(ui.value / 100)
-        self.set_filtered_wireframe_opacity(ui.value / 100)
-    })
-    HexaLab.UI.wireframe_opacity.slider().on('slide', function (e, ui) {
-        self.set_visible_wireframe_opacity(ui.value / 100)
-    })
-    HexaLab.UI.singularity_mode.slider({
-        value: 0,
-        min: 0,
-        max: 4,
-        step: 1
-    }).on('slide', function (e, ui) {
-        self.set_singularity_mode(ui.value)
-    })
-    HexaLab.UI.occlusion.on('click', function () {
-        self.set_occlusion(this.checked)
-    })
-    HexaLab.UI.color_map.on('change', function () {
-        self.set_color_map(this.options[this.selectedIndex].value)
-        self.update()
-        HexaLab.UI.quality_plot_update()
-    })
 
     var width = dom_element.offsetWidth;
     var height = dom_element.offsetHeight;
@@ -617,16 +591,16 @@ HexaLab.App = function (dom_element) {
     // Renderer
     this.renderer = new HexaLab.Renderer(width, height);
 
-    this.default_renderer_settings = {
-        occlusion: false,
-        antialiasing: true,
-    };
-
     this.canvas = {
         element: this.renderer.get_element(),
         container: dom_element
     }
     this.canvas.container.appendChild(this.canvas.element);
+
+    this.default_renderer_settings = {
+        occlusion: false,
+        antialiasing: true
+    };
 
     // Materials
     this.visible_surface_material = new THREE.MeshLambertMaterial({
@@ -695,8 +669,6 @@ HexaLab.App = function (dom_element) {
         distance: 1.5
     }
 
-    this.set_camera_settings(this.default_camera_settings);
-
     // Scene
     this.default_scene_settings = {
         background: '#ffffff',
@@ -725,6 +697,11 @@ HexaLab.App = function (dom_element) {
 
 Object.assign(HexaLab.App.prototype, {
 
+    // Propagate back the current app settings to the UI.
+    // This is generally only used when external settings are loaded into the
+    // system and the UI needs to sync with those. Sometime though it is also
+    // necessary to change a user setting from inside the system, so syncing can
+    // also be useful in those situation.
     sync: function () {
         var settings = this.get_settings();
         HexaLab.UI.filtered_opacity.slider('value', settings.materials.filtered_surface_opacity * 100)
@@ -746,15 +723,7 @@ Object.assign(HexaLab.App.prototype, {
         }
     },
 
-    // Settings
-
-    get_canvas_size() {
-        return {
-            width: this.canvas.container.offsetWidth,
-            height: this.canvas.container.offsetHeight
-        }
-    },
-
+    // Resize callback
     resize: function () {
         var width = this.canvas.container.offsetWidth
         var height = this.canvas.container.offsetHeight
@@ -766,6 +735,7 @@ Object.assign(HexaLab.App.prototype, {
         log('Frame resized to ' + width + 'x' + height)
     },
 
+    // Settings setters
     set_camera_settings: function (settings) {
         var size, center
         if (this.mesh) {
@@ -836,6 +806,7 @@ Object.assign(HexaLab.App.prototype, {
         this.update();
     },
 
+    // Settings getters
     get_camera_settings: function () {
         if (this.mesh) {
             var c = this.mesh.get_center();
@@ -896,6 +867,15 @@ Object.assign(HexaLab.App.prototype, {
         }
     },
 
+    // Individual setters/getters. These are more for comodity than anything
+    // else, they just wrap the thing that actually contains/controls the data.
+    get_canvas_size() {
+        return {
+            width: this.canvas.container.offsetWidth,
+            height: this.canvas.container.offsetHeight
+        }
+    },
+
     set_color_map: function (map) {
         if (map == 'Jet')
             this.backend.set_color_map(Module.ColorMap.Jet)
@@ -924,7 +904,6 @@ Object.assign(HexaLab.App.prototype, {
     },
 
     set_singularity_mode: function (mode) {
-        this.singularity_mode = mode
         if (mode == 0) {
             this.set_singularity_surface_opacity(0.0)
             this.set_singularity_wireframe_opacity(0.0)
@@ -941,6 +920,30 @@ Object.assign(HexaLab.App.prototype, {
             this.set_singularity_surface_opacity(1.0)
             this.set_singularity_wireframe_opacity(1.0)
         }
+        if (this.singularity_mode == 0 && mode > 0) {
+            if (this.filtered_surface_material.opacity > 0.3) {
+                var x = this.filtered_surface_material.opacity
+                this.set_filtered_surface_opacity(0.3)
+                this.prev_filtered_surface_opacity = x
+                this.sync()
+            }
+            if (this.visible_wireframe_material.opacity > 0.3) {
+                var x = this.visible_wireframe_material.opacity
+                this.set_visible_wireframe_opacity(0.3)
+                this.prev_visible_wireframe_opacity = x
+                this.sync()
+            }
+        } else if (this.singularity_mode > 0 && mode == 0) {
+            if (this.prev_filtered_surface_opacity) {
+                this.set_filtered_surface_opacity(this.prev_filtered_surface_opacity)
+                this.sync()
+            }
+            if (this.prev_visible_wireframe_opacity) {
+                this.set_visible_wireframe_opacity(this.prev_visible_wireframe_opacity)
+                this.sync()
+            }
+        }
+        this.singularity_mode = mode
     },
 
     set_visible_wireframe_color: function (color) {
@@ -948,7 +951,13 @@ Object.assign(HexaLab.App.prototype, {
     },
 
     set_visible_wireframe_opacity: function (opacity) {
-        this.visible_wireframe_material.opacity = opacity;
+        this.visible_wireframe_material.opacity = opacity
+        if (opacity == 0) {
+            this.visible_wireframe_material.visible = false
+        } else {
+            this.visible_wireframe_material.visible = true
+        }
+        this.prev_visible_wireframe_opacity = null
     },
 
     set_filtered_surface_color: function (color) {
@@ -957,6 +966,12 @@ Object.assign(HexaLab.App.prototype, {
 
     set_filtered_surface_opacity: function (opacity) {
         this.filtered_surface_material.opacity = opacity;
+        if (opacity == 0) {
+            this.filtered_surface_material.visible = false;
+        } else {
+            this.filtered_surface_material.visible = true;
+        }
+        this.prev_filtered_surface_opacity = null
     },
 
     set_filtered_wireframe_color: function (color) {
@@ -993,14 +1008,19 @@ Object.assign(HexaLab.App.prototype, {
         this.renderer.set_msaa(value);
     },
 
-    // Mesh
-
+    // Import a new mesh. First invoke the backend for the parser and builder.
+    // If everything goes well, reset settings to default and propagate the
+    // fact that a new mesh is in use to the entire system. Finally sync
+    // the mesh gpu data (vertices, normals, ecc) with that of the backend.
     import_mesh: function (path) {
+        // invoke backend
         var result = this.backend.import_mesh(path);
         if (!result) {
             throw false
         }
-
+        // reset settings
+        // settings the mesh mush happen before the reset, as it is used inside
+        // the set_settings call.
         this.mesh = this.backend.get_mesh();
         this.set_settings({
             camera: this.default_camera_settings,
@@ -1008,23 +1028,23 @@ Object.assign(HexaLab.App.prototype, {
             scene: this.default_scene_settings,
             materials: this.default_material_settings
         });
+        // propagate
         this.mesh_stats = this.backend.get_mesh_stats();
         this.renderer.set_mesh_params(this.mesh_stats.min_edge_len, this.mesh_stats.avg_edge_len);
         this.set_quality_measure(this.quality_measure)
         for (var k in this.filters) {
             this.filters[k].on_mesh_change(this.mesh);
         }
-        this.update();
-
         var c = this.mesh.get_center();
         var center = new THREE.Vector3(c.x(), c.y(), c.z());
         var mesh_obj = new THREE.Object3D();
         mesh_obj.position.set(center.x, center.y, center.z);
         this.renderer.camera_light.target = mesh_obj;
+        // update mesh data
+        this.update();
     },
 
-    // Update
-
+    // Update all models to their current version in the cpp backend.
     update: function () {
         this.backend.build_models();
         this.models.visible.update();
@@ -1032,15 +1052,14 @@ Object.assign(HexaLab.App.prototype, {
         this.models.singularity.update();
     },
 
-    // Animate
-
+    // The application main loop. Call this after instancing an App object to
+    // start rendering.
     animate: function () {
-
         this.controls.update();
-        //this.stats.begin();
 
         if (this.mesh) {
             var meshes = [];
+
             for (var k in this.filters) {
                 for (var j in this.filters[k].scene.objects) {
                     meshes.push(this.filters[k].scene.objects[j]);
@@ -1048,7 +1067,6 @@ Object.assign(HexaLab.App.prototype, {
             }
 
             this.renderer.render(this.models, meshes, this.camera);
-            //this.stats.end();
         }
 
         // queue next frame
