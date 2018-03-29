@@ -52,6 +52,7 @@ HexaLab.QualityFilter = function () {
 
     // State
     this.default_settings = {
+        enabled: false,
         min: 0,
         max: 0.8,
         op: 'inside'
@@ -63,6 +64,7 @@ HexaLab.QualityFilter.prototype = Object.assign(Object.create(HexaLab.Filter.pro
     // Api
     get_settings: function () {
         return {
+            enabled: this.backend.enabled,
             min: this.backend.quality_threshold_min,
             max: this.backend.quality_threshold_max,
             op: this.op
@@ -73,6 +75,7 @@ HexaLab.QualityFilter.prototype = Object.assign(Object.create(HexaLab.Filter.pro
         this.set_quality_threshold_min(settings.min)
         this.set_quality_threshold_max(settings.max)
         this.set_operator(settings.op)
+        this.enable(settings.enabled)
     },
 
     sync: function () {
@@ -86,6 +89,10 @@ HexaLab.QualityFilter.prototype = Object.assign(Object.create(HexaLab.Filter.pro
     },
 
     // State
+
+    enable: function (enabled) {
+        this.backend.enabled = enabled
+    },
 
     set_quality_threshold_min: function (threshold) {
         this.backend.quality_threshold_min = threshold

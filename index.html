@@ -44,7 +44,7 @@
                     <div id="toolbar_wrapper">
                         <h1>HexaLab</h1>
                         <div id="toolbar">
-                            <button id="load_mesh" title="Open a hexahedral mesh from a local file">
+                            <button id="load_mesh" title="Open local">
                                 <i class="fa fa-folder-open"></i>
                             </button>
                             <button id="home" title="Reset Camera">
@@ -56,7 +56,7 @@
                             <button id="load_settings" title="Load settings">
                                 <i class="fa fa-gear"></i>
                             </button>
-                            <button id="save_settings" title="Store current settings">
+                            <button id="save_settings" title="Store settings">
                                 <i class="fa fa-floppy-o"></i>
                             </button>
                             <button id="snapshot" title="Take a snapshot">
@@ -73,14 +73,14 @@
 
                     <div id="model_menu" class="menu_area">
                         <div class="menu_title_wrapper">
-                            <div class="menu_title">Hex model</div>
+                            <div class="menu_title">Hexahedral mesh</div>
                         </div>
                         <div class="menu_content">
                             <div class="menu_row">
                                 <div class="menu_row_label">Source</div>
                                 <div class="menu_row_input">
                                     <select id="mesh_source">
-                                        <option value="-2" selected="selected" style="display: none;">Select a paper or click open icon&hellip;</option>
+                                        <option value="-2" selected="selected" style="display: none;">Select a mesh source&hellip;</option>
                                         <option value="-1">From File</option>
                                     </select>
                                 </div>
@@ -108,7 +108,7 @@
 
                     <div id="plane_menu" class="menu_area">
                         <div class="menu_title_wrapper">
-                            <div class="menu_title">Filter by Plane</div>
+                            <div class="menu_title">Plane Filter</div>
                             <label class="switch menu_switch" title="Toggle the filtering of cells beyond a given plane">
                                 <input type="checkbox" id="plane_enabled">
                                 <span class="switch-slider"></span>
@@ -154,7 +154,7 @@
 
                     <div id="quality_menu" class="menu_area">
                         <div class="menu_title_wrapper">
-                            <div class="menu_title">Filter by Hex Quality</div>
+                            <div class="menu_title">Quality Filter</div>
                             <label class="switch menu_switch" title="Toggle the filtering of cells based on their estimated quality">
                                 <input type="checkbox" id="quality_enabled">
                                 <span class="switch-slider"></span>
@@ -190,7 +190,7 @@
                     </div>
                     <div id="peeling_menu" class="menu_area">
                         <div class="menu_title_wrapper">
-                            <div class="menu_title">Filter by Peeling</div>
+                            <div class="menu_title">Peeling Filter</div>
                             <label class="switch menu_switch" title="Toggle the filtering of cells based on their depth">
                                 <input type="checkbox" id="peeling_enabled">
                                 <span class="switch-slider"></span>
@@ -264,7 +264,7 @@
         <div id="frame">
             <div id="drag_drop_overlay" class="first_drag_drop">
                 <div>
-                    <span id="drag_drop_header">Drag&Drop a mesh file in the box below<br/> or use the toolbar to the left</span>
+                    <span id="drag_drop_header">Drop a file in the box below<br/> or use the sidebar</span>
                 </div>
                 <div id="mesh_drag_drop_area">
                     <div id="mesh_drag_drop_quad" class="drag_drop_quad_off">

@@ -26,8 +26,7 @@ HexaLab.PlaneFilter = function () {
     // Listener
     var self = this;
     HexaLab.UI.plane_enabled.change(function () {
-        self.backend.enabled = $(this).is(':checked')
-        self.update_visibility()
+        self.enable($(this).is(':checked'))
         HexaLab.app.update()
     })
     HexaLab.UI.plane_nx.change(function () {
@@ -116,10 +115,11 @@ HexaLab.PlaneFilter = function () {
     self.visible_edge = false
 
     this.default_settings = {
-        plane_normal: new THREE.Vector3(1, 0, 0),
-        plane_offset: 0,
-        plane_opacity: 0.3,
-        plane_color: "#56bbbb"
+        enabled: false,
+        normal: new THREE.Vector3(1, 0, 0),
+        offset: 0,
+        opacity: 0.3,
+        color: "#56bbbb"
     }
 };
 
@@ -128,18 +128,20 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
     // Api
     get_settings: function () {
         return {
-            plane_normal: this.plane.normal,
-            plane_offset: this.plane.offset,
-            plane_opacity: this.plane.material.opacity,
-            plane_color: '#' + this.plane.material.color.getHexString()
+            enabled: this.backend.enabled,
+            normal: this.plane.normal,
+            offset: this.plane.offset,
+            opacity: this.plane.material.opacity,
+            color: '#' + this.plane.material.color.getHexString()
         };
     },
 
     set_settings: function (settings) {
-        this.set_plane_normal(settings.plane_normal.x, settings.plane_normal.y, settings.plane_normal.z);
-        this.set_plane_offset(settings.plane_offset);
-        this.set_plane_opacity(settings.plane_opacity);
-        this.set_plane_color(settings.plane_color);
+        this.enable(settings.enabled)
+        this.set_plane_normal(settings.normal.x, settings.normal.y, settings.normal.z);
+        this.set_plane_offset(settings.offset);
+        this.set_plane_opacity(settings.opacity);
+        this.set_plane_color(settings.color);
     },
 
     on_mesh_change: function (mesh) {
@@ -179,6 +181,11 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
 
     // State
 
+    enable: function (enabled) {
+        this.backend.enabled = enabled
+        this.update_visibility()
+    },
+
     set_plane_normal: function (nx, ny, nz) {
         this.backend.set_plane_normal(nx, ny, nz);
         var n = this.backend.get_plane_normal();
@@ -217,8 +224,8 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
                 this.plane.edges.visible = false
             }
         } else {
-            this.plane.mesh.visible = false
-            this.plane.edges.visible = false
+            if (this.plane.mesh) this.plane.mesh.visible = false
+            if (this.plane.edges) this.plane.edges.visible = false
         }
     },
 

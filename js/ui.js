@@ -22,13 +22,13 @@ HexaLab.FS = {
         }
         FS.createDataFile("/", name, data, true, true);
     },
-    delete_file: function (name) { 
+    delete_file: function (name) {
         try {
             if (HexaLab.FS.file_exists("/" + name)) {
                 FS.unlink('/' + name);
             }
         } catch (err) {
-        }       
+        }
     },
     open_dir: function (path) {
         var lookup = FS.lookupPath(path)
@@ -104,7 +104,7 @@ HexaLab.UI = {
 
 $('#mesh_info_2').css('left', (HexaLab.UI.menu.width() + 10).toString().concat('px'))
 
-// -------------------------------------------------------------------------------- 
+// --------------------------------------------------------------------------------
 // Mesh/settings load/save trigger functions
 // --------------------------------------------------------------------------------
 HexaLab.UI.mesh_local_load_trigger = function () {
@@ -127,7 +127,7 @@ HexaLab.UI.settings_save_trigger = function () {
     saveAs(blob, "HLsettings.txt");
 }
 
-// -------------------------------------------------------------------------------- 
+// --------------------------------------------------------------------------------
 // Mesh/settings file bind and dispatch
 // --------------------------------------------------------------------------------
 HexaLab.UI.on_first_mesh = function () {
@@ -164,9 +164,9 @@ HexaLab.UI.import_local_mesh = function (file) {
                 HexaLab.UI.mesh_info_1_text.empty().append('<span>Can\'t parse the file.</span>')
                 return
             }
-            var stats = HexaLab.app.app.get_mesh_stats()
+            var stats = HexaLab.app.backend.get_mesh_stats()
 
-            HexaLab.UI.mesh_info_1_text.empty().append('<span class="mesh-name">' + file.name + '</span>' + '<br/>' + 
+            HexaLab.UI.mesh_info_1_text.empty().append('<span class="mesh-name">' + file.name + '</span>' + '<br/>' +
                 '<span>' + stats.vert_count + ' vertices ' + '</span>' + '<br />' +
                 '<span>' + stats.hexa_count + ' hexas ' + '</span>')
         })
@@ -184,13 +184,13 @@ HexaLab.UI.import_remote_mesh = function (source, name) {
     request.open('GET', 'datasets/' + source.path + '/' + name, true);
     request.responseType = 'arraybuffer';
     request.onload = function(e) {
-        var data = new Uint8Array(this.response); 
+        var data = new Uint8Array(this.response);
         HexaLab.UI.import_mesh(data, name, function (result) {
             if (!result){
-                HexaLab.UI.mesh_info_2_text.empty().append('<span>Can\'t parse the file.</span>') 
+                HexaLab.UI.mesh_info_2_text.empty().append('<span>Can\'t parse the file.</span>')
                 return
             }
-            var stats = HexaLab.app.app.get_mesh_stats()
+            var stats = HexaLab.app.backend.get_mesh_stats()
             HexaLab.UI.mesh_info_2_text.empty().append(stats.vert_count + ' vertices <br />' +
                 stats.hexa_count + ' hexas </span>')
         })
@@ -221,9 +221,9 @@ $.ajax({
     HexaLab.UI.datasets_index = data
 
     $.each(HexaLab.UI.datasets_index.sources, function (i, source) {
-        HexaLab.UI.mesh_source.append($('<option>', { 
+        HexaLab.UI.mesh_source.append($('<option>', {
             value: i,
-            text : source.label 
+            text : source.label
         }));
     });
 })
@@ -239,7 +239,7 @@ HexaLab.UI.mesh_source.on("change", function () {
         var source = HexaLab.UI.datasets_index.sources[i]
 
         HexaLab.UI.mesh_info_1_text.empty().append('<span class="paper-title">' + source.paper.title + '</span>' + '<br />' +
-            '<span class="paper-authors">' + source.paper.authors + '</span>' + ' - ' + 
+            '<span class="paper-authors">' + source.paper.authors + '</span>' + ' - ' +
             '<span class="paper-venue">' + source.paper.venue + ' (' + source.paper.year + ') ' + '</span>')
         HexaLab.UI.mesh_info_1.show().css('display', 'flex');
         HexaLab.UI.mesh_info_1_buttons.show().css('display', 'flex');
@@ -263,19 +263,19 @@ HexaLab.UI.mesh_source.on("change", function () {
         }
 
         HexaLab.UI.paper_mesh_picker.empty().css('font-style', 'italic')
-        HexaLab.UI.paper_mesh_picker.append($('<option>', { 
+        HexaLab.UI.paper_mesh_picker.append($('<option>', {
                 value: "-1",
                 text : 'Select a mesh',
                 style: 'display:none;'
             }));
         $.each(source.data, function (i, name) {
-            HexaLab.UI.paper_mesh_picker.append($('<option>', { 
+            HexaLab.UI.paper_mesh_picker.append($('<option>', {
                 value: i,
                 text : name,
                 style: 'font-style: normal;'
             }));
         });
-        HexaLab.UI.paper_mesh_picker.show()        
+        HexaLab.UI.paper_mesh_picker.show()
     }
 })
 
@@ -353,7 +353,7 @@ HexaLab.UI.quality_plot = function(container, axis) {
     var c = [];
     var p = [];
 
-    var quality = HexaLab.app.app.get_hexa_quality();
+    var quality = HexaLab.app.backend.get_hexa_quality();
     var data = new Float32Array(Module.HEAPU8.buffer, quality.data(), quality.size());
     for (var i = 0; i < quality.size() ; i++) {
         x[i] = data[i]
@@ -366,7 +366,7 @@ HexaLab.UI.quality_plot = function(container, axis) {
 
     for (var i = 0; i <= 10; ++i) {
         var v = i / 10
-        var rgb = HexaLab.app.app.map_to_color(v)
+        var rgb = HexaLab.app.backend.map_to_color(v)
         var r = (rgb.x() * 255).toFixed(0)
         var g = (rgb.y() * 255).toFixed(0)
         var b = (rgb.z() * 255).toFixed(0)
@@ -378,7 +378,7 @@ HexaLab.UI.quality_plot = function(container, axis) {
         histnorm: 'probability',
         marker: {
             cmax: bins - 1,
-            cmin: 0, 
+            cmin: 0,
             color: c,
             colorscale: p
         },
@@ -387,11 +387,11 @@ HexaLab.UI.quality_plot = function(container, axis) {
     var bk = axis.concat('bins')
     plot_data[0][bk] = {
         size: 1 / bins,
-        start: 0,   
+        start: 0,
         end: 1,
     };
 
-    var layout = { 
+    var layout = {
         paper_bgcolor: 'rgba(0,0,0,0)',
         plot_bgcolor: 'rgba(0,0,0,0)',
         xaxis: {
@@ -445,7 +445,7 @@ HexaLab.UI.menu.resizable({
 
 HexaLab.UI.menu.on('resize', function () {
     var width = HexaLab.UI.display.width() - HexaLab.UI.menu.width()
-    HexaLab.UI.frame.css('margin-left', HexaLab.UI.menu.width()) 
+    HexaLab.UI.frame.css('margin-left', HexaLab.UI.menu.width())
     HexaLab.UI.frame.width(width)
     HexaLab.app.resize()
     $('#mesh_info_2').css('left', (HexaLab.UI.menu.width() + 10).toString().concat('px'))

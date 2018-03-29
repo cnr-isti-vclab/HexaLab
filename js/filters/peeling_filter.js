@@ -24,7 +24,7 @@ HexaLab.PeelingFilter = function () {
     // Listener
     var self = this;
     HexaLab.UI.peeling_enabled.on('click', function() {
-        self.backend.enabled = $(this).is(':checked')
+        self.enable($(this).is(':checked'))
         HexaLab.app.update()
     })
     HexaLab.UI.peeling_depth_number.change(function () {
@@ -45,6 +45,7 @@ HexaLab.PeelingFilter = function () {
 
     // State
     this.default_settings = {
+        enabled: false,
         depth: 0
     }
 }
@@ -54,12 +55,14 @@ HexaLab.PeelingFilter.prototype = Object.assign(Object.create(HexaLab.Filter.pro
     // Api
     get_settings: function () {
         return {
+            enabled: this.backend.enabled,
             depth: this.backend.peeling_depth,
         }
     },
 
     set_settings: function (settings) {
         this.set_peeling_depth(settings.depth)
+        this.enable(settings.enabled)
     },
 
     sync: function () {
@@ -74,6 +77,10 @@ HexaLab.PeelingFilter.prototype = Object.assign(Object.create(HexaLab.Filter.pro
     },
 
     // State
+
+    enable: function (enabled) {
+        this.backend.enabled = enabled
+    },
 
     set_peeling_depth: function (depth) {
         this.backend.peeling_depth = depth
