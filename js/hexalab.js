@@ -591,6 +591,9 @@ HexaLab.App = function (dom_element) {
         self.set_filtered_surface_opacity(ui.value / 100)
         self.set_filtered_wireframe_opacity(ui.value / 100)
     })
+    HexaLab.UI.wireframe_opacity.slider().on('slide', function (e, ui) {
+        self.set_visible_wireframe_opacity(ui.value / 100)
+    })
     HexaLab.UI.singularity_opacity.slider().on('slide', function (e, ui) {
         self.set_singularity_surface_opacity(ui.value / 100)
         self.set_singularity_wireframe_opacity(ui.value / 100)
@@ -722,6 +725,7 @@ Object.assign(HexaLab.App.prototype, {
     sync: function () {
         var settings = this.get_settings();
         HexaLab.UI.filtered_opacity.slider('value', settings.materials.filtered_surface_opacity * 100)
+        HexaLab.UI.wireframe_opacity.slider('value', settings.materials.visible_wireframe_opacity * 100)
         HexaLab.UI.singularity_opacity.slider('value', settings.materials.singularity_surface_opacity * 100)
         HexaLab.UI.quality.prop('checked', settings.materials.show_quality_on_visible_surface)
         HexaLab.UI.occlusion.prop('checked', settings.renderer.occlusion)
