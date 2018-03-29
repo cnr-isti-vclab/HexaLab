@@ -24,7 +24,7 @@ HexaLab.PeelingFilter = function () {
     // Listener
     var self = this;
     HexaLab.UI.peeling_enabled.on('click', function() {
-        self.filter.enabled = $(this).is(':checked')
+        self.backend.enabled = $(this).is(':checked')
         HexaLab.app.update()
     })
     HexaLab.UI.peeling_depth_number.change(function () {

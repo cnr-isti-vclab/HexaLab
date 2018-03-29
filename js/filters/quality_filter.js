@@ -23,7 +23,7 @@ HexaLab.QualityFilter = function () {
     // Listener
     var self = this;
     HexaLab.UI.quality_enabled.on('click', function() {
-        self.filter.enabled = $(this).is(':checked')
+        self.backend.enabled = $(this).is(':checked')
         HexaLab.app.update()
     })
     HexaLab.UI.quality_min_number.change(function () {

@@ -26,7 +26,7 @@ HexaLab.PlaneFilter = function () {
     // Listener
     var self = this;
     HexaLab.UI.plane_enabled.change(function () {
-        self.filter.enabled = $(this).is(':checked')
+        self.backend.enabled = $(this).is(':checked')
         self.update_visibility()
         HexaLab.app.update()
     })
@@ -202,7 +202,6 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
 
     set_plane_color: function (color) {
         this.plane.material.color.set(color);
-        this.plane.edges.color.set(color);
     },
 
     update_visibility: function () {

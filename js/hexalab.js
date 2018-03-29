@@ -131,8 +131,20 @@ HexaLab.Renderer = function (width, height) {
     this.renderer = new THREE.WebGLRenderer({
         antialias: true,
         preserveDrawingBuffer: true,
+        alpha: true
     });
     this.renderer.setSize(width, height);
+
+    // Silhouette
+    this.alpha_pass = {
+        material: new THREE.ShaderMaterial({
+            vertexShader: THREE.AlphaPass.vertexShader,
+            fragmentShader: THREE.AlphaPass.fragmentShader,
+            uniforms: {
+                uAlpha: { value: 1.0 }
+            },
+        }),
+    }
 
     // SSAO passes setup
     this.ortho_camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
@@ -264,7 +276,7 @@ HexaLab.Renderer = function (width, height) {
 
     this.renderer.autoClear = false;
 
-    this.renderer.setClearColor(0x000000)
+    this.renderer.setClearColor(0xffffff, 1.0)
     this.renderer.clear()
 }
 
@@ -381,15 +393,10 @@ Object.assign(HexaLab.Renderer.prototype, {
 
         this.empty = false
 
-        // prepare renderer
-        var do_ssao = this.settings.ssao;
-        var clear_color = this.settings.clear_color;
-        this.renderer.setClearColor(clear_color, 1);
-
         clear_scene();
 
         // render
-        if (do_ssao) {
+        if (this.settings.ssao) {
             this.renderer.setRenderTarget()
 
             // gather opaque surface models
@@ -401,12 +408,12 @@ Object.assign(HexaLab.Renderer.prototype, {
                 var mesh = meshes[k];
                 if (!mesh.material.transparent) this.scene.add(mesh);
             }
-            // finish up the scene
+            // finish up the scene with camera and lighing
             this.scene.add(camera);
             this.scene.add(this.ambient);
             camera.add(this.camera_light);
 
-            // view norm/depth prepass
+            // view space norm/depth prepass
             this.scene.overrideMaterial = this.normal_pass.material;
             this.renderer.render(this.scene, camera, this.normal_pass.target, true);
             this.scene.overrideMaterial = null;
@@ -461,30 +468,83 @@ Object.assign(HexaLab.Renderer.prototype, {
             clear_scene();
             camera.remove(this.camera_light);
         } else {
-            this.renderer.setRenderTarget();
-            this.renderer.clear();
+            this.renderer.setRenderTarget()
+            this.renderer.clear()
 
-            // fill scene
-            for (var k in models) {
-                var model = models[k];
-                add_model_surface(model);
-                add_model_wireframe(model);
-            }
-            for (var k in meshes) {
-                var mesh = meshes[k];
-                this.scene.add(mesh);
-            }
+            clear_scene();
+
+            // Draw the solid mesh
+            add_model_surface(models.visible)
             this.scene.add(camera);
             this.scene.add(this.ambient);
             camera.add(this.camera_light);
-
-            // render
-            this.renderer.clear();
             this.renderer.render(this.scene, camera);
 
-            // clean up the scene
             clear_scene();
             camera.remove(this.camera_light);
+
+            // Draw the singularity mesh
+            add_model_surface(models.singularity)
+            this.scene.add(camera);
+            this.scene.add(this.ambient);
+            camera.add(this.camera_light);
+            this.renderer.render(this.scene, camera);
+
+            clear_scene();
+            camera.remove(this.camera_light);
+
+            // Clear all alpha values to 0
+            this.fullscreen_quad.material = this.alpha_pass.material
+            this.fullscreen_quad.material.uniforms.uAlpha = { value: 0.0 }
+            this.fullscreen_quad.material.depthWrite = false;
+            this.fullscreen_quad.material.depthTest = false;
+            this.scene.add(this.fullscreen_quad);
+            this.renderer.context.colorMask(false, false, false, true);
+            this.renderer.render(this.scene, this.ortho_camera);
+            this.renderer.context.colorMask(true, true, true, true);
+
+            clear_scene()
+
+            // Set the outer silhouette alpha values
+            add_model_surface(models.filtered)
+            this.scene.overrideMaterial = this.alpha_pass.material
+            this.scene.overrideMaterial.uniforms.uAlpha = { value: 0.3 }
+            this.scene.overrideMaterial.depthWrite = false;
+            this.scene.overrideMaterial.depthTest = true;
+            this.renderer.context.colorMask(false, false, false, true);
+            this.renderer.render(this.scene, camera);
+            this.renderer.context.colorMask(true, true, true, true);
+
+            clear_scene()
+            this.scene.overrideMaterial = null
+
+            // Do a fullscreen pass, coloring the set alpha values only
+            this.fullscreen_quad.material = new THREE.MeshBasicMaterial({
+                color: "#000000",
+                blending: THREE.CustomBlending,
+                blendEquation: THREE.AddEquation,
+                blendSrc: THREE.DstAlphaFactor,
+                blendDst: THREE.OneMinusDstAlphaFactor,
+                transparent: true,
+                depthTest: false,
+                depthWrite: false
+            });
+            this.scene.add(this.fullscreen_quad);
+            this.renderer.render(this.scene, this.ortho_camera);
+
+            clear_scene();
+
+            // Set back all alpha values to 1
+            this.fullscreen_quad.material = this.alpha_pass.material
+            this.fullscreen_quad.material.uniforms.uAlpha = { value: 1.0 }
+            this.fullscreen_quad.material.depthWrite = false;
+            this.fullscreen_quad.material.depthTest = false;
+            this.scene.add(this.fullscreen_quad);
+            this.renderer.context.colorMask(false, false, false, true);
+            this.renderer.render(this.scene, this.ortho_camera);
+            this.renderer.context.colorMask(true, true, true, true);
+
+            clear_scene()
         }
 
         // hud
@@ -556,8 +616,6 @@ HexaLab.App = function (dom_element) {
     // Materials
     this.visible_surface_material = new THREE.MeshLambertMaterial({
         emissive: '#202020',
-        polygonOffset: true,
-        polygonOffsetFactor: 0.5,
         vertexColors: THREE.VertexColors
     });
     this.visible_wireframe_material = new THREE.MeshBasicMaterial({
@@ -565,8 +623,6 @@ HexaLab.App = function (dom_element) {
         depthWrite: false
     });
     this.filtered_surface_material = new THREE.MeshLambertMaterial({
-        polygonOffset: true,
-        polygonOffsetFactor: 0.5,
         transparent: true,
         depthWrite: false
     });
@@ -574,11 +630,11 @@ HexaLab.App = function (dom_element) {
         transparent: true,
         depthWrite: false
     });
-    this.singularity_surface_material = new THREE.MeshBasicMaterial({
+    this.singularity_surface_material = new THREE.MeshLambertMaterial({
         transparent: true,
         depthWrite: true,
         polygonOffset: true,
-        polygonOffsetFactor: 0.5,
+        polygonOffsetFactor: -1.0,
         vertexColors: THREE.VertexColors,
         side: THREE.DoubleSide,
     });
@@ -598,8 +654,8 @@ HexaLab.App = function (dom_element) {
         filtered_wireframe_color: '#000000',
         filtered_wireframe_opacity: 0,
 
-        singularity_surface_opacity: 0.8,
-        singularity_wireframe_opacity: 0.8,
+        singularity_surface_opacity: 1.0,
+        singularity_wireframe_opacity: 1.0,
 
         color_map: 'Parula',
         quality_measure: 'Scaled Jacobian'  // TODO move this?
