@@ -94,7 +94,7 @@ HexaLab.UI = {
     wireframe_opacity: $('#wireframe_slider'),
     quality: $("#show_quality"),
     occlusion: $("#show_occlusion"),
-    singularity_opacity: $('#singularity_slider'),
+    singularity_mode: $('#singularity_slider'),
 
     // Mesh sources
     datasets_index: {},

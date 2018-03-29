@@ -594,9 +594,13 @@ HexaLab.App = function (dom_element) {
     HexaLab.UI.wireframe_opacity.slider().on('slide', function (e, ui) {
         self.set_visible_wireframe_opacity(ui.value / 100)
     })
-    HexaLab.UI.singularity_opacity.slider().on('slide', function (e, ui) {
-        self.set_singularity_surface_opacity(ui.value / 100)
-        self.set_singularity_wireframe_opacity(ui.value / 100)
+    HexaLab.UI.singularity_mode.slider({
+        value: 0,
+        min: 0,
+        max: 4,
+        step: 1
+    }).on('slide', function (e, ui) {
+        self.set_singularity_mode(ui.value)
     })
     HexaLab.UI.occlusion.on('click', function () {
         self.set_occlusion(this.checked)
@@ -668,8 +672,7 @@ HexaLab.App = function (dom_element) {
         filtered_wireframe_color: '#000000',
         filtered_wireframe_opacity: 0,
 
-        singularity_surface_opacity: 1.0,
-        singularity_wireframe_opacity: 1.0,
+        singularity_mode: 0,
 
         color_map: 'Parula',
         quality_measure: 'Scaled Jacobian'  // TODO move this?
@@ -726,7 +729,7 @@ Object.assign(HexaLab.App.prototype, {
         var settings = this.get_settings();
         HexaLab.UI.filtered_opacity.slider('value', settings.materials.filtered_surface_opacity * 100)
         HexaLab.UI.wireframe_opacity.slider('value', settings.materials.visible_wireframe_opacity * 100)
-        HexaLab.UI.singularity_opacity.slider('value', settings.materials.singularity_surface_opacity * 100)
+        HexaLab.UI.singularity_mode.slider('value', settings.materials.singularity_mode)
         HexaLab.UI.quality.prop('checked', settings.materials.show_quality_on_visible_surface)
         HexaLab.UI.occlusion.prop('checked', settings.renderer.occlusion)
         HexaLab.UI.color_map.val(settings.materials.color_map)
@@ -803,8 +806,9 @@ Object.assign(HexaLab.App.prototype, {
         this.set_filtered_surface_opacity(settings.filtered_surface_opacity)
         this.set_filtered_wireframe_color(settings.filtered_wireframe_color)
         this.set_filtered_wireframe_opacity(settings.filtered_wireframe_opacity)
-        this.set_singularity_surface_opacity(settings.singularity_surface_opacity)
-        this.set_singularity_wireframe_opacity(settings.singularity_wireframe_opacity)
+        this.set_singularity_mode(settings.singularity_mode)
+        //this.set_singularity_surface_opacity(settings.singularity_surface_opacity)
+        //this.set_singularity_wireframe_opacity(settings.singularity_wireframe_opacity)
         this.set_color_map(settings.color_map)
         this.set_quality_measure(settings.quality_measure)
     },
@@ -854,8 +858,9 @@ Object.assign(HexaLab.App.prototype, {
             filtered_surface_opacity: this.filtered_surface_material.opacity,
             filtered_wireframe_color: '#' + this.filtered_wireframe_material.color.getHexString(),
             filtered_wireframe_opacity: this.filtered_wireframe_material.opacity,
-            singularity_surface_opacity: this.singularity_surface_material.opacity,
-            singularity_wireframe_opacity: this.singularity_wireframe_material.opacity,
+            singularity_mode: this.singularity_mode,
+            //singularity_surface_opacity: this.singularity_surface_material.opacity,
+            //singularity_wireframe_opacity: this.singularity_wireframe_material.opacity,
             color_map: this.color_map
         }
     },
@@ -916,6 +921,26 @@ Object.assign(HexaLab.App.prototype, {
         this.backend.do_show_color_map = show;
         this.visible_surface_material.needsUpdate = true;
         this.update();
+    },
+
+    set_singularity_mode: function (mode) {
+        this.singularity_mode = mode
+        if (mode == 0) {
+            this.set_singularity_surface_opacity(0.0)
+            this.set_singularity_wireframe_opacity(0.0)
+        } else if (mode == 1) {
+            this.set_singularity_surface_opacity(0.0)
+            this.set_singularity_wireframe_opacity(1.0)
+        } else if (mode == 2) {
+            this.set_singularity_surface_opacity(0.0)
+            this.set_singularity_wireframe_opacity(1.0)
+        } else if (mode == 3) {
+            this.set_singularity_surface_opacity(1.0)
+            this.set_singularity_wireframe_opacity(1.0)
+        } else if (mode == 4) {
+            this.set_singularity_surface_opacity(1.0)
+            this.set_singularity_wireframe_opacity(1.0)
+        }
     },
 
     set_visible_wireframe_color: function (color) {
