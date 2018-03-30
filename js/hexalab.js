@@ -547,7 +547,7 @@ Object.assign(HexaLab.Renderer.prototype, {
             // Finally render transparent meshes (the culling plane)
             for (var k in meshes) {
                 var mesh = meshes[k];
-                if (mesh.material.transparent) this.scene.add(mesh);
+                this.scene.add(mesh);
             }
             this.scene.add(main_camera);
             this.backend.render(this.scene, main_camera);
