@@ -877,22 +877,17 @@ Object.assign(HexaLab.App.prototype, {
     },
 
     set_color_map: function (map) {
-        if (map == 'Jet')
-            this.backend.set_color_map(Module.ColorMap.Jet)
-        else if (map == 'Parula')
-            this.backend.set_color_map(Module.ColorMap.Parula)
-        else if (map == 'RedGreen')
-            this.backend.set_color_map(Module.ColorMap.RedGreen)
+        if      (map == 'Jet')      this.backend.set_color_map(Module.ColorMap.Jet)
+        else if (map == 'Parula')   this.backend.set_color_map(Module.ColorMap.Parula)
+        else if (map == 'RedGreen') this.backend.set_color_map(Module.ColorMap.RedGreen)
         this.color_map = map
+        HexaLab.UI.on_set_color_map(map)
     },
 
     set_quality_measure: function (measure) {
-        if (measure == "Scaled Jacobian")
-            this.backend.compute_hexa_quality(Module.QualityMeasure.ScaledJacobian)
-        else if (measure == "Diagonal Ratio")
-            this.backend.compute_hexa_quality(Module.QualityMeasure.DiagonalRatio)
-        else if (measure == "Edge Ratio")
-            this.backend.compute_hexa_quality(Module.QualityMeasure.EdgeRatio)
+        if      (measure == "Scaled Jacobian")  this.backend.compute_hexa_quality(Module.QualityMeasure.ScaledJacobian)
+        else if (measure == "Diagonal Ratio")   this.backend.compute_hexa_quality(Module.QualityMeasure.DiagonalRatio)
+        else if (measure == "Edge Ratio")       this.backend.compute_hexa_quality(Module.QualityMeasure.EdgeRatio)
         this.quality_measure = measure
         this.update();  // TODO move this out into the caller
     },
@@ -900,6 +895,7 @@ Object.assign(HexaLab.App.prototype, {
     show_visible_quality: function (show) {
         this.backend.do_show_color_map = show;
         this.visible_surface_material.needsUpdate = true;
+        HexaLab.UI.on_show_visible_quality(show)
         this.update();
     },
 
@@ -944,6 +940,7 @@ Object.assign(HexaLab.App.prototype, {
             }
         }
         this.singularity_mode = mode
+        HexaLab.UI.on_set_singularity_mode(mode)
     },
 
     set_visible_wireframe_color: function (color) {
@@ -952,12 +949,9 @@ Object.assign(HexaLab.App.prototype, {
 
     set_visible_wireframe_opacity: function (opacity) {
         this.visible_wireframe_material.opacity = opacity
-        if (opacity == 0) {
-            this.visible_wireframe_material.visible = false
-        } else {
-            this.visible_wireframe_material.visible = true
-        }
+        this.visible_wireframe_material.visible = opacity != 0
         this.prev_visible_wireframe_opacity = null
+        HexaLab.UI.on_set_wireframe_opacity(opacity)
     },
 
     set_filtered_surface_color: function (color) {
@@ -966,12 +960,9 @@ Object.assign(HexaLab.App.prototype, {
 
     set_filtered_surface_opacity: function (opacity) {
         this.filtered_surface_material.opacity = opacity;
-        if (opacity == 0) {
-            this.filtered_surface_material.visible = false;
-        } else {
-            this.filtered_surface_material.visible = true;
-        }
+        this.filtered_surface_material.visible = opacity != 0;
         this.prev_filtered_surface_opacity = null
+        HexaLab.UI.on_set_filtered_surface_opacity(opacity)
     },
 
     set_filtered_wireframe_color: function (color) {
@@ -980,20 +971,12 @@ Object.assign(HexaLab.App.prototype, {
 
     set_filtered_wireframe_opacity: function (opacity) {
         this.filtered_wireframe_material.opacity = opacity;
-        if (opacity == 0) {
-            this.filtered_wireframe_material.visible = false;
-        } else {
-            this.filtered_wireframe_material.visible = true;
-        }
+        this.filtered_wireframe_material.visible = opacity != 0;
     },
 
     set_singularity_surface_opacity: function (opacity) {
         this.singularity_surface_material.opacity = opacity;
-        if (opacity == 0) {
-            this.singularity_surface_material.visible = false;
-        } else {
-            this.singularity_surface_material.visible = true;
-        }
+        this.singularity_surface_material.visible = opacity != 0;
     },
 
     set_singularity_wireframe_opacity: function (opacity) {
@@ -1001,7 +984,8 @@ Object.assign(HexaLab.App.prototype, {
     },
 
     set_occlusion: function (value) {
-        this.renderer.set_ssao(value);
+        this.renderer.set_ssao(value)
+        HexaLab.UI.on_set_occlusion(value)
     },
 
     set_antialiasing: function (value) {
@@ -1016,7 +1000,8 @@ Object.assign(HexaLab.App.prototype, {
         // invoke backend
         var result = this.backend.import_mesh(path);
         if (!result) {
-            throw false
+            HexaLab.UI.on_import_mesh_fail(path)
+            return
         }
         // reset settings
         // settings the mesh mush happen before the reset, as it is used inside
@@ -1042,6 +1027,7 @@ Object.assign(HexaLab.App.prototype, {
         this.renderer.camera_light.target = mesh_obj;
         // update mesh data
         this.update();
+        HexaLab.UI.on_import_mesh(path)
     },
 
     // Update all models to their current version in the cpp backend.
