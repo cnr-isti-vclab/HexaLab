@@ -108,14 +108,16 @@ HexaLab.PlaneFilter = function () {
         offset: 0,
         world_offset: 0,
         position: null,
-        normal: null
+        normal: null,
+        mesh: new THREE.Mesh(),
+        edges: new THREE.LineSegments()
     };
 
     self.visible_color = false
     self.visible_edge = false
 
     this.default_settings = {
-        enabled: false,
+        enabled: true,
         normal: new THREE.Vector3(1, 0, 0),
         offset: 0,
         opacity: 0.3,
@@ -154,7 +156,11 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
         var geometry = new THREE.PlaneGeometry(this.mesh.get_size(), this.mesh.get_size());
         var edges = new THREE.EdgesGeometry(geometry)
         this.plane.mesh = new THREE.Mesh(geometry, this.plane.material);
-        this.plane.edges = new THREE.LineSegments(edges, new THREE.LineBasicMaterial( { color: this.plane.material.color } ))
+        this.plane.edges = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({
+            color: this.plane.material.color,
+            transparent: true,
+            opacity: 1.0 // TODO differentiate between filter scene objects meshes and wireframe, draw meshes pre-ssao, wireframe post-ssao
+        }))
 
         this.scene.add(this.plane.mesh)
         this.scene.add(this.plane.edges)

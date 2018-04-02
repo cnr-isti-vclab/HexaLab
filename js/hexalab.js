@@ -368,200 +368,161 @@ Object.assign(HexaLab.Renderer.prototype, {
         this.backend.setSize(width, height);
     },
 
+    draw_silhouette: function () {
+        // Clear all alpha values to 0
+        this.fullscreen_quad.material = this.alpha_pass.material
+        this.fullscreen_quad.material.uniforms.uAlpha = { value: 0.0 }
+        this.fullscreen_quad.material.depthWrite = false
+        this.fullscreen_quad.material.depthTest = false
+        this.scene.add(this.fullscreen_quad)
+        this.backend.context.colorMask(false, false, false, true)
+        this.backend.render(this.scene, this.ortho_camera)
+        this.backend.context.colorMask(true, true, true, true)
+
+        clear_scene()
+
+        // Set the outer silhouette alpha values
+        add_model_surface(models.filtered)
+        this.scene.overrideMaterial = this.alpha_pass.material
+        this.scene.overrideMaterial.uniforms.uAlpha = { value: models.filtered.surface.material.opacity }
+        this.scene.overrideMaterial.depthWrite = false
+        this.scene.overrideMaterial.depthTest = true
+        this.backend.context.colorMask(false, false, false, true)
+        this.backend.render(this.scene, main_camera)
+        this.backend.context.colorMask(true, true, true, true)
+
+        clear_scene()
+        this.scene.overrideMaterial = null
+
+        // Do a fullscreen pass, coloring the set alpha values only
+        this.fullscreen_quad.material = new THREE.MeshBasicMaterial({
+           color: "#000000",
+           blending: THREE.CustomBlending,
+           blendEquation: THREE.AddEquation,
+           blendSrc: THREE.DstAlphaFactor,
+           blendDst: THREE.OneMinusDstAlphaFactor,
+           transparent: true,
+           depthTest: false,
+           depthWrite: false
+        })
+        this.scene.add(this.fullscreen_quad)
+        this.backend.render(this.scene, this.ortho_camera)
+
+        clear_scene()
+
+        // Set back all alpha values to 1
+        this.fullscreen_quad.material = this.alpha_pass.material
+        this.fullscreen_quad.material.uniforms.uAlpha = { value: 1.0 }
+        this.fullscreen_quad.material.depthWrite = false
+        this.fullscreen_quad.material.depthTest = false
+        this.scene.add(this.fullscreen_quad)
+        this.backend.context.colorMask(false, false, false, true)
+        this.backend.render(this.scene, this.ortho_camera)
+        this.backend.context.colorMask(true, true, true, true)
+
+        clear_scene()
+    },
+
     render: function (models, meshes, main_camera) {
-        var self = this;
-        function clear_scene() {
+        // -- utility --
+        var self = this
+        function clear_scene () {
             while (self.scene.children.length > 0) {
-                self.scene.remove(self.scene.children[0]);
+                self.scene.remove(self.scene.children[0])
             }
         }
-        function add_model_surface(model) {
+        function add_model_surface () {
             if (model.surface.geometry.attributes.position) {
-                var mesh = new THREE.Mesh(model.surface.geometry, model.surface.material);
-                self.scene.add(mesh);
-                mesh.frustumCulled = false;
+                var mesh = new THREE.Mesh(model.surface.geometry, model.surface.material)
+                self.scene.add(mesh)
+                mesh.frustumCulled = false
             }
         }
-        function add_model_wireframe(model) {
+        function add_model_wireframe () {
             if (model.wireframe.geometry.attributes.position) {
-                var mesh = new THREE.LineSegments(model.wireframe.geometry, model.wireframe.material);
-                self.scene.add(mesh);
-                mesh.frustumCulled = false;
+                var mesh = new THREE.LineSegments(model.wireframe.geometry, model.wireframe.material)
+                self.scene.add(mesh)
+                mesh.frustumCulled = false
             }
         }
-        function enable_lighting() {
-            self.scene.add(main_camera)
-            self.scene.add(self.ambient)
-            main_camera.add(self.camera_light)
-        }
-        function disable_lighting() {
-            main_camera.remove(self.camera_light)
-        }
 
-        clear_scene();
+        // -- main render sequence --
+       // gather opaque surface models
+       for (var k in models) {
+           var model = models[k]
+           if (model.surface.material && !model.surface.material.transparent) add_model_surface(model)
+       }
+       for (var k in meshes) {
+           var mesh = meshes[k]
+           if (!mesh.material.transparent) this.scene.add(mesh)
+       }
 
-        // render
-        if (this.settings.ssao) {
-            this.backend.setRenderTarget()
+       // render opaque models
+       this.backend.setRenderTarget()
+       this.backend.clear()
+       this.scene.add(main_camera)
+       this.scene.add(this.ambient)
+       main_camera.add(this.camera_light)
+       this.backend.render(this.scene, main_camera)
 
-            // gather opaque surface models
-            for (var k in models) {
-                var model = models[k];
-                if (model.surface.material && !model.surface.material.transparent) add_model_surface(model);
-            }
-            for (var k in meshes) {
-                var mesh = meshes[k];
-                if (!mesh.material.transparent) this.scene.add(mesh);
-            }
-            // finish up the scene with camera and lighing
-            this.scene.add(main_camera);
-            this.scene.add(this.ambient);
-            main_camera.add(this.camera_light);
+       if (this.settings.ssao) {
+           // view norm/depth prepass
+           this.scene.overrideMaterial = this.normal_pass.material
+           this.backend.render(this.scene, main_camera, this.normal_pass.target, true)
+           this.scene.overrideMaterial = this.depth_pass.material
+           this.backend.render(this.scene, main_camera, this.depth_pass.target, true)
+           this.scene.overrideMaterial = null
 
-            // view space norm/depth prepass
-            this.scene.overrideMaterial = this.normal_pass.material;
-            this.backend.render(this.scene, main_camera, this.normal_pass.target, true);
-            this.scene.overrideMaterial = null;
+           // clean up
+           clear_scene()
+           main_camera.remove(this.camera_light)
 
-            this.scene.overrideMaterial = this.depth_pass.material;
-            this.backend.render(this.scene, main_camera, this.depth_pass.target, true);
-            this.scene.overrideMaterial = null;
+           // ssao
+           this.ssao_pass.material.uniforms.uProj    = { value: main_camera.projectionMatrix }
+           this.ssao_pass.material.uniforms.uInvProj = { value: new THREE.Matrix4().getInverse(main_camera.projectionMatrix) }
+           this.blur_pass.material.uniforms.uInvProj = { value: new THREE.Matrix4().getInverse(main_camera.projectionMatrix) }
 
-            // render opaque models
-            this.backend.setRenderTarget();
-            this.backend.clear();
-            this.backend.render(this.scene, main_camera);
+           this.scene.add(this.fullscreen_quad)
 
-            // clean up
-            clear_scene();
-            main_camera.remove(this.camera_light);
+           this.fullscreen_quad.material = this.ssao_pass.material
+           this.backend.render(this.scene, this.ortho_camera, this.ssao_pass.target, true)
+           //this.backend.render(this.scene, this.ortho_camera)
 
-            // ssao
-            this.ssao_pass.material.uniforms.uProj = { value: main_camera.projectionMatrix };
-            this.ssao_pass.material.uniforms.uInvProj = { value: new THREE.Matrix4().getInverse(main_camera.projectionMatrix) };
-            this.blur_pass.material.uniforms.uInvProj = { value: new THREE.Matrix4().getInverse(main_camera.projectionMatrix) };
+           this.fullscreen_quad.material = this.blur_pass.material
+           this.backend.render(this.scene, this.ortho_camera)
 
-            this.scene.add(this.fullscreen_quad);
+           clear_scene()
+       } else {
+           // just clean up
+           clear_scene()
+           main_camera.remove(this.camera_light)
+       }
 
-            this.fullscreen_quad.material = this.ssao_pass.material;
-            this.backend.render(this.scene, this.ortho_camera, this.ssao_pass.target, true);
+       // gather translucent models (and all wireframes)
+       for (var k in models) {
+           var model = models[k];
+           if (model.surface.material && model.surface.material.transparent) add_model_surface(model);
+           if (model.wireframe.material) add_model_wireframe(model);
+       }
+       for (var k in meshes) {
+           var mesh = meshes[k]
+           if (mesh.material.transparent) this.scene.add(mesh)
+       }
+       // render translucents
+       this.scene.add(main_camera)
+       this.scene.add(this.ambient)
+       main_camera.add(this.camera_light)
+       this.backend.render(this.scene, main_camera)
+       clear_scene()
+       main_camera.remove(this.camera_light)
 
-            this.fullscreen_quad.material = this.blur_pass.material;
-            this.backend.render(this.scene, this.ortho_camera);
-
-            clear_scene();
-
-            // gather translucent models (and all wireframes)
-            for (var k in models) {
-                var model = models[k];
-                if (model.surface.material && model.surface.material.transparent) add_model_surface(model);
-                if (model.wireframe.material) add_model_wireframe(model);
-            }
-            for (var k in meshes) {
-                var mesh = meshes[k];
-                if (mesh.material.transparent) this.scene.add(mesh);
-            }
-            // finish up the scene
-            this.scene.add(main_camera);
-            this.scene.add(this.ambient);
-            main_camera.add(this.camera_light);
-
-            // render translucents
-            this.backend.render(this.scene, main_camera);
-
-            // clean up
-            clear_scene();
-            main_camera.remove(this.camera_light);
-        } else {
-            this.backend.setRenderTarget()
-            this.backend.clear()
-
-            // Draw the solid mesh
-            enable_lighting()
-            add_model_surface(models.visible)
-            add_model_wireframe(models.visible)
-            this.backend.render(this.scene, main_camera)
-
-            clear_scene()
-
-            // Draw the singularity mesh
-            add_model_surface(models.singularity)
-            this.backend.render(this.scene, main_camera)
-
-            clear_scene()
-            disable_lighting()
-
-            // Clear all alpha values to 0
-            this.fullscreen_quad.material = this.alpha_pass.material
-            this.fullscreen_quad.material.uniforms.uAlpha = { value: 0.0 }
-            this.fullscreen_quad.material.depthWrite = false;
-            this.fullscreen_quad.material.depthTest = false;
-            this.scene.add(this.fullscreen_quad);
-            this.backend.context.colorMask(false, false, false, true);
-            this.backend.render(this.scene, this.ortho_camera);
-            this.backend.context.colorMask(true, true, true, true);
-
-            clear_scene()
-
-            // Set the outer silhouette alpha values
-            add_model_surface(models.filtered)
-            this.scene.overrideMaterial = this.alpha_pass.material
-            this.scene.overrideMaterial.uniforms.uAlpha = { value: models.filtered.surface.material.opacity }
-            this.scene.overrideMaterial.depthWrite = false;
-            this.scene.overrideMaterial.depthTest = true;
-            this.backend.context.colorMask(false, false, false, true);
-            this.backend.render(this.scene, main_camera);
-            this.backend.context.colorMask(true, true, true, true);
-
-            clear_scene()
-            this.scene.overrideMaterial = null
-
-            // Do a fullscreen pass, coloring the set alpha values only
-            this.fullscreen_quad.material = new THREE.MeshBasicMaterial({
-                color: "#000000",
-                blending: THREE.CustomBlending,
-                blendEquation: THREE.AddEquation,
-                blendSrc: THREE.DstAlphaFactor,
-                blendDst: THREE.OneMinusDstAlphaFactor,
-                transparent: true,
-                depthTest: false,
-                depthWrite: false
-            });
-            this.scene.add(this.fullscreen_quad);
-            this.backend.render(this.scene, this.ortho_camera);
-
-            clear_scene();
-
-            // Set back all alpha values to 1
-            this.fullscreen_quad.material = this.alpha_pass.material
-            this.fullscreen_quad.material.uniforms.uAlpha = { value: 1.0 }
-            this.fullscreen_quad.material.depthWrite = false;
-            this.fullscreen_quad.material.depthTest = false;
-            this.scene.add(this.fullscreen_quad);
-            this.backend.context.colorMask(false, false, false, true);
-            this.backend.render(this.scene, this.ortho_camera);
-            this.backend.context.colorMask(true, true, true, true);
-
-            clear_scene()
-
-            // Finally render transparent meshes (the culling plane)
-            for (var k in meshes) {
-                var mesh = meshes[k];
-                this.scene.add(mesh);
-            }
-            this.scene.add(main_camera);
-            this.backend.render(this.scene, main_camera);
-
-            clear_scene();
-        }
-
-        // hud
-        this.scene.add(this.gizmo);
-        this.backend.setViewport(10, 10, 100, 100);
-        this.hud_camera.setRotationFromMatrix(main_camera.matrixWorld);
-        this.backend.render(this.scene, this.hud_camera);
-        this.scene.remove(this.gizmo);
-        this.backend.setViewport(0, 0, this.width, this.height);
+       // hud
+       this.scene.add(this.gizmo)
+       this.backend.setViewport(10, 10, 100, 100)
+       this.hud_camera.setRotationFromMatrix(main_camera.matrixWorld)
+       this.backend.render(this.scene, this.hud_camera)
+       this.scene.remove(this.gizmo)
+       this.backend.setViewport(0, 0, this.width, this.height)
     }
 })
 
@@ -598,7 +559,7 @@ HexaLab.App = function (dom_element) {
     this.canvas.container.appendChild(this.canvas.element);
 
     this.default_renderer_settings = {
-        occlusion: false,
+        occlusion: true,
         antialiasing: true
     };
 
@@ -614,9 +575,9 @@ HexaLab.App = function (dom_element) {
         polygonOffset: true,
         polygonOffsetFactor: 0.5
     });
-    this.filtered_surface_material = new THREE.MeshLambertMaterial({
+    this.filtered_surface_material = new THREE.MeshBasicMaterial({
         transparent: true,
-        depthWrite: false
+        depthWrite: false,
     });
     this.filtered_wireframe_material = new THREE.MeshBasicMaterial({
         transparent: true,
@@ -638,6 +599,8 @@ HexaLab.App = function (dom_element) {
 
     this.default_material_settings = {
         show_quality_on_visible_surface: false,
+        visible_inside_color: '#ffff00',
+        visible_outside_color: '#ffffff',
         visible_wireframe_color: '#000000',
         visible_wireframe_opacity: 1,
 
@@ -777,6 +740,8 @@ Object.assign(HexaLab.App.prototype, {
         this.set_filtered_wireframe_color(settings.filtered_wireframe_color)
         this.set_filtered_wireframe_opacity(settings.filtered_wireframe_opacity)
         this.set_singularity_mode(settings.singularity_mode)
+        this.set_visible_outside_color(settings.visible_outside_color)
+        this.set_visible_inside_color(settings.visible_inside_color)
         //this.set_singularity_surface_opacity(settings.singularity_surface_opacity)
         //this.set_singularity_wireframe_opacity(settings.singularity_wireframe_opacity)
         this.set_color_map(settings.color_map)
@@ -830,6 +795,8 @@ Object.assign(HexaLab.App.prototype, {
             filtered_wireframe_color: '#' + this.filtered_wireframe_material.color.getHexString(),
             filtered_wireframe_opacity: this.filtered_wireframe_material.opacity,
             singularity_mode: this.singularity_mode,
+            visible_inside_color: this.get_visible_inside_color(),
+            visible_outside_color: this.get_visible_outside_color(),
             //singularity_surface_opacity: this.singularity_surface_material.opacity,
             //singularity_wireframe_opacity: this.singularity_wireframe_material.opacity,
             color_map: this.color_map
@@ -882,6 +849,30 @@ Object.assign(HexaLab.App.prototype, {
         else if (map == 'RedGreen') this.backend.set_color_map(Module.ColorMap.RedGreen)
         this.color_map = map
         HexaLab.UI.on_set_color_map(map)
+    },
+
+    set_visible_inside_color: function (color) {
+        var c = new THREE.Color(color)
+        this.backend.set_visible_inside_color(c.r, c.g, c.b)
+        this.update()
+        HexaLab.UI.on_set_visible_inside_color(color)
+    },
+
+    get_visible_inside_color: function () {
+        var c = this.backend.get_visible_inside_color()
+        return '#' + new THREE.Color(c.x(), c.y(), c.z()).getHexString()
+    },
+
+    set_visible_outside_color: function (color) {
+        var c = new THREE.Color(color)
+        this.backend.set_visible_outside_color(c.r, c.g, c.b)
+        this.update()
+        HexaLab.UI.on_set_visible_outside_color(color)
+    },
+
+    get_visible_outside_color: function () {
+        var c = this.backend.get_visible_outside_color()
+        return '#' + new THREE.Color(c.x(), c.y(), c.z()).getHexString()
     },
 
     set_quality_measure: function (measure) {

@@ -101,6 +101,9 @@ HexaLab.UI = {
     quality: $("#show_quality"),
     occlusion: $("#show_occlusion"),
     singularity_mode: $('#singularity_slider'),
+    visible_outside_color: $('#visible_outside_color'),
+    visible_inside_color: $('#visible_inside_color'),
+    visible_color_wrapper: $('#visible_color_wrapper'),
 
     // Mesh sources
     datasets_index: {},
@@ -134,11 +137,33 @@ HexaLab.UI.surface_color_source.on("change", function () {
     }
 })
 
+HexaLab.UI.visible_outside_color.spectrum({
+    cancelText: ''
+}).on('change.spectrum', function (color) {
+    HexaLab.app.set_visible_outside_color($(this).spectrum('get').toHexString())
+})
+
+HexaLab.UI.on_set_visible_outside_color = function (color) {
+    HexaLab.UI.visible_outside_color.spectrum('set', color)
+}
+
+HexaLab.UI.visible_inside_color.spectrum({
+    cancelText: ''
+}).on('change.spectrum', function (color) {
+    HexaLab.app.set_visible_inside_color($(this).spectrum('get').toHexString())
+})
+
+HexaLab.UI.on_set_visible_inside_color = function (color) {
+    HexaLab.UI.visible_inside_color.spectrum('set', color)
+}
+
 HexaLab.UI.on_show_visible_quality = function (do_show) {
     if (do_show) {
         $("#surface_colormap_input").css('display', 'flex');
+        HexaLab.UI.visible_color_wrapper.hide();
     } else {
         $("#surface_colormap_input").hide();
+        HexaLab.UI.visible_color_wrapper.css('display', 'flex');
     }
 }
 
@@ -176,7 +201,7 @@ HexaLab.UI.occlusion.on('click', function () {
 })
 
 HexaLab.UI.on_set_occlusion = function (do_occlusion) {
-    HexaLab.UI.occlusion.prop('checked', true)
+    HexaLab.UI.occlusion.prop('checked', do_occlusion)
 }
 
 HexaLab.UI.color_map.on('change', function () {
@@ -278,7 +303,8 @@ HexaLab.UI.import_remote_mesh = function (source, name) {
 
 HexaLab.UI.setup_mesh_stats = function() {
     var stats = HexaLab.app.backend.get_mesh_stats()
-    HexaLab.UI.mesh_info_2.show().empty()
+    HexaLab.UI.mesh_info_2.show()
+    HexaLab.UI.mesh_info_2_text.empty()
     HexaLab.UI.mesh_info_2_text.append('<div class="menu_row"><div class="menu_row_label" style="font-weight:bold;line-height:100%;padding-bottom:10px;">Geometry</div></div>')
     HexaLab.UI.mesh_info_2_text.append('<div id="mesh_stats_wrapper">' +
         '<div><span class="mesh_stat">vertices: </span>' + stats.vert_count + '</div>' +

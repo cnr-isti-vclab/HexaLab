@@ -34,6 +34,8 @@ namespace HexaLab {
         Model filtered_model;
         Model singularity_model;
 
+        Vector3f visible_outside_color = Vector3f(1, 1, 1);
+        Vector3f visible_inside_color  = Vector3f(1, 1, 0);
 
     public:
         bool import_mesh(string path);
@@ -46,6 +48,10 @@ namespace HexaLab {
 
         ColorMap color_map;
         bool do_show_color_map = false;
+        void set_visible_outside_color(float r, float g, float b) { visible_outside_color = Vector3f(r, g, b); }
+        void set_visible_inside_color(float r, float g, float b) { visible_inside_color = Vector3f(r, g, b); }
+        Vector3f get_visible_outside_color() { return visible_outside_color; }
+        Vector3f get_visible_inside_color() { return visible_inside_color; }
 
         Model* get_visible_model() { return &this->visible_model; }
         Model* get_filtered_model() { return &this->filtered_model; }

@@ -171,7 +171,7 @@ namespace HexaLab {
             if (do_show_color_map) {
                 color = color_map.get(mesh->hexa_quality[nav.hexa_index()]);
             } else {
-                color = nav.is_face_boundary() ? Vector3f(1, 1, 1) : Vector3f(1, 1, 0);
+                color = nav.is_face_boundary() ? this->visible_outside_color : this->visible_inside_color;
             }
             visible_model.surface_vert_color.push_back(color);
             visible_model.surface_vert_color.push_back(color);
