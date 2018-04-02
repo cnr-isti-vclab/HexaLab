@@ -890,6 +890,7 @@ Object.assign(HexaLab.App.prototype, {
         else if (measure == "Edge Ratio")       this.backend.compute_hexa_quality(Module.QualityMeasure.EdgeRatio)
         this.quality_measure = measure
         this.update();  // TODO move this out into the caller
+        HexaLab.UI.on_set_quality_measure(measure)
     },
 
     show_visible_quality: function (show) {

@@ -187,7 +187,7 @@ input {
 .menu_area .menu_content .menu_row {
 	width: 100%;
 	clear: both;
-	line-height: 25px;
+	line-height: 30px;
 
 	overflow: hidden;
 	display: flex;
@@ -289,13 +289,22 @@ input {
 	display: none;
 }
 
-
 .menu_area .menu_content .menu_row #mesh_info_2 {
 	display: none;
 }
 
 .menu_area .menu_content .menu_row #paper_mesh_picker {
 	display: none;
+}
+
+.menu_area .menu_content .menu_row #mesh_stats_wrapper {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+}
+
+.menu_area .menu_content .menu_row .mesh_stat {
+	padding-left: 15px;
 }
 
 .menu_area .menu_content .menu_row .menu_row_input {

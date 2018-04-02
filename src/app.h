@@ -17,6 +17,10 @@ namespace HexaLab {
         float min_edge_len = 0;
         float max_edge_len = 0;
         float avg_edge_len = 0;
+        float quality_min = 0;
+        float quality_max = 0;
+        float quality_avg = 0;
+        float quality_var = 0;
     };
 
     class App {

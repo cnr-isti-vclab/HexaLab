@@ -26,9 +26,21 @@ OBJ = hexalab_js.bc \
       quality_filter.bc \
       mesh_navigator.bc
 
-LIBS = 
+DEPS = app.h \
+	   builder.h \
+	   color_map.h \
+	   common.h \
+	   hex_quality.h \
+	   ifilter.h \
+	   loader.h \
+	   mesh.h \
+	   mesh_navigator.h \
+	   model.h \
+	   peeling_filter.h \
+	   plane_filter.h \
+	   quality_filter.h
 
-%.bc: %.cpp
+%.bc: %.cpp $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 hexalab_asm.js: $(OBJ) $(LIBS)

@@ -1,5 +1,7 @@
 #include <app.h>
 
+#include <limits>
+
 namespace HexaLab {
     bool App::import_mesh(string path) {
         delete mesh;
@@ -52,6 +54,10 @@ namespace HexaLab {
     }
 
     void App::compute_hexa_quality(App::quality_measure_fun* fun) {
+        float min = std::numeric_limits<float>::max();
+        float max = -std::numeric_limits<float>::max();
+        float sum = 0;
+        float sum2 = 0;
         mesh->hexa_quality.resize(mesh->hexas.size());
         Vector3f v[8];
         for (size_t i = 0; i < mesh->hexas.size(); ++i) {
@@ -68,8 +74,17 @@ namespace HexaLab {
                 v[j++] = nav.vert().position;
                 nav = nav.rotate_on_face();
             } while(nav.vert() != b);
-            mesh->hexa_quality[i] = fun(v[4], v[5], v[6], v[7], v[0], v[1], v[2], v[3]);
+            float q = fun(v[4], v[5], v[6], v[7], v[0], v[1], v[2], v[3]);
+            mesh->hexa_quality[i] = q;
+            if (min > q) min = q;
+            if (max < q) max = q;
+            sum += q;
+            sum2 += q * q;
         }
+        this->mesh_stats.quality_min = min;
+        this->mesh_stats.quality_max = max;
+        this->mesh_stats.quality_avg = sum / mesh->hexas.size();
+        this->mesh_stats.quality_var = sum2 / mesh->hexas.size() - this->mesh_stats.quality_avg * this->mesh_stats.quality_avg;
     }
 
     void App::build_singularity_model() {

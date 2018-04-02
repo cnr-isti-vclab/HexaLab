@@ -157,6 +157,10 @@ EMSCRIPTEN_BINDINGS(HexaLab) {
         .property("min_edge_len",           &MeshStats::min_edge_len)
         .property("max_edge_len",           &MeshStats::max_edge_len)
         .property("avg_edge_len",           &MeshStats::avg_edge_len)
+        .property("quality_min",            &MeshStats::quality_min)
+        .property("quality_max",            &MeshStats::quality_max)
+        .property("quality_avg",            &MeshStats::quality_avg)
+        .property("quality_var",            &MeshStats::quality_var)
         ;
 
     class_<Vector3f>("float3")
