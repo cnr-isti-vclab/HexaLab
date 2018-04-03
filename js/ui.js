@@ -555,7 +555,9 @@ HexaLab.UI.quality_plot = function(container, axis) {
             colorscale: colorscale,
             colorbar: {
                 thickness: 15,
-                showticklabels: false
+                showticklabels: false,
+                x: -0.3,
+                len: 1.03
             }
         },
     }]
@@ -566,7 +568,10 @@ HexaLab.UI.quality_plot = function(container, axis) {
         size: 0.01
     }
 
-    var plot_layout = {}
+    var plot_layout = {
+        paper_bgcolor: 'rgba(255, 255, 255, 0.2)',
+        plot_bgcolor:  'rgba(255, 255, 255, 0.2)'
+    }
     plot_layout[axis.concat('axis')] = {
         autorange: false,
         range: [0, 1],
