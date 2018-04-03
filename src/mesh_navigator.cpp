@@ -6,17 +6,17 @@ namespace HexaLab {
     MeshNavigator MeshNavigator::flip_edge() { return MeshNavigator(_mesh->darts[_dart->edge_neighbor], *_mesh); }
     MeshNavigator MeshNavigator::flip_vert() { return MeshNavigator(_mesh->darts[_dart->vert_neighbor], *_mesh); }
 
-    MeshNavigator MeshNavigator::rotate_on_edge() { 
+    MeshNavigator MeshNavigator::rotate_on_edge() {
         MeshNavigator nav = *this;
         if (nav.dart().hexa_neighbor != -1) {
             nav = nav.flip_hexa();
         }
-        return nav.flip_face(); 
+        return nav.flip_face();
     }
     MeshNavigator MeshNavigator::rotate_on_face() { return flip_vert().flip_edge(); }
     MeshNavigator MeshNavigator::rotate_on_hexa() { return flip_vert().flip_edge().flip_face().flip_edge(); }
     MeshNavigator MeshNavigator::next_hexa_face() { return flip_vert().flip_edge().flip_face(); }
-    
+
     /**
      * @brief MeshNavigator::incident_face_on_edge_num
      * @return the number of faces that are incident on the current edge
@@ -31,10 +31,10 @@ namespace HexaLab {
         nav = nav.rotate_on_edge();
         if(nav.is_face_boundary()) edge_on_boundary=true;
         ++faceCnt;
-        
+
       } while(!(nav == *this));
       if(edge_on_boundary) faceCnt/=2;
-      return faceCnt; 
+      return faceCnt;
     }
 
     void MeshNavigator::collect_face_vertex_position_vector(std::vector<Vector3f> &posVec) const
@@ -44,13 +44,13 @@ namespace HexaLab {
       do
       {
         posVec.push_back(nav.vert().position);
-        nav = nav.rotate_on_face();        
+        nav = nav.rotate_on_face();
       } while(!(nav == *this));
       assert(posVec.size()==4);
     }
+
     bool MeshNavigator::is_face_boundary() const { return (_dart->hexa_neighbor == -1); }
-    
-    
+
     Hexa& MeshNavigator::hexa() { return _mesh->hexas[_dart->hexa]; }
     Face& MeshNavigator::face() { return _mesh->faces[_dart->face]; }
     Edge& MeshNavigator::edge() { return _mesh->edges[_dart->edge]; }

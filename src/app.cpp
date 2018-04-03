@@ -2,6 +2,8 @@
 
 #include <limits>
 
+#define D2R (3.141592653589793f / 180.f)
+
 namespace HexaLab {
     bool App::import_mesh(string path) {
         delete mesh;
@@ -40,7 +42,7 @@ namespace HexaLab {
         //}
 
 
-        build_singularity_model();
+        build_singularity_models();
 
         for (size_t i = 0; i < filters.size(); ++i) {
             filters[i]->on_mesh_set(*mesh);
@@ -87,64 +89,92 @@ namespace HexaLab {
         this->mesh_stats.quality_var = sum2 / mesh->hexas.size() - this->mesh_stats.quality_avg * this->mesh_stats.quality_avg;
     }
 
-    void App::build_singularity_model() {
-      singularity_model.clear();
-      for (size_t i = 0; i < mesh->edges.size(); ++i) {
-          MeshNavigator nav = mesh->navigate(mesh->edges[i]);
-          int face_count = nav.incident_face_on_edge_num();
-          if (face_count == 4) continue;
-          if (nav.edge().surface_flag) continue;
-          // add edge
-          for (int j = 0; j < 2; ++j) {
-              singularity_model.wireframe_vert_pos.push_back(mesh->verts[nav.dart().vert].position);
-              nav = nav.flip_vert();
-          }
-          Vector3f color;
-          switch (face_count) {
-          case  3:   color = Vector3f(1, 0, 0);  break;
-          case  5:   color = Vector3f(0, 1, 0);  break;
-          default:   color = Vector3f(0, 0, 1);
-          }
-          singularity_model.wireframe_vert_color.push_back(color);
-          singularity_model.wireframe_vert_color.push_back(color);
+    void App::build_singularity_models() {
+        singularity_model.clear();
+        boundary_singularity_model.clear();
+        boundary_creases_model.clear();
+        for (size_t i = 0; i < mesh->edges.size(); ++i) {
+            MeshNavigator nav = mesh->navigate(mesh->edges[i]);
 
-//          Face& begin = nav.face();
-//          do {
-//            vector<Vector3f> facePos;
-//            nav.collect_face_vertex_position_vector(facePos);
-//              singularity_model.surface_vert_pos.push_back(facePos[i]);
-//              singularity_model.surface_vert_color.push_back(color);
-//              singularity_model.wireframe_vert_pos.push_back(facePos[i]);
-//              singularity_model.wireframe_vert_pos.push_back(facePos[(i+1)%facePos.size()]);
-//              singularity_model.wireframe_vert_color.push_back(Vector3f(0, 0, 0));
-//              singularity_model.wireframe_vert_color.push_back(Vector3f(0, 0, 0));
-//            }
-//            nav = nav.rotate_on_edge();
-//          } while (nav.face() != begin);
+            // -- Boundary check --
+            {
+                bool boundary = false;
+                Face& begin = nav.face();
+                do {
+                    if (nav.is_face_boundary()) {
+                        boundary = true;
+                        break;
+                    }
+                    nav = nav.rotate_on_edge();
+                } while(nav.face() != begin);
 
-          // add adjacent faces
-          Face& begin = nav.face();
-          do {                                      // foreach face adjacent tot he singularity edge
-              for (int k = 0; k < 2; ++k) {         // for both triangles making up the face
-                  for (int j = 0; j < 2; ++j) {     // 2 + 1 face vertices add
-                      singularity_model.surface_vert_pos.push_back(mesh->verts[nav.dart().vert].position);
-                      singularity_model.surface_vert_color.push_back(color);
-                      for (int n = 0; n < 2; ++n) { // 2 verts that make the edge
-                          if (j == 0 && k == 1) {
-                              continue;
-                          }
-                          singularity_model.wireframe_vert_pos.push_back(mesh->verts[nav.dart().vert].position);
-                          singularity_model.wireframe_vert_color.push_back(Vector3f(0, 0, 0));
-                          nav = nav.flip_vert();
-                      }
-                      nav = nav.rotate_on_face();
-                  }
-                  singularity_model.surface_vert_pos.push_back(mesh->verts[nav.dart().vert].position);
-                  singularity_model.surface_vert_color.push_back(color);
-              }
-              nav = nav.rotate_on_edge();
-          } while (nav.face() != begin);
-      }
+                if (boundary) {
+                    // Boundary singularity
+                    if (nav.incident_face_on_edge_num() != 2) {
+                        for (int n = 0; n < 2; ++n) {     // 2 verts that make the edge
+                            boundary_singularity_model.wireframe_vert_pos.push_back(nav.vert().position);
+                            boundary_singularity_model.wireframe_vert_color.push_back(Vector3f(0, 0, 1));
+                            nav = nav.flip_vert();
+                        }
+                    }
+
+                    // Boundary Crease
+                    MeshNavigator nav2 = nav.flip_face();
+                    if (!nav2.is_face_boundary()) {
+                        nav2 = nav2.flip_hexa().flip_face();
+                        float dot = nav.face().normal.dot(nav2.face().normal);
+                        if (std::acos(dot) > 30 * D2R) {
+                            for (int n = 0; n < 2; ++n) {     // 2 verts that make the edge
+                                boundary_creases_model.wireframe_vert_pos.push_back(nav.vert().position);
+                                boundary_creases_model.wireframe_vert_color.push_back(Vector3f(1, 0, 0));
+                                nav = nav.flip_vert();
+                            }
+                        }
+                    }
+                }
+            }
+
+            // -- Singularity check
+            int face_count = nav.incident_face_on_edge_num();
+            if (face_count == 4) continue;
+            if (nav.edge().surface_flag) continue;
+            // add edge
+            for (int j = 0; j < 2; ++j) {
+                singularity_model.wireframe_vert_pos.push_back(mesh->verts[nav.dart().vert].position);
+                nav = nav.flip_vert();
+            }
+            Vector3f color;
+            switch (face_count) {
+                case  3:   color = Vector3f(1, 0, 0);  break;
+                case  5:   color = Vector3f(0, 1, 0);  break;
+                default:   color = Vector3f(0, 0, 1);
+            }
+            singularity_model.wireframe_vert_color.push_back(color);
+            singularity_model.wireframe_vert_color.push_back(color);
+
+            // add adjacent faces
+            Face& begin = nav.face();
+            do {                                          // foreach face adjacent tot he singularity edge
+                for (int k = 0; k < 2; ++k) {             // for both triangles making up the face
+                    for (int j = 0; j < 2; ++j) {         // 2 + 1 face vertices add
+                        singularity_model.surface_vert_pos.push_back(mesh->verts[nav.dart().vert].position);
+                        singularity_model.surface_vert_color.push_back(color);
+                        for (int n = 0; n < 2; ++n) {     // 2 verts that make the edge
+                            if (j == 0 && k == 1) {
+                                continue;
+                            }
+                            singularity_model.wireframe_vert_pos.push_back(mesh->verts[nav.dart().vert].position);
+                            singularity_model.wireframe_vert_color.push_back(Vector3f(0, 0, 0));
+                            nav = nav.flip_vert();
+                        }
+                        nav = nav.rotate_on_face();
+                    }
+                    singularity_model.surface_vert_pos.push_back(mesh->verts[nav.dart().vert].position);
+                    singularity_model.surface_vert_color.push_back(color);
+                }
+                nav = nav.rotate_on_edge();
+            } while (nav.face() != begin);
+        }
     }
 
     void App::add_visible_face(Dart& dart, float normal_sign) {
@@ -186,7 +216,7 @@ namespace HexaLab {
 //            nav.edge().mark = mesh->mark;
             MeshNavigator edge_nav = nav;
             for (int v = 0; v < 2; ++v) {
-                visible_model.wireframe_vert_pos.push_back(mesh->verts[edge_nav.dart().vert].position);
+                visible_model.wireframe_vert_pos.push_back(edge_nav.vert().position);
                 edge_nav = edge_nav.flip_vert();
             }
         //}
@@ -222,7 +252,7 @@ namespace HexaLab {
         //}
     }
 
-    void App::build_models() {
+    void App::build_surface_models() {
         if (mesh == nullptr) return;
 
         auto t_start = sample_time();

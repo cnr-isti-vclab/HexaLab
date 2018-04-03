@@ -33,11 +33,18 @@ namespace HexaLab {
         Model visible_model;
         Model filtered_model;
         Model singularity_model;
+        Model boundary_singularity_model;
+        Model boundary_creases_model;
 
         Vector3f visible_outside_color = Vector3f(1, 1, 1);
         Vector3f visible_inside_color  = Vector3f(1, 1, 0);
 
     public:
+        typedef float (quality_measure_fun)(const Vector3f&, const Vector3f&,
+            const Vector3f&, const Vector3f&, const Vector3f&,
+            const Vector3f&, const Vector3f&, const Vector3f&);
+
+
         bool import_mesh(string path);
         Mesh* get_mesh() { return mesh; }
         MeshStats* get_mesh_stats() { return &mesh_stats; }
@@ -56,14 +63,14 @@ namespace HexaLab {
         Model* get_visible_model() { return &this->visible_model; }
         Model* get_filtered_model() { return &this->filtered_model; }
         Model* get_singularity_model() { return &this->singularity_model; }
+        Model* get_boundary_singularity_model() { return &this->boundary_singularity_model; }
+        Model* get_boundary_creases_model() { return &this->boundary_creases_model; }
 
         vector<float>* get_hexa_quality() { return mesh == nullptr ? nullptr : &mesh->hexa_quality; }
-        typedef float (quality_measure_fun)(const Vector3f&, const Vector3f&, const Vector3f&,
-            const Vector3f&, const Vector3f&, const Vector3f&, const Vector3f&, const Vector3f&);
         void compute_hexa_quality(quality_measure_fun* fun);
 
-        void build_models();
-        void build_singularity_model();
+        void build_surface_models();
+        void build_singularity_models();
 
     private:
         void add_visible_face(Dart& dart, float normal_sign);

@@ -596,6 +596,7 @@ HexaLab.App = function (dom_element) {
     this.singularity_wireframe_material = new THREE.MeshBasicMaterial({
         transparent: true,
         depthWrite: false,
+        //color: 0xff0000,
         vertexColors: THREE.VertexColors
     });
 
@@ -622,6 +623,8 @@ HexaLab.App = function (dom_element) {
     this.models.visible = new HexaLab.Model(this.backend.get_visible_model(), this.visible_surface_material, this.visible_wireframe_material);
     this.models.filtered = new HexaLab.Model(this.backend.get_filtered_model(), this.filtered_surface_material, this.filtered_wireframe_material);
     this.models.singularity = new HexaLab.Model(this.backend.get_singularity_model(), this.singularity_surface_material, this.singularity_wireframe_material);
+    this.models.boundary_singularity = new HexaLab.Model(this.backend.get_boundary_singularity_model(), this.singularity_surface_material, this.singularity_wireframe_material);
+    this.models.boundary_creases = new HexaLab.Model(this.backend.get_boundary_creases_model(), this.singularity_surface_material, this.singularity_wireframe_material);
 
     // Camera
     this.camera = new THREE.PerspectiveCamera(30, width / height, 0.1, 1000);
@@ -1030,6 +1033,8 @@ Object.assign(HexaLab.App.prototype, {
         this.models.visible.update();
         this.models.filtered.update();
         this.models.singularity.update();
+        this.models.boundary_creases.update();
+        this.models.boundary_singularity.update();
     },
 
     // The application main loop. Call this after instancing an App object to
