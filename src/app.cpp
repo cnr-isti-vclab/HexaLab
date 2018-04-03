@@ -105,6 +105,8 @@ namespace HexaLab {
           case  5:   color = Vector3f(0, 1, 0);  break;
           default:   color = Vector3f(0, 0, 1);
           }
+          singularity_model.wireframe_vert_color.push_back(color);
+          singularity_model.wireframe_vert_color.push_back(color);
 
 //          Face& begin = nav.face();
 //          do {
@@ -120,17 +122,17 @@ namespace HexaLab {
 //            nav = nav.rotate_on_edge();
 //          } while (nav.face() != begin);
 
-          singularity_model.wireframe_vert_color.push_back(color);
-          singularity_model.wireframe_vert_color.push_back(color);
           // add adjacent faces
           Face& begin = nav.face();
-          do {
-              for (int k = 0; k < 2; ++k) {
-                  int j = 0;
-                  for (; j < 2; ++j) {
+          do {                                      // foreach face adjacent tot he singularity edge
+              for (int k = 0; k < 2; ++k) {         // for both triangles making up the face
+                  for (int j = 0; j < 2; ++j) {     // 2 + 1 face vertices add
                       singularity_model.surface_vert_pos.push_back(mesh->verts[nav.dart().vert].position);
                       singularity_model.surface_vert_color.push_back(color);
-                      for (int n = 0; n < 2; ++n) {
+                      for (int n = 0; n < 2; ++n) { // 2 verts that make the edge
+                          if (j == 0 && k == 1) {
+                              continue;
+                          }
                           singularity_model.wireframe_vert_pos.push_back(mesh->verts[nav.dart().vert].position);
                           singularity_model.wireframe_vert_color.push_back(Vector3f(0, 0, 0));
                           nav = nav.flip_vert();
@@ -152,8 +154,7 @@ namespace HexaLab {
         }
 
         for (int i = 0; i < 2; ++i) {
-            int j = 0;
-            for (; j < 2; ++j) {
+            for (int j = 0; j < 2; ++j) {
                 visible_model.surface_vert_pos.push_back(mesh->verts[nav.dart().vert].position);
                 add_visible_wireframe(nav.dart());
                 nav = nav.rotate_on_face();
@@ -195,8 +196,7 @@ namespace HexaLab {
         MeshNavigator nav = mesh->navigate(dart);
 
         for (int i = 0; i < 2; ++i) {
-            int j = 0;
-            for (; j < 2; ++j) {
+            for (int j = 0; j < 2; ++j) {
                 filtered_model.surface_vert_pos.push_back(mesh->verts[nav.dart().vert].position);
                 add_filtered_wireframe(nav.dart());
                 nav = nav.rotate_on_face();

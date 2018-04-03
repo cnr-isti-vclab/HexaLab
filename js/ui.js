@@ -601,67 +601,6 @@ HexaLab.UI.quality_plot = function(container, axis) {
         layout: plot_layout,
         config: plot_config
     });
-/*
-
-    var plot_data = [{
-        type: 'histogram',
-        histnorm: 'probability',
-        marker: {
-            cmax: bins - 1,
-            cmin: 0,
-            color: c,
-            colorscale: p
-        },
-    }];
-    plot_data[0][axis] = x;
-    var bk = axis.concat('bins')
-    plot_data[0][bk] = {
-        size: 1 / bins,
-        start: 0,
-        end: 1,
-    };
-
-    var layout = {
-        paper_bgcolor: 'rgba(0,0,0,0)',
-        plot_bgcolor: 'rgba(0,0,0,0)',
-        xaxis: {
-            fixedrange: true
-        },
-        yaxis: {
-            fixedrange: true
-        },
-        margin: {
-            l: 40,
-            r: 40,
-            b: 40,
-            t: 40,
-            pad: 4
-        },
-    };
-
-    var options = {
-        modeBarButtons: [
-            [{
-                name: 'Flip axis',
-                icon: Plotly.Icons['3d_rotate'],
-                click: function() {
-                    if (axis == 'x') {
-                        HexaLab.UI.quality_plot(container, 'y')
-                    } else if (axis == 'y') {
-                        HexaLab.UI.quality_plot(container, 'x')
-                    }
-                }
-            }],
-            [
-              'toImage'
-            ]
-        ],
-        displaylogo: false
-    }
-
-    container.axis = axis
-
-    //Plotly.newPlot(container, plot_data, layout, options);*/
 }
 
 // --------------------------------------------------------------------------------

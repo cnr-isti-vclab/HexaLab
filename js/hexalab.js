@@ -33,6 +33,8 @@ Object.assign(HexaLab.Model.prototype, {
         if (this.backend.surface_norm().size() != 0) {
             var buffer = new Float32Array(Module.HEAPU8.buffer, this.backend.surface_norm().data(), this.backend.surface_norm().size() * 3);
             this.surface.geometry.addAttribute('normal', new THREE.BufferAttribute(buffer, 3));
+        } else {
+            this.surface.geometry.computeVertexNormals()
         }
         this.surface.geometry.removeAttribute('color');
         if (this.backend.surface_color().size() != 0) {
@@ -583,7 +585,7 @@ HexaLab.App = function (dom_element) {
         transparent: true,
         depthWrite: false
     });
-    this.singularity_surface_material = new THREE.MeshBasicMaterial({
+    this.singularity_surface_material = new THREE.MeshLambertMaterial({
         transparent: true,
         depthWrite: true,
         polygonOffset: true,
