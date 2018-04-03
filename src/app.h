@@ -57,7 +57,7 @@ namespace HexaLab {
         Model* get_filtered_model() { return &this->filtered_model; }
         Model* get_singularity_model() { return &this->singularity_model; }
 
-        vector<float>& get_hexa_quality() { return mesh->hexa_quality; }
+        vector<float>* get_hexa_quality() { return mesh == nullptr ? nullptr : &mesh->hexa_quality; }
         typedef float (quality_measure_fun)(const Vector3f&, const Vector3f&, const Vector3f&,
             const Vector3f&, const Vector3f&, const Vector3f&, const Vector3f&, const Vector3f&);
         void compute_hexa_quality(quality_measure_fun* fun);

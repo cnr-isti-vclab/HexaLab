@@ -338,12 +338,13 @@ HexaLab.UI.setup_mesh_stats = function() {
 HexaLab.UI.on_set_quality_measure = function (measure) {
     HexaLab.UI.view_quality_measure = measure
     HexaLab.UI.setup_mesh_stats()
+    HexaLab.UI.quality_plot_update()
 }
 
 HexaLab.UI.on_import_mesh = function (name) {
     if (HexaLab.UI.view_source == 2) HexaLab.UI.setup_paper_mesh_picker()
     HexaLab.UI.setup_mesh_stats(name)
-    HexaLab.UI.quality_plot_update();
+    HexaLab.UI.quality_plot_update()
 }
 
 HexaLab.UI.on_import_mesh_fail = function (name) {
@@ -511,19 +512,23 @@ HexaLab.UI.quality_plot_update = function () {
 }
 
 HexaLab.UI.quality_plot = function(container, axis) {
-    var x = [];
-    var c = [];
-    var p = [];
+    var data = []
+    var bins_colors = []  // bin i takes the color that comes remapping bins_colors[i] from cmin-cmax to colormap 0-1
+    var colorscale = []
 
-    var quality = HexaLab.app.backend.get_hexa_quality();
-    var data = new Float32Array(Module.HEAPU8.buffer, quality.data(), quality.size());
-    for (var i = 0; i < quality.size() ; i++) {
-        x[i] = data[i]
+    var quality = HexaLab.app.backend.get_hexa_quality()
+    if (quality != null) {
+        var t = new Float32Array(Module.HEAPU8.buffer, quality.data(), quality.size())
+        for (var i = 0; i < quality.size() ; i++) {
+            data[i] = t[i]
+        }
     }
 
+    var stats = HexaLab.app.backend.get_mesh_stats()
     var bins = 100
-    for (var i = 0; i < bins ; i++) {
-        c[i] = i
+    var base = Math.trunc(stats.quality_min * bins)
+    for (var i = base; i < bins ; i++) {
+        bins_colors[i - base] = i
     }
 
     for (var i = 0; i <= 10; ++i) {
@@ -532,8 +537,71 @@ HexaLab.UI.quality_plot = function(container, axis) {
         var r = (rgb.x() * 255).toFixed(0)
         var g = (rgb.y() * 255).toFixed(0)
         var b = (rgb.z() * 255).toFixed(0)
-        p[i] = [v.toString(), 'rgb(' + r + ',' + g + ',' + b + ')']
+        colorscale[i] = [v.toString(), 'rgb(' + r + ',' + g + ',' + b + ')']
     }
+
+    var plot_data = [{
+        type: 'histogram',
+        histfunc: 'count',
+        histnorm: 'probability',
+        cauto: false,
+        autobinx: false,
+        //nbinsx: 100,
+        marker: {
+            showscale: true,
+            cmin: 0,
+            cmax: bins - 1,
+            color: bins_colors,
+            colorscale: colorscale,
+            colorbar: {
+                thickness: 15,
+                showticklabels: false
+            }
+        },
+    }]
+    plot_data[0][axis] = data
+    plot_data[0][axis.concat('bins')] = {
+        start: 0,
+        end: 1,
+        size: 0.01
+    }
+
+    var plot_layout = {}
+    plot_layout[axis.concat('axis')] = {
+        autorange: false,
+        range: [0, 1],
+        type: 'linear'
+    }
+
+    var plot_config = {
+        modeBarButtons: [
+            [{
+                name: 'Flip',
+                icon: Plotly.Icons['3d_rotate'],
+                click: function() {
+                    if (axis == 'x') {
+                        HexaLab.UI.quality_plot(container, 'y')
+                    } else if (axis == 'y') {
+                        HexaLab.UI.quality_plot(container, 'x')
+                    }
+                }
+            }],
+            [
+              'toImage'
+            ]
+        ],
+        displaylogo: false,
+        displayModeBar: true
+    }
+
+    container.axis = axis
+
+    Plotly.newPlot(container, {
+        data: plot_data,
+        layout: plot_layout,
+        config: plot_config
+    });
+/*
 
     var plot_data = [{
         type: 'histogram',
@@ -593,7 +661,7 @@ HexaLab.UI.quality_plot = function(container, axis) {
 
     container.axis = axis
 
-    Plotly.newPlot(container, plot_data, layout, options);
+    //Plotly.newPlot(container, plot_data, layout, options);*/
 }
 
 // --------------------------------------------------------------------------------

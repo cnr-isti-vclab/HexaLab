@@ -24,9 +24,9 @@ Vector3f mesh_center(Mesh& mesh) {
     return mesh.aabb.center();
 };
 
-vector<float>* hexa_quality(App& app) {
-    return &app.get_hexa_quality();
-}
+//vector<float>* hexa_quality(App& app) {
+//    return &app.get_hexa_quality();
+//}
 
 vector<Vector3f>* get_surface_vert_pos(Model& model) { return &model.surface_vert_pos; }
 vector<Vector3f>* get_surface_vert_norm(Model& model) { return &model.surface_vert_norm; }
@@ -79,7 +79,7 @@ EMSCRIPTEN_BINDINGS(HexaLab) {
         .function("get_visible_model",          &App::get_visible_model, allow_raw_pointers())
         .function("get_filtered_model",         &App::get_filtered_model, allow_raw_pointers())
         .function("get_singularity_model",      &App::get_singularity_model, allow_raw_pointers())
-        .function("get_hexa_quality",           &hexa_quality, allow_raw_pointers())
+        .function("get_hexa_quality",           &App::get_hexa_quality, allow_raw_pointers())
         .function("set_color_map",              &set_color_map)
         .function("map_to_color",               &map_to_color)
         .function("get_mesh_stats",             &App::get_mesh_stats, allow_raw_pointers())
@@ -92,8 +92,8 @@ EMSCRIPTEN_BINDINGS(HexaLab) {
         ;
 
     enum_<ColorMap::Palette>("ColorMap")
-        .value("Jet",                       ColorMap::Palette::Jet)
         .value("Parula",                    ColorMap::Palette::Parula)
+        .value("Jet",                       ColorMap::Palette::Jet)
         .value("RedGreen",                  ColorMap::Palette::RedGreen)
         ;
 

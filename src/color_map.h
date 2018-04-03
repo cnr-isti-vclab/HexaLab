@@ -12,7 +12,7 @@ namespace HexaLab {
 	class ColorMap {
 	public:
 		enum class Palette {
-			Parula,
+			Parula = 0,
 			Jet,
 			RedGreen
 		};
