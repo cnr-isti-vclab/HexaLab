@@ -297,7 +297,7 @@ HexaLab.Renderer = function (width, height) {
             uniforms: {
             },
         }),
-        target: new THREE.WebGLRenderTarget(480, 480, {
+        target: new THREE.WebGLRenderTarget(120, 120, {
             format: THREE.RGBAFormat,
             type: THREE.FloatType,
             minFilter: THREE.NearestFilter,
@@ -421,12 +421,65 @@ Object.assign(HexaLab.Renderer.prototype, {
         // create and fill ao textures
         let pos_tex_data = new Float32Array(t_size * t_size * 4)
         let norm_tex_data = new Float32Array(t_size * t_size * 4)
+        let a = new THREE.Vector3(),
+            b = new THREE.Vector3(),
+            c = new THREE.Vector3(),
+            d = new THREE.Vector3()
+        for (let i = 0; i < pos_attrib.count / 6; ++i) {
+            a.set(pos_attrib.array[i * 18 +  0], pos_attrib.array[i * 18 +  1], pos_attrib.array[i * 18 +  2])
+            b.set(pos_attrib.array[i * 18 +  3], pos_attrib.array[i * 18 +  4], pos_attrib.array[i * 18 +  5])
+            c.set(pos_attrib.array[i * 18 +  6], pos_attrib.array[i * 18 +  7], pos_attrib.array[i * 18 +  8])
+            // skip the first vertex of the second face since it's the same as the last of the first face
+            d.set(pos_attrib.array[i * 18 + 12], pos_attrib.array[i * 18 + 13], pos_attrib.array[i * 18 + 14])
+            // skip the last vertex of the second face since it's the same as the first of the first face
+            let center = new THREE.Vector3().add(a).add(b).add(c).add(d).multiplyScalar(0.25)    // average
+            
+             // TODO in offset calculation, account for triangle screen size
+            let v
+            v = a.clone()
+            v.add(new THREE.Vector3().add(center).sub(a).normalize().multiplyScalar(0.01))
+            pos_tex_data[i * 24 +  0] = v.x
+            pos_tex_data[i * 24 +  1] = v.y
+            pos_tex_data[i * 24 +  2] = v.z
+            pos_tex_data[i * 24 +  3] = 0
+
+            v = b.clone()
+            v.add(new THREE.Vector3().add(center).sub(b).normalize().multiplyScalar(0.01))
+            pos_tex_data[i * 24 +  4] = v.x
+            pos_tex_data[i * 24 +  5] = v.y
+            pos_tex_data[i * 24 +  6] = v.z
+            pos_tex_data[i * 24 +  7] = 0
+
+            v = c.clone()
+            v.add(new THREE.Vector3().add(center).sub(c).normalize().multiplyScalar(0.01))
+            pos_tex_data[i * 24 +  8] = v.x
+            pos_tex_data[i * 24 +  9] = v.y
+            pos_tex_data[i * 24 + 10] = v.z
+            pos_tex_data[i * 24 + 11] = 0
+
+            v = c.clone()
+            v.add(new THREE.Vector3().add(center).sub(c).normalize().multiplyScalar(0.01))
+            pos_tex_data[i * 24 + 12] = v.x
+            pos_tex_data[i * 24 + 13] = v.y
+            pos_tex_data[i * 24 + 14] = v.z
+            pos_tex_data[i * 24 + 15] = 0
+
+            v = d.clone()
+            v.add(new THREE.Vector3().add(center).sub(d).normalize().multiplyScalar(0.01))
+            pos_tex_data[i * 24 + 16] = v.x
+            pos_tex_data[i * 24 + 17] = v.y
+            pos_tex_data[i * 24 + 18] = v.z
+            pos_tex_data[i * 24 + 19] = 0
+
+            v = a.clone()
+            v.add(new THREE.Vector3().add(center).sub(a).normalize().multiplyScalar(0.01))
+            pos_tex_data[i * 24 + 20] = v.x
+            pos_tex_data[i * 24 + 21] = v.y
+            pos_tex_data[i * 24 + 22] = v.z
+            pos_tex_data[i * 24 + 23] = 0
+        }
         for (let i = 0; i < t_size * t_size; ++i) {
             if (i < pos_attrib.count) {
-                pos_tex_data[i * 4 + 0] = pos_attrib.array[i * 3 + 0]
-                pos_tex_data[i * 4 + 1] = pos_attrib.array[i * 3 + 1]
-                pos_tex_data[i * 4 + 2] = pos_attrib.array[i * 3 + 2]
-                pos_tex_data[i * 4 + 3] = 0
                 norm_tex_data[i * 4 + 0] = norm_attrib.array[i * 3 + 0]
                 norm_tex_data[i * 4 + 1] = norm_attrib.array[i * 3 + 1]
                 norm_tex_data[i * 4 + 2] = norm_attrib.array[i * 3 + 2]
@@ -442,6 +495,7 @@ Object.assign(HexaLab.Renderer.prototype, {
                 norm_tex_data[i * 4 + 3] = 0
             }
         }
+        
         const tVert = new THREE.DataTexture(pos_tex_data, t_size, t_size, THREE.RGBAFormat, THREE.FloatType, THREE.UVMapping,
             THREE.ClampToEdgeWrapping, THREE.ClampToEdgeWrapping, THREE.NearestFilter, THREE.NearestFilter, 1)
         const tNorm = new THREE.DataTexture(norm_tex_data, t_size, t_size, THREE.RGBAFormat, THREE.FloatType, THREE.UVMapping,
@@ -796,7 +850,7 @@ Object.assign(HexaLab.Renderer.prototype, {
                 for (var i = 0; i < color.count * 3; ++i) {
                     if (gpu_data[i * 4] > max) max = gpu_data[i * 4]
                 }
-                max /= 2
+                // max /= 2
                 this.ao_pass.result = gpu_data
                 this.ao_pass.result_max = max
                 // pass accumulated light again and update mesh vertex colors accordingly
