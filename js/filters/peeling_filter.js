@@ -25,7 +25,7 @@ HexaLab.PeelingFilter = function () {
     var self = this;
     HexaLab.UI.peeling_enabled.on('click', function() {
         self.enable($(this).is(':checked'))
-        HexaLab.app.update()
+        HexaLab.app.queue_models_update()
     })
     HexaLab.UI.peeling_depth_number.change(function () {
         var value = parseFloat($(this).val())
@@ -34,13 +34,11 @@ HexaLab.PeelingFilter = function () {
         if (value >  max) value = max
         if (value <  min) value = min
         self.set_peeling_depth(value)
-        self.sync()
-        HexaLab.app.update()
+        HexaLab.app.queue_models_update()
     })
     HexaLab.UI.peeling_depth_slider.on('slide', function (e, ui) {
         self.set_peeling_depth(ui.value)
-        self.sync()
-        HexaLab.app.update()
+        HexaLab.app.queue_models_update()
     })
 
     // State
@@ -52,7 +50,7 @@ HexaLab.PeelingFilter = function () {
 
 HexaLab.PeelingFilter.prototype = Object.assign(Object.create(HexaLab.Filter.prototype), {
 
-    // Api
+    // base class filter interface
     get_settings: function () {
         return {
             enabled: this.backend.enabled,
@@ -65,25 +63,33 @@ HexaLab.PeelingFilter.prototype = Object.assign(Object.create(HexaLab.Filter.pro
         this.enable(settings.enabled)
     },
 
-    sync: function () {
-        HexaLab.UI.peeling_depth_slider.slider('value', this.backend.peeling_depth)
-        HexaLab.UI.peeling_depth_number.val(this.backend.peeling_depth)
-        HexaLab.UI.peeling_enabled.prop('checked', this.backend.enabled)
-    },
-
-    on_mesh_change: function (mesh) {
+    on_mesh_change: function (mesh_stats) {
         HexaLab.UI.peeling_depth_slider.slider('option', 'max', this.backend.max_depth)
-        this.sync()
     },
 
-    // State
+    // callback events: system -> UI
+
+    on_peeling_depth_set: function (value) {
+        HexaLab.UI.peeling_depth_slider.slider('value', value)
+        HexaLab.UI.peeling_depth_number.val(value)
+    },
+
+    on_enabled_set: function (bool) {
+        HexaLab.UI.peeling_enabled.prop('checked', bool)
+    },
+
+    // system state changers
 
     enable: function (enabled) {
         this.backend.enabled = enabled
+        HexaLab.app.queue_models_update(true, true)
+        this.on_enabled_set(enabled)
     },
 
     set_peeling_depth: function (depth) {
         this.backend.peeling_depth = depth
+        HexaLab.app.queue_models_update(true, true)
+        this.on_peeling_depth_set(depth)
     },
 });
 

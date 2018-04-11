@@ -9,7 +9,11 @@
 #include <builder.h>
 #include <color_map.h>
 
+#include <Eigen/Geometry>
+
 namespace HexaLab {
+
+    using namespace Eigen;
 
     struct MeshStats {
         size_t vert_count = 0;
@@ -17,6 +21,7 @@ namespace HexaLab {
         float min_edge_len = 0;
         float max_edge_len = 0;
         float avg_edge_len = 0;
+        AlignedBox3f aabb;
         float quality_min = 0;
         float quality_max = 0;
         float quality_avg = 0;
@@ -44,9 +49,8 @@ namespace HexaLab {
             const Vector3f&, const Vector3f&, const Vector3f&,
             const Vector3f&, const Vector3f&, const Vector3f&);
 
-
         bool import_mesh(string path);
-        Mesh* get_mesh() { return mesh; }
+        //Mesh* get_mesh() { return mesh; }
         MeshStats* get_mesh_stats() { return &mesh_stats; }
 
         void add_filter(IFilter* filter) {

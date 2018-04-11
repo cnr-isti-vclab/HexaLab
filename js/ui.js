@@ -112,6 +112,23 @@ HexaLab.UI = {
     quality_type: $('#quality_type')
 }
 
+document.body.addEventListener('paste', function (e) { 
+    var clipboardData, pastedData
+
+    e.stopPropagation()
+    e.preventDefault()
+
+    clipboardData = e.clipboardData || window.clipboardData
+    pastedData = clipboardData.getData('Text')
+
+    HexaLab.app.set_settings(JSON.parse(pastedData))
+})
+document.body.addEventListener('copy', function (e) { 
+    e.clipboardData.setData("text/plain;charset=utf-8", JSON.stringify(HexaLab.app.get_settings(), null, 4))
+    e.stopPropagation()
+    e.preventDefault()
+})
+
 $('#mesh_info_2').css('left', (HexaLab.UI.menu.width() + 10).toString().concat('px'))
 
 HexaLab.UI.quality_type_html = '<div class="menu_row"><div class="menu_row_label" style="font-weight:bold;">Quality measure</div>\
@@ -197,16 +214,15 @@ HexaLab.UI.on_set_singularity_mode = function (mode) {
 }
 
 HexaLab.UI.occlusion.on('click', function () {
-    HexaLab.app.set_occlusion(this.checked)
+    HexaLab.app.set_occlusion(this.checked ? 'object space' : 'none')
 })
 
-HexaLab.UI.on_set_occlusion = function (do_occlusion) {
-    HexaLab.UI.occlusion.prop('checked', do_occlusion)
+HexaLab.UI.on_set_occlusion = function (ao) {
+    HexaLab.UI.occlusion.prop('checked', ao == 'object space')
 }
 
 HexaLab.UI.color_map.on('change', function () {
     HexaLab.app.set_color_map(this.options[this.selectedIndex].value)
-    HexaLab.app.update()
 })
 
 HexaLab.UI.on_set_color_map = function (value) {
@@ -302,13 +318,13 @@ HexaLab.UI.import_remote_mesh = function (source, name) {
 }
 
 HexaLab.UI.setup_mesh_stats = function() {
-    var stats = HexaLab.app.backend.get_mesh_stats()
+    var mesh = HexaLab.app.backend.get_mesh()
     HexaLab.UI.mesh_info_2.show()
     HexaLab.UI.mesh_info_2_text.empty()
     HexaLab.UI.mesh_info_2_text.append('<div class="menu_row"><div class="menu_row_label" style="font-weight:bold;line-height:100%;padding-bottom:10px;">Geometry</div></div>')
     HexaLab.UI.mesh_info_2_text.append('<div id="mesh_stats_wrapper">' +
-        '<div><span class="mesh_stat">vertices: </span>' + stats.vert_count + '</div>' +
-        '<div><span class="mesh_stat">hexas:    </span>' + stats.hexa_count + '</div>' +
+        '<div><span class="mesh_stat">vertices: </span>' + mesh.vert_count + '</div>' +
+        '<div><span class="mesh_stat">hexas:    </span>' + mesh.hexa_count + '</div>' +
         '</div>'
     )
     HexaLab.UI.mesh_info_2_text.append('<div class="menu_row"><div class="menu_row_label" style="font-weight:bold;">Quality measure</div>\
@@ -323,10 +339,10 @@ HexaLab.UI.setup_mesh_stats = function() {
     </div></div>')
     if (HexaLab.UI.view_quality_measure) $('#quality_type').val(HexaLab.UI.view_quality_measure)
     HexaLab.UI.mesh_info_2_text.append('<div id="mesh_stats_wrapper">' +
-        '<div><span class="mesh_stat">min: </span>' + stats.quality_min.toFixed(3) + '</div>' +
-        '<div><span class="mesh_stat">max: </span>' + stats.quality_max.toFixed(3) + '</div>' +
-        '<div><span class="mesh_stat">avg: </span>' + stats.quality_avg.toFixed(3) + '</div>' +
-        '<div><span class="mesh_stat">var: </span>' + stats.quality_var.toFixed(3) + '</div>' +
+        '<div><span class="mesh_stat">min: </span>' + mesh.quality_min.toFixed(3) + '</div>' +
+        '<div><span class="mesh_stat">max: </span>' + mesh.quality_max.toFixed(3) + '</div>' +
+        '<div><span class="mesh_stat">avg: </span>' + mesh.quality_avg.toFixed(3) + '</div>' +
+        '<div><span class="mesh_stat">var: </span>' + mesh.quality_var.toFixed(3) + '</div>' +
         '</div>'
     )
     $('#quality_type').on('change', function () {
@@ -524,9 +540,9 @@ HexaLab.UI.quality_plot = function(container, axis) {
         }
     }
 
-    var stats = HexaLab.app.backend.get_mesh_stats()
+    var mesh = HexaLab.app.backend.get_mesh()
     var bins = 100
-    var base = Math.trunc(stats.quality_min * bins)
+    var base = Math.trunc(mesh.quality_min * bins)
     for (var i = base; i < bins ; i++) {
         bins_colors[i - base] = i
     }
@@ -570,12 +586,18 @@ HexaLab.UI.quality_plot = function(container, axis) {
 
     var plot_layout = {
         paper_bgcolor: 'rgba(255, 255, 255, 0.2)',
-        plot_bgcolor:  'rgba(255, 255, 255, 0.2)'
+        plot_bgcolor:  'rgba(255, 255, 255, 0.2)',
     }
     plot_layout[axis.concat('axis')] = {
         autorange: false,
         range: [0, 1],
-        type: 'linear'
+        type: 'linear',
+        ticks:'outside',
+        tick0:0,
+        dtick:0.25,
+        ticklen:2,
+        tickwidth:2,
+        tickcolor:'#444444'
     }
 
     var plot_config = {

@@ -27,32 +27,24 @@ HexaLab.PlaneFilter = function () {
     var self = this;
     HexaLab.UI.plane_enabled.change(function () {
         self.enable($(this).is(':checked'))
-        HexaLab.app.update()
     })
     HexaLab.UI.plane_nx.change(function () {
         self.set_plane_normal(parseFloat(this.value), self.plane.normal.y, self.plane.normal.z)
-        HexaLab.app.update()
     })
     HexaLab.UI.plane_ny.change(function () {
         self.set_plane_normal(self.plane.normal.x, parseFloat(this.value), self.plane.normal.z)
-        HexaLab.app.update()
     })
     HexaLab.UI.plane_nz.change(function () {
         self.set_plane_normal(self.plane.normal.x, self.plane.normal.y, parseFloat(this.value))
-        HexaLab.app.update()
     })
     HexaLab.UI.plane_offset_number.change(function () {
         self.set_plane_offset(parseFloat(this.value))
-        self.sync()
-        HexaLab.app.update()
     })
     HexaLab.UI.plane_offset_slider.slider({
         min: 0,
         max: 1000
     }).on('slide', function (e, ui) {
-        self.set_plane_offset(ui.value / 1000);
-        self.sync()
-        HexaLab.app.update()
+        self.set_plane_offset(ui.value / 1000)
     }).on('slidestart', function(e, ui) {
         self.visible_color = true
         self.visible_edge = true
@@ -64,31 +56,21 @@ HexaLab.PlaneFilter = function () {
     })
     HexaLab.UI.plane_snap_nx.on('click', function () {
         self.set_plane_normal(1, 0, 0)
-        self.sync()
-        HexaLab.app.update()
     })
     HexaLab.UI.plane_snap_ny.on('click', function () {
         self.set_plane_normal(0, 1, 0)
-        self.sync()
-        HexaLab.app.update()
     })
     HexaLab.UI.plane_snap_nz.on('click', function () {
         self.set_plane_normal(0, 0, 1)
-        self.sync()
-        HexaLab.app.update();
     })
     HexaLab.UI.plane_swap.on('click', function () {
         var n = self.plane.normal.clone().negate();
         self.set_plane_offset(1 - self.plane.offset)
         self.set_plane_normal(n.x, n.y, n.z)
-        self.sync()
-        HexaLab.app.update();
     })
     HexaLab.UI.plane_snap_camera.on('click', function () {
         var camera_dir = HexaLab.app.camera.getWorldDirection()
         self.set_plane_normal(camera_dir.x, camera_dir.y, camera_dir.z)
-        self.sync()
-        HexaLab.app.update()
     })
 
     /*HexaLab.UI.plane_color.change(function () {
@@ -148,12 +130,11 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
 
     on_mesh_change: function (mesh) {
         this.mesh = mesh;
-        this.backend.on_mesh_set(mesh);
 
         this.scene.remove(this.plane.mesh);
         this.scene.remove(this.plane.edges);
 
-        var geometry = new THREE.PlaneGeometry(this.mesh.get_size(), this.mesh.get_size());
+        var geometry = new THREE.PlaneGeometry(this.mesh.get_aabb_diagonal(), this.mesh.get_aabb_diagonal());
         var edges = new THREE.EdgesGeometry(geometry)
         this.plane.mesh = new THREE.Mesh(geometry, this.plane.material);
         this.plane.edges = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({
@@ -167,22 +148,24 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
         this.update_visibility()
 
         this.set_settings(this.get_settings());
-        this.sync()
         this.update_mesh();
     },
 
-    sync: function () {
-        HexaLab.UI.plane_offset_slider.slider('value', this.plane.offset * 1000)
-        HexaLab.UI.plane_offset_number.val(this.plane.offset);
+    // system -> UI
 
-        HexaLab.UI.plane_nx.val(this.plane.normal.x.toFixed(3));
-        HexaLab.UI.plane_ny.val(this.plane.normal.y.toFixed(3));
-        HexaLab.UI.plane_nz.val(this.plane.normal.z.toFixed(3));
+    on_enabled_set: function (bool) {
+        HexaLab.UI.plane_enabled.prop('checked', bool)
+    },
 
-        HexaLab.UI.plane_enabled.prop('checked', this.backend.enabled)
+    on_plane_normal_set: function (normal) {
+        HexaLab.UI.plane_nx.val(normal.x.toFixed(3));
+        HexaLab.UI.plane_ny.val(normal.y.toFixed(3));
+        HexaLab.UI.plane_nz.val(normal.z.toFixed(3));
+    },
 
-        //HexaLab.UI.plane_opacity.slider('value', opacity * 100);
-        //HexaLab.UI.plane_color.val(color);
+    on_plane_offset_set: function (offset) {
+        HexaLab.UI.plane_offset_slider.slider('value', offset * 1000)
+        HexaLab.UI.plane_offset_number.val(offset);
     },
 
     // State
@@ -190,6 +173,8 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
     enable: function (enabled) {
         this.backend.enabled = enabled
         this.update_visibility()
+        this.on_enabled_set(enabled)
+        HexaLab.app.queue_models_update(true, true)
     },
 
     set_plane_normal: function (nx, ny, nz) {
@@ -197,16 +182,18 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
         var n = this.backend.get_plane_normal();
         this.plane.normal = new THREE.Vector3(nx, ny, nz);
         n.delete(); // TODO don't allocate at all, just read memory?
-
+        this.on_plane_normal_set(this.plane.normal)
         this.update_mesh();
+        HexaLab.app.queue_models_update(true, true)
     },
 
     set_plane_offset: function (offset) {
         this.backend.set_plane_offset(offset);
         this.plane.offset = offset;
         this.plane.world_offset = this.backend.get_plane_world_offset();
-
+        this.on_plane_offset_set(offset)
         this.update_mesh();
+        HexaLab.app.queue_models_update(true, true)
     },
 
     set_plane_opacity: function (opacity) {
@@ -238,8 +225,9 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
     update_mesh: function () {
         if (this.mesh) {
             for (var x of [this.plane.mesh, this.plane.edges]) {
-                var pos = this.mesh.get_center();
+                var pos = this.mesh.get_aabb_center();
                 x.position.set(pos.x(), pos.y(), pos.z());
+                x.position.set(0, 0, 0);
                 var dir = new THREE.Vector3().addVectors(x.position, this.plane.normal);
                 x.lookAt(dir);
                 x.translateZ(-this.plane.world_offset);

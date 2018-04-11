@@ -23,24 +23,17 @@ HexaLab.QualityFilter = function () {
     // Listener
     var self = this;
     HexaLab.UI.quality_enabled.on('click', function() {
-        self.backend.enabled = $(this).is(':checked')
-        HexaLab.app.update()
+        self.enable($(this).is(':checked'))
     })
     HexaLab.UI.quality_min_number.change(function () {
         self.set_quality_threshold_min(parseFloat($(this).val()))
-        self.sync()
-        HexaLab.app.update()
     })
     HexaLab.UI.quality_max_number.change(function () {
         self.set_quality_threshold_max(parseFloat($(this).val()))
-        self.sync()
-        HexaLab.app.update()
     })
     HexaLab.UI.quality_range_slider.on('slide', function (e, ui) {
         self.set_quality_threshold_min(ui.values[0] / 100)
         self.set_quality_threshold_max(ui.values[1] / 100)
-        self.sync()
-        HexaLab.app.update()
     })
     HexaLab.UI.quality_swap_range.on('click', function () {
         if (self.op == 'inside') {
@@ -78,32 +71,26 @@ HexaLab.QualityFilter.prototype = Object.assign(Object.create(HexaLab.Filter.pro
         this.enable(settings.enabled)
     },
 
-    sync: function () {
-        HexaLab.UI.quality_range_slider.slider('option', 'values', [this.backend.quality_threshold_min * 100, this.backend.quality_threshold_max * 100])
-        HexaLab.UI.quality_min_number.val(this.backend.quality_threshold_min.toFixed(3))
-        HexaLab.UI.quality_max_number.val(this.backend.quality_threshold_max.toFixed(3))
-        HexaLab.UI.quality_enabled.prop('checked', this.backend.enabled)
-    },
-
     on_mesh_change: function (mesh) {
     },
 
-    // State
+    // system -> UI
 
-    enable: function (enabled) {
-        this.backend.enabled = enabled
+    on_enabled_set: function (bool) {
+        HexaLab.UI.quality_enabled.prop('checked', bool)
     },
 
-    set_quality_threshold_min: function (threshold) {
-        this.backend.quality_threshold_min = threshold
+    on_quality_threshold_min_set: function (min) {
+        HexaLab.UI.quality_min_number.val(min.toFixed(3))
+        HexaLab.UI.quality_range_slider.slider('option', 'values', [min * 100, this.backend.quality_threshold_max * 100])
     },
 
-    set_quality_threshold_max: function (threshold) {
-        this.backend.quality_threshold_max = threshold
+    on_quality_threshold_max_set: function (max) {
+        HexaLab.UI.quality_max_number.val(max.toFixed(3))
+        HexaLab.UI.quality_range_slider.slider('option', 'values', [this.backend.quality_threshold_min * 100, max * 100])
     },
 
-    set_operator: function (op) {
-        this.op = op
+    on_operator_set: function (op) {
         if (op == 'inside') {
             this.backend.operator = Module.QualityFilterOperator.Inside
             HexaLab.UI.quality_range_slider.css('background', '#ffffff')
@@ -113,7 +100,32 @@ HexaLab.QualityFilter.prototype = Object.assign(Object.create(HexaLab.Filter.pro
             HexaLab.UI.quality_range_slider.find('div').css('background', '#ffffff')
             this.backend.operator = Module.QualityFilterOperator.Outside
         }
-        HexaLab.app.update()
+    },
+
+    // State
+
+    enable: function (enabled) {
+        this.backend.enabled = enabled
+        this.on_enabled_set(enabled)
+        HexaLab.app.queue_models_update(true, true)
+    },
+
+    set_quality_threshold_min: function (threshold) {
+        this.backend.quality_threshold_min = threshold
+        this.on_quality_threshold_min_set(threshold)
+        HexaLab.app.queue_models_update(true, true)
+    },
+
+    set_quality_threshold_max: function (threshold) {
+        this.backend.quality_threshold_max = threshold
+        this.on_quality_threshold_max_set(threshold)
+        HexaLab.app.queue_models_update(true, true)
+    },
+
+    set_operator: function (op) {
+        this.op = op
+        this.on_operator_set(op)
+        HexaLab.app.queue_models_update(true, true)
     },
 });
 

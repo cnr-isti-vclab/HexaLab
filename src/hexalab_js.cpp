@@ -17,12 +17,15 @@ size_t buffer_size(std::vector<T>& v) {
     return v.size();
 }
 
-float mesh_size(Mesh& mesh) {
-    return mesh.aabb.diagonal().norm();
-};
-Vector3f mesh_center(Mesh& mesh) {
-    return mesh.aabb.center();
-};
+float mesh_stats_aabb_diag(MeshStats& stats) {
+    return stats.aabb.diagonal().norm();
+}
+Vector3f mesh_stats_aabb_size(MeshStats& stats) {
+    return stats.aabb.sizes();
+}
+Vector3f mesh_stats_center(MeshStats& stats) {
+    return stats.aabb.center();
+}
 
 //vector<float>* hexa_quality(App& app) {
 //    return &app.get_hexa_quality();
@@ -75,7 +78,6 @@ EMSCRIPTEN_BINDINGS(HexaLab) {
         .function("build_models",                   &App::build_surface_models)
         .function("import_mesh",                    &App::import_mesh)
         .function("add_filter",                     &App::add_filter, allow_raw_pointers())
-        .function("get_mesh",                       &App::get_mesh, allow_raw_pointers())
         .function("get_visible_model",              &App::get_visible_model, allow_raw_pointers())
         .function("get_filtered_model",             &App::get_filtered_model, allow_raw_pointers())
         .function("get_singularity_model",          &App::get_singularity_model, allow_raw_pointers())
@@ -84,7 +86,7 @@ EMSCRIPTEN_BINDINGS(HexaLab) {
         .function("get_hexa_quality",               &App::get_hexa_quality, allow_raw_pointers())
         .function("set_color_map",                  &set_color_map)
         .function("map_to_color",                   &map_to_color)
-        .function("get_mesh_stats",                 &App::get_mesh_stats, allow_raw_pointers())
+        .function("get_mesh",                       &App::get_mesh_stats, allow_raw_pointers())
         .function("compute_hexa_quality",           &compute_hexa_quality)
         .function("set_visible_outside_color",      &App::set_visible_outside_color)
         .function("set_visible_inside_color",       &App::set_visible_inside_color)
@@ -118,13 +120,14 @@ EMSCRIPTEN_BINDINGS(HexaLab) {
         .function("wireframe_pos",          &get_wireframe_vert_pos, allow_raw_pointers())
         .function("wireframe_color",        &get_wireframe_vert_color, allow_raw_pointers())
         ;
-
+/*
     class_<Mesh>("Mesh")
         .constructor<>()
-        .function("get_size",               &mesh_size)
-        .function("get_center",             &mesh_center)
+        .function("get_aabb_diag",          &mesh_aabb_diag)
+        .function("get_aabb_size",          &mesh_aabb_size)
+        .function("get_aabb_center",        &mesh_center)
         ;
-
+*/
     class_<IFilter>("Filter")
         .property("enabled",                &IFilter::enabled)
         ;
@@ -157,7 +160,7 @@ EMSCRIPTEN_BINDINGS(HexaLab) {
         .property("max_depth",              &PeelingFilter::max_depth)
         ;
 
-    class_<MeshStats>("MeshStats")
+    class_<MeshStats>("Mesh")
         .property("vert_count",             &MeshStats::vert_count)
         .property("hexa_count",             &MeshStats::hexa_count)
         .property("min_edge_len",           &MeshStats::min_edge_len)
@@ -167,6 +170,9 @@ EMSCRIPTEN_BINDINGS(HexaLab) {
         .property("quality_max",            &MeshStats::quality_max)
         .property("quality_avg",            &MeshStats::quality_avg)
         .property("quality_var",            &MeshStats::quality_var)
+        .function("get_aabb_diagonal",      &mesh_stats_aabb_diag)
+        .function("get_aabb_size",          &mesh_stats_aabb_size)
+        .function("get_aabb_center",        &mesh_stats_center)
         ;
 
     class_<Vector3f>("float3")

@@ -42,7 +42,7 @@ THREE.SSAOEval = {
 		    "float y = tex.y * 2.0 - 1.0;",
 		    "float z = getLinearDepth(tex);",
 		    "return vec3(x, y, z);",
-		"}", 
+		"}",
 
 		"vec3 getViewPos(const in vec3 screenPos) {",
 			"vec4 viewPos = uInvProj * vec4(screenPos, 1.0);",
@@ -60,16 +60,16 @@ THREE.SSAOEval = {
 		/*"vec3 getNorm2(const in float depth, const in vec2 uv) {",
 			"const vec2 offset1 = vec2(0.0,0.001);",
 		  	"const vec2 offset2 = vec2(0.001,0.0);",
-		  
+
 		  	"float depth1 = getLinearDepth(uv + offset1);",
 		  	"float depth2 = getLinearDepth(uv + offset2);",
-		  
+
 		  	"vec3 p1 = vec3(offset1, depth1 - depth);",
 		  	"vec3 p2 = vec3(offset2, depth2 - depth);",
-		  
+
 		  	"vec3 normal = cross(p1, p2);",
 		  	"normal.z = -normal.z;",
-		  
+
 		  	"return normalize(normal);",
 		"}",*/
 
@@ -100,12 +100,12 @@ THREE.SSAOEval = {
 					"vec3 sampleView = getViewPos(sampleScreen);",
 
 					"float rangeCheck = smoothstep(0.0, 1.0, uRadius / abs(viewPos.z - sampleView.z));",
-					"occlusion += (sampleView.z > sample.z ? 1.0 : 0.0) * rangeCheck;",   
+					"occlusion += (sampleView.z > sample.z ? 1.0 : 0.0) * rangeCheck;",
 				"}",
 			"}",
 
 			"occlusion = 1.0 - (occlusion / float(numSamples));",
-			"gl_FragColor = vec4(vec3(occlusion), 1.0);",
+			"gl_FragColor = vec4(vec3(screenPos.z), 1.0);",
 		"}"
 
 	].join( "\n" )

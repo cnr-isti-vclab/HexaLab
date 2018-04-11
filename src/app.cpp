@@ -35,6 +35,8 @@ namespace HexaLab {
         mesh_stats.avg_edge_len = avg;
         mesh_stats.vert_count = mesh->verts.size();
         mesh_stats.hexa_count = mesh->hexas.size();
+        mesh_stats.aabb = mesh->aabb;
+        HL_LOG("%f\n", mesh_stats.aabb.diagonal().norm());
 
         //HL_LOG("Validating...\n");
         //if (!Builder::validate(*mesh)) {
