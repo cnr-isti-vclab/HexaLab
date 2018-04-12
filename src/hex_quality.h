@@ -25,7 +25,7 @@ using namespace std;
  *      / |     / |
  *    P4------P5  |
  *    |   |    |  |
- *    |  P3 -- |  P2
+ *    |  P3----|--P2
  *    | /      | / 
  *    P0------P1
  * 
@@ -99,7 +99,7 @@ static float jacobian(const Vector3f& p0, const Vector3f& p1, const Vector3f& p2
 static float dimension(const Vector3f& p0, const Vector3f& p1, const Vector3f& p2, const Vector3f& p3,
                        const Vector3f& p4, const Vector3f& p5, const Vector3f& p6, const Vector3f& p7)
 {
-    // TODO
+    //TODO
     return -1;
 }
 
@@ -198,7 +198,7 @@ static float maximum_aspect_frobenius(const Vector3f& p0, const Vector3f& p1, co
                                       const Vector3f& p4, const Vector3f& p5, const Vector3f& p6, const Vector3f& p7)
 {
     // TODO
-    return -1;
+    return 1.0;
 }
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -207,7 +207,7 @@ static float mean_aspect_frobenius(const Vector3f& p0, const Vector3f& p1, const
                                    const Vector3f& p4, const Vector3f& p5, const Vector3f& p6, const Vector3f& p7)
 {
     // TODO
-    return -1;
+    return 1.0;
 }
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -216,7 +216,7 @@ static float oddy(const Vector3f& p0, const Vector3f& p1, const Vector3f& p2, co
                   const Vector3f& p4, const Vector3f& p5, const Vector3f& p6, const Vector3f& p7)
 {
     // TODO
-    return -1;
+    return 0.0;
 }
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::

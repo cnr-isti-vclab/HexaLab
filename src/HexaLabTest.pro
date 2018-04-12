@@ -26,5 +26,6 @@ HEADERS = app.h \
   model.h \
   plane_filter.h \
   quality_filter.h \ 
-    peeling_filter.h \
-    hex_quality.h
+  peeling_filter.h \
+  hex_quality.h \
+  hex_quality_color_maps.h
