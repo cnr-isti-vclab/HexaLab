@@ -8,6 +8,7 @@
 #include <loader.h>
 #include <builder.h>
 #include <color_map.h>
+#include <hex_quality_color_maps.h>
 
 #include <Eigen/Geometry>
 
@@ -21,6 +22,7 @@ namespace HexaLab {
         float min_edge_len = 0;
         float max_edge_len = 0;
         float avg_edge_len = 0;
+        float avg_volume = 0;
         AlignedBox3f aabb;
         float quality_min = 0;
         float quality_max = 0;
@@ -30,57 +32,91 @@ namespace HexaLab {
 
     class App {
     private:
+        // Currently loaded mesh. Initially a nullptr.
         Mesh* mesh = nullptr;
+        // Data structure exposed to the .js app containing a bunch of useful info about the currently loaded mesh.
         MeshStats mesh_stats;
 
+        // App filters instances. Each has a correspondent filter object in the .js app.
+        // Filters are directly instanced and added from the .js app.
         vector<IFilter*> filters;
 
+        // App models. Each has a correspondent model object in the .js app.
+        // Singularity models are not subject to filtering, so they are built only once.
+        // visible_model and filtered_model together make up the entire mesh and are updated on request.
         Model visible_model;
         Model filtered_model;
         Model singularity_model;
         Model boundary_singularity_model;
         Model boundary_creases_model;
 
-        Vector3f visible_outside_color = Vector3f(1, 1, 1);
-        Vector3f visible_inside_color  = Vector3f(1, 1, 0);
+        // Colors selected for the visible_model in the .js app. They are used when hexa quality color mapping is off.
+        Vector3f default_outside_color = Vector3f(1, 1, 1);
+        Vector3f default_inside_color  = Vector3f(1, 1, 0);
+        
+        // Selected quality measure. The evaluated values are stored inside the mesh, for each hexa.
+        // Automatically updated on mesh or measure change.
+        QualityMeasureEnum quality_measure = QualityMeasureEnum::SJ;
+
+        // Selected quality color map, used when the hexa quality color mapping is on.
+        ColorMap color_map;
+        bool     quality_color_mapping_enabled = false;
+
+        bool models_dirty_flag = false;
 
     public:
-        typedef float (quality_measure_fun)(const Vector3f&, const Vector3f&,
-            const Vector3f&, const Vector3f&, const Vector3f&,
-            const Vector3f&, const Vector3f&, const Vector3f&);
-
+        // Loads and imports a new mesh file into the system. Call the Loader, the Builder, updates mesh stats and
+        // evaluated quality measures, builds singularity models, notifies filters of the new mesh. 
         bool import_mesh(string path);
-        //Mesh* get_mesh() { return mesh; }
-        MeshStats* get_mesh_stats() { return &mesh_stats; }
 
-        void add_filter(IFilter* filter) {
-            filters.push_back(filter);
-        }
+        // Adds a filter to the filters collection. On update, the filters are invoked in the order in which they were added.
+        void add_filter(IFilter* filter);
 
-        ColorMap color_map;
-        bool do_show_color_map = false;
-        void set_visible_outside_color(float r, float g, float b) { visible_outside_color = Vector3f(r, g, b); }
-        void set_visible_inside_color(float r, float g, float b) { visible_inside_color = Vector3f(r, g, b); }
-        Vector3f get_visible_outside_color() { return visible_outside_color; }
-        Vector3f get_visible_inside_color() { return visible_inside_color; }
+        // Flags the models as dirty. Called by all the app setters. 
+        // Filters should also call this (either from their .cpp or .js portion) whenever their settings get changed.
+        void flag_models_as_dirty() { this->models_dirty_flag = true; }
 
-        Model* get_visible_model() { return &this->visible_model; }
-        Model* get_filtered_model() { return &this->filtered_model; }
-        Model* get_singularity_model() { return &this->singularity_model; }
-        Model* get_boundary_singularity_model() { return &this->boundary_singularity_model; }
-        Model* get_boundary_creases_model() { return &this->boundary_creases_model; }
+        // If models are marked dirty, it reruns all the filters and rebuilds the surface models buffers.
+        // Returns true if an update has been made (the models were marked dirty), false otherwise
+        bool update_models();
+        
+        // Updates the selected color map, enabled quality color mapping and flags the model color buffer as dirty.
+        void enable_quality_color_mapping(ColorMap map);
+        // Disables quality color mapping and flags the model color buffer as dirty (it will be rebuilt using the default colors).
+        void disable_quality_color_mapping();
 
-        vector<float>* get_hexa_quality() { return mesh == nullptr ? nullptr : &mesh->hexa_quality; }
-        void compute_hexa_quality(quality_measure_fun* fun);
+        // Updates the default colors and if quality color mapping is disabled, it flags the model color buffer as dirty.
+        void set_default_outside_color(float r, float g, float b);
+        void set_default_inside_color(float r, float g, float b);
 
-        void build_surface_models();
-        void build_singularity_models();
+        // Flags as dirty the model quality buffers, and also the model color buffer if quality color mapping is enabled.
+        void set_quality_measure(QualityMeasureEnum e);
 
+        // Getters
+        Vector3f        get_default_outside_color()         { return this->default_outside_color; }
+        Vector3f        get_default_inside_color()          { return this->default_inside_color; }
+        Model*          get_visible_model()                 { return &this->visible_model; }
+        Model*          get_filtered_model()                { return &this->filtered_model; }
+        Model*          get_singularity_model()             { return &this->singularity_model; }
+        Model*          get_boundary_singularity_model()    { return &this->boundary_singularity_model; }
+        Model*          get_boundary_creases_model()        { return &this->boundary_creases_model; }
+        Mesh*           get_mesh()                          { return this->mesh; }
+        MeshStats*      get_mesh_stats()                    { return this->mesh ? &this->mesh_stats : nullptr; }
+        vector<float>*  get_hexa_quality()                  { return this->mesh ? &this->mesh->hexa_quality : nullptr; }
+        vector<float>*  get_normalized_hexa_quality()       { return this->mesh ? &this->mesh->normalized_hexa_quality : nullptr; }
+        ColorMap        get_color_map()                     { return this->color_map; }
+        bool            is_quality_color_mapping_enabled()  { return this->quality_color_mapping_enabled; }
+        QualityMeasureEnum get_quality_measure()            { return this->quality_measure; }
+                        
     private:
         void add_visible_face(Dart& dart, float normal_sign);
         void add_visible_wireframe(Dart& dart);
         void add_filtered_face(Dart& dart);
         void add_filtered_wireframe(Dart& dart);
+        
+        void compute_hexa_quality();
+        void build_surface_models();
+        void build_singularity_models();
     };
 }
 

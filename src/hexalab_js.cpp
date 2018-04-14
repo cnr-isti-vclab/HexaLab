@@ -4,68 +4,31 @@
 #include <peeling_filter.h>
 #include <color_map.h>
 #include <hex_quality.h>
+#include <hex_quality_color_maps.h>
 
 using namespace HexaLab;
 using namespace Eigen;
 
-template<typename T>
-js_ptr buffer_data(std::vector<T>& v) {
-    return (js_ptr)v.data();
-}
-template<typename T>
-size_t buffer_size(std::vector<T>& v) {
-    return v.size();
-}
+// emscripten bindings helpers
 
-float mesh_stats_aabb_diag(MeshStats& stats) {
-    return stats.aabb.diagonal().norm();
-}
-Vector3f mesh_stats_aabb_size(MeshStats& stats) {
-    return stats.aabb.sizes();
-}
-Vector3f mesh_stats_center(MeshStats& stats) {
-    return stats.aabb.center();
-}
-
-//vector<float>* hexa_quality(App& app) {
-//    return &app.get_hexa_quality();
-//}
-
-vector<Vector3f>* get_surface_vert_pos(Model& model) { return &model.surface_vert_pos; }
-vector<Vector3f>* get_surface_vert_norm(Model& model) { return &model.surface_vert_norm; }
-vector<Vector3f>* get_surface_vert_color(Model& model) { return &model.surface_vert_color; }
-vector<Vector3f>* get_wireframe_vert_pos(Model& model) { return &model.wireframe_vert_pos; }
+// Model
+vector<Vector3f>* get_surface_vert_pos(Model& model)     { return &model.surface_vert_pos; }
+vector<Vector3f>* get_surface_vert_norm(Model& model)    { return &model.surface_vert_norm; }
+vector<Vector3f>* get_surface_vert_color(Model& model)   { return &model.surface_vert_color; }
+vector<Vector3f>* get_wireframe_vert_pos(Model& model)   { return &model.wireframe_vert_pos; }
 vector<Vector3f>* get_wireframe_vert_color(Model& model) { return &model.wireframe_vert_color; }
 
-void set_color_map(App& app, ColorMap::Palette palette) {
-    app.color_map = ColorMap(palette);
-}
+// std::vector
+template<typename T> js_ptr buffer_data(std::vector<T>& v) { return (js_ptr)v.data(); }
+template<typename T> size_t buffer_size(std::vector<T>& v) { return v.size(); }
 
-Vector3f map_to_color(App& app, float value) {
-    return app.color_map.get(value);
-}
+// MeshStats
+float    mesh_stats_aabb_diag(MeshStats& stats) { return stats.aabb.diagonal().norm(); }
+Vector3f mesh_stats_aabb_size(MeshStats& stats) { return stats.aabb.sizes(); }
+Vector3f mesh_stats_center(MeshStats& stats)    { return stats.aabb.center(); }
 
-enum class QualityMeasure {
-    ScaledJacobian,
-    DiagonalRatio,
-    EdgeRatio
-};
-
-void compute_hexa_quality(App& app, QualityMeasure measure) {
-    App::quality_measure_fun* fun;
-    switch(measure) {
-    case QualityMeasure::ScaledJacobian:
-        fun = &scaled_jacobian;
-        break;
-    case QualityMeasure::DiagonalRatio:
-        fun = &diagonal_ratio;
-        break;
-    case QualityMeasure::EdgeRatio:
-        fun = &edge_ratio;
-        break;
-    }
-    app.compute_hexa_quality(fun);
-}
+// ColorMap
+Vector3f map_value_to_color(App& app, float value) { return app.get_color_map().get(value); }
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
@@ -73,26 +36,36 @@ void compute_hexa_quality(App& app, QualityMeasure measure) {
 using namespace emscripten;
 EMSCRIPTEN_BINDINGS(HexaLab) {
 
+    // APP
+
     class_<App>("App")
         .constructor<>()
-        .function("build_models",                   &App::build_surface_models)
-        .function("import_mesh",                    &App::import_mesh)
-        .function("add_filter",                     &App::add_filter, allow_raw_pointers())
-        .function("get_visible_model",              &App::get_visible_model, allow_raw_pointers())
-        .function("get_filtered_model",             &App::get_filtered_model, allow_raw_pointers())
-        .function("get_singularity_model",          &App::get_singularity_model, allow_raw_pointers())
-        .function("get_boundary_singularity_model", &App::get_boundary_singularity_model, allow_raw_pointers())
-        .function("get_boundary_creases_model",     &App::get_boundary_creases_model, allow_raw_pointers())
-        .function("get_hexa_quality",               &App::get_hexa_quality, allow_raw_pointers())
-        .function("set_color_map",                  &set_color_map)
-        .function("map_to_color",                   &map_to_color)
-        .function("get_mesh",                       &App::get_mesh_stats, allow_raw_pointers())
-        .function("compute_hexa_quality",           &compute_hexa_quality)
-        .function("set_visible_outside_color",      &App::set_visible_outside_color)
-        .function("set_visible_inside_color",       &App::set_visible_inside_color)
-        .function("get_visible_outside_color",      &App::get_visible_outside_color)
-        .function("get_visible_inside_color",       &App::get_visible_inside_color)
-        .property("do_show_color_map",              &App::do_show_color_map)
+        .function("import_mesh",                        &App::import_mesh)
+        .function("add_filter",                         &App::add_filter, allow_raw_pointers())
+        .function("flag_models_as_dirty",               &App::flag_models_as_dirty)
+        .function("update_models",                      &App::update_models)
+        .function("enable_quality_color_mapping",       &App::enable_quality_color_mapping)
+        .function("disable_quality_color_mapping",      &App::disable_quality_color_mapping)
+        .function("set_default_outside_color",          &App::set_default_outside_color)
+        .function("set_default_inside_color",           &App::set_default_inside_color)
+        .function("set_quality_measure",                &App::set_quality_measure)
+        .function("enable_quality_color_mapping",       &App::enable_quality_color_mapping)
+        .function("disable_quality_color_mapping",      &App::disable_quality_color_mapping)
+
+        .function("get_visible_model",                  &App::get_visible_model, allow_raw_pointers())
+        .function("get_filtered_model",                 &App::get_filtered_model, allow_raw_pointers())
+        .function("get_singularity_model",              &App::get_singularity_model, allow_raw_pointers())
+        .function("get_boundary_singularity_model",     &App::get_boundary_singularity_model, allow_raw_pointers())
+        .function("get_boundary_creases_model",         &App::get_boundary_creases_model, allow_raw_pointers())
+        .function("get_hexa_quality",                   &App::get_hexa_quality, allow_raw_pointers())
+        .function("get_normalized_hexa_quality",        &App::get_normalized_hexa_quality, allow_raw_pointers())
+        .function("get_mesh",                           &App::get_mesh_stats, allow_raw_pointers())
+        .function("get_default_outside_color",          &App::get_default_outside_color)
+        .function("get_default_inside_color",           &App::get_default_inside_color)
+        .function("is_quality_color_mapping_enabled",   &App::is_quality_color_mapping_enabled)
+        .function("get_quality_measure",                &App::get_quality_measure)
+
+        .function("map_value_to_color",                 &map_value_to_color)
         ;
 
     enum_<ColorMap::Palette>("ColorMap")
@@ -101,15 +74,26 @@ EMSCRIPTEN_BINDINGS(HexaLab) {
         .value("RedGreen",                  ColorMap::Palette::RedGreen)
         ;
 
-    enum_<QualityFilter::Operator>("QualityFilterOperator")
-        .value("Inside",                    QualityFilter::Operator::Inside)
-        .value("Outside",                   QualityFilter::Operator::Outside)
-        ;
-
-    enum_<QualityMeasure>("QualityMeasure")
-        .value("ScaledJacobian",            QualityMeasure::ScaledJacobian)
-        .value("DiagonalRatio",             QualityMeasure::DiagonalRatio)
-        .value("EdgeRatio",                 QualityMeasure::EdgeRatio)
+    enum_<QualityMeasureEnum>("QualityMeasure")
+        .value("ScaledJacobian",            QualityMeasureEnum::SJ)
+        .value("Diagonal",                  QualityMeasureEnum::DIA)
+        .value("EdgeRatio",                 QualityMeasureEnum::ER)
+        .value("Dimension",                 QualityMeasureEnum::DIM)
+        .value("Distortion",                QualityMeasureEnum::DIS)
+        .value("Jacobian",                  QualityMeasureEnum::J)
+        .value("MaxEdgeRatio",              QualityMeasureEnum::MER)
+        .value("MaxAspectFrobenius",        QualityMeasureEnum::MAAF)
+        .value("MeanAspectFrobenius",       QualityMeasureEnum::MEAF)
+        .value("Oddy",                      QualityMeasureEnum::ODD)
+        .value("RelativeSizeSquared",       QualityMeasureEnum::RSS)
+        .value("Shape",                     QualityMeasureEnum::SHA)
+        .value("ShapeAndSize",              QualityMeasureEnum::SHAS)
+        .value("Shear",                     QualityMeasureEnum::SHE)
+        .value("ShearAndSize",              QualityMeasureEnum::SHES)
+        .value("Skew",                      QualityMeasureEnum::SKE)
+        .value("Stretch",                   QualityMeasureEnum::STR)
+        .value("Taper",                     QualityMeasureEnum::TAP)
+        .value("Volume",                    QualityMeasureEnum::VOL)
         ;
 
     class_<Model>("Model")
@@ -120,14 +104,24 @@ EMSCRIPTEN_BINDINGS(HexaLab) {
         .function("wireframe_pos",          &get_wireframe_vert_pos, allow_raw_pointers())
         .function("wireframe_color",        &get_wireframe_vert_color, allow_raw_pointers())
         ;
-/*
-    class_<Mesh>("Mesh")
-        .constructor<>()
-        .function("get_aabb_diag",          &mesh_aabb_diag)
-        .function("get_aabb_size",          &mesh_aabb_size)
-        .function("get_aabb_center",        &mesh_center)
+
+    class_<MeshStats>("Mesh")
+        .property("vert_count",             &MeshStats::vert_count)
+        .property("hexa_count",             &MeshStats::hexa_count)
+        .property("min_edge_len",           &MeshStats::min_edge_len)
+        .property("max_edge_len",           &MeshStats::max_edge_len)
+        .property("avg_edge_len",           &MeshStats::avg_edge_len)
+        .property("quality_min",            &MeshStats::quality_min)
+        .property("quality_max",            &MeshStats::quality_max)
+        .property("quality_avg",            &MeshStats::quality_avg)
+        .property("quality_var",            &MeshStats::quality_var)
+        .function("get_aabb_diagonal",      &mesh_stats_aabb_diag)
+        .function("get_aabb_size",          &mesh_stats_aabb_size)
+        .function("get_aabb_center",        &mesh_stats_center)
         ;
-*/
+
+    // FILTERS
+
     class_<IFilter>("Filter")
         .property("enabled",                &IFilter::enabled)
         ;
@@ -141,6 +135,11 @@ EMSCRIPTEN_BINDINGS(HexaLab) {
         .function("get_plane_normal",       &PlaneFilter::get_plane_normal)
         .function("get_plane_offset",       &PlaneFilter::get_plane_offset)
         .function("get_plane_world_offset", &PlaneFilter::get_plane_world_offset)
+        ;
+
+    enum_<QualityFilter::Operator>("QualityFilterOperator")
+        .value("Inside",                    QualityFilter::Operator::Inside)
+        .value("Outside",                   QualityFilter::Operator::Outside)
         ;
 
     class_<QualityFilter, base<IFilter>>("QualityFilter")
@@ -160,20 +159,7 @@ EMSCRIPTEN_BINDINGS(HexaLab) {
         .property("max_depth",              &PeelingFilter::max_depth)
         ;
 
-    class_<MeshStats>("Mesh")
-        .property("vert_count",             &MeshStats::vert_count)
-        .property("hexa_count",             &MeshStats::hexa_count)
-        .property("min_edge_len",           &MeshStats::min_edge_len)
-        .property("max_edge_len",           &MeshStats::max_edge_len)
-        .property("avg_edge_len",           &MeshStats::avg_edge_len)
-        .property("quality_min",            &MeshStats::quality_min)
-        .property("quality_max",            &MeshStats::quality_max)
-        .property("quality_avg",            &MeshStats::quality_avg)
-        .property("quality_var",            &MeshStats::quality_var)
-        .function("get_aabb_diagonal",      &mesh_stats_aabb_diag)
-        .function("get_aabb_size",          &mesh_stats_aabb_size)
-        .function("get_aabb_center",        &mesh_stats_center)
-        ;
+    // MISC
 
     class_<Vector3f>("float3")
         .constructor<>()

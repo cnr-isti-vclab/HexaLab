@@ -2,7 +2,9 @@
 #define HEX_QUALITY_COLOR_MAPS_H
 
 #include <Eigen/Dense>
-#include "hex_quality.h"
+
+#include <common.h>
+#include <hex_quality.h>
 
 namespace HexaLab
 {
@@ -18,7 +20,7 @@ namespace HexaLab
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-enum
+enum class QualityMeasureEnum
 {         // QUALITY METRIC NAME    | RANGE       | ACCEPTABLE RANGE
           // --------------------------------------------------------
     DIA,  // Diagonal               | [0,inf)     | [0.65,1]
@@ -44,67 +46,137 @@ enum
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-float from_native_to_normalized_range(const int   metric,
-                                      const float q,
-                                      const float q_min = -std::numeric_limits<float>::infinity(),
-                                      const float q_max =  std::numeric_limits<float>::infinity())
+static float normalize_quality_measure(QualityMeasureEnum metric,
+                                const float q,
+                                const float q_min = -std::numeric_limits<float>::infinity(),
+                                const float q_max =  std::numeric_limits<float>::infinity())
 {
     switch(metric)
     {
-        case DIA : return q/q_max;
-        case DIM : return q/q_max;
-        case DIS : return (q-q_min)/(q_max-q_min);
-        case ER  : return (q_max-q)/(q_max-1.f);
-        case J   : return (q-q_min)/(q_max-q_min);
-        case MER : return (q_max-q)/(q_max-1.f);
-        case MAAF: return (q_max-q)/(q_max-1.f);
-        case MEAF: return (q_max-q)/(q_max-1.f);
-        case ODD : return (q_max-q)/q_max;
-        case RSS : return q;
-        case SJ  : return (q+1.f)/(q_max+1.f);
-        case SHA : return q;
-        case SHAS: return q;
-        case SHE : return q;
-        case SHES: return q;
-        case SKE : return (q_max-q)/q_max;
-        case STR : return q/q_max;
-        case TAP : return (q_max-q)/q_max;
-        case VOL : return (q-q_min)/(q_max-q_min);
+        case QualityMeasureEnum::DIA : return q/q_max;
+        case QualityMeasureEnum::DIM : return q/q_max;
+        case QualityMeasureEnum::DIS : return (q-q_min)/(q_max-q_min);
+        case QualityMeasureEnum::ER  : return (q_max-q)/(q_max-1.f);
+        case QualityMeasureEnum::J   : return (q-q_min)/(q_max-q_min);
+        case QualityMeasureEnum::MER : return (q_max-q)/(q_max-1.f);
+        case QualityMeasureEnum::MAAF: return (q_max-q)/(q_max-1.f);
+        case QualityMeasureEnum::MEAF: return (q_max-q)/(q_max-1.f);
+        case QualityMeasureEnum::ODD : return (q_max-q)/q_max;
+        case QualityMeasureEnum::RSS : return q;
+        case QualityMeasureEnum::SJ  : return (q+1.f)/(q_max+1.f);
+        case QualityMeasureEnum::SHA : return q;
+        case QualityMeasureEnum::SHAS: return q;
+        case QualityMeasureEnum::SHE : return q;
+        case QualityMeasureEnum::SHES: return q;
+        case QualityMeasureEnum::SKE : return (q_max-q)/q_max;
+        case QualityMeasureEnum::STR : return q/q_max;
+        case QualityMeasureEnum::TAP : return (q_max-q)/q_max;
+        case QualityMeasureEnum::VOL : return (q-q_min)/(q_max-q_min);
     }
+    return 0;
 }
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-float from_normalized_to_native_range(const int   metric,
-                                      const float q,
-                                      const float q_min = -std::numeric_limits<float>::infinity(),
-                                      const float q_max =  std::numeric_limits<float>::infinity())
+static float denormalize_quality_measure(QualityMeasureEnum metric,
+                                  const float q,
+                                  const float q_min = -std::numeric_limits<float>::infinity(),
+                                  const float q_max =  std::numeric_limits<float>::infinity())
 {
     switch(metric)
     {
-        case DIA : return q*q_max;
-        case DIM : return q*q_max;
-        case DIS : return q_min+q*(q_max-q_min);
-        case ER  : return 1.f+(1.f-q)*(q_max-1.f);
-        case J   : return q_min+q*(q_max-q_min);
-        case MER : return 1.f+(1.f-q)*(q_max-1.f);
-        case MAAF: return 1.f+(1.f-q)*(q_max-1.f);
-        case MEAF: return 1.f+(1.f-q)*(q_max-1.f);
-        case ODD : return (1.f-q)*q_max;
-        case RSS : return q;
-        case SJ  : return -1.f+q*(q_max+1.f);
-        case SHA : return q;
-        case SHAS: return q;
-        case SHE : return q;
-        case SHES: return q;
-        case SKE : return (1.f-q)*q_max;
-        case STR : return q*q_max;
-        case TAP : return (1.f-q)*q_max;
-        case VOL : return q_min+q*(q_max-q_min);
+        case QualityMeasureEnum::DIA : return q*q_max;
+        case QualityMeasureEnum::DIM : return q*q_max;
+        case QualityMeasureEnum::DIS : return q_min+q*(q_max-q_min);
+        case QualityMeasureEnum::ER  : return 1.f+(1.f-q)*(q_max-1.f);
+        case QualityMeasureEnum::J   : return q_min+q*(q_max-q_min);
+        case QualityMeasureEnum::MER : return 1.f+(1.f-q)*(q_max-1.f);
+        case QualityMeasureEnum::MAAF: return 1.f+(1.f-q)*(q_max-1.f);
+        case QualityMeasureEnum::MEAF: return 1.f+(1.f-q)*(q_max-1.f);
+        case QualityMeasureEnum::ODD : return (1.f-q)*q_max;
+        case QualityMeasureEnum::RSS : return q;
+        case QualityMeasureEnum::SJ  : return -1.f+q*(q_max+1.f);
+        case QualityMeasureEnum::SHA : return q;
+        case QualityMeasureEnum::SHAS: return q;
+        case QualityMeasureEnum::SHE : return q;
+        case QualityMeasureEnum::SHES: return q;
+        case QualityMeasureEnum::SKE : return (1.f-q)*q_max;
+        case QualityMeasureEnum::STR : return q*q_max;
+        case QualityMeasureEnum::TAP : return (1.f-q)*q_max;
+        case QualityMeasureEnum::VOL : return q_min+q*(q_max-q_min);
     }
+    return 0;
 }
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+static quality_measure_fun* get_quality_measure_fun(QualityMeasureEnum measure) {
+    quality_measure_fun* fun = nullptr;
+    switch(measure) {
+    case QualityMeasureEnum::SJ:
+        fun = &QualityMeasureFun::scaled_jacobian;
+        break;
+    case QualityMeasureEnum::DIA:
+        fun = &QualityMeasureFun::diagonal;
+        break;
+    case QualityMeasureEnum::ER:
+        fun = &QualityMeasureFun::edge_ratio;
+        break;
+    case QualityMeasureEnum::DIM:
+        fun = &QualityMeasureFun::dimension;
+        break;
+    case QualityMeasureEnum::DIS:
+        fun = &QualityMeasureFun::distortion;
+        break;
+    case QualityMeasureEnum::J:
+        fun = &QualityMeasureFun::jacobian;
+        break;
+    case QualityMeasureEnum::MER:
+        fun = &QualityMeasureFun::maximum_edge_ratio;
+        break;
+    case QualityMeasureEnum::MAAF:
+        fun = &QualityMeasureFun::maximum_aspect_frobenius;
+        break;
+    case QualityMeasureEnum::MEAF:
+        fun = &QualityMeasureFun::mean_aspect_frobenius;
+        break;
+    case QualityMeasureEnum::ODD:
+        fun = &QualityMeasureFun::oddy;
+        break;
+    case QualityMeasureEnum::RSS:
+        fun = &QualityMeasureFun::relative_size_squared;
+        break;
+    case QualityMeasureEnum::SHA:
+        fun = &QualityMeasureFun::shape;
+        break;
+    case QualityMeasureEnum::SHAS:
+        fun = &QualityMeasureFun::shape_and_size;
+        break;
+    case QualityMeasureEnum::SHE:
+        fun = &QualityMeasureFun::shear;
+        break;
+    case QualityMeasureEnum::SHES:
+        fun = &QualityMeasureFun::shear_and_size;
+        break;
+    case QualityMeasureEnum::SKE:
+        fun = &QualityMeasureFun::skew;
+        break;
+    case QualityMeasureEnum::STR:
+        fun = &QualityMeasureFun::stretch;
+        break;
+    case QualityMeasureEnum::TAP:
+        fun = &QualityMeasureFun::taper;
+        break;
+    case QualityMeasureEnum::VOL:
+        fun = &QualityMeasureFun::volume;
+        break;
+    default:
+        HL_LOG("Invalid QualityMeasureEnum value: %d\n", measure);
+        break;
+    }
+
+    return fun;
+}
 
 }
 

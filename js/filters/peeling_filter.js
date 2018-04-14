@@ -64,7 +64,9 @@ HexaLab.PeelingFilter.prototype = Object.assign(Object.create(HexaLab.Filter.pro
     },
 
     on_mesh_change: function (mesh_stats) {
-        HexaLab.UI.peeling_depth_slider.slider('option', 'max', this.backend.max_depth)
+        this.on_peeling_depth_set(this.backend.peeling_depth)
+        this.on_max_depth_set(this.backend.max_depth)
+        this.on_enabled_set(this.backend.enabled)
     },
 
     // callback events: system -> UI
@@ -76,6 +78,10 @@ HexaLab.PeelingFilter.prototype = Object.assign(Object.create(HexaLab.Filter.pro
 
     on_enabled_set: function (bool) {
         HexaLab.UI.peeling_enabled.prop('checked', bool)
+    },
+
+    on_max_depth_set: function (max) {
+        HexaLab.UI.peeling_depth_slider.slider('option', 'max', max)
     },
 
     // system state changers

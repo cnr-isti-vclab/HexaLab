@@ -8,6 +8,8 @@ x84
 
 *.bc
 src/*.user
+*.o
+src/test/*
 src/.qmake.stash
 build-*/
 emcc.bat

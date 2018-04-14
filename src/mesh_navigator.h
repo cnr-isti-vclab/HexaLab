@@ -30,7 +30,7 @@ namespace HexaLab {
         MeshNavigator rotate_on_edge();
         // 'Rotates' on the current face, changing vert and edge
         MeshNavigator rotate_on_face();
-        // 'Rotates' around the current hexa, changing vert, edge and face.
+        // 'Rotates' around the current hexa's 4 side faces, changing vert, edge and face.
         // Each call changes face; 4 calls to do a full rotation.
         MeshNavigator rotate_on_hexa();
 

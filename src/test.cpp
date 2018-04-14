@@ -16,7 +16,7 @@ int main() {
   printf("Size of Vert %lu\n",sizeof(Vert));
   printf("Size of Dart %lu\n",sizeof(Dart));
   
-  std::ifstream istr("../datasets/index.json");
+  std::ifstream istr("../../datasets/index.json");
   json job;
   istr >> job;
   json srcVec=job["sources"];
@@ -31,19 +31,24 @@ int main() {
     json dataVec= srcVec[i]["data"];
     printf("-- title %s\n",title.c_str());
     
+    App app;
     for(size_t j=0;j<dataVec.size();++j)
     {
       ++meshCnt;
       string filename = dataVec[j];
-      App app;
-      const string basepath="../datasets/";
-      bool ret = app.import_mesh(basepath+path+"/"+filename);
-      if(!ret) ++failCnt;
+      const string basepath="../../datasets/";
+      bool ret = app.import_mesh("../../datasets/Skeleton-driven Adaptive Hexahedral Meshing of Tubular Shapes/dinopet_graded.mesh");
+      //bool ret = app.import_mesh(basepath+path+"/"+filename);
+      if (!ret) {
+          ++failCnt;
+      }
       PeelingFilter pf;
       pf.on_mesh_set(*app.get_mesh());
       
       fflush(stdout);
     }    
   }
-  printf("%i meshes in the archive (%i fails to load)\n",meshCnt,failCnt);
+  printf("%i meshes in the archive (%i fails to load)\n", meshCnt, failCnt);
+  printf("Press enter to exit.\n");
+  getchar();
 }

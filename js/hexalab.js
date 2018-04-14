@@ -574,14 +574,14 @@ Object.assign(HexaLab.Renderer.prototype, {
         samples[0] = sample_sphere_surface()
         for (let i = 1; i < this.ao_pass.samples; ++i) {
             let p = sample_sphere_surface()
-            let d = 0
+            let d = 9999
             for (let j = 0; j < i; ++j) {
                 const _d = p.distanceTo(samples[j])
                 if (_d < d) d = _d
             }
             for (let j = 0; j < 49; ++j) {
                 let p2 = sample_sphere_surface()
-                let d2 = 0
+                let d2 = 9999
                 for (let j = 0; j < i; ++j) {
                     const _d = p2.distanceTo(samples[j])
                     if (_d < d2) d2 = _d
@@ -917,15 +917,15 @@ HexaLab.App = function (dom_element) {
     this.canvas.container.appendChild(this.canvas.element)
 
     this.default_renderer_settings = {
-        occlusion: 'object space',
+        occlusion: 'object space',  // TODO
         antialiasing: 'msaa'
     }
 
     // Materials
     this.default_material_settings = {
         show_quality_on_visible_surface: false,
-        visible_inside_color: '#ffff00',
-        visible_outside_color: '#ffffff',
+        visible_default_inside_color: '#ffff00',
+        visible_default_outside_color: '#ffffff',
         visible_wireframe_color: '#000000',
         visible_wireframe_opacity: 1,
 
@@ -1018,34 +1018,9 @@ HexaLab.App = function (dom_element) {
 
     // Resize callback
     window.addEventListener('resize', this.resize.bind(this));
-
-    // Dirty flag
-    this.dirty_models = false
 };
 
 Object.assign(HexaLab.App.prototype, {
-
-    // Propagate back the current app settings to the UI.
-    // This is generally only used when external settings are loaded into the
-    // system and the UI needs to sync with those. Sometime though it is also
-    // necessary to change a user setting from inside the system, so syncing can
-    // also be useful in those situation.
-    sync: function () {
-        var settings = this.get_settings()
-        HexaLab.UI.filtered_opacity.slider('value', settings.materials.filtered_surface_opacity * 100)
-        HexaLab.UI.wireframe_opacity.slider('value', settings.materials.visible_wireframe_opacity * 100)
-        HexaLab.UI.singularity_mode.slider('value', settings.materials.singularity_mode)
-        HexaLab.UI.quality.prop('checked', settings.materials.show_quality_on_visible_surface)
-        HexaLab.UI.occlusion.prop('checked', settings.renderer.occlusion)
-        HexaLab.UI.color_map.val(settings.materials.color_map)
-        if (settings.materials.show_quality_on_visible_surface) {
-            HexaLab.UI.surface_color_source.val("ColorMap")
-            $("#surface_colormap_input").css('display', 'flex')
-        } else {
-            HexaLab.UI.surface_color_source.val("Default")
-            $("#surface_colormap_input").hide()
-        }
-    },
 
     // Resize callback
     resize: function () {
@@ -1092,7 +1067,7 @@ Object.assign(HexaLab.App.prototype, {
     },
 
     set_material_settings: function (settings) {
-        this.show_visible_quality(settings.show_quality_on_visible_surface)
+        this.show_visible_quality(settings.is_quality_color_mapping_enabled)
         this.set_visible_wireframe_color(settings.visible_wireframe_color)
         this.set_visible_wireframe_opacity(settings.visible_wireframe_opacity)
         this.set_filtered_surface_color(settings.filtered_surface_color)
@@ -1100,8 +1075,8 @@ Object.assign(HexaLab.App.prototype, {
         this.set_filtered_wireframe_color(settings.filtered_wireframe_color)
         this.set_filtered_wireframe_opacity(settings.filtered_wireframe_opacity)
         this.set_singularity_mode(settings.singularity_mode)
-        this.set_visible_outside_color(settings.visible_outside_color)
-        this.set_visible_inside_color(settings.visible_inside_color)
+        this.set_visible_default_outside_color(settings.visible_default_outside_color)
+        this.set_visible_default_inside_color(settings.visible_default_inside_color)
         //this.set_singularity_surface_opacity(settings.singularity_surface_opacity)
         //this.set_singularity_wireframe_opacity(settings.singularity_wireframe_opacity)
         this.set_color_map(settings.color_map)
@@ -1146,7 +1121,7 @@ Object.assign(HexaLab.App.prototype, {
 
     get_material_settings: function () {
         return {
-            show_quality_on_visible_surface: this.backend.do_show_color_map,
+            is_quality_color_mapping_enabled: this.backend.is_quality_color_mapping_enabled(),
             visible_wireframe_color: '#' + this.visible_wireframe_material.color.getHexString(),
             visible_wireframe_opacity: this.visible_wireframe_material.opacity,
             filtered_surface_color: '#' + this.filtered_surface_material.color.getHexString(),
@@ -1154,8 +1129,8 @@ Object.assign(HexaLab.App.prototype, {
             filtered_wireframe_color: '#' + this.filtered_wireframe_material.color.getHexString(),
             filtered_wireframe_opacity: this.filtered_wireframe_material.opacity,
             singularity_mode: this.singularity_mode,
-            visible_inside_color: this.get_visible_inside_color(),
-            visible_outside_color: this.get_visible_outside_color(),
+            visible_default_inside_color: this.get_visible_default_inside_color(),
+            visible_default_outside_color: this.get_visible_default_outside_color(),
             //singularity_surface_opacity: this.singularity_surface_material.opacity,
             //singularity_wireframe_opacity: this.singularity_wireframe_material.opacity,
             color_map: this.color_map
@@ -1203,49 +1178,54 @@ Object.assign(HexaLab.App.prototype, {
     },
 
     set_color_map: function (map) {
-        if      (map == 'Jet')      this.backend.set_color_map(Module.ColorMap.Jet)
-        else if (map == 'Parula')   this.backend.set_color_map(Module.ColorMap.Parula)
-        else if (map == 'RedGreen') this.backend.set_color_map(Module.ColorMap.RedGreen)
         this.color_map = map
+        if (this.backend.is_quality_color_mapping_enabled()) {
+            if      (map == 'Jet')      this.backend.enable_quality_color_mapping(Module.ColorMap.Jet)
+            else if (map == 'Parula')   this.backend.enable_quality_color_mapping(Module.ColorMap.Parula)
+            else if (map == 'RedGreen') this.backend.enable_quality_color_mapping(Module.ColorMap.RedGreen)
+            this.queue_models_update(true, false)
+        }
         HexaLab.UI.on_set_color_map(map)
-        this.queue_models_update(true, false)
     },
 
-    set_visible_inside_color: function (color) {
+    set_visible_default_inside_color: function (color) {
         var c = new THREE.Color(color)
-        this.backend.set_visible_inside_color(c.r, c.g, c.b)
+        this.backend.set_default_inside_color(c.r, c.g, c.b)
         this.queue_models_update(true, false)
-        HexaLab.UI.on_set_visible_inside_color(color)
+        HexaLab.UI.on_set_visible_default_inside_color(color)
     },
 
-    get_visible_inside_color: function () {
-        var c = this.backend.get_visible_inside_color()
+    get_visible_default_inside_color: function () {
+        var c = this.backend.get_default_inside_color()
         return '#' + new THREE.Color(c.x(), c.y(), c.z()).getHexString()
     },
 
-    set_visible_outside_color: function (color) {
+    set_visible_default_outside_color: function (color) {
         var c = new THREE.Color(color)
-        this.backend.set_visible_outside_color(c.r, c.g, c.b)
+        this.backend.set_default_outside_color(c.r, c.g, c.b)
         this.queue_models_update(true, false)
-        HexaLab.UI.on_set_visible_outside_color(color)
+        HexaLab.UI.on_set_visible_default_outside_color(color)
     },
 
-    get_visible_outside_color: function () {
-        var c = this.backend.get_visible_outside_color()
+    get_visible_default_outside_color: function () {
+        var c = this.backend.get_default_outside_color()
         return '#' + new THREE.Color(c.x(), c.y(), c.z()).getHexString()
     },
 
     set_quality_measure: function (measure) {
-        if      (measure == "Scaled Jacobian")  this.backend.compute_hexa_quality(Module.QualityMeasure.ScaledJacobian)
-        else if (measure == "Diagonal Ratio")   this.backend.compute_hexa_quality(Module.QualityMeasure.DiagonalRatio)
-        else if (measure == "Edge Ratio")       this.backend.compute_hexa_quality(Module.QualityMeasure.EdgeRatio)
-        this.quality_measure = measure
-        this.queue_models_update(true, true)
+        if      (measure == "Scaled Jacobian")  this.backend.set_quality_measure(Module.QualityMeasure.ScaledJacobian)
+        else if (measure == "Diagonal Ratio")   this.backend.set_quality_measure(Module.QualityMeasure.DiagonalRatio)
+        else if (measure == "Edge Ratio")       this.backend.set_quality_measure(Module.QualityMeasure.EdgeRatio)
+        this.queue_models_update(true, true)    // TODO update only on real need (needs to query quality filter enabled state)
         HexaLab.UI.on_set_quality_measure(measure)
     },
 
     show_visible_quality: function (show) {
-        this.backend.do_show_color_map = show
+        if (show) {
+            this.backend.enable_quality_color_mapping(this.color_map)
+        } else {
+            this.backend.disable_quality_color_mapping()
+        }
         this.visible_surface_material.needsUpdate = true
         HexaLab.UI.on_show_visible_quality(show)
         this.queue_models_update(true, false)
@@ -1377,48 +1357,59 @@ Object.assign(HexaLab.App.prototype, {
             scene: this.default_scene_settings,
             materials: this.default_material_settings
         });
+        // notify filters
         for (var k in this.filters) {
             this.filters[k].on_mesh_change(this.mesh)
         }
-        // update mesh data
+        // update models
         this.dirty_color = false
         this.dirty_pos = false
-        this.update_models()
+        //this.update_models_bindings()   // TODO move this inside the renderer? together with the models?
+        this.update_scene()
+        // notify renderer
         this.renderer.on_mesh_change(this.models, this.mesh)
         // update UI
         HexaLab.UI.on_import_mesh(path)
     },
 
-    queue_models_update : function (color, visibility) {
-        this.dirty_models = true
+    queue_models_update: function (color, visibility) {
+        this.backend.flag_models_as_dirty()
         this.dirty_color = color
         this.dirty_pos = visibility
     },
 
-    // Update all models to their current version in the cpp backend.
-    update_models: function () {
-        this.backend.build_models()
+    update_models_bindings: function () {
         this.models.visible.update()
         this.models.filtered.update()
         this.models.singularity.update()
         this.models.boundary_creases.update()
         this.models.boundary_singularity.update()
-        if (this.dirty_pos) {
-            this.renderer.on_models_visibility_change(this.models, this.mesh)
-        } else if (this.dirty_color) {
-            this.renderer.on_models_color_change(this.models)
-        }
-        this.dirty_models = false
-        this.dirty_color = false
-        this.dirty_pos = false
     },
 
-    // The application main loop. Call this after instancing an App object to
-    // start rendering.
-    animate: function () {
-        this.controls.update()
-        if (this.dirty_models) this.update_models()
+    // Update all models to their current version in the cpp backend.
+    update_scene: function () {
+        // Trigger update
+        if (this.backend.update_models() && this.mesh) {
+            this.update_models_bindings()  
+            if (this.dirty_pos) {
+                this.renderer.on_models_visibility_change(this.models, this.mesh)
+            } else if (this.dirty_color) {
+                this.renderer.on_models_color_change(this.models)
+            }
+            this.dirty_color = false
+            this.dirty_pos = false
+        }
+    },
 
+    update_camera: function () {
+        this.controls.update()
+    },
+
+    // The application main loop. Call this after instancing an App object to start rendering.
+    animate: function () {
+        this.update_camera()
+        this.update_scene()
+        // rendering
         if (this.mesh) {
             var meshes = []
             for (var k in this.filters) {
@@ -1429,7 +1420,6 @@ Object.assign(HexaLab.App.prototype, {
 
             this.renderer.render(this.models, meshes, this.camera);
         }
-
         // queue next frame
         requestAnimationFrame(this.animate.bind(this));
     }

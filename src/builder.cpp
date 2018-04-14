@@ -193,9 +193,21 @@ namespace HexaLab {
         }
 
         size_t hexa_count = indices.size() / 8;
+        size_t p25 = hexa_count * 0.25;
+        size_t p50 = hexa_count * 0.5;
+        size_t p75 = hexa_count * 0.75;
         for (size_t h = 0; h < hexa_count; ++h) {
+            if (h == p25) {
+                HL_LOG("[Builder] 25%%... ");
+            } else if (h == p50) {
+                HL_LOG("50%%... ");
+            } else if (h == p75) {
+                HL_LOG("75%%... ");
+            }
             add_hexa(mesh, &indices[h * 8]);
         }
+        HL_LOG("\n");
+
         mesh.hexa_quality.resize(hexa_count);
         for (size_t i = 0; i < hexa_count; ++i) {
             // compute quality
@@ -225,7 +237,7 @@ namespace HexaLab {
             Face& begin = nav.face();
             do {
                 if (nav.dart().hexa_neighbor == -1) {
-                    nav.edge().surface_flag = true;
+                    nav.edge().is_surface = true;
                 }
                 nav = nav.rotate_on_edge();
 //                ++mesh.edges[i].face_count;

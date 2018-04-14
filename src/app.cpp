@@ -5,10 +5,14 @@
 #define D2R (3.141592653589793f / 180.f)
 
 namespace HexaLab {
+
+    // PUBLIC
+
     bool App::import_mesh(string path) {
         delete mesh;
         mesh = new Mesh();
 
+        // Load
         HL_LOG("Loading %s...\n", path.c_str());
         vector<Vector3f> verts;
         vector<HexaLab::Index> indices;
@@ -16,10 +20,14 @@ namespace HexaLab {
             return false;
         }
 
+        // Build
         HL_LOG("Building...\n");
         Builder::build(*mesh, verts, indices);
 
-        float max = std::numeric_limits<float>::lowest(), min = std::numeric_limits<float>::max(), avg = 0;
+        // Update stats
+        float max = std::numeric_limits<float>::lowest();
+        float min = std::numeric_limits<float>::max();
+        float avg = 0;
         for (size_t i = 0; i < mesh->edges.size(); ++i) {
             MeshNavigator nav = mesh->navigate(mesh->edges[i]);
             Vector3f edge = nav.vert().position - nav.flip_vert().vert().position;
@@ -29,40 +37,137 @@ namespace HexaLab {
             avg += len;
         }
         avg /= mesh->edges.size();
-
         mesh_stats.min_edge_len = min;
         mesh_stats.max_edge_len = max;
         mesh_stats.avg_edge_len = avg;
+
+        // TODO doublecheck these random ripoffs
+        // auto subvolume = [] (const Vector3f& a, const Vector3f& b, const Vector3f& c, const Vector3f& d, const Vector3f& e) {
+        //     float base = (b - a).cross(d - a).norm() + (c - a).cross(d - a).norm();
+        //     base /= 2;
+        //     Vector3f norm = (b - a).cross(c - a).normalized();
+        //     float h = std::abs(norm.dot(e - a));
+        //     return base * h / 3;
+        // };
+        // auto hex_volume = [&subvolume] (Vector3f* coords) {
+        //     return subvolume(coords[0], coords[1], coords[3], coords[2], coords[7]) +
+        //         subvolume(coords[0], coords[1], coords[4], coords[5], coords[7]) +
+        //         subvolume(coords[1], coords[2], coords[5], coords[6], coords[7]);
+        // };
+        // Vector3f v[8];
+        // float avg_v = 0;
+        // for (size_t i = 0; i < mesh->hexas.size(); ++i) {
+        //     int j = 0;
+        //     MeshNavigator nav = mesh->navigate(mesh->hexas[i]);
+        //     Vert& a = nav.vert();
+        //     do {
+        //         v[j++] = nav.vert().position;
+        //         nav = nav.rotate_on_face();
+        //     } while(nav.vert() != a);
+        //     nav = nav.rotate_on_hexa().rotate_on_hexa().flip_vert();
+        //     Vert& b = nav.vert();
+        //     do {
+        //         v[j++] = nav.vert().position;
+        //         nav = nav.rotate_on_face();
+        //     } while(nav.vert() != b);
+        //     avg_v += hex_volume(v);
+        // }
+        // avg_v /= mesh->hexas.size();
+        mesh_stats.avg_volume = 1;
+
         mesh_stats.vert_count = mesh->verts.size();
         mesh_stats.hexa_count = mesh->hexas.size();
         mesh_stats.aabb = mesh->aabb;
-        HL_LOG("%f\n", mesh_stats.aabb.diagonal().norm());
+        mesh_stats.quality_min = 0;
+        mesh_stats.quality_max = 0;
+        mesh_stats.quality_avg = 0;
+        mesh_stats.quality_var = 0;
 
-        //HL_LOG("Validating...\n");
-        //if (!Builder::validate(*mesh)) {
-            //return false;
-        //}
+        // build quality buffers
+        this->compute_hexa_quality();
 
-
-        build_singularity_models();
-
+        // notify filters
         for (size_t i = 0; i < filters.size(); ++i) {
             filters[i]->on_mesh_set(*mesh);
         }
 
-//        for (auto i = 0; i < mesh->hexas.size(); ++i) {
-//            mesh->hexa_quality.push_back(mesh->hexas[i].scaled_jacobian);
-//        }
+        // build buffers
+        this->flag_models_as_dirty();
+        //this->update_models();
+        this->build_singularity_models();
 
         return true;
     }
 
-    void App::compute_hexa_quality(App::quality_measure_fun* fun) {
+    void App::enable_quality_color_mapping(ColorMap e) {
+        this->quality_color_mapping_enabled = true;
+        this->color_map = e;
+        this->flag_models_as_dirty();   // TODO update color only
+    }
+
+    void App::disable_quality_color_mapping() {
+        this->quality_color_mapping_enabled = false;
+        this->flag_models_as_dirty();   // TODO update color only
+    }
+
+    void App::set_quality_measure(QualityMeasureEnum e) {
+        this->quality_measure = e;
+        this->compute_hexa_quality();
+        if (this->is_quality_color_mapping_enabled()) {
+            this->flag_models_as_dirty();   // TODO update color only
+        }
+    }
+
+    void App::set_default_outside_color(float r, float g, float b) {
+        this->default_outside_color = Vector3f(r, g, b);
+        if (!this->is_quality_color_mapping_enabled()) {
+            this->flag_models_as_dirty();
+        }
+    }
+
+    void App::set_default_inside_color(float r, float g, float b) {
+        this->default_inside_color = Vector3f(r, g, b);
+        if (!this->is_quality_color_mapping_enabled()) {
+            this->flag_models_as_dirty();
+        }
+    }
+
+    void App::add_filter(IFilter* filter) { 
+        this->filters.push_back(filter); 
+        this->flag_models_as_dirty(); 
+    }
+
+    bool App::update_models() {
+        if (this->models_dirty_flag) {
+            this->build_surface_models();
+            this->models_dirty_flag = false;  
+            return true;
+        }
+        return false;
+    }
+
+    // PRIVATE
+
+    void App::compute_hexa_quality() {
+        quality_measure_fun* fun = get_quality_measure_fun(this->quality_measure);
+        
+        void* arg = nullptr;
+        switch (this->quality_measure) {
+            case QualityMeasureEnum::RSS:
+            case QualityMeasureEnum::SHAS:
+            case QualityMeasureEnum::SHES:
+                arg = &this->mesh_stats.avg_volume;
+                break;
+        }
+
         float min = std::numeric_limits<float>::max();
         float max = -std::numeric_limits<float>::max();
         float sum = 0;
         float sum2 = 0;
+        
         mesh->hexa_quality.resize(mesh->hexas.size());
+        mesh->normalized_hexa_quality.resize(mesh->hexas.size());
+
         Vector3f v[8];
         for (size_t i = 0; i < mesh->hexas.size(); ++i) {
             int j = 0;
@@ -78,8 +183,9 @@ namespace HexaLab {
                 v[j++] = nav.vert().position;
                 nav = nav.rotate_on_face();
             } while(nav.vert() != b);
-            float q = fun(v[4], v[5], v[6], v[7], v[0], v[1], v[2], v[3]);
+            float q = fun(v[4], v[5], v[6], v[7], v[0], v[1], v[2], v[3], arg);
             mesh->hexa_quality[i] = q;
+            mesh->normalized_hexa_quality[i] = normalize_quality_measure(this->quality_measure, q);
             if (min > q) min = q;
             if (max < q) max = q;
             sum += q;
@@ -139,7 +245,7 @@ namespace HexaLab {
             // -- Singularity check
             int face_count = nav.incident_face_on_edge_num();
             if (face_count == 4) continue;
-            if (nav.edge().surface_flag) continue;
+            if (nav.edge().is_surface) continue;
             // add edge
             for (int j = 0; j < 2; ++j) {
                 singularity_model.wireframe_vert_pos.push_back(mesh->verts[nav.dart().vert].position);
@@ -201,10 +307,10 @@ namespace HexaLab {
             // If hexa quality display is enabled, fetch the color from there.
             // Otherwise use the defautl coloration (white for outer faces, yellow for everything else)
             Vector3f color;
-            if (do_show_color_map) {
-                color = color_map.get(mesh->hexa_quality[nav.hexa_index()]);
+            if (is_quality_color_mapping_enabled()) {
+                color = color_map.get(mesh->normalized_hexa_quality[nav.hexa_index()]);
             } else {
-                color = nav.is_face_boundary() ? this->visible_outside_color : this->visible_inside_color;
+                color = nav.is_face_boundary() ? this->default_outside_color : this->default_inside_color;
             }
             visible_model.surface_vert_color.push_back(color);
             visible_model.surface_vert_color.push_back(color);
@@ -271,19 +377,14 @@ namespace HexaLab {
         for (size_t i = 0; i < mesh->faces.size(); ++i) {
             MeshNavigator nav = mesh->navigate(mesh->faces[i]);
             // hexa a visible, hexa b not existing or not visible
-            if (! mesh->is_hexa_marked(nav.hexa())
-                && (nav.dart().hexa_neighbor == -1
-                    || mesh->is_hexa_marked(nav.flip_hexa().hexa()))) {
+            if (!mesh->is_marked(nav.hexa()) && (nav.dart().hexa_neighbor == -1 || mesh->is_marked(nav.flip_hexa().hexa()))) {
                 add_visible_face(nav.dart(), 1);
-                // hexa a invisible, hexa b existing and visible
-            } else if ( mesh->is_hexa_marked(nav.hexa())
-                && nav.dart().hexa_neighbor != -1
-                && !mesh->is_hexa_marked(nav.flip_hexa().hexa())) {
+            // hexa a invisible, hexa b existing and visible
+            } else if ( mesh->is_marked(nav.hexa()) && nav.dart().hexa_neighbor != -1 && !mesh->is_marked(nav.flip_hexa().hexa())) {
                 add_visible_face(nav.dart(), -1);
-//                add_filtered_face(nav.dart());
-                // face was culled by the plane, is surface
-            } else if ( mesh->is_hexa_marked(nav.hexa())
-                    && nav.dart().hexa_neighbor == -1) {
+                // add_filtered_face(nav.dart());
+            // face was culled by the plane, is surface
+            } else if ( mesh->is_marked(nav.hexa()) && nav.dart().hexa_neighbor == -1) {
                 add_filtered_face(nav.dart());
             }
         }

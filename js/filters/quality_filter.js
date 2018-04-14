@@ -72,6 +72,10 @@ HexaLab.QualityFilter.prototype = Object.assign(Object.create(HexaLab.Filter.pro
     },
 
     on_mesh_change: function (mesh) {
+        this.on_enabled_set(this.backend.enabled)
+        this.on_quality_threshold_min_set(this.backend.quality_threshold_min)
+        this.on_quality_threshold_max_set(this.backend.quality_threshold_max)
+        this.on_operator_set(this.backend.operator)
     },
 
     // system -> UI

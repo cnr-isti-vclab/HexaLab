@@ -131,16 +131,16 @@ document.body.addEventListener('copy', function (e) {
 
 $('#mesh_info_2').css('left', (HexaLab.UI.menu.width() + 10).toString().concat('px'))
 
-HexaLab.UI.quality_type_html = '<div class="menu_row"><div class="menu_row_label" style="font-weight:bold;">Quality measure</div>\
-<div class="menu_row_input">\
-    <div class="menu_row_input_block">\
-        <select id="quality_type" title="Choose Hex Quality measure">\
-            <option value="Scaled Jacobian">Scaled Jacobian</option>\
-            <option value="Diagonal Ratio">Diagonal Ratio</option>\
-            <option value="Edge Ratio">Edge Ratio</option>\
-        </select>\
-    </div>\
-</div></div>'
+// HexaLab.UI.quality_type_html = '<div class="menu_row"><div class="menu_row_label" style="font-weight:bold;">Quality measure</div>\
+// <div class="menu_row_input">\
+//     <div class="menu_row_input_block">\
+//         <select id="quality_type" title="Choose Hex Quality measure">\
+//             <option value="Scaled Jacobian">Scaled Jacobian</option>\
+//             <option value="Diagonal Ratio">Diagonal Ratio</option>\
+//             <option value="Edge Ratio">Edge Ratio</option>\
+//         </select>\
+//     </div>\
+// </div></div>'
 
 // --------------------------------------------------------------------------------
 // Rendering options
@@ -157,20 +157,20 @@ HexaLab.UI.surface_color_source.on("change", function () {
 HexaLab.UI.visible_outside_color.spectrum({
     cancelText: ''
 }).on('change.spectrum', function (color) {
-    HexaLab.app.set_visible_outside_color($(this).spectrum('get').toHexString())
+    HexaLab.app.set_visible_default_outside_color($(this).spectrum('get').toHexString())
 })
 
-HexaLab.UI.on_set_visible_outside_color = function (color) {
+HexaLab.UI.on_set_visible_default_outside_color = function (color) {
     HexaLab.UI.visible_outside_color.spectrum('set', color)
 }
 
 HexaLab.UI.visible_inside_color.spectrum({
     cancelText: ''
 }).on('change.spectrum', function (color) {
-    HexaLab.app.set_visible_inside_color($(this).spectrum('get').toHexString())
+    HexaLab.app.set_visible_default_inside_color($(this).spectrum('get').toHexString())
 })
 
-HexaLab.UI.on_set_visible_inside_color = function (color) {
+HexaLab.UI.on_set_visible_default_inside_color = function (color) {
     HexaLab.UI.visible_inside_color.spectrum('set', color)
 }
 
@@ -300,8 +300,9 @@ HexaLab.UI.import_remote_mesh = function (source, name) {
     request.open('GET', 'datasets/' + source.path + '/' + name, true);
     request.responseType = 'arraybuffer';
     request.onload = function(e) {
-        var data = new Uint8Array(this.response);
+        var data = new Uint8Array(this.response)
         HexaLab.UI.import_mesh(data, name)
+        HexaLab.UI.setup_paper_mesh_picker()
     }
     request.send();
 
@@ -311,7 +312,6 @@ HexaLab.UI.import_remote_mesh = function (source, name) {
     })
     HexaLab.UI.view_source =  HexaLab.UI.mesh_source[0].selectedIndex
     HexaLab.UI.view_mesh = HexaLab.UI.paper_mesh_picker[0].selectedIndex
-    HexaLab.UI.setup_paper_mesh_picker()
     HexaLab.UI.mesh_info_2_text.text('Loading...')
     HexaLab.UI.paper_mesh_picker.css('font-style', 'normal').show()
     HexaLab.UI.mesh_info_2.show().css('display', 'flex');
@@ -332,8 +332,24 @@ HexaLab.UI.setup_mesh_stats = function() {
         <div class="menu_row_input_block">\
             <select id="quality_type" title="Choose Hex Quality measure">\
                 <option value="Scaled Jacobian">Scaled Jacobian</option>\
-                <option value="Diagonal Ratio">Diagonal Ratio</option>\
                 <option value="Edge Ratio">Edge Ratio</option>\
+                <option value="Diagonal">Diagonal</option>\
+                <option value="Dimension">Dimension</option>\
+                <option value="Distortion">Distortion</option>\
+                <option value="Jacobian">Jacobian</option>\
+                <option value="Max Edge Ratio">Max Edge Ratio</option>\
+                <option value="Max Aspect Frobenius">Max Aspect Frobenius</option>\
+                <option value="Mean Aspect Frobenius">Mean Aspect Frobenius</option>\
+                <option value="Oddy">Oddy</option>\
+                <option value="Relative Size Squared">Relative Size Squared</option>\
+                <option value="Shape">Shape</option>\
+                <option value="Shape and Size">Shape and Size</option>\
+                <option value="Shear">Shear</option>\
+                <option value="Shear and Size">Shear and Size</option>\
+                <option value="Skew">Skew</option>\
+                <option value="Stretch">Stretch</option>\
+                <option value="Taper">Taper</option>\
+                <option value="Volume">Volume</option>\
             </select>\
         </div>\
     </div></div>')
@@ -532,7 +548,7 @@ HexaLab.UI.quality_plot = function(container, axis) {
     var bins_colors = []  // bin i takes the color that comes remapping bins_colors[i] from cmin-cmax to colormap 0-1
     var colorscale = []
 
-    var quality = HexaLab.app.backend.get_hexa_quality()
+    var quality = HexaLab.app.backend.get_normalized_hexa_quality()
     if (quality != null) {
         var t = new Float32Array(Module.HEAPU8.buffer, quality.data(), quality.size())
         for (var i = 0; i < quality.size() ; i++) {

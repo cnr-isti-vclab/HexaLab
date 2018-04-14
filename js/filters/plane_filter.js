@@ -3,17 +3,18 @@
 // --------------------------------------------------------------------------------
 // UI
 // --------------------------------------------------------------------------------
-HexaLab.UI.plane_enabled = $('#plane_enabled')
-HexaLab.UI.plane_offset_slider = $('#plane_offset_slider').slider()
-HexaLab.UI.plane_offset_number = $('#plane_offset_number')
-HexaLab.UI.plane_nx = $('#plane_nx')
-HexaLab.UI.plane_ny = $('#plane_ny')
-HexaLab.UI.plane_nz = $('#plane_nz')
-HexaLab.UI.plane_snap_nx = $('#plane_snap_nx')
-HexaLab.UI.plane_snap_ny = $('#plane_snap_ny')
-HexaLab.UI.plane_snap_nz = $('#plane_snap_nz')
-HexaLab.UI.plane_swap = $('#plane_swap_sign')
-HexaLab.UI.plane_snap_camera = $('#plane_snap_camera')
+// TODO use PlaneFilter namespace?
+HexaLab.UI.plane_enabled        = $('#plane_enabled')
+HexaLab.UI.plane_offset_slider  = $('#plane_offset_slider').slider()
+HexaLab.UI.plane_offset_number  = $('#plane_offset_number')
+HexaLab.UI.plane_nx             = $('#plane_nx')
+HexaLab.UI.plane_ny             = $('#plane_ny')
+HexaLab.UI.plane_nz             = $('#plane_nz')
+HexaLab.UI.plane_snap_nx        = $('#plane_snap_nx')
+HexaLab.UI.plane_snap_ny        = $('#plane_snap_ny')
+HexaLab.UI.plane_snap_nz        = $('#plane_snap_nz')
+HexaLab.UI.plane_swap           = $('#plane_swap_sign')
+HexaLab.UI.plane_snap_camera    = $('#plane_snap_camera')
 
 // --------------------------------------------------------------------------------
 // Logic
@@ -128,6 +129,13 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
         this.set_plane_color(settings.color);
     },
 
+    read_normal_from_backend: function () {
+        const n = this.backend.get_plane_normal()
+        const v = new THREE.Vector3(n.x(), n.y(), n.z())
+        n.delete();
+        return v;
+    },
+
     on_mesh_change: function (mesh) {
         this.mesh = mesh;
 
@@ -147,7 +155,13 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
         this.scene.add(this.plane.edges)
         this.update_visibility()
 
-        this.set_settings(this.get_settings());
+        this.set_plane_opacity(this.default_settings.opacity)
+        this.set_plane_color(this.default_settings.color)
+
+        this.on_enabled_set(this.backend.enabled)
+        this.on_plane_normal_set(this.read_normal_from_backend())
+        this.on_plane_offset_set(this.backend.get_plane_offset())
+
         this.update_mesh();
     },
 
