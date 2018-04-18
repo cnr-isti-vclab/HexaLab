@@ -2,6 +2,8 @@
 
 #include <builder.h>
 
+#include <hex_quality.h>
+
 namespace HexaLab {
 
     std::unordered_map<Builder::EdgeMapKey, Index> Builder::edges_map;
@@ -329,10 +331,30 @@ namespace HexaLab {
             }
         }
 
+        for (size_t i = 0; i < mesh.hexas.size(); ++i) {
+            Hexa& h = mesh.hexas[i];
+            Vector3f v[8];
+            int j = 0;
+            auto nav = mesh.navigate(h);
+            Vert& a = nav.vert();
+            do {
+                v[j++] = nav.vert().position;
+                nav = nav.rotate_on_face();
+            } while (nav.vert() != a);
+            nav = nav.rotate_on_hexa().rotate_on_hexa().flip_vert();
+            Vert& b = nav.vert();
+            do {
+                v[j++] = nav.vert().position;
+                nav = nav.rotate_on_face();
+            } while (nav.vert() != b);
+            float q = QualityMeasureFun::volume(v[4], v[5], v[6], v[7], v[0], v[1], v[2], v[3], nullptr);
+            HL_ASSERT(q > 0);
+        }
+
         auto dt = milli_from_sample(t0);
 
-        HL_LOG("[Mesh validator] Surface darts: %d/%d\n", surface_darts, mesh.darts.size());
-        HL_LOG("[Mesh validator] Validation took %dms.\n", dt);
+        HL_LOG("[Validator] Surface darts: %d/%d\n", surface_darts, mesh.darts.size());
+        HL_LOG("[Validator] Validation took %dms.\n", dt);
 
         return true;
     }

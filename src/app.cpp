@@ -24,6 +24,10 @@ namespace HexaLab {
         HL_LOG("Building...\n");
         Builder::build(*mesh, verts, indices);
 
+        // Validate
+        // HL_LOG("Validating...\n");
+        // Builder::validate(*mesh);
+
         // Update stats
         float max = std::numeric_limits<float>::lowest();
         float min = std::numeric_limits<float>::max();
@@ -57,7 +61,7 @@ namespace HexaLab {
                 v[j++] = nav.vert().position;
                 nav = nav.rotate_on_face();
             } while(nav.vert() != b);
-            avg_v += QualityMeasureFun::volume(v[1], v[0], v[4], v[5], v[2], v[3], v[7], v[6], nullptr);
+            avg_v += QualityMeasureFun::volume(v[4], v[5], v[6], v[7], v[0], v[1], v[2], v[3], nullptr);
         }
         avg_v /= mesh->hexas.size();
         mesh_stats.avg_volume = avg_v;
@@ -182,7 +186,7 @@ namespace HexaLab {
                 v[j++] = nav.vert().position;
                 nav = nav.rotate_on_face();
             } while(nav.vert() != b);
-            float q = fun(v[1], v[0], v[4], v[5], v[2], v[3], v[7], v[6], arg);
+            float q = fun(v[4], v[5], v[6], v[7], v[0], v[1], v[2], v[3], arg);
             mesh->hexa_quality[i] = q;
             if (min > q) min = q;
             if (max < q) max = q;

@@ -37,8 +37,8 @@ int main() {
       ++meshCnt;
       string filename = dataVec[j];
       const string basepath="../../datasets/";
-      bool ret = app.import_mesh("../../datasets/Skeleton-driven Adaptive Hexahedral Meshing of Tubular Shapes/dinopet_graded.mesh");
-      //bool ret = app.import_mesh(basepath+path+"/"+filename);
+      //bool ret = app.import_mesh("../../datasets/Skeleton-driven Adaptive Hexahedral Meshing of Tubular Shapes/dinopet_graded.mesh");
+      bool ret = app.import_mesh(basepath+path+"/"+filename);
       if (!ret) {
           ++failCnt;
       }
