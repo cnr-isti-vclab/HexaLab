@@ -442,7 +442,6 @@ Object.assign(HexaLab.Viewer.prototype, {
     // Settings
     set_background_color:   function (color) { this.settings.background = color },
     set_light_intensity:    function (intensity) { this.scene_light.intensity = intensity },
-    set_ao_mode:            function (value) { this.settings.ao = value },
     set_aa_mode:            function (value) { this.settings.aa = value; /*this.init_backend()*/ },
     get_background_color:   function () { return this.settings.background },
     get_light_intensity:    function () { return this.scene_light.intensity },
@@ -455,9 +454,22 @@ Object.assign(HexaLab.Viewer.prototype, {
     add_mesh:               function (mesh) { this.meshes.add(mesh) },
     remove_mesh:            function (mesh) { this.meshes.remove(mesh) },
 
+    set_ao_mode: function (value) {
+        if (this.settings.ao == 'object space' && value != 'object space') {
+            Module.print("[AO] Disabled")
+            this.buffers.visible.surface.removeAttribute('color')
+            this.buffers.visible.surface.addAttribute('color', this.ao_pass.original_color)
+        } 
+        this.settings.ao = value
+        if (value == 'object space') {
+            this.reset_osao()
+        }
+    },
+
     reset_osao: function () {
         // determine ao textures size
         const pos_attrib    = this.buffers.visible.surface.attributes.position
+        if (!pos_attrib) return
         const norm_attrib   = this.buffers.visible.surface.attributes.normal
         const color_attrib  = this.buffers.visible.surface.attributes.color
         const index_attrib  = this.buffers.visible.surface.getIndex()
@@ -639,7 +651,9 @@ Object.assign(HexaLab.Viewer.prototype, {
         clearTimeout(this.ao_pass.timer)
         const self = this
         this.ao_pass.timer = setTimeout(function () {
-            self.reset_osao()
+            if (self.settings.ao == 'object space') {
+                self.reset_osao()
+            }
         }, delay)
         this.ao_pass.paused = true
     },
