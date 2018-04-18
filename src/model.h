@@ -14,7 +14,7 @@ namespace HexaLab {
         vector<Vector3f> surface_vert_pos;
         vector<Vector3f> surface_vert_norm;
         vector<Vector3f> surface_vert_color;
-        Vector<Index>    surface_ibuffer;
+        vector<Index>    surface_ibuffer;
         vector<Vector3f> wireframe_vert_pos;
         vector<Vector3f> wireframe_vert_color;
 

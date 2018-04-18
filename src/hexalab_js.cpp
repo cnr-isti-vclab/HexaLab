@@ -15,6 +15,7 @@ using namespace Eigen;
 vector<Vector3f>* get_surface_vert_pos(Model& model)     { return &model.surface_vert_pos; }
 vector<Vector3f>* get_surface_vert_norm(Model& model)    { return &model.surface_vert_norm; }
 vector<Vector3f>* get_surface_vert_color(Model& model)   { return &model.surface_vert_color; }
+vector<Index>*    get_surface_ibuffer(Model& model)      { return &model.surface_ibuffer; }
 vector<Vector3f>* get_wireframe_vert_pos(Model& model)   { return &model.wireframe_vert_pos; }
 vector<Vector3f>* get_wireframe_vert_color(Model& model) { return &model.wireframe_vert_color; }
 
@@ -99,6 +100,7 @@ EMSCRIPTEN_BINDINGS(HexaLab) {
         .function("surface_pos",            &get_surface_vert_pos, allow_raw_pointers())
         .function("surface_norm",           &get_surface_vert_norm, allow_raw_pointers())
         .function("surface_color",          &get_surface_vert_color, allow_raw_pointers())
+        .function("surface_ibuffer",        &get_surface_ibuffer, allow_raw_pointers())
         .function("wireframe_pos",          &get_wireframe_vert_pos, allow_raw_pointers())
         .function("wireframe_color",        &get_wireframe_vert_color, allow_raw_pointers())
         ;
@@ -178,6 +180,12 @@ EMSCRIPTEN_BINDINGS(HexaLab) {
         .constructor<>()
         .function("data",                   &buffer_data<float>)
         .function("size",                   &buffer_size<float>)
+        ;
+
+    class_<vector<Index>>("buffer1i")
+        .constructor<>()
+        .function("data",                   &buffer_data<Index>)
+        .function("size",                   &buffer_size<Index>)
         ;
 
 }

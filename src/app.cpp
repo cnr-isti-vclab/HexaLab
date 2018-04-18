@@ -299,37 +299,61 @@ namespace HexaLab {
         }
     }
 
+    void App::add_visible_vert(Dart& dart, float normal_sign, Vector3f color) {
+        MeshNavigator nav = mesh->navigate(dart);
+        // if (this->mesh->is_marked(nav.vert())) {
+            // visible_model.surface_ibuffer.push_back(nav.vert().ibuffer_idx);
+        // } else {
+            visible_model.surface_vert_pos.push_back(nav.vert().position);
+            visible_model.surface_vert_norm.push_back(nav.face().normal * normal_sign);
+            visible_model.surface_vert_color.push_back(color);
+            HL_ASSERT(visible_model.surface_vert_pos.size() == visible_model.surface_vert_norm.size() &&
+                visible_model.surface_vert_pos.size() == visible_model.surface_vert_color.size());
+            Index idx = visible_model.surface_vert_pos.size() - 1;
+            visible_model.surface_ibuffer.push_back(idx);
+            // nav.vert().ibuffer_idx = idx;
+            // this->mesh->mark(nav.vert());
+        // }
+    }
+
     void App::add_visible_face(Dart& dart, float normal_sign) {
         MeshNavigator nav = mesh->navigate(dart);
         if (normal_sign == -1) {
             nav = nav.flip_hexa().flip_edge();
         }
 
+        // If hexa quality display is enabled, fetch the color from there.
+        // Otherwise use the defautl coloration (white for outer faces, yellow for everything else)
+        Vector3f color;
+        if (is_quality_color_mapping_enabled()) {
+            color = color_map.get(mesh->normalized_hexa_quality[nav.hexa_index()]);
+        } else {
+            color = nav.is_face_boundary() ? this->default_outside_color : this->default_inside_color;
+        }
+
         for (int i = 0; i < 2; ++i) {
             for (int j = 0; j < 2; ++j) {
-                visible_model.surface_vert_pos.push_back(mesh->verts[nav.dart().vert].position);
                 add_visible_wireframe(nav.dart());
                 nav = nav.rotate_on_face();
             }
-            visible_model.surface_vert_pos.push_back(mesh->verts[nav.dart().vert].position);
-
-            Vector3f normal = nav.face().normal * normal_sign;
-            visible_model.surface_vert_norm.push_back(normal);
-            visible_model.surface_vert_norm.push_back(normal);
-            visible_model.surface_vert_norm.push_back(normal);
-
-            // If hexa quality display is enabled, fetch the color from there.
-            // Otherwise use the defautl coloration (white for outer faces, yellow for everything else)
-            Vector3f color;
-            if (is_quality_color_mapping_enabled()) {
-                color = color_map.get(mesh->normalized_hexa_quality[nav.hexa_index()]);
-            } else {
-                color = nav.is_face_boundary() ? this->default_outside_color : this->default_inside_color;
-            }
-            visible_model.surface_vert_color.push_back(color);
-            visible_model.surface_vert_color.push_back(color);
-            visible_model.surface_vert_color.push_back(color);
         }
+
+        nav = mesh->navigate(dart);
+        if (normal_sign == -1) nav = nav.flip_vert();
+        Vert& vert = nav.vert();
+        Index idx = visible_model.surface_vert_pos.size();
+        do {
+            visible_model.surface_vert_pos.push_back(nav.vert().position);
+            visible_model.surface_vert_norm.push_back(nav.face().normal * normal_sign);
+            visible_model.surface_vert_color.push_back(color);
+            nav = nav.rotate_on_face();
+        } while (nav.vert() != vert);
+        visible_model.surface_ibuffer.push_back(idx + 0);
+        visible_model.surface_ibuffer.push_back(idx + 1);
+        visible_model.surface_ibuffer.push_back(idx + 2);
+        visible_model.surface_ibuffer.push_back(idx + 2);
+        visible_model.surface_ibuffer.push_back(idx + 3);
+        visible_model.surface_ibuffer.push_back(idx + 0);
     }
 
     void App::add_visible_wireframe(Dart& dart) {

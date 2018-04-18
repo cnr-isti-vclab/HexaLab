@@ -114,6 +114,7 @@ namespace HexaLab {
         QualityMeasureEnum  get_quality_measure()               { return this->quality_measure; }
 
     private:
+        void add_visible_vert(Dart& dart, float normal_sign, Vector3f color);
         void add_visible_face(Dart& dart, float normal_sign);
         void add_visible_wireframe(Dart& dart);
         void add_filtered_face(Dart& dart);

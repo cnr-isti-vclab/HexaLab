@@ -21,30 +21,41 @@ Object.assign(HexaLab.BufferGeometry.prototype, {
         this.surface.removeAttribute('position');
         const x = this.backend.surface_pos().size()
         if (this.backend.surface_pos().size() != 0) {
-            var buffer = new Float32Array(Module.HEAPU8.buffer, this.backend.surface_pos().data(), this.backend.surface_pos().size() * 3);
+            const buffer = new Float32Array(Module.HEAPU8.buffer, this.backend.surface_pos().data(), this.backend.surface_pos().size() * 3);
             this.surface.addAttribute('position', new THREE.BufferAttribute(buffer, 3));
         }
         this.surface.removeAttribute('normal');
         if (this.backend.surface_norm().size() != 0) {
-            var buffer = new Float32Array(Module.HEAPU8.buffer, this.backend.surface_norm().data(), this.backend.surface_norm().size() * 3);
+            const buffer = new Float32Array(Module.HEAPU8.buffer, this.backend.surface_norm().data(), this.backend.surface_norm().size() * 3);
             this.surface.addAttribute('normal', new THREE.BufferAttribute(buffer, 3));
         } else {
             this.surface.computeVertexNormals()
         }
         this.surface.removeAttribute('color');
         if (this.backend.surface_color().size() != 0) {
-            var buffer = new Float32Array(Module.HEAPU8.buffer, this.backend.surface_color().data(), this.backend.surface_color().size() * 3);
+            const buffer = new Float32Array(Module.HEAPU8.buffer, this.backend.surface_color().data(), this.backend.surface_color().size() * 3);
             this.surface.addAttribute('color', new THREE.BufferAttribute(buffer, 3));
+        }
+        this.surface.setIndex(null)     // TODO ?
+        if (this.backend.surface_ibuffer().size() != 0) {
+            let buffer = []
+            const data = this.backend.surface_ibuffer().data()
+            const size = this.backend.surface_ibuffer().size()
+            const t = new Int32Array(Module.HEAPU8.buffer, data, size)
+            for (let i = 0; i < size; ++i) {  // TODO no copy
+                buffer[i] = t[i];
+            } 
+            this.surface.setIndex(buffer)
         }
 
         this.wireframe.removeAttribute('position');
         if (this.backend.wireframe_pos().size() != 0) {
-            var buffer = new Float32Array(Module.HEAPU8.buffer, this.backend.wireframe_pos().data(), this.backend.wireframe_pos().size() * 3);
+            const buffer = new Float32Array(Module.HEAPU8.buffer, this.backend.wireframe_pos().data(), this.backend.wireframe_pos().size() * 3);
             this.wireframe.addAttribute('position', new THREE.BufferAttribute(buffer, 3));
         }
         this.wireframe.removeAttribute('color');
         if (this.backend.wireframe_color().size() != 0) {
-            var buffer = new Float32Array(Module.HEAPU8.buffer, this.backend.wireframe_color().data(), this.backend.wireframe_color().size() * 3);
+            const buffer = new Float32Array(Module.HEAPU8.buffer, this.backend.wireframe_color().data(), this.backend.wireframe_color().size() * 3);
             this.wireframe.addAttribute('color', new THREE.BufferAttribute(buffer, 3));
         }
     },
@@ -449,6 +460,7 @@ Object.assign(HexaLab.Viewer.prototype, {
         const pos_attrib    = this.buffers.visible.surface.attributes.position
         const norm_attrib   = this.buffers.visible.surface.attributes.normal
         const color_attrib  = this.buffers.visible.surface.attributes.color
+        const index_attrib  = this.buffers.visible.surface.getIndex()
         let t_size  = 1
         while (t_size * t_size < pos_attrib.count) {   // count is number of vec3 items
             t_size *= 2
@@ -460,61 +472,62 @@ Object.assign(HexaLab.Viewer.prototype, {
             b = new THREE.Vector3(),
             c = new THREE.Vector3(),
             d = new THREE.Vector3()
-        for (let i = 0; i < pos_attrib.count / 6; ++i) {
-            a.set(pos_attrib.array[i * 18 +  0], pos_attrib.array[i * 18 +  1], pos_attrib.array[i * 18 +  2])
-            b.set(pos_attrib.array[i * 18 +  3], pos_attrib.array[i * 18 +  4], pos_attrib.array[i * 18 +  5])
-            c.set(pos_attrib.array[i * 18 +  6], pos_attrib.array[i * 18 +  7], pos_attrib.array[i * 18 +  8])
+        for (let i = 0; i < index_attrib.count / 6; ++i) {
+            a.set(pos_attrib.array[index_attrib.array[i * 6 + 0] * 3 + 0], pos_attrib.array[index_attrib.array[i * 6 + 0] * 3 + 1], pos_attrib.array[index_attrib.array[i * 6 + 0] * 3 + 2])
+            b.set(pos_attrib.array[index_attrib.array[i * 6 + 1] * 3 + 0], pos_attrib.array[index_attrib.array[i * 6 + 1] * 3 + 1], pos_attrib.array[index_attrib.array[i * 6 + 1] * 3 + 2])
+            c.set(pos_attrib.array[index_attrib.array[i * 6 + 2] * 3 + 0], pos_attrib.array[index_attrib.array[i * 6 + 2] * 3 + 1], pos_attrib.array[index_attrib.array[i * 6 + 2] * 3 + 2])
             // skip the first vertex of the second face since it's the same as the last of the first face
-            d.set(pos_attrib.array[i * 18 + 12], pos_attrib.array[i * 18 + 13], pos_attrib.array[i * 18 + 14])
+            d.set(pos_attrib.array[index_attrib.array[i * 6 + 4] * 3 + 0], pos_attrib.array[index_attrib.array[i * 6 + 4] * 3 + 1], pos_attrib.array[index_attrib.array[i * 6 + 4] * 3 + 2])
             // skip the last vertex of the second face since it's the same as the first of the first face
             let center = new THREE.Vector3().add(a).add(b).add(c).add(d).multiplyScalar(0.25)    // average
             
             // TODO in offset calculation, account for triangle screen size ?
+            const offset = 0.01
             let v
             v = a.clone()
-            v.add(new THREE.Vector3().add(center).sub(a).normalize().multiplyScalar(0.01))
-            pos_tex_data[i * 24 +  0] = v.x
-            pos_tex_data[i * 24 +  1] = v.y
-            pos_tex_data[i * 24 +  2] = v.z
-            pos_tex_data[i * 24 +  3] = 0
+            v.add(new THREE.Vector3().add(center).sub(a).normalize().multiplyScalar(offset))
+            pos_tex_data[index_attrib.array[i * 6 + 0] * 4 + 0] = v.x
+            pos_tex_data[index_attrib.array[i * 6 + 0] * 4 + 1] = v.y
+            pos_tex_data[index_attrib.array[i * 6 + 0] * 4 + 2] = v.z
+            pos_tex_data[index_attrib.array[i * 6 + 0] * 4 + 3] = 0
 
             v = b.clone()
-            v.add(new THREE.Vector3().add(center).sub(b).normalize().multiplyScalar(0.01))
-            pos_tex_data[i * 24 +  4] = v.x
-            pos_tex_data[i * 24 +  5] = v.y
-            pos_tex_data[i * 24 +  6] = v.z
-            pos_tex_data[i * 24 +  7] = 0
+            v.add(new THREE.Vector3().add(center).sub(b).normalize().multiplyScalar(offset))
+            pos_tex_data[index_attrib.array[i * 6 + 1] * 4 + 0] = v.x
+            pos_tex_data[index_attrib.array[i * 6 + 1] * 4 + 1] = v.y
+            pos_tex_data[index_attrib.array[i * 6 + 1] * 4 + 2] = v.z
+            pos_tex_data[index_attrib.array[i * 6 + 1] * 4 + 3] = 0
 
             v = c.clone()
-            v.add(new THREE.Vector3().add(center).sub(c).normalize().multiplyScalar(0.01))
-            pos_tex_data[i * 24 +  8] = v.x
-            pos_tex_data[i * 24 +  9] = v.y
-            pos_tex_data[i * 24 + 10] = v.z
-            pos_tex_data[i * 24 + 11] = 0
+            v.add(new THREE.Vector3().add(center).sub(c).normalize().multiplyScalar(offset))
+            pos_tex_data[index_attrib.array[i * 6 + 2] * 4 + 0] = v.x
+            pos_tex_data[index_attrib.array[i * 6 + 2] * 4 + 1] = v.y
+            pos_tex_data[index_attrib.array[i * 6 + 2] * 4 + 2] = v.z
+            pos_tex_data[index_attrib.array[i * 6 + 2] * 4 + 3] = 0
 
             v = c.clone()
-            v.add(new THREE.Vector3().add(center).sub(c).normalize().multiplyScalar(0.01))
-            pos_tex_data[i * 24 + 12] = v.x
-            pos_tex_data[i * 24 + 13] = v.y
-            pos_tex_data[i * 24 + 14] = v.z
-            pos_tex_data[i * 24 + 15] = 0
+            v.add(new THREE.Vector3().add(center).sub(c).normalize().multiplyScalar(offset))
+            pos_tex_data[index_attrib.array[i * 6 + 3] * 4 + 0] = v.x
+            pos_tex_data[index_attrib.array[i * 6 + 3] * 4 + 1] = v.y
+            pos_tex_data[index_attrib.array[i * 6 + 3] * 4 + 2] = v.z
+            pos_tex_data[index_attrib.array[i * 6 + 3] * 4 + 3] = 0
 
             v = d.clone()
-            v.add(new THREE.Vector3().add(center).sub(d).normalize().multiplyScalar(0.01))
-            pos_tex_data[i * 24 + 16] = v.x
-            pos_tex_data[i * 24 + 17] = v.y
-            pos_tex_data[i * 24 + 18] = v.z
-            pos_tex_data[i * 24 + 19] = 0
+            v.add(new THREE.Vector3().add(center).sub(d).normalize().multiplyScalar(offset))
+            pos_tex_data[index_attrib.array[i * 6 + 4] * 4 + 0] = v.x
+            pos_tex_data[index_attrib.array[i * 6 + 4] * 4 + 1] = v.y
+            pos_tex_data[index_attrib.array[i * 6 + 4] * 4 + 2] = v.z
+            pos_tex_data[index_attrib.array[i * 6 + 4] * 4 + 3] = 0
 
             v = a.clone()
-            v.add(new THREE.Vector3().add(center).sub(a).normalize().multiplyScalar(0.01))
-            pos_tex_data[i * 24 + 20] = v.x
-            pos_tex_data[i * 24 + 21] = v.y
-            pos_tex_data[i * 24 + 22] = v.z
-            pos_tex_data[i * 24 + 23] = 0
+            v.add(new THREE.Vector3().add(center).sub(a).normalize().multiplyScalar(offset))
+            pos_tex_data[index_attrib.array[i * 6 + 5] * 4 + 0] = v.x
+            pos_tex_data[index_attrib.array[i * 6 + 5] * 4 + 1] = v.y
+            pos_tex_data[index_attrib.array[i * 6 + 5] * 4 + 2] = v.z
+            pos_tex_data[index_attrib.array[i * 6 + 5] * 4 + 3] = 0
         }
         for (let i = 0; i < t_size * t_size; ++i) {
-            if (i < pos_attrib.count) {
+            if (i < norm_attrib.count) {
                 norm_tex_data[i * 4 + 0] = norm_attrib.array[i * 3 + 0]
                 norm_tex_data[i * 4 + 1] = norm_attrib.array[i * 3 + 1]
                 norm_tex_data[i * 4 + 2] = norm_attrib.array[i * 3 + 2]
