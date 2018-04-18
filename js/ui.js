@@ -356,11 +356,19 @@ HexaLab.UI.setup_mesh_stats = function() {
         </div>\
     </div></div>')
     if (HexaLab.UI.view_quality_measure) $('#quality_type').val(HexaLab.UI.view_quality_measure)
+    let min = mesh.quality_min.toFixed(3)
+    let max = mesh.quality_max.toFixed(3)
+    let avg = mesh.quality_avg.toFixed(3)
+    let vri = mesh.quality_var.toFixed(3)
+    if (min == 0) min = mesh.quality_min.toExponential(2)
+    if (max == 0) max = mesh.quality_max.toExponential(2)
+    if (avg == 0) avg = mesh.quality_avg.toExponential(2)
+    if (vri == 0) vri = mesh.quality_var.toExponential(2)
     HexaLab.UI.mesh_info_2_text.append('<div id="mesh_stats_wrapper">' +
-        '<div><span class="mesh_stat">min: </span>' + mesh.quality_min.toFixed(3) + '</div>' +
-        '<div><span class="mesh_stat">max: </span>' + mesh.quality_max.toFixed(3) + '</div>' +
-        '<div><span class="mesh_stat">avg: </span>' + mesh.quality_avg.toFixed(3) + '</div>' +
-        '<div><span class="mesh_stat">var: </span>' + mesh.quality_var.toFixed(3) + '</div>' +
+        '<div><span class="mesh_stat">min: </span>' + min + '</div>' +
+        '<div><span class="mesh_stat">max: </span>' + max + '</div>' +
+        '<div><span class="mesh_stat">avg: </span>' + avg + '</div>' +
+        '<div><span class="mesh_stat">var: </span>' + vri + '</div>' +
         '</div>'
     )
     $('#quality_type').on('change', function () {
