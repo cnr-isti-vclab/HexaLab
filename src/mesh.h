@@ -63,7 +63,7 @@ namespace HexaLab {
 
     struct Hexa {
         Index dart      = -1;
-        uint32_t mark   = 0;
+        uint32_t mark   =  0;
 
         Hexa(){}
         Hexa(Index dart) { this->dart = dart; }
@@ -86,7 +86,7 @@ namespace HexaLab {
     };
 
     struct Edge {
-        Index dart = -1;
+        Index dart      = -1;
         bool is_surface = false;
 
         Edge(){}
@@ -96,9 +96,11 @@ namespace HexaLab {
     };
 
     struct Vert {
-        Index dart = -1;
+        Index dart          = -1;
         Vector3f position;
-        bool is_surface = false;
+        bool is_surface     = false;
+        Index ibuffer_idx   = -1;
+        uint32_t mark       =  0;   // marks the ibuffer_idx
 
         Vert(){}
         Vert(Vector3f position) { this->position = position; }

@@ -566,11 +566,17 @@ Object.assign(HexaLab.Viewer.prototype, {
             // materials:  settings.materials,
             rendering:  settings.rendering
         }
+        // cut off a few irrelevant settings from the app
         relevant_settings.app.singularity_mode = null
         relevant_settings.app.apply_color_map = null
         // Dirty hack for not resetting on quality change if quality filtering is disabled
         if (!relevant_settings.filters["Quality"].enabled) {
             relevant_settings.app.quality_measure = null
+        }
+        // cut off disabled filters
+        for (const key in relevant_settings.filters) {
+            if (relevant_settings.filters[key].enabled == false)
+                relevant_settings.filters[key] = null
         }
         const hash = objectHash.sha1(relevant_settings)
         let cached = true
