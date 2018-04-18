@@ -74,6 +74,7 @@ namespace HexaLab {
     struct Face {
         Index dart = -1;
         Vector3f normal;
+        // is_surface is given by simply checking the existence of a neighboring hexa
 
         Face(){}
         Face(Index dart) { this->dart = dart; }
@@ -97,6 +98,7 @@ namespace HexaLab {
     struct Vert {
         Index dart = -1;
         Vector3f position;
+        bool is_surface = false;
 
         Vert(){}
         Vert(Vector3f position) { this->position = position; }

@@ -28,6 +28,8 @@ namespace HexaLab {
         float quality_max = 0;
         float quality_avg = 0;
         float quality_var = 0;
+        float normalized_quality_min = 0;
+        float normalized_quality_max = 0;
     };
 
     class App {
@@ -47,8 +49,9 @@ namespace HexaLab {
         Model visible_model;
         Model filtered_model;
         Model singularity_model;
-        Model boundary_singularity_model;
-        Model boundary_creases_model;
+
+        bool do_show_boundary_singularity = false;
+        bool do_show_boundary_creases = false;
 
         // Colors selected for the visible_model in the .js app. They are used when hexa quality color mapping is off.
         Vector3f default_outside_color = Vector3f(1, 1, 1);
@@ -81,7 +84,7 @@ namespace HexaLab {
         bool update_models();
         
         // Updates the selected color map, enabled quality color mapping and flags the model color buffer as dirty.
-        void enable_quality_color_mapping(ColorMap map);
+        void enable_quality_color_mapping(ColorMap::Palette palette);
         // Disables quality color mapping and flags the model color buffer as dirty (it will be rebuilt using the default colors).
         void disable_quality_color_mapping();
 
@@ -92,22 +95,24 @@ namespace HexaLab {
         // Flags as dirty the model quality buffers, and also the model color buffer if quality color mapping is enabled.
         void set_quality_measure(QualityMeasureEnum e);
 
+        void show_boundary_singularity(bool do_show);
+        void show_boundary_creases(bool do_show);
+
+
         // Getters
-        Vector3f        get_default_outside_color()         { return this->default_outside_color; }
-        Vector3f        get_default_inside_color()          { return this->default_inside_color; }
-        Model*          get_visible_model()                 { return &this->visible_model; }
-        Model*          get_filtered_model()                { return &this->filtered_model; }
-        Model*          get_singularity_model()             { return &this->singularity_model; }
-        Model*          get_boundary_singularity_model()    { return &this->boundary_singularity_model; }
-        Model*          get_boundary_creases_model()        { return &this->boundary_creases_model; }
-        Mesh*           get_mesh()                          { return this->mesh; }
-        MeshStats*      get_mesh_stats()                    { return this->mesh ? &this->mesh_stats : nullptr; }
-        vector<float>*  get_hexa_quality()                  { return this->mesh ? &this->mesh->hexa_quality : nullptr; }
-        vector<float>*  get_normalized_hexa_quality()       { return this->mesh ? &this->mesh->normalized_hexa_quality : nullptr; }
-        ColorMap        get_color_map()                     { return this->color_map; }
-        bool            is_quality_color_mapping_enabled()  { return this->quality_color_mapping_enabled; }
-        QualityMeasureEnum get_quality_measure()            { return this->quality_measure; }
-                        
+        Vector3f            get_default_outside_color()         { return this->default_outside_color; }
+        Vector3f            get_default_inside_color()          { return this->default_inside_color; }
+        Model*              get_visible_model()                 { return &this->visible_model; }
+        Model*              get_filtered_model()                { return &this->filtered_model; }
+        Model*              get_singularity_model()             { return &this->singularity_model; }
+        Mesh*               get_mesh()                          { return this->mesh; }
+        MeshStats*          get_mesh_stats()                    { return this->mesh ? &this->mesh_stats : nullptr; }
+        vector<float>*      get_hexa_quality()                  { return this->mesh ? &this->mesh->hexa_quality : nullptr; }
+        vector<float>*      get_normalized_hexa_quality()       { return this->mesh ? &this->mesh->normalized_hexa_quality : nullptr; }
+        ColorMap&           get_color_map()                     { return this->color_map; }
+        bool                is_quality_color_mapping_enabled()  { return this->quality_color_mapping_enabled; }
+        QualityMeasureEnum  get_quality_measure()               { return this->quality_measure; }
+
     private:
         void add_visible_face(Dart& dart, float normal_sign);
         void add_visible_wireframe(Dart& dart);

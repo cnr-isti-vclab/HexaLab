@@ -49,14 +49,12 @@ EMSCRIPTEN_BINDINGS(HexaLab) {
         .function("set_default_outside_color",          &App::set_default_outside_color)
         .function("set_default_inside_color",           &App::set_default_inside_color)
         .function("set_quality_measure",                &App::set_quality_measure)
-        .function("enable_quality_color_mapping",       &App::enable_quality_color_mapping)
-        .function("disable_quality_color_mapping",      &App::disable_quality_color_mapping)
+        .function("show_boundary_singularity",          &App::show_boundary_singularity)
+        .function("show_boundary_creases",              &App::show_boundary_creases)
 
         .function("get_visible_model",                  &App::get_visible_model, allow_raw_pointers())
         .function("get_filtered_model",                 &App::get_filtered_model, allow_raw_pointers())
         .function("get_singularity_model",              &App::get_singularity_model, allow_raw_pointers())
-        .function("get_boundary_singularity_model",     &App::get_boundary_singularity_model, allow_raw_pointers())
-        .function("get_boundary_creases_model",         &App::get_boundary_creases_model, allow_raw_pointers())
         .function("get_hexa_quality",                   &App::get_hexa_quality, allow_raw_pointers())
         .function("get_normalized_hexa_quality",        &App::get_normalized_hexa_quality, allow_raw_pointers())
         .function("get_mesh",                           &App::get_mesh_stats, allow_raw_pointers())
@@ -118,6 +116,8 @@ EMSCRIPTEN_BINDINGS(HexaLab) {
         .function("get_aabb_diagonal",      &mesh_stats_aabb_diag)
         .function("get_aabb_size",          &mesh_stats_aabb_size)
         .function("get_aabb_center",        &mesh_stats_center)
+        .property("normalized_quality_min", &MeshStats::normalized_quality_min)
+        .property("normalized_quality_max", &MeshStats::normalized_quality_max)
         ;
 
     // FILTERS

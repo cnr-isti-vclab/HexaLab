@@ -2,7 +2,7 @@
 
 #define HL_QUALITY_FILTER_DEFAULT_ENABLED   false
 #define HL_QUALITY_FILTER_DEFAULT_MIN       0.f
-#define HL_QUALITY_FILTER_DEFAULT_MAX       0.8f
+#define HL_QUALITY_FILTER_DEFAULT_MAX       1.f
 #define HL_QUALITY_FILTER_DEFAULT_OP        Operator::Inside
 
 namespace HexaLab {
@@ -20,10 +20,10 @@ namespace HexaLab {
             bool is_filtered;
         	switch(this->op) {
         	case Operator::Inside:
-        		is_filtered = mesh.hexa_quality[i] < quality_threshold_min || mesh.hexa_quality[i] > quality_threshold_max;
+        		is_filtered = mesh.normalized_hexa_quality[i] < quality_threshold_min || mesh.normalized_hexa_quality[i] > quality_threshold_max;
         		break;
         	case Operator::Outside:
-        		is_filtered = mesh.hexa_quality[i] > quality_threshold_min && mesh.hexa_quality[i] < quality_threshold_max;
+        		is_filtered = mesh.normalized_hexa_quality[i] > quality_threshold_min && mesh.normalized_hexa_quality[i] < quality_threshold_max;
         		break;
         	}
             if (is_filtered) {

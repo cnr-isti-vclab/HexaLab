@@ -170,6 +170,7 @@ namespace HexaLab {
 			palette = default_palette;
 			goto start;
 		}
+		this->palette_enum = palette;
 	}
 
 	Vector3f ColorMap::get(float value) {

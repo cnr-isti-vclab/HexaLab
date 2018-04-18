@@ -41,39 +41,26 @@ namespace HexaLab {
         mesh_stats.max_edge_len = max;
         mesh_stats.avg_edge_len = avg;
 
-        // TODO doublecheck these random ripoffs
-        // auto subvolume = [] (const Vector3f& a, const Vector3f& b, const Vector3f& c, const Vector3f& d, const Vector3f& e) {
-        //     float base = (b - a).cross(d - a).norm() + (c - a).cross(d - a).norm();
-        //     base /= 2;
-        //     Vector3f norm = (b - a).cross(c - a).normalized();
-        //     float h = std::abs(norm.dot(e - a));
-        //     return base * h / 3;
-        // };
-        // auto hex_volume = [&subvolume] (Vector3f* coords) {
-        //     return subvolume(coords[0], coords[1], coords[3], coords[2], coords[7]) +
-        //         subvolume(coords[0], coords[1], coords[4], coords[5], coords[7]) +
-        //         subvolume(coords[1], coords[2], coords[5], coords[6], coords[7]);
-        // };
-        // Vector3f v[8];
-        // float avg_v = 0;
-        // for (size_t i = 0; i < mesh->hexas.size(); ++i) {
-        //     int j = 0;
-        //     MeshNavigator nav = mesh->navigate(mesh->hexas[i]);
-        //     Vert& a = nav.vert();
-        //     do {
-        //         v[j++] = nav.vert().position;
-        //         nav = nav.rotate_on_face();
-        //     } while(nav.vert() != a);
-        //     nav = nav.rotate_on_hexa().rotate_on_hexa().flip_vert();
-        //     Vert& b = nav.vert();
-        //     do {
-        //         v[j++] = nav.vert().position;
-        //         nav = nav.rotate_on_face();
-        //     } while(nav.vert() != b);
-        //     avg_v += hex_volume(v);
-        // }
-        // avg_v /= mesh->hexas.size();
-        mesh_stats.avg_volume = 1;
+        float avg_v = 0;
+        Vector3f v[8];
+        for (size_t i = 0; i < mesh->hexas.size(); ++i) {
+            int j = 0;
+            MeshNavigator nav = mesh->navigate(mesh->hexas[i]);
+            Vert& a = nav.vert();
+            do {
+                v[j++] = nav.vert().position;
+                nav = nav.rotate_on_face();
+            } while(nav.vert() != a);
+            nav = nav.rotate_on_hexa().rotate_on_hexa().flip_vert();
+            Vert& b = nav.vert();
+            do {
+                v[j++] = nav.vert().position;
+                nav = nav.rotate_on_face();
+            } while(nav.vert() != b);
+            avg_v += QualityMeasureFun::volume(v[1], v[0], v[4], v[5], v[2], v[3], v[7], v[6], nullptr);
+        }
+        avg_v /= mesh->hexas.size();
+        mesh_stats.avg_volume = avg_v;
 
         mesh_stats.vert_count = mesh->verts.size();
         mesh_stats.hexa_count = mesh->hexas.size();
@@ -99,9 +86,9 @@ namespace HexaLab {
         return true;
     }
 
-    void App::enable_quality_color_mapping(ColorMap e) {
+    void App::enable_quality_color_mapping(ColorMap::Palette e) {
+        this->color_map = ColorMap(e);
         this->quality_color_mapping_enabled = true;
-        this->color_map = e;
         this->flag_models_as_dirty();   // TODO update color only
     }
 
@@ -146,17 +133,29 @@ namespace HexaLab {
         return false;
     }
 
+
+    void App::show_boundary_singularity(bool do_show) {
+        this->do_show_boundary_singularity = do_show;
+        this->flag_models_as_dirty();
+    }
+    void App::show_boundary_creases(bool do_show) {
+        this->do_show_boundary_creases = do_show;
+        this->flag_models_as_dirty();
+    }
+
+
     // PRIVATE
 
     void App::compute_hexa_quality() {
         quality_measure_fun* fun = get_quality_measure_fun(this->quality_measure);
-        
         void* arg = nullptr;
         switch (this->quality_measure) {
             case QualityMeasureEnum::RSS:
             case QualityMeasureEnum::SHAS:
             case QualityMeasureEnum::SHES:
                 arg = &this->mesh_stats.avg_volume;
+                break;
+            default:
                 break;
         }
 
@@ -183,9 +182,8 @@ namespace HexaLab {
                 v[j++] = nav.vert().position;
                 nav = nav.rotate_on_face();
             } while(nav.vert() != b);
-            float q = fun(v[4], v[5], v[6], v[7], v[0], v[1], v[2], v[3], arg);
+            float q = fun(v[1], v[0], v[4], v[5], v[2], v[3], v[7], v[6], arg);
             mesh->hexa_quality[i] = q;
-            mesh->normalized_hexa_quality[i] = normalize_quality_measure(this->quality_measure, q);
             if (min > q) min = q;
             if (max < q) max = q;
             sum += q;
@@ -195,52 +193,64 @@ namespace HexaLab {
         this->mesh_stats.quality_max = max;
         this->mesh_stats.quality_avg = sum / mesh->hexas.size();
         this->mesh_stats.quality_var = sum2 / mesh->hexas.size() - this->mesh_stats.quality_avg * this->mesh_stats.quality_avg;
+
+        min = std::numeric_limits<float>::max();
+        max = -std::numeric_limits<float>::max();
+        for (size_t i = 0; i < mesh->hexas.size(); ++i) {
+            float q = normalize_quality_measure(this->quality_measure, mesh->hexa_quality[i], this->mesh_stats.quality_min, this->mesh_stats.quality_max);
+            if (min > q) min = q;
+            if (max < q) max = q;
+            mesh->normalized_hexa_quality[i] = q;
+        }
+
+        this->mesh_stats.normalized_quality_min = min;
+        this->mesh_stats.normalized_quality_max = max;
     }
 
     void App::build_singularity_models() {
         singularity_model.clear();
-        boundary_singularity_model.clear();
-        boundary_creases_model.clear();
+        // boundary_singularity_model.clear();
+        // boundary_creases_model.clear();
         for (size_t i = 0; i < mesh->edges.size(); ++i) {
             MeshNavigator nav = mesh->navigate(mesh->edges[i]);
 
             // -- Boundary check --
-            {
-                bool boundary = false;
-                Face& begin = nav.face();
-                do {
-                    if (nav.is_face_boundary()) {
-                        boundary = true;
-                        break;
-                    }
-                    nav = nav.rotate_on_edge();
-                } while(nav.face() != begin);
+            // {
+            //     bool boundary = false;
+            //     Face& begin = nav.face();
+            //     do {
+            //         if (nav.is_face_boundary()) {
+            //             boundary = true;
+            //             break;
+            //         }
+            //         nav = nav.rotate_on_edge();
+            //     } while(nav.face() != begin);
 
-                if (boundary) {
-                    // Boundary singularity
-                    if (nav.incident_face_on_edge_num() != 2) {
-                        for (int n = 0; n < 2; ++n) {     // 2 verts that make the edge
-                            boundary_singularity_model.wireframe_vert_pos.push_back(nav.vert().position);
-                            boundary_singularity_model.wireframe_vert_color.push_back(Vector3f(0, 0, 1));
-                            nav = nav.flip_vert();
-                        }
-                    }
+            //     if (boundary) {
+            //         // Boundary singularity
+            //         if (nav.incident_face_on_edge_num() != 2) {
+            //             for (int n = 0; n < 2; ++n) {     // 2 verts that make the edge
+            //                 boundary_singularity_model.wireframe_vert_pos.push_back(nav.vert().position);
+            //                 boundary_singularity_model.wireframe_vert_color.push_back(Vector3f(0, 0, 1));
+            //                 nav = nav.flip_vert();
+            //             }
+            //         }
 
-                    // Boundary Crease
-                    MeshNavigator nav2 = nav.flip_face();
-                    if (!nav2.is_face_boundary()) {
-                        nav2 = nav2.flip_hexa().flip_face();
-                        float dot = nav.face().normal.dot(nav2.face().normal);
-                        if (std::acos(dot) > 30 * D2R) {
-                            for (int n = 0; n < 2; ++n) {     // 2 verts that make the edge
-                                boundary_creases_model.wireframe_vert_pos.push_back(nav.vert().position);
-                                boundary_creases_model.wireframe_vert_color.push_back(Vector3f(1, 0, 0));
-                                nav = nav.flip_vert();
-                            }
-                        }
-                    }
-                }
-            }
+            //         // Boundary Crease
+            //         MeshNavigator nav2 = nav.flip_face();
+            //         if (!nav2.is_face_boundary()) {
+            //             nav2 = nav2.flip_hexa().flip_face();
+            //             float dot = nav.face().normal.dot(nav2.face().normal);
+            //             if (std::acos(dot) > 30 * D2R) {
+            //                 for (int n = 0; n < 2; ++n) {     // 2 verts that make the edge
+            //                     boundary_creases_model.wireframe_vert_pos.push_back(nav.vert().position);
+            //                     boundary_creases_model.wireframe_vert_color.push_back(Vector3f(1, 0, 0));
+            //                     nav = nav.flip_vert();
+            //                 }
+            //             }
+            //         }
+            //     }
+            // }
 
             // -- Singularity check
             int face_count = nav.incident_face_on_edge_num();
@@ -323,10 +333,53 @@ namespace HexaLab {
         //if (nav.edge().mark != mesh->mark) {
 //            nav.edge().mark = mesh->mark;
             MeshNavigator edge_nav = nav;
+            bool boundary_singularity = false;
+            bool boundary_crease = false;
+            if (this->do_show_boundary_singularity) {
+                if (nav.incident_face_on_edge_num() != 2) {
+                    boundary_singularity = true;
+                }
+            }
+            // if (this->do_show_boundary_creases) {
+            //     Face& begin = nav.face();
+            //     bool prev_face_is_boundary = false;
+            //     Vector3f prev_face_normal;
+            //     do {
+            //         if (!prev_face_is_boundary) {
+            //             if (nav.is_face_boundary()) {
+            //                 prev_face_is_boundary = true;
+            //                 prev_face_normal = nav.face().normal;
+            //             }
+            //         } else {
+            //             if (nav.is_face_boundary()) {
+            //                 // float dot = nav.face().normal.dot(prev_face_normal);
+            //                 // if (std::acos(std::abs(dot)) > 1 * D2R) {
+            //                     boundary_crease = true;
+            //                     break;      // Ends in a different dart from the starting one!
+            //                 // }
+            //             } else {
+            //                 prev_face_is_boundary = false;
+            //             }
+            //         }
+            //         nav = nav.rotate_on_edge();
+            //     } while (nav.face() != begin);
+            // }
             for (int v = 0; v < 2; ++v) {
                 visible_model.wireframe_vert_pos.push_back(edge_nav.vert().position);
+                // if (this->do_show_boundary_singularity && boundary_singularity
+                    // && this->do_show_boundary_creases && boundary_crease) {
+                    // visible_model.wireframe_vert_color.push_back(Vector3f(0, 1, 1));
+                // } else 
+                if (this->do_show_boundary_singularity && boundary_singularity) {
+                    visible_model.wireframe_vert_color.push_back(Vector3f(0, 0, 1));
+                // } else if (this->do_show_boundary_creases && boundary_crease) {
+                    // visible_model.wireframe_vert_color.push_back(Vector3f(0, 1, 0));
+                } else {
+                    visible_model.wireframe_vert_color.push_back(Vector3f(0, 0, 0));
+                }
                 edge_nav = edge_nav.flip_vert();
             }
+
         //}
     }
 

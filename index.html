@@ -25,6 +25,7 @@
     <script src="js/external/TrackballControls.js"></script>
     <script src="js/external/FileSaver.js"></script>
     <script src="js/external/Stats.js"></script>
+    <script src="js/external/object_hash.js"></script>
 </head>
 
 <body>
@@ -65,7 +66,7 @@
 
                     <div id="model_menu" class="menu_area">
                         <div class="menu_title_wrapper">
-                            <div class="menu_title">Hexahedral mesh</div>
+                            <div class="menu_title">Mesh</div>
                         </div>
                         <div class="menu_content">
                             <div class="menu_row">
@@ -159,11 +160,11 @@
                         </div>
                         <div class="menu_content">
                             <div class="menu_row">
-                                <div class="menu_row_label">Range</div>
+                                <!--div class="menu_row_label">Upper limit</div-->
                                 <div class="menu_row_input">
                                     <div class="slider" id="quality_range_slider"></div>
                                     <div class="menu_row_input_block">
-                                        <input type="number" id="quality_min_number">
+                                        <!--input type="number" id="quality_min_number"-->
                                         <input type="number" id="quality_max_number">
                                     </div>
                                 </div>
@@ -180,7 +181,7 @@
                         </div>
                         <div class="menu_content">
                             <div class="menu_row">
-                                <div class="menu_row_label">Depth</div>
+                                <!--div class="menu_row_label">Depth</div-->
                                 <div class="menu_row_input">
                                     <div class="slider" id="peeling_depth_slider"></div>
                                     <div class="menu_row_input_block">

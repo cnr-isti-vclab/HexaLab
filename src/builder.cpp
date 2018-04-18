@@ -238,9 +238,10 @@ namespace HexaLab {
             do {
                 if (nav.dart().hexa_neighbor == -1) {
                     nav.edge().is_surface = true;
+                    nav.vert().is_surface = true;
+                    nav.flip_vert().vert().is_surface = true;
                 }
                 nav = nav.rotate_on_edge();
-//                ++mesh.edges[i].face_count;
             } while (nav.face() != begin);
         }
 

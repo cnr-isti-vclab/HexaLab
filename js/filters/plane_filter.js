@@ -70,7 +70,7 @@ HexaLab.PlaneFilter = function () {
         self.set_plane_normal(n.x, n.y, n.z)
     })
     HexaLab.UI.plane_snap_camera.on('click', function () {
-        var camera_dir = HexaLab.app.camera.getWorldDirection()
+        var camera_dir = HexaLab.app.camera().getWorldDirection()
         self.set_plane_normal(camera_dir.x, camera_dir.y, camera_dir.z)
     })
 
@@ -123,36 +123,38 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
 
     set_settings: function (settings) {
         this.enable(settings.enabled)
-        this.set_plane_normal(settings.normal.x, settings.normal.y, settings.normal.z);
-        this.set_plane_offset(settings.offset);
-        this.set_plane_opacity(settings.opacity);
-        this.set_plane_color(settings.color);
+        this.set_plane_normal(settings.normal.x, settings.normal.y, settings.normal.z)
+        this.set_plane_offset(settings.offset)
+        this.set_plane_opacity(settings.opacity)
+        this.set_plane_color(settings.color)
     },
 
     read_normal_from_backend: function () {
         const n = this.backend.get_plane_normal()
         const v = new THREE.Vector3(n.x(), n.y(), n.z())
-        n.delete();
-        return v;
+        n.delete()
+        return v
     },
 
     on_mesh_change: function (mesh) {
-        this.mesh = mesh;
+        this.object_mesh = mesh
 
-        this.scene.remove(this.plane.mesh);
-        this.scene.remove(this.plane.edges);
+        HexaLab.app.viewer.remove_mesh(this.plane.mesh)
+        HexaLab.app.viewer.remove_mesh(this.plane.edges)
 
-        var geometry = new THREE.PlaneGeometry(this.mesh.get_aabb_diagonal(), this.mesh.get_aabb_diagonal());
+        var geometry = new THREE.PlaneGeometry(this.object_mesh.get_aabb_diagonal(), this.object_mesh.get_aabb_diagonal());
         var edges = new THREE.EdgesGeometry(geometry)
+        
         this.plane.mesh = new THREE.Mesh(geometry, this.plane.material);
         this.plane.edges = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({
             color: this.plane.material.color,
             transparent: true,
             opacity: 1.0 // TODO differentiate between filter scene objects meshes and wireframe, draw meshes pre-ssao, wireframe post-ssao
         }))
+        
+        HexaLab.app.viewer.add_mesh(this.plane.mesh)
+        HexaLab.app.viewer.add_mesh(this.plane.edges)
 
-        this.scene.add(this.plane.mesh)
-        this.scene.add(this.plane.edges)
         this.update_visibility()
 
         this.set_plane_opacity(this.default_settings.opacity)
@@ -172,14 +174,14 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
     },
 
     on_plane_normal_set: function (normal) {
-        HexaLab.UI.plane_nx.val(normal.x.toFixed(3));
-        HexaLab.UI.plane_ny.val(normal.y.toFixed(3));
-        HexaLab.UI.plane_nz.val(normal.z.toFixed(3));
+        HexaLab.UI.plane_nx.val(normal.x.toFixed(3))
+        HexaLab.UI.plane_ny.val(normal.y.toFixed(3))
+        HexaLab.UI.plane_nz.val(normal.z.toFixed(3))
     },
 
     on_plane_offset_set: function (offset) {
         HexaLab.UI.plane_offset_slider.slider('value', offset * 1000)
-        HexaLab.UI.plane_offset_number.val(offset);
+        HexaLab.UI.plane_offset_number.val(offset)
     },
 
     // State
@@ -188,26 +190,26 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
         this.backend.enabled = enabled
         this.update_visibility()
         this.on_enabled_set(enabled)
-        HexaLab.app.queue_models_update(true, true)
+        HexaLab.app.queue_geometry_update()
     },
 
     set_plane_normal: function (nx, ny, nz) {
-        this.backend.set_plane_normal(nx, ny, nz);
-        var n = this.backend.get_plane_normal();
-        this.plane.normal = new THREE.Vector3(nx, ny, nz);
+        this.backend.set_plane_normal(nx, ny, nz)
+        var n = this.backend.get_plane_normal()
+        this.plane.normal = new THREE.Vector3(nx, ny, nz)
         n.delete(); // TODO don't allocate at all, just read memory?
         this.on_plane_normal_set(this.plane.normal)
-        this.update_mesh();
-        HexaLab.app.queue_models_update(true, true)
+        this.update_mesh()
+        HexaLab.app.queue_geometry_update()
     },
 
     set_plane_offset: function (offset) {
-        this.backend.set_plane_offset(offset);
-        this.plane.offset = offset;
-        this.plane.world_offset = this.backend.get_plane_world_offset();
+        this.backend.set_plane_offset(offset)
+        this.plane.offset = offset
+        this.plane.world_offset = this.backend.get_plane_world_offset()
         this.on_plane_offset_set(offset)
-        this.update_mesh();
-        HexaLab.app.queue_models_update(true, true)
+        this.update_mesh()
+        HexaLab.app.queue_geometry_update()
     },
 
     set_plane_opacity: function (opacity) {
@@ -215,7 +217,7 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
     },
 
     set_plane_color: function (color) {
-        this.plane.material.color.set(color);
+        this.plane.material.color.set(color)
     },
 
     update_visibility: function () {
@@ -237,17 +239,17 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
     },
 
     update_mesh: function () {
-        if (this.mesh) {
+        if (this.object_mesh) {
             for (var x of [this.plane.mesh, this.plane.edges]) {
-                var pos = this.mesh.get_aabb_center();
-                x.position.set(pos.x(), pos.y(), pos.z());
-                x.position.set(0, 0, 0);
-                var dir = new THREE.Vector3().addVectors(x.position, this.plane.normal);
-                x.lookAt(dir);
-                x.translateZ(-this.plane.world_offset);
+                var pos = this.object_mesh.get_aabb_center()
+                x.position.set(pos.x(), pos.y(), pos.z())
+                //x.position.set(0, 0, 0)
+                var dir = new THREE.Vector3().addVectors(x.position, this.plane.normal)
+                x.lookAt(dir)
+                x.translateZ(-this.plane.world_offset)
             }
         }
     }
 });
 
-HexaLab.filters.push(new HexaLab.PlaneFilter());
+HexaLab.filters.push(new HexaLab.PlaneFilter())
