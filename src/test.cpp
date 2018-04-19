@@ -16,7 +16,11 @@ int main() {
   printf("Size of Vert %lu\n",sizeof(Vert));
   printf("Size of Dart %lu\n",sizeof(Dart));
   
-  std::ifstream istr("../../datasets/index.json");
+  std::ifstream istr("../datasets/index.json");
+  if(!istr.is_open()) {
+    printf("Failing to opening dataset index"); 
+    exit(-1);
+  }
   json job;
   istr >> job;
   json srcVec=job["sources"];
@@ -36,8 +40,8 @@ int main() {
     {
       ++meshCnt;
       string filename = dataVec[j];
-      const string basepath="../../datasets/";
-      //bool ret = app.import_mesh("../../datasets/Skeleton-driven Adaptive Hexahedral Meshing of Tubular Shapes/dinopet_graded.mesh");
+      const string basepath="../datasets/";
+      //bool ret = app.import_mesh("../datasets/Skeleton-driven Adaptive Hexahedral Meshing of Tubular Shapes/dinopet_graded.mesh");
       bool ret = app.import_mesh(basepath+path+"/"+filename);
       app.update_models();
       if (!ret) {
