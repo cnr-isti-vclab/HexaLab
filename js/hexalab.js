@@ -595,7 +595,8 @@ Object.assign(HexaLab.Viewer.prototype, {
         relevant_settings.app.singularity_mode = null
         relevant_settings.app.apply_color_map = null
         // Dirty hack for not resetting on quality change if quality filtering is disabled
-        if (!relevant_settings.filters["Quality"].enabled) {
+        if (!relevant_settings.filters["Quality"].enabled || 
+            (relevant_settings.filters["Quality"].min == 0 && relevant_settings.filters["Quality"].max == 1)) {
             relevant_settings.app.quality_measure = null
         }
         // cut off disabled filters
