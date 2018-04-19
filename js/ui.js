@@ -802,7 +802,7 @@ HexaLab.UI.create_plot_panel = function () {
     HexaLab.UI.plot_overlay = HexaLab.UI.overlay(x, y, width, height, '').appendTo(document.body)
     HexaLab.UI.quality_plot(HexaLab.UI.plot_overlay[0], 'y')
     HexaLab.UI.plot_overlay.on('resize', function () {
-        HexaLab.UI.resize_plot()
+        HexaLab.UI.quality_plot_update()
     })
 }
 
