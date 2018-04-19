@@ -1,224 +1,251 @@
 {
     "sources": [{
-            "paper": {
-                "title": "All-hex Meshing Using Singularity-restricted Field",
-                "venue": "ACM Transactions on Graphics Volume 31 Issue 6",
-                "authors": "Yufei Li, Yang Liu, Weiwei Xu, Wenping Wang, Baining Guo",
-                "year": "2012",
-                "PDF": "http://i.cs.hku.hk/~yfli/All-hex/allhex.pdf",
-                "web": "http://www.cs.ubc.ca/labs/imager/tr/2015/untangler/",
-                "DOI": "10.1145/2366145.2366196"
-            },
-            "path": "All-Hex Meshing using Singularity-Restricted Field",
-            "label": "2012 - All-Hex Meshing Using Singularity-Restricted Field",
-            "data": [
-                "bone/bone.mesh",
-                "bunny/bunny.mesh",
-                "double torus/double torus.mesh",
-                "ellipsoid/ellipsoid-A.mesh",
-                "ellipsoid/ellipsoid-B.mesh",
-                "ellipsoid/ellipsoid-C.mesh",
-                "fandisk/fandisk.mesh",
-                "fertility/fertility.mesh",
-                "hanger/hanger.mesh",
-                "impeller/impeller.mesh",
-                "joint/joint.mesh",
-                "rockerarm/rockerarm.mesh",
-                "rod/rod.mesh",
-                "sculpture/sculpture-A.mesh",
-                "sculpture/sculpture-B.mesh"
-            ]
-        }, {
-            "paper": {
-                "title": "ℓ1-Based Construction of Polycube Maps from Complex Shapes",
-                "venue": "ACM Transactions on Graphics Volume 33 Issue 3",
-                "authors": "Jin Huang, Tengfei Jiang, Zeyun Shi, Yiying Tong, Hujun Bao, Mathieu Desbrun",
-                "year": "2014",
-                "PDF": "http://www.geometry.caltech.edu/pubs/HJSTBD13.pdf",
-                "web": "",
-                "DOI": "10.1145/2602141"
-            },
-            "path": "l1-Based Construction of Polycube Maps from Complex Shapes",
-            "label": "2014 - ℓ1-Based Construction of Polycube Maps from Complex Shapes",
-            "data": [
-                "anc101/hex.mesh",
-                "angel_1/hex.mesh",
-                "angel_2/hex.mesh",
-                "angel_3/hex.mesh",
-                "bumpy_torus/hex.mesh",
-                "bunny/hex.mesh",
-                "buste/hex.mesh",
-                "canewt/hex.mesh",
-                "cognit/hex.mesh",
-                "dancing-children-2/hex.mesh",
-                "dragon/hex.mesh",
-                "elephant/hex.mesh",
-                "fertility/hex.mesh",
-                "gargoyle/hex.mesh",
-                "kiss/hex.mesh",
-                "kitty/hex.mesh",
-                "rockerArm_1/hex.mesh",
-                "rockerArm_2/hex.mesh",
-                "rod/hex.mesh"
-            ]
-        }, {
-            "paper": {
-                "title": "Practical Hex-Mesh Optimization via Edge-Cone Rectification",
-                "venue": "ACM Transactions on Graphics Volume 34 Issue 4",
-                "authors": "Marco Livesu, Alla Sheffer, Nicholas Vining, Marco Tarini",
-                "year": "2015",
-                "PDF": "http://www.cs.ubc.ca/labs/imager/tr/2015/untangler/downloads/untangler.pdf",
-                "web": "http://www.cs.ubc.ca/labs/imager/tr/2015/untangler/",
-                "DOI": "10.1145/2766905"
-            },
-            "path": "Practical Hex-Mesh Optimization via Edge-Cone Rectification",
-            "label": "2015 - Practical Hex-Mesh Optimization via Edge-Cone Rectification",
-            "data": [
-                "armadillo_out.mesh",
-                "armadillo_stresstest_out.mesh",
-                "block_out.mesh",
-                "block_stresstest_out.mesh",
-                "bunny_out.mesh",
-                "bust_out.mesh",
-                "cap_out.mesh",
-                "dancingchildren_out.mesh",
-                "dragon_out.mesh",
-                "hanger_stresstest_out.mesh",
-                "impeller_stresstest_out.mesh",
-                "KingKong_out.mesh"
-            ]
-        }, {
-            "paper": {
-                "title": "Efficient Volumetric PolyCube-Map Construction",
-                "venue": "Computer Graphics Forum, Volume 35, Issue 7",
-                "authors": "Xiao-Ming Fu, Chong-Yang Bai, Yang Liu",
-                "year": "2016",
-                "PDF": "http://pan.baidu.com/s/1qYAKqqK",
-                "web": "http://staff.ustc.edu.cn/~fuxm/projects/EfficientPolyCube/index.html",
-                "DOI": "10.1111/cgf.13007"
-            },
-            "path": "Efficient Volumetric PolyCube-Map Construction",
-            "label": "2016 - Efficient Volumetric PolyCube-Map Construction",
-            "data": [
-                "Armadillo_hex-a.mesh",
-                "Armadillo_hex-b.mesh",
-                "Bimba_hex-c.mesh",
-                "Bimba_hex-d.mesh",
-                "Blade_hex.mesh",
-                "Bunny_hex.mesh",
-                "Buste_hex.mesh",
-                "Carter_hex.mesh",
-                "Dancing_Children_hex.mesh",
-                "Dragon_hex.mesh",
-                "Elephant_hex.mesh",
-                "Fertility_hex-largel.mesh",
-                "Fertility_hex-small.mesh",
-                "Greek_Sculpture_hex.mesh",
-                "Kiss_hex.mesh",
-                "Rocker_hex.mesh",
-                "Sphinx_hex-e.mesh",
-                "Sphinx_hex-f.mesh"
-            ]
-        }, {
-            "paper": {
-                "title": "Skeleton-driven Adaptive Hexahedral Meshing of Tubular Shapes",
-                "venue": "Computer Graphics Forum, 35 (7),",
-                "authors": "Marco Livesu, Alessandro Muntoni, Enrico Puppo, Riccardo Scateni",
-                "year": "2016",
-                "web": "http://pers.ge.imati.cnr.it/livesu/papers/ULPTS15/ULPTS15.html",
-                "DOI": "10.1111/cgf.13021"
-            },
-            "path": "Skeleton-driven Adaptive Hexahedral Meshing of Tubular Shapes",
-            "label": "2016 - Skeleton-driven Adaptive Hexahedral Meshing of Tubular Shapes",
-            "data": [
-                "armadillo.mesh",
-                "big_buddy.mesh",
-                "block.mesh",
-                "blood_vessel.mesh",
-                "cactus.mesh",
-                "dino_graded.mesh",
-                "dino.mesh",
-                "dinopet_graded.mesh",
-                "dinopet.mesh",
-                "fertility.mesh",
-                "octopus.mesh",
-                "rocker_arm.mesh",
-                "santa.mesh",
-                "warrior_graded.mesh",
-                "warrior.mesh"
-            ]
-        }, {
-            "paper": {
-                "title": "Structured Volume Decomposition via Generalized Sweeping",
-                "venue": "IEEE Transactions on Visualization and Computer Graphics, Volume 22, Issue 7",
-                "authors": "Xifeng Gao, Tobias Martin, Sai Deng, Elaine Cohen, Zhigang Deng and Guoning Chen",
-                "year": "2016",
-                "PDF": "http://www2.cs.uh.edu/~chengu/hex_meshing/hex-meshing.pdf",
-                "web": "https://gaoxifeng.github.io/research.html",
-                "DOI": "10.1109/TVCG.2015.2473835"
-            },
-            "path": "Structured Volume Decomposition via Generalized Sweeping",
-            "label": "2016 - Structured Volume Decomposition via Generalized Sweeping",
-            "data": [
-                "hex_mesh/bunny/bunny_1.mesh",
-                "hex_mesh/bunny/bunny_2.mesh",
-                "hex_mesh/bunny/bunny_3.mesh",
-                "hex_mesh/bunny6/bunny6_1.mesh",
-                "hex_mesh/bunny6/bunny6_2.mesh",
-                "hex_mesh/bunny6/bunny6_3.mesh",
-                "hex_mesh/cat/cat_1.mesh",
-                "hex_mesh/cat/cat_2_padded.mesh",
-                "hex_mesh/cat/cat_2.mesh",
-                "hex_mesh/cat/cat_3.mesh",
-                "hex_mesh/Dolphin/Dolphin_1.mesh",
-                "hex_mesh/Dolphin/Dolphin_2.mesh",
-                "hex_mesh/Dolphin/Dolphin_3.mesh",
-                "hex_mesh/Dolphin/Dolphin_padded.mesh",
-                "hex_mesh/femur1/femur1_1.mesh",
-                "hex_mesh/femur1/femur1_2.mesh",
-                "hex_mesh/femur1/femur1_3.mesh",
-                "hex_mesh/femur1/femur1_padded.mesh",
-                "hex_mesh/fertility/fertility_1.mesh",
-                "hex_mesh/fertility/fertility_2.mesh",
-                "hex_mesh/fertility/fertility_3.mesh",
-                "hex_mesh/hand/hand7_1.mesh",
-                "hex_mesh/hand/hand7_2.mesh",
-                "hex_mesh/hand/hand7_3.mesh",
-                "hex_mesh/hand/hand7_padded.mesh",
-                "hex_mesh/kitten/kitten_1.mesh",
-                "hex_mesh/kitten/kitten_2.mesh",
-                "hex_mesh/kitten/kitten_3.mesh",
-                "hex_mesh/kitten_with_bifur/kitten_with_bifur_1.mesh",
-                "hex_mesh/kitten_with_bifur/kitten_with_bifur_2.mesh",
-                "hex_mesh/kitten_with_bifur/kitten_with_bifur_3.mesh",
-                "hex_mesh/kitten_with_bifur/Kitten_with_bifur_padded.mesh",
-                "hex_mesh/rabbit/rabbit_1.mesh",
-                "hex_mesh/rabbit/rabbit_2.mesh",
-                "hex_mesh/rabbit/rabbit_3.mesh",
-                "hex_mesh/rabbit/rabbit_padded.mesh",
-                "hex_mesh/rockerarm/rockerarm_1.mesh",
-                "hex_mesh/rockerarm/rockerarm_2.mesh",
-                "hex_mesh/rockerarm/rockerarm_3.mesh",
-                "hex_mesh/rotellipse/rotellipse_padded.mesh",
-                "hex_mesh/twistedu/twistedu.mesh"
-            ]
-        }, {
-            "paper": {
-                "title": "Hexahedral Mesh Generation via Constrained Quadrilateralization",
-                "venue": " PLoS ONE, Volume 12 Issue 5",
-                "authors": "Feifei Shang, Yangke Gan, and Yufei Guo",
-                "year": "2017",
-                "PDF": "http://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0177603&type=printable",
-                "web": "http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0177603",
-                "DOI": "10.1371/journal.pone.0177603"
-            },
-            "path": "Hexahedral Mesh Generation via Constrained Quadrilateralization",
-            "label": "2017 - Hexahedral Mesh Generation via Constrained Quadrilateralization",
-            "data": [
-                "cube - pone.0177603.s001.mesh",
-                "fandisk - pone.0177603.s002.mesh",
-                "joint - pone.0177603.s003.mesh"
-            ]
-        }
-    ]
+        "paper": {
+            "title": "All-hex Meshing Using Singularity-restricted Field",
+            "venue": "ACM Transactions on Graphics Volume 31 Issue 6",
+            "authors": "Yufei Li, Yang Liu, Weiwei Xu, Wenping Wang, Baining Guo",
+            "year": "2012",
+            "PDF": "http://i.cs.hku.hk/~yfli/All-hex/allhex.pdf",
+            "web": "http://www.cs.ubc.ca/labs/imager/tr/2015/untangler/",
+            "DOI": "10.1145/2366145.2366196"
+        },
+        "path": "All-Hex Meshing using Singularity-Restricted Field",
+        "label": "2012 - All-Hex Meshing Using Singularity-Restricted Field",
+        "data": [
+            "bone/bone.mesh",
+            "bunny/bunny.mesh",
+            "double torus/double torus.mesh",
+            "ellipsoid/ellipsoid-A.mesh",
+            "ellipsoid/ellipsoid-B.mesh",
+            "ellipsoid/ellipsoid-C.mesh",
+            "fandisk/fandisk.mesh",
+            "fertility/fertility.mesh",
+            "hanger/hanger.mesh",
+            "impeller/impeller.mesh",
+            "joint/joint.mesh",
+            "rockerarm/rockerarm.mesh",
+            "rod/rod.mesh",
+            "sculpture/sculpture-A.mesh",
+            "sculpture/sculpture-B.mesh"
+        ]
+    }, {
+        "paper": {
+            "title": "ℓ1-Based Construction of Polycube Maps from Complex Shapes",
+            "venue": "ACM Transactions on Graphics Volume 33 Issue 3",
+            "authors": "Jin Huang, Tengfei Jiang, Zeyun Shi, Yiying Tong, Hujun Bao, Mathieu Desbrun",
+            "year": "2014",
+            "PDF": "http://www.geometry.caltech.edu/pubs/HJSTBD13.pdf",
+            "web": "",
+            "DOI": "10.1145/2602141"
+        },
+        "path": "l1-Based Construction of Polycube Maps from Complex Shapes",
+        "label": "2014 - ℓ1-Based Construction of Polycube Maps from Complex Shapes",
+        "data": [
+            "anc101/hex.mesh",
+            "angel_1/hex.mesh",
+            "angel_2/hex.mesh",
+            "angel_3/hex.mesh",
+            "bumpy_torus/hex.mesh",
+            "bunny/hex.mesh",
+            "buste/hex.mesh",
+            "canewt/hex.mesh",
+            "cognit/hex.mesh",
+            "dancing-children-2/hex.mesh",
+            "dragon/hex.mesh",
+            "elephant/hex.mesh",
+            "fertility/hex.mesh",
+            "gargoyle/hex.mesh",
+            "kiss/hex.mesh",
+            "kitty/hex.mesh",
+            "rockerArm_1/hex.mesh",
+            "rockerArm_2/hex.mesh",
+            "rod/hex.mesh"
+        ]
+    }, {
+        "paper": {
+            "title": "Practical Hex-Mesh Optimization via Edge-Cone Rectification",
+            "venue": "ACM Transactions on Graphics Volume 34 Issue 4",
+            "authors": "Marco Livesu, Alla Sheffer, Nicholas Vining, Marco Tarini",
+            "year": "2015",
+            "PDF": "http://www.cs.ubc.ca/labs/imager/tr/2015/untangler/downloads/untangler.pdf",
+            "web": "http://www.cs.ubc.ca/labs/imager/tr/2015/untangler/",
+            "DOI": "10.1145/2766905"
+        },
+        "path": "Practical Hex-Mesh Optimization via Edge-Cone Rectification",
+        "label": "2015 - Practical Hex-Mesh Optimization via Edge-Cone Rectification",
+        "data": [
+            "armadillo_out.mesh",
+            "armadillo_stresstest_out.mesh",
+            "block_out.mesh",
+            "block_stresstest_out.mesh",
+            "bunny_out.mesh",
+            "bust_out.mesh",
+            "cap_out.mesh",
+            "dancingchildren_out.mesh",
+            "dragon_out.mesh",
+            "hanger_stresstest_out.mesh",
+            "impeller_stresstest_out.mesh",
+            "KingKong_out.mesh"
+        ]
+    }, {
+        "paper": {
+            "title": "All-hex meshing using closed-form induced polycube",
+            "venue": "ACM Transactions on Graphics Volume 34 Issue 4",
+            "authors": "Xianzhong Fang, Weiwei Xu, Hujun Bao, Jin Huang.",
+            "year": "2016",
+            "PDF": "http://www.cad.zju.edu.cn/home/hj/16/closed-form-polycube/closed-form-polycube.pdf",
+            "web": "http://www.cad.zju.edu.cn/home/hj/index.xml",
+            "DOI": "10.1145/2897824.2925957"
+        },
+        "path": "All-Hex Meshing Using Closed-Form Induced Polycube",
+        "label": "2016 - All-hex meshing using closed-form induced polycube",
+        "data": [
+            "KPDloekr-hex.mesh",
+            "carter-hex.mesh",
+            "chinese-lion-hex.mesh",
+            "dragon-hex.mesh",
+            "fancy_ring-hex.mesh",
+            "fertility-hex.mesh",
+            "grayloc-hex.mesh",
+            "hollow-eight-hex.mesh",
+            "joint-hex.mesh",
+            "kitten-hex.mesh",
+            "knot-hex.mesh",
+            "nut-hex.mesh",
+            "pegasus-hex.mesh",
+            "rockerarm-hex.mesh"
+        ]
+    }, {
+        "paper": {
+            "title": "Efficient Volumetric PolyCube-Map Construction",
+            "venue": "Computer Graphics Forum, Volume 35, Issue 7",
+            "authors": "Xiao-Ming Fu, Chong-Yang Bai, Yang Liu",
+            "year": "2016",
+            "PDF": "http://pan.baidu.com/s/1qYAKqqK",
+            "web": "http://staff.ustc.edu.cn/~fuxm/projects/EfficientPolyCube/index.html",
+            "DOI": "10.1111/cgf.13007"
+        },
+        "path": "Efficient Volumetric PolyCube-Map Construction",
+        "label": "2016 - Efficient Volumetric PolyCube-Map Construction",
+        "data": [
+            "Armadillo_hex-a.mesh",
+            "Armadillo_hex-b.mesh",
+            "Bimba_hex-c.mesh",
+            "Bimba_hex-d.mesh",
+            "Blade_hex.mesh",
+            "Bunny_hex.mesh",
+            "Buste_hex.mesh",
+            "Carter_hex.mesh",
+            "Dancing_Children_hex.mesh",
+            "Dragon_hex.mesh",
+            "Elephant_hex.mesh",
+            "Fertility_hex-largel.mesh",
+            "Fertility_hex-small.mesh",
+            "Greek_Sculpture_hex.mesh",
+            "Kiss_hex.mesh",
+            "Rocker_hex.mesh",
+            "Sphinx_hex-e.mesh",
+            "Sphinx_hex-f.mesh"
+        ]
+    }, {
+        "paper": {
+            "title": "Skeleton-driven Adaptive Hexahedral Meshing of Tubular Shapes",
+            "venue": "Computer Graphics Forum, 35 (7),",
+            "authors": "Marco Livesu, Alessandro Muntoni, Enrico Puppo, Riccardo Scateni",
+            "year": "2016",
+            "web": "http://pers.ge.imati.cnr.it/livesu/papers/ULPTS15/ULPTS15.html",
+            "DOI": "10.1111/cgf.13021"
+        },
+        "path": "Skeleton-driven Adaptive Hexahedral Meshing of Tubular Shapes",
+        "label": "2016 - Skeleton-driven Adaptive Hexahedral Meshing of Tubular Shapes",
+        "data": [
+            "armadillo.mesh",
+            "big_buddy.mesh",
+            "block.mesh",
+            "blood_vessel.mesh",
+            "cactus.mesh",
+            "dino_graded.mesh",
+            "dino.mesh",
+            "dinopet_graded.mesh",
+            "dinopet.mesh",
+            "fertility.mesh",
+            "octopus.mesh",
+            "rocker_arm.mesh",
+            "santa.mesh",
+            "warrior_graded.mesh",
+            "warrior.mesh"
+        ]
+    }, {
+        "paper": {
+            "title": "Structured Volume Decomposition via Generalized Sweeping",
+            "venue": "IEEE Transactions on Visualization and Computer Graphics, Volume 22, Issue 7",
+            "authors": "Xifeng Gao, Tobias Martin, Sai Deng, Elaine Cohen, Zhigang Deng and Guoning Chen",
+            "year": "2016",
+            "PDF": "http://www2.cs.uh.edu/~chengu/hex_meshing/hex-meshing.pdf",
+            "web": "https://gaoxifeng.github.io/research.html",
+            "DOI": "10.1109/TVCG.2015.2473835"
+        },
+        "path": "Structured Volume Decomposition via Generalized Sweeping",
+        "label": "2016 - Structured Volume Decomposition via Generalized Sweeping",
+        "data": [
+            "hex_mesh/bunny/bunny_1.mesh",
+            "hex_mesh/bunny/bunny_2.mesh",
+            "hex_mesh/bunny/bunny_3.mesh",
+            "hex_mesh/bunny6/bunny6_1.mesh",
+            "hex_mesh/bunny6/bunny6_2.mesh",
+            "hex_mesh/bunny6/bunny6_3.mesh",
+            "hex_mesh/cat/cat_1.mesh",
+            "hex_mesh/cat/cat_2_padded.mesh",
+            "hex_mesh/cat/cat_2.mesh",
+            "hex_mesh/cat/cat_3.mesh",
+            "hex_mesh/Dolphin/Dolphin_1.mesh",
+            "hex_mesh/Dolphin/Dolphin_2.mesh",
+            "hex_mesh/Dolphin/Dolphin_3.mesh",
+            "hex_mesh/Dolphin/Dolphin_padded.mesh",
+            "hex_mesh/femur1/femur1_1.mesh",
+            "hex_mesh/femur1/femur1_2.mesh",
+            "hex_mesh/femur1/femur1_3.mesh",
+            "hex_mesh/femur1/femur1_padded.mesh",
+            "hex_mesh/fertility/fertility_1.mesh",
+            "hex_mesh/fertility/fertility_2.mesh",
+            "hex_mesh/fertility/fertility_3.mesh",
+            "hex_mesh/hand/hand7_1.mesh",
+            "hex_mesh/hand/hand7_2.mesh",
+            "hex_mesh/hand/hand7_3.mesh",
+            "hex_mesh/hand/hand7_padded.mesh",
+            "hex_mesh/kitten/kitten_1.mesh",
+            "hex_mesh/kitten/kitten_2.mesh",
+            "hex_mesh/kitten/kitten_3.mesh",
+            "hex_mesh/kitten_with_bifur/kitten_with_bifur_1.mesh",
+            "hex_mesh/kitten_with_bifur/kitten_with_bifur_2.mesh",
+            "hex_mesh/kitten_with_bifur/kitten_with_bifur_3.mesh",
+            "hex_mesh/kitten_with_bifur/Kitten_with_bifur_padded.mesh",
+            "hex_mesh/rabbit/rabbit_1.mesh",
+            "hex_mesh/rabbit/rabbit_2.mesh",
+            "hex_mesh/rabbit/rabbit_3.mesh",
+            "hex_mesh/rabbit/rabbit_padded.mesh",
+            "hex_mesh/rockerarm/rockerarm_1.mesh",
+            "hex_mesh/rockerarm/rockerarm_2.mesh",
+            "hex_mesh/rockerarm/rockerarm_3.mesh",
+            "hex_mesh/rotellipse/rotellipse_padded.mesh",
+            "hex_mesh/twistedu/twistedu.mesh"
+        ]
+    }, {
+        "paper": {
+            "title": "Hexahedral Mesh Generation via Constrained Quadrilateralization",
+            "venue": " PLoS ONE, Volume 12 Issue 5",
+            "authors": "Feifei Shang, Yangke Gan, and Yufei Guo",
+            "year": "2017",
+            "PDF": "http://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0177603&type=printable",
+            "web": "http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0177603",
+            "DOI": "10.1371/journal.pone.0177603"
+        },
+        "path": "Hexahedral Mesh Generation via Constrained Quadrilateralization",
+        "label": "2017 - Hexahedral Mesh Generation via Constrained Quadrilateralization",
+        "data": [
+            "cube - pone.0177603.s001.mesh",
+            "fandisk - pone.0177603.s002.mesh",
+            "joint - pone.0177603.s003.mesh"
+        ]
+    }]
 }

@@ -5,9 +5,11 @@ Current datasets came from the following papers:
 - [All-Hex Meshing Using Singularity-Restricted Field (2012)](http://doi.org/10.1145/2366145.2366196)
 - [ℓ1-Based Construction of Polycube Maps from Complex Shapes (2014)](https://doi.org/10.1145/2602141)
 - [Practical Hex-Mesh Optimization via Edge-Cone Rectification (2015)](http://doi.org/10.1145/2766905)
+- [All-Hex Meshing Using Closed-Form Induced Polycube (2016)](http://doi.org/10.1145/2897824.2925957)
 - [Efficient Volumetric PolyCube-Map Construction (2016)](http://doi.org/10.1111/cgf.13007)
 - [Skeleton-driven Adaptive Hexahedral Meshing of Tubular Shapes (2016)](http://doi.org/10.1111/cgf.13021)
-- [Structured Volume Decomposition via Generalized Sweeping (2017)](http://doi.org/10.1109/TVCG.2015.2473835) 
+- [Structured Volume Decomposition via Generalized Sweeping (2016)](http://doi.org/10.1109/TVCG.2015.2473835) 
+- [Hexahedral Mesh Generation via Constrained Quadrilateralization (2017)](http://doi.org/10.1371/journal.pone.0177603)
 ## How to contribute
 We really welcome datasets from existing papers, and we are collecting the ones we find available on the web. If you have some models related to a published paper you have two ways to contribute:
 1) raise an [issue](https://github.com/cnr-isti-vclab/HexaLab/issues) asking for a dataset/paper to be included providing doi of the paper and the link to the dataset; 
