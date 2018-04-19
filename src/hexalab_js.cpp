@@ -15,7 +15,7 @@ using namespace Eigen;
 vector<Vector3f>* get_surface_vert_pos(Model& model)     { return &model.surface_vert_pos; }
 vector<Vector3f>* get_surface_vert_norm(Model& model)    { return &model.surface_vert_norm; }
 vector<Vector3f>* get_surface_vert_color(Model& model)   { return &model.surface_vert_color; }
-vector<Index>*    get_surface_ibuffer(Model& model)      { return &model.surface_ibuffer; }
+vector<HexaLab::Index>*    get_surface_ibuffer(Model& model)      { return &model.surface_ibuffer; }
 vector<Vector3f>* get_wireframe_vert_pos(Model& model)   { return &model.wireframe_vert_pos; }
 vector<Vector3f>* get_wireframe_vert_color(Model& model) { return &model.wireframe_vert_color; }
 
