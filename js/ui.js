@@ -589,31 +589,40 @@ function dataURItoBlob(dataURI) {
 }
 
 HexaLab.UI.quality_plot = function(container, axis) {
-    var data = []
-    var bins_colors = []  // bin i takes the color that comes remapping bins_colors[i] from cmin-cmax to colormap 0-1
-    var colorscale = []
+    // https://community.plot.ly/t/using-colorscale-with-histograms/150
+    let data = []
+    let bins_colors = []
+    let colorscale = []
 
-    var quality = HexaLab.app.backend.get_normalized_hexa_quality()
+    let range_min = HexaLab.app.backend.get_lower_quality_range_bound()
+    let range_max = HexaLab.app.backend.get_upper_quality_range_bound()
+
+    let quality = HexaLab.app.backend.get_hexa_quality()
     if (quality != null) {
-        var t = new Float32Array(Module.HEAPU8.buffer, quality.data(), quality.size())
-        for (var i = 0; i < quality.size() ; i++) {
+        let t = new Float32Array(Module.HEAPU8.buffer, quality.data(), quality.size())
+        for (let i = 0; i < quality.size() ; i++) {
             data[i] = t[i]
         }
     }
 
-    var mesh = HexaLab.app.backend.get_mesh()
-    var bins = 100
-    var base = Math.trunc(mesh.normalized_quality_min * bins)
-    for (var i = base; i < bins ; i++) {
-        bins_colors[i - base] = i
+    // problem: plotly does not map the color to the range, it maps the color to the bins.
+    //          the first color is given to the first non-empty bin, the others follow.
+    //          following non-empty bins are correctly counted and their color is skipped.
+    // solution: skip the first n color ticks, where n is the number of empty bins at the start.
+    let mesh = HexaLab.app.backend.get_mesh()
+    let bins = 100
+    let bin_size = (range_max - range_min) / bins
+    let base = Math.trunc((mesh.quality_min - range_min) / bin_size)
+    for (let i = base; i < bins ; i++) {
+        bins_colors[i - base] = 100 - i
     }
 
-    for (var i = 0; i <= 10; ++i) {
-        var v = i / 10
-        var rgb = HexaLab.app.backend.map_value_to_color(v)
-        var r = (rgb.x() * 255).toFixed(0)
-        var g = (rgb.y() * 255).toFixed(0)
-        var b = (rgb.z() * 255).toFixed(0)
+    for (let i = 0; i <= 10; ++i) {
+        let v = i / 10
+        let rgb = HexaLab.app.backend.map_value_to_color(1 - v)
+        let r = (rgb.x() * 255).toFixed(0)
+        let g = (rgb.y() * 255).toFixed(0)
+        let b = (rgb.z() * 255).toFixed(0)
         colorscale[i] = [v.toString(), 'rgb(' + r + ',' + g + ',' + b + ')']
     }
 
@@ -642,9 +651,9 @@ HexaLab.UI.quality_plot = function(container, axis) {
     }]
     plot_data[0][axis] = data
     plot_data[0][axis.concat('bins')] = {
-        start: 0,
-        end: 1,
-        size: 0.01
+        start: range_min,
+        end: range_max,
+        size: bin_size
     }
 
     var plot_layout = {
@@ -661,7 +670,7 @@ HexaLab.UI.quality_plot = function(container, axis) {
     }
     plot_layout[axis.concat('axis')] = {
         autorange: false,
-        range: [0, 1],
+        range: [range_max, range_min],
         type: 'linear',
         ticks:'outside',
         tick0:0,

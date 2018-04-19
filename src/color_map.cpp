@@ -174,6 +174,7 @@ namespace HexaLab {
 	}
 
 	Vector3f ColorMap::get(float value) {
+		value = 1 - value;
 		float x = (float)(palette->size() - 1) * value;
 		int i = (int)x;
 		if (i + 1 >= palette->size()) {

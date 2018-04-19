@@ -31,6 +31,18 @@ Vector3f mesh_stats_center(MeshStats& stats)    { return stats.aabb.center(); }
 // ColorMap
 Vector3f map_value_to_color(App& app, float value) { return app.get_color_map().get(value); }
 
+// Quality measure
+float get_lower_quality_range_bound(App& app) { 
+    QualityMeasureEnum m = app.get_quality_measure();
+    MeshStats& s = *app.get_mesh_stats();
+    return denormalize_quality_measure(m, 0, s.quality_min, s.quality_max);
+}
+float get_upper_quality_range_bound(App& app) { 
+    QualityMeasureEnum m = app.get_quality_measure();
+    MeshStats& s = *app.get_mesh_stats();
+    return denormalize_quality_measure(m, 1, s.quality_min, s.quality_max);
+}
+
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #include <emscripten/bind.h>
@@ -65,6 +77,9 @@ EMSCRIPTEN_BINDINGS(HexaLab) {
         .function("get_quality_measure",                &App::get_quality_measure)
 
         .function("map_value_to_color",                 &map_value_to_color)
+
+        .function("get_lower_quality_range_bound",      &get_lower_quality_range_bound)
+        .function("get_upper_quality_range_bound",      &get_upper_quality_range_bound)
         ;
 
     enum_<ColorMap::Palette>("ColorMap")
