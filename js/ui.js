@@ -389,6 +389,7 @@ HexaLab.UI.on_import_mesh = function (name) {
     HexaLab.UI.load_settings.prop("disabled", false)
     HexaLab.UI.save_settings.prop("disabled", false)
     HexaLab.UI.snapshot.prop("disabled", false)
+    if (HexaLab.UI.view_source == 1) HexaLab.UI.show_mesh_name(name)
     if (HexaLab.UI.view_source == 2) HexaLab.UI.setup_paper_mesh_picker()
     HexaLab.UI.setup_mesh_stats(name)
     HexaLab.UI.quality_plot_update()
@@ -478,6 +479,12 @@ HexaLab.UI.setup_paper_mesh_picker = function () {
     });
 
     HexaLab.UI.paper_mesh_picker.show()
+}
+
+HexaLab.UI.show_mesh_name = function (name) {
+    HexaLab.UI.mesh_info_1_text.empty().append(name)
+    HexaLab.UI.mesh_info_1.show().css('display', 'flex')
+    HexaLab.UI.mesh_info_1_buttons.hide()
 }
 
 HexaLab.UI.mesh_source.on("change", function () {
@@ -784,7 +791,7 @@ HexaLab.UI.menu.on('resize', function () {
 
 HexaLab.UI.load_mesh.on('click', function () {
     HexaLab.UI.mesh_source.val('-1')
-    HexaLab.UI.clean_mesh_info()
+    // HexaLab.UI.clean_mesh_info()
     if (HexaLab.UI.view_source == 1) HexaLab.UI.setup_mesh_stats(HexaLab.FS.short_path(HexaLab.UI.mesh_long_name))
     HexaLab.UI.mesh_local_load_trigger()
 })
