@@ -7,6 +7,7 @@ Current datasets came from the following papers:
 - [Practical Hex-Mesh Optimization via Edge-Cone Rectification (2015)](http://doi.org/10.1145/2766905)
 - [All-Hex Meshing Using Closed-Form Induced Polycube (2016)](http://doi.org/10.1145/2897824.2925957)
 - [Efficient Volumetric PolyCube-Map Construction (2016)](http://doi.org/10.1111/cgf.13007)
+- [Polycube simplification for coarse layouts of surfaces and volumes (2016)](http://doi.org/10.1111/cgf.12959 )
 - [Skeleton-driven Adaptive Hexahedral Meshing of Tubular Shapes (2016)](http://doi.org/10.1111/cgf.13021)
 - [Structured Volume Decomposition via Generalized Sweeping (2016)](http://doi.org/10.1109/TVCG.2015.2473835) 
 - [Hexahedral Mesh Generation via Constrained Quadrilateralization (2017)](http://doi.org/10.1371/journal.pone.0177603)
