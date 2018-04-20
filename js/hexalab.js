@@ -462,7 +462,7 @@ Object.assign(HexaLab.Viewer.prototype, {
         } 
         this.settings.ao = value
         if (value == 'object space') {
-            this.reset_osao()
+            this.dirty_osao = true
         }
     },
 
@@ -664,7 +664,7 @@ Object.assign(HexaLab.Viewer.prototype, {
         this.ao_cache = {}
 
         this.buffers.update()
-        this.reset_osao()
+        this.dirty_osao     = true
         this.dirty_geometry = false
         this.dirty_color    = false
 
@@ -852,12 +852,18 @@ Object.assign(HexaLab.Viewer.prototype, {
             // this.models.boundary_creases.update()
             // this.models.boundary_singularity.update()
             this.delayed_osao_reset(400)
-        } else if (this.dirty_color) {
-            this.buffers.update()
-            this.on_surface_color_change()
+        } else {
+            if (this.dirty_osao) {
+                this.reset_osao()
+            }
+            if (this.dirty_color) {
+                this.buffers.update()
+                this.on_surface_color_change()
+            }
         }
         this.dirty_geometry = false
         this.dirty_color    = false
+        this.dirty_osao = false
 
         // -- main render sequence --
 
@@ -1015,8 +1021,8 @@ HexaLab.App = function (dom_element) {
 
     // Materials
     this.default_material_settings = {
-        visible_default_inside_color:   '#ffff00',
-        visible_default_outside_color:  '#ffffff',
+        visible_surface_default_inside_color:   '#ffff00',
+        visible_surface_default_outside_color:  '#ffffff',
         // visible_wireframe_color:        '#000000',
         visible_wireframe_opacity:      0.15,
 
@@ -1165,8 +1171,8 @@ Object.assign(HexaLab.App.prototype, {
         this.set_filtered_surface_opacity(settings.filtered_surface_opacity)
         this.set_filtered_wireframe_color(settings.filtered_wireframe_color)
         this.set_filtered_wireframe_opacity(settings.filtered_wireframe_opacity)
-        this.set_visible_surface_default_outside_color(settings.visible_default_outside_color)
-        this.set_visible_surface_default_inside_color(settings.visible_default_inside_color)
+        this.set_visible_surface_default_outside_color(settings.visible_surface_default_outside_color)
+        this.set_visible_surface_default_inside_color(settings.visible_surface_default_inside_color)
         // this.set_singularity_surface_opacity(settings.singularity_surface_opacity)
         // this.set_singularity_wireframe_opacity(settings.singularity_wireframe_opacity)
     },

@@ -88,10 +88,6 @@ HexaLab.PlaneFilter = function () {
             side: THREE.DoubleSide,
             depthWrite: false
         }),
-        offset: 0,
-        world_offset: 0,
-        position: null,
-        normal: null,
         mesh: new THREE.Mesh(),
         edges: new THREE.LineSegments()
     };
@@ -112,13 +108,16 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
 
     // Api
     get_settings: function () {
-        return {
+        const n = this.backend.get_plane_normal()
+        const s = {
             enabled: this.backend.enabled,
-            normal: this.plane.normal,
-            offset: this.plane.offset,
+            normal: new THREE.Vector3(n.x(), n.y(), n.z()),
+            offset: this.backend.get_plane_offset(),
             opacity: this.plane.material.opacity,
             color: '#' + this.plane.material.color.getHexString()
-        };
+        }
+        n.delete()
+        return s
     },
 
     set_settings: function (settings) {
@@ -195,17 +194,14 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
 
     set_plane_normal: function (nx, ny, nz) {
         this.backend.set_plane_normal(nx, ny, nz)
-        var n = this.backend.get_plane_normal()
-        this.plane.normal = new THREE.Vector3(nx, ny, nz)
-        n.delete(); // TODO don't allocate at all, just read memory?
-        this.on_plane_normal_set(this.plane.normal)
+        const normal = new THREE.Vector3(nx, ny, nz)
+        this.on_plane_normal_set(normal)
         this.update_mesh()
         HexaLab.app.queue_geometry_update()
     },
 
     set_plane_offset: function (offset) {
         this.backend.set_plane_offset(offset)
-        this.plane.offset = offset
         this.plane.world_offset = this.backend.get_plane_world_offset()
         this.on_plane_offset_set(offset)
         this.update_mesh()
@@ -244,7 +240,10 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
                 var pos = this.object_mesh.get_aabb_center()
                 x.position.set(pos.x(), pos.y(), pos.z())
                 //x.position.set(0, 0, 0)
-                var dir = new THREE.Vector3().addVectors(x.position, this.plane.normal)
+                const n = this.backend.get_plane_normal()
+                const normal = new THREE.Vector3(n.x(), n.y(), n.z())
+                n.delete()
+                var dir = new THREE.Vector3().addVectors(x.position, normal)
                 x.lookAt(dir)
                 x.translateZ(-this.plane.world_offset)
             }
