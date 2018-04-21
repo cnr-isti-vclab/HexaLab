@@ -119,7 +119,13 @@ namespace HexaLab {
         void add_visible_wireframe(Dart& dart);
         void add_filtered_face(Dart& dart);
         void add_filtered_wireframe(Dart& dart);
-        
+
+        void add_vertex(Vector3f pos, Vector3f norm, Vector3f color);
+        void add_triangle(Index i1, Index i2, Index i3);
+
+        void prepare_geometry();
+        void prepare_round_geometry();
+
         void compute_hexa_quality();
         void build_surface_models();
         void build_singularity_models();

@@ -98,9 +98,7 @@ namespace HexaLab {
     struct Vert {
         Index dart          = -1;
         Vector3f position;
-        bool is_surface     = false;
-        Index ibuffer_idx   = -1;
-        uint32_t mark       =  0;   // marks the ibuffer_idx
+        bool is_visible     = false;
 
         Vert(){}
         Vert(Vector3f position) { this->position = position; }
@@ -131,10 +129,8 @@ namespace HexaLab {
         void unmark_all() { ++this->current_mark; }
         
         bool is_marked  (const Hexa &hexa) const { return hexa.mark == this->current_mark; }
-        bool is_marked  (const Vert &vert) const { return vert.mark == this->current_mark; }
         void unmark     (Hexa &hexa)       const { hexa.mark = this->current_mark - 1; }
         void mark       (Hexa &hexa)       const { hexa.mark = this->current_mark; }
-        void mark       (Vert &vert)       const { vert.mark = this->current_mark; }
 
         // Methods to spawn a mesh navigator off of a mesh element
         MeshNavigator navigate(Dart& dart) { return MeshNavigator(dart, *this); }

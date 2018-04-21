@@ -301,19 +301,25 @@ namespace HexaLab {
 
     void App::add_visible_vert(Dart& dart, float normal_sign, Vector3f color) {
         MeshNavigator nav = mesh->navigate(dart);
-        // if (this->mesh->is_marked(nav.vert())) {
-            // visible_model.surface_ibuffer.push_back(nav.vert().ibuffer_idx);
-        // } else {
-            visible_model.surface_vert_pos.push_back(nav.vert().position);
-            visible_model.surface_vert_norm.push_back(nav.face().normal * normal_sign);
-            visible_model.surface_vert_color.push_back(color);
-            HL_ASSERT(visible_model.surface_vert_pos.size() == visible_model.surface_vert_norm.size() &&
-                visible_model.surface_vert_pos.size() == visible_model.surface_vert_color.size());
-            Index idx = visible_model.surface_vert_pos.size() - 1;
-            visible_model.surface_ibuffer.push_back(idx);
-            // nav.vert().ibuffer_idx = idx;
-            // this->mesh->mark(nav.vert());
-        // }
+        visible_model.surface_vert_pos.push_back(nav.vert().position);
+        visible_model.surface_vert_norm.push_back(nav.face().normal * normal_sign);
+        visible_model.surface_vert_color.push_back(color);
+        HL_ASSERT(visible_model.surface_vert_pos.size() == visible_model.surface_vert_norm.size() &&
+            visible_model.surface_vert_pos.size() == visible_model.surface_vert_color.size());
+        Index idx = visible_model.surface_vert_pos.size() - 1;
+        visible_model.surface_ibuffer.push_back(idx);
+    }
+
+    void App::add_vertex(Vector3f pos, Vector3f norm, Vector3f color) {
+        visible_model.surface_vert_pos.push_back(pos);
+        visible_model.surface_vert_norm.push_back(norm);
+        visible_model.surface_vert_color.push_back(color);
+    }
+
+    void App::add_triangle(Index i1, Index i2, Index i3) {
+        visible_model.surface_ibuffer.push_back(i1);
+        visible_model.surface_ibuffer.push_back(i2);
+        visible_model.surface_ibuffer.push_back(i3);
     }
 
     void App::add_visible_face(Dart& dart, float normal_sign) {
@@ -343,17 +349,11 @@ namespace HexaLab {
         Vert& vert = nav.vert();
         Index idx = visible_model.surface_vert_pos.size();
         do {
-            visible_model.surface_vert_pos.push_back(nav.vert().position);
-            visible_model.surface_vert_norm.push_back(nav.face().normal * normal_sign);
-            visible_model.surface_vert_color.push_back(color);
+            add_vertex(nav.vert().position, nav.face().normal * normal_sign, color);
             nav = nav.rotate_on_face();
         } while (nav.vert() != vert);
-        visible_model.surface_ibuffer.push_back(idx + 0);
-        visible_model.surface_ibuffer.push_back(idx + 1);
-        visible_model.surface_ibuffer.push_back(idx + 2);
-        visible_model.surface_ibuffer.push_back(idx + 2);
-        visible_model.surface_ibuffer.push_back(idx + 3);
-        visible_model.surface_ibuffer.push_back(idx + 0);
+        add_triangle(idx + 0, idx + 1, idx + 2);
+        add_triangle(idx + 2, idx + 3, idx + 0);
     }
 
     void App::add_visible_wireframe(Dart& dart) {
@@ -441,6 +441,72 @@ namespace HexaLab {
         //}
     }
 
+    void App::prepare_geometry() {
+        for (size_t i = 0; i < mesh->faces.size(); ++i) {
+            MeshNavigator nav = mesh->navigate(mesh->faces[i]);
+            // hexa a visible, hexa b not existing or not visible
+            if (!mesh->is_marked(nav.hexa()) && (nav.dart().hexa_neighbor == -1 || mesh->is_marked(nav.flip_hexa().hexa()))) {
+                this->add_visible_face(nav.dart(), 1);
+                // hexa a invisible, hexa b existing and visible
+            } else if (mesh->is_marked(nav.hexa()) && nav.dart().hexa_neighbor != -1 && !mesh->is_marked(nav.flip_hexa().hexa())) {
+                this->add_visible_face(nav.dart(), -1);
+                // add_filtered_face(nav.dart());
+                // face was culled by the plane, is surface
+            } else if (mesh->is_marked(nav.hexa()) && nav.dart().hexa_neighbor == -1) {
+                this->add_filtered_face(nav.dart());
+            }
+        }
+    }
+
+    void App::prepare_round_geometry() {
+        auto mark_face_as_visible = [](Mesh* mesh, Dart& dart) {
+            MeshNavigator nav = mesh->navigate(dart);
+            Vert& vert = nav.vert();
+            do {
+                nav.vert().is_visible = true;
+                nav = nav.rotate_on_face();
+            } while (nav.vert() != vert);
+        };
+
+        for (size_t i = 0; i < mesh->faces.size(); ++i) {
+            MeshNavigator nav = mesh->navigate(mesh->faces[i]);
+            if (!mesh->is_marked(nav.hexa()) && (nav.dart().hexa_neighbor == -1 || mesh->is_marked(nav.flip_hexa().hexa()))) {
+                mark_face_as_visible(this->mesh, nav.dart());
+            } else if (mesh->is_marked(nav.hexa()) && nav.dart().hexa_neighbor != -1 && !mesh->is_marked(nav.flip_hexa().hexa())) {
+                mark_face_as_visible(this->mesh, nav.dart());
+            }
+        }
+
+        for (size_t i = 0; i < mesh->hexas.size(); ++i) {
+            // ******
+            Vert*       verts[2][2][2];
+            Vector3f    faces[6];
+            // ******
+            MeshNavigator nav = mesh->navigate(mesh->hexas[i]);
+            Face& face = nav.face();
+            for (size_t f = 0; f < 6; ++f) {
+                float normal_sign = nav.hexa() == mesh->hexas[i] ? 1 : -1;
+                faces[f] = nav.face().normal * normal_sign;
+                nav = nav.next_hexa_face();
+            }
+            verts[0][0][0] = &nav.flip_vert().vert();
+            verts[0][0][1] = &nav.vert();
+            verts[0][1][0] = &nav.flip_vert().flip_edge().flip_vert().vert();
+            verts[0][1][1] = &nav.flip_edge().flip_vert().vert();
+            nav = nav.flip_face().flip_edge().flip_vert().flip_edge().flip_face();
+            verts[1][0][0] = &nav.flip_vert().vert();
+            verts[1][0][1] = &nav.vert();
+            verts[1][1][0] = &nav.flip_vert().flip_edge().flip_vert().vert();
+            verts[1][1][1] = &nav.flip_edge().flip_vert().vert();
+
+            // ******
+            // TODO generate geometry...
+            //      use add_vertex()
+            //          add_triangle()
+            // ******
+        }
+    }
+
     void App::build_surface_models() {
         if (mesh == nullptr) return;
 
@@ -455,19 +521,6 @@ namespace HexaLab {
             filters[i]->filter(*mesh);
         }
 
-        for (size_t i = 0; i < mesh->faces.size(); ++i) {
-            MeshNavigator nav = mesh->navigate(mesh->faces[i]);
-            // hexa a visible, hexa b not existing or not visible
-            if (!mesh->is_marked(nav.hexa()) && (nav.dart().hexa_neighbor == -1 || mesh->is_marked(nav.flip_hexa().hexa()))) {
-                add_visible_face(nav.dart(), 1);
-            // hexa a invisible, hexa b existing and visible
-            } else if ( mesh->is_marked(nav.hexa()) && nav.dart().hexa_neighbor != -1 && !mesh->is_marked(nav.flip_hexa().hexa())) {
-                add_visible_face(nav.dart(), -1);
-                // add_filtered_face(nav.dart());
-            // face was culled by the plane, is surface
-            } else if ( mesh->is_marked(nav.hexa()) && nav.dart().hexa_neighbor == -1) {
-                add_filtered_face(nav.dart());
-            }
-        }
+        this->prepare_geometry();
     }
 }
