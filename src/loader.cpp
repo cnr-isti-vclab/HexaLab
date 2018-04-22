@@ -35,7 +35,7 @@ namespace HexaLab {
                 for (int i = 0; i < vertices_count; ++i) {
                     Vector3f v;
                     float x;
-                    HL_ASSERT_LOG(stream >> v.x() >> v.y() >> v.z() >> x, "ERROR: malformed mesh file. Unexpected vertex data format.\n");
+                    HL_ASSERT_LOG(stream >> v.x() >> v.y() >> v.z() >> x, "ERROR: malformed mesh file. Unexpected vertex data format at vert %i.\n",i);
                     vertices.push_back(v);
                 }
             // Quad indices

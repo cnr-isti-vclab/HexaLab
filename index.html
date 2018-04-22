@@ -6,16 +6,16 @@
     <meta http-equiv="Content-Language" content="en">
     <meta name="google" content="notranslate">
     <title>HexaLab</title>
-    <link rel="icon" href="img/favicon.png" type="image/x-icon"/>                     
+    <link rel="icon" href="img/favicon.png" type="image/x-icon"/>
     <link rel="stylesheet" href="css/jquery-ui.css">
     <link rel="stylesheet" href="css/spectrum.css">
     <link rel="stylesheet" href="css/hexalab.css">
     <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    
-    <script type="text/javascript" id="cookiebanner" src="js/external/cookiebanner.js" 
-                data-height="20px" data-position="top" data-mask="true" 
-                data-message="We use technical, statistical and third parties-cookies to improve HexaLab experience. <br>We DO NOT use profiling and advertising cookies.<br>We reserve the right of tracking your usage of HexaLab for collecting statistical information in aggregate anonymous way. <br><b>Your 3D models will always stay only on your client and NO 3D data is ever transmitted</b>.<br><br>Click anywhere to acknowledge this info and start using HexaLab. " ></script>  
+
+    <script type="text/javascript" id="cookiebanner" src="js/external/cookiebanner.js"
+                data-height="20px" data-position="top" data-mask="true"
+                data-message="We use technical, statistical and third parties-cookies to improve HexaLab experience. <br>We DO NOT use profiling and advertising cookies.<br>We reserve the right of tracking your usage of HexaLab for collecting statistical information in aggregate anonymous way. <br><b>Your 3D models will always stay only on your client and NO 3D data is ever transmitted</b>.<br><br>Click anywhere to acknowledge this info and start using HexaLab. " ></script>
     <script src="js/external/jquery.js"></script>
     <script src="js/external/jquery-ui.min.js"></script>
     <script src="js/external/jquery.dragbetter.js"></script>
@@ -25,9 +25,7 @@
     <script src="js/external/TrackballControls.js"></script>
     <script src="js/external/FileSaver.js"></script>
     <script src="js/external/Stats.js"></script>
-    <script src="js/shaders/ssao_eval.js"></script>
-    <script src="js/shaders/ssao_blur.js"></script>
-    <script src="js/shaders/ssao_pre.js"></script>
+    <script src="js/external/object_hash.js"></script>
 </head>
 
 <body>
@@ -39,7 +37,7 @@
                     <div id="toolbar_wrapper">
                         <h1>HexaLab</h1>
                         <div id="toolbar">
-                            <button id="load_mesh" title="Open a hexahedral mesh from a local file">
+                            <button id="load_mesh" title="Open local">
                                 <i class="fa fa-folder-open"></i>
                             </button>
                             <button id="home" title="Reset Camera">
@@ -51,7 +49,7 @@
                             <button id="load_settings" title="Load settings">
                                 <i class="fa fa-gear"></i>
                             </button>
-                            <button id="save_settings" title="Store current settings">
+                            <button id="save_settings" title="Store settings">
                                 <i class="fa fa-floppy-o"></i>
                             </button>
                             <button id="snapshot" title="Take a snapshot">
@@ -60,22 +58,22 @@
                             <button id="github" title="GitHub page">
                                 <i class="fa fa-github"></i>
                             </button>
-                            <button id="about" title="About">
+                            <!--button id="about" title="About">
                                 <i class="fa fa-question"></i>
-                            </button>
+                            </button-->
                         </div>
                     </div>
 
                     <div id="model_menu" class="menu_area">
                         <div class="menu_title_wrapper">
-                            <div class="menu_title">Hex model</div>
+                            <div class="menu_title">Mesh</div>
                         </div>
                         <div class="menu_content">
                             <div class="menu_row">
                                 <div class="menu_row_label">Source</div>
                                 <div class="menu_row_input">
                                     <select id="mesh_source">
-                                        <option value="-2" selected="selected" style="display: none;">Select a paper or click open icon&hellip;</option>
+                                        <option value="-2" selected="selected" style="display: none;">Select a mesh source&hellip;</option>
                                         <option value="-1">From File</option>
                                     </select>
                                 </div>
@@ -108,7 +106,7 @@
 
                     <div id="plane_menu" class="menu_area">
                         <div class="menu_title_wrapper">
-                            <div class="menu_title">Filter by Plane</div>
+                            <div class="menu_title">Plane Filter</div>
                             <label class="switch menu_switch" title="Toggle the filtering of cells beyond a given plane">
                                 <input type="checkbox" id="plane_enabled">
                                 <span class="switch-slider"></span>
@@ -146,19 +144,7 @@
                             </div>
                             <div class="menu_row">
                                 <div class="menu_row_input">
-                                    <div class="slider" id="plane_offset_slider"></div>    
-                                </div>
-                            </div>
-                            <div class="menu_row">
-                                <div class="menu_row_label">Color</div>
-                                <div class="menu_row_input">
-                                    <input type="checkbox" id="plane_color_visibility"></input>
-                                </div>
-                            </div>
-                            <div class="menu_row">
-                                <div class="menu_row_label">Edge</div>
-                                <div class="menu_row_input">
-                                    <input type="checkbox" id="plane_edge_visibility"></input>
+                                    <div class="slider" id="plane_offset_slider"></div>
                                 </div>
                             </div>
                         </div>
@@ -166,7 +152,7 @@
 
                     <div id="quality_menu" class="menu_area">
                         <div class="menu_title_wrapper">
-                            <div class="menu_title">Filter by Hex Quality</div>
+                            <div class="menu_title">Quality Filter</div>
                             <label class="switch menu_switch" title="Toggle the filtering of cells based on their estimated quality">
                                 <input type="checkbox" id="quality_enabled">
                                 <span class="switch-slider"></span>
@@ -174,24 +160,11 @@
                         </div>
                         <div class="menu_content">
                             <div class="menu_row">
-                                <div class="menu_row_label">Type</div>
-                                <div class="menu_row_input">
-                                    <div class="menu_row_input_block">
-                                        <select id="quality_type">
-                                            <option>Scaled Jacobian</option>
-                                        </select>
-                                        <button id="quality_swap_range" title="Swap quality range">
-                                            <i class="fa fa-exchange"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="menu_row">
-                                <div class="menu_row_label">Range</div>
+                                <!--div class="menu_row_label">Upper limit</div-->
                                 <div class="menu_row_input">
                                     <div class="slider" id="quality_range_slider"></div>
                                     <div class="menu_row_input_block">
-                                        <input type="number" id="quality_min_number">
+                                        <!--input type="number" id="quality_min_number"-->
                                         <input type="number" id="quality_max_number">
                                     </div>
                                 </div>
@@ -200,7 +173,7 @@
                     </div>
                     <div id="peeling_menu" class="menu_area">
                         <div class="menu_title_wrapper">
-                            <div class="menu_title">Filter by Peeling</div>
+                            <div class="menu_title">Peeling Filter</div>
                             <label class="switch menu_switch" title="Toggle the filtering of cells based on their depth">
                                 <input type="checkbox" id="peeling_enabled">
                                 <span class="switch-slider"></span>
@@ -208,7 +181,7 @@
                         </div>
                         <div class="menu_content">
                             <div class="menu_row">
-                                <div class="menu_row_label">Depth</div>
+                                <!--div class="menu_row_label">Depth</div-->
                                 <div class="menu_row_input">
                                     <div class="slider" id="peeling_depth_slider"></div>
                                     <div class="menu_row_input_block">
@@ -224,13 +197,33 @@
                         </div>
                         <div class="menu_content">
                             <div class="menu_row">
-                                <div class="menu_row_label">Surface</div>
+                                <div class="menu_row_label">Color</div>
                                 <div class="menu_row_input">
-                                    <input type="text" id="surface_color">
+                                    <select id="surface_color_source">
+                                        <option value="Default" selected="selected">Default</option>
+                                        <option value="ColorMap">Quality</option>
+                                    </select>
+                                </div>
+                                <div class="menu_row_input" id="visible_color_wrapper">
+                                    <input type="text" id="visible_outside_color">
+                                    <input type="text" id="visible_inside_color">
+                                </div>
+                                <div class="menu_row_input" id="surface_colormap_input">
+                                    <select id="color_map">
+                                        <option value="Parula" selected="selected">Parula</option>
+                                        <option value="Jet">Jet</option>
+                                        <option value="RedGreen">Red Green</option>
+                                    </select>
                                 </div>
                             </div>
                             <div class="menu_row">
-                                <div class="menu_row_label">Filtered</div>
+                                <div class="menu_row_label">Wireframe</div>
+                                <div class="menu_row_input">
+                                    <div class="slider" id="wireframe_slider"></div>
+                                </div>
+                            </div>
+                            <div class="menu_row">
+                                <div class="menu_row_label">Silhouette</div>
                                 <div class="menu_row_input">
                                     <div class="slider" id="filtered_slider"></div>
                                 </div>
@@ -242,25 +235,9 @@
                                 </div>
                             </div>
                             <div class="menu_row">
-                                <div class="menu_row_label">Quality</div>
-                                <div class="menu_row_input">
-                                    <input type="checkbox" id="show_quality">
-                                </div>
-                            </div>
-                            <div class="menu_row">
                                 <div class="menu_row_label">Occlusion</div>
                                 <div class="menu_row_input">
                                     <input type="checkbox" id="show_occlusion">
-                                </div>
-                            </div>
-                            <div class="menu_row">
-                                <div class="menu_row_label">ColorMap</div>
-                                <div class="menu_row_input">
-                                    <select id="color_map">
-                                        <option value="Parula" selected="selected">Parula</option>
-                                        <option value="Jet">Jet</option>
-                                        <option value="RedGreen">Red Green</option>
-                                    </select>
                                 </div>
                             </div>
                         </div>
@@ -280,7 +257,7 @@
         <div id="frame">
             <div id="drag_drop_overlay" class="first_drag_drop">
                 <div>
-                    <span id="drag_drop_header">Drag&Drop a mesh file in the box below<br/> or use the toolbar to the left.</span>
+                    <span id="drag_drop_header">Drop a file in the box below<br/> or use the sidebar</span>
                 </div>
                 <div id="mesh_drag_drop_area">
                     <div id="mesh_drag_drop_quad" class="drag_drop_quad_off">
@@ -309,6 +286,12 @@
     <script src="js/generated/hexalab_asm.js"></script>
     <!-- HexaLab -->
     <script src="js/ui.js"></script>
+    <script src="js/shaders/ao_eval.js"></script>
+    <script src="js/shaders/ao_pre.js"></script>
+    <script src="js/shaders/ssao_eval.js"></script>
+    <script src="js/shaders/ssao_blur.js"></script>
+    <script src="js/shaders/ssao_pre.js"></script>
+    <script src="js/shaders/alpha_pass.js"></script>
     <script src="js/hexalab.js"></script>
     <script src="js/filters/plane_filter.js"></script>
     <script src="js/filters/quality_filter.js"></script>

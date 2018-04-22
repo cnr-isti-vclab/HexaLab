@@ -1,4 +1,8 @@
+#include <hex_quality.h>
+
 #include <builder.h>
+
+#include <hex_quality.h>
 
 namespace HexaLab {
 
@@ -7,45 +11,7 @@ namespace HexaLab {
 
     constexpr Index Builder::hexa_face[6][4];
 
-    static float scaled_jacobian(const Vector3f& p0, const Vector3f& p1, const Vector3f& p2, const Vector3f& p3,
-        const Vector3f& p4, const Vector3f& p5, const Vector3f& p6, const Vector3f& p7) {
-        // edges
-        Vector3f L0 = p1 - p0;    Vector3f L4 = p4 - p0;    Vector3f L8 = p5 - p4;
-        Vector3f L1 = p2 - p1;    Vector3f L5 = p5 - p1;    Vector3f L9 = p6 - p5;
-        Vector3f L2 = p3 - p2;    Vector3f L6 = p6 - p2;    Vector3f L10 = p7 - p6;
-        Vector3f L3 = p3 - p0;    Vector3f L7 = p7 - p3;    Vector3f L11 = p7 - p4;
-
-        // cross-derivatives
-        Vector3f X1 = (p1 - p0) + (p2 - p3) + (p5 - p4) + (p6 - p7);
-        Vector3f X2 = (p3 - p0) + (p2 - p1) + (p7 - p4) + (p6 - p5);
-        Vector3f X3 = (p4 - p0) + (p5 - p1) + (p6 - p2) + (p7 - p3);
-
-        L0.normalize();     L4.normalize();     L8.normalize();
-        L1.normalize();     L5.normalize();     L9.normalize();
-        L2.normalize();     L6.normalize();     L10.normalize();
-        L3.normalize();     L7.normalize();     L11.normalize();
-        X1.normalize();     X2.normalize();     X3.normalize();
-
-        // normalized jacobian matrices determinants
-        float alpha[9] =
-        {
-            L0.dot(L3.cross(L4)),
-            L1.dot(-L0.cross(L5)),
-            L2.dot(-L1.cross(L6)),
-            -L3.dot(-L2.cross(L7)),
-            L11.dot(L8.cross(-L4)),
-            -L8.dot(L9.cross(-L5)),
-            -L9.dot(L10.cross(-L6)),
-            -L10.dot(-L11.cross(-L7)),
-            X1.dot(X2.cross(X3))
-        };
-
-        float msj = *std::min_element(alpha, alpha + 9);
-
-        if (msj > 1.1) msj = -1.0;
-
-        return msj;
-    }
+   
 
     void Builder::add_edge(Mesh& mesh, Index h, Index f, const Index* edge) {
         // Lookup/add the edge
@@ -229,13 +195,26 @@ namespace HexaLab {
         }
 
         size_t hexa_count = indices.size() / 8;
+        size_t p25 = hexa_count * 0.25;
+        size_t p50 = hexa_count * 0.5;
+        size_t p75 = hexa_count * 0.75;
         for (size_t h = 0; h < hexa_count; ++h) {
+            if (h == p25) {
+                HL_LOG("[Builder] 25%%... ");
+            } else if (h == p50) {
+                HL_LOG("50%%... ");
+            } else if (h == p75) {
+                HL_LOG("75%%... ");
+            }
             add_hexa(mesh, &indices[h * 8]);
         }
+        HL_LOG("\n");
 
+        mesh.hexa_quality.resize(hexa_count);
         for (size_t i = 0; i < hexa_count; ++i) {
             // compute quality
-            mesh.hexas[i].scaled_jacobian =  scaled_jacobian(
+//            mesh.hexa_quality[i] =  diagonal_ratio(
+            /*mesh.hexa_quality[i] =  scaled_jacobian(
                 vertices[indices[i * 8 + 0]],
                 vertices[indices[i * 8 + 1]],
                 vertices[indices[i * 8 + 2]],
@@ -244,7 +223,7 @@ namespace HexaLab {
                 vertices[indices[i * 8 + 5]],
                 vertices[indices[i * 8 + 6]],
                 vertices[indices[i * 8 + 7]]
-            );
+            );*/
             // count neighbors
 //            MeshNavigator nav = mesh.navigate(mesh.hexas[i]);
 //            for (int j = 0; j < 6; ++j) {
@@ -260,10 +239,11 @@ namespace HexaLab {
             Face& begin = nav.face();
             do {
                 if (nav.dart().hexa_neighbor == -1) {
-                    nav.edge().surface_flag = true;
+                    nav.edge().is_surface = true;
+                    // nav.vert().is_surface = true;
+                    // nav.flip_vert().vert().is_surface = true;
                 }
                 nav = nav.rotate_on_edge();
-//                ++mesh.edges[i].face_count;
             } while (nav.face() != begin);
         }
 
@@ -351,10 +331,30 @@ namespace HexaLab {
             }
         }
 
+        for (size_t i = 0; i < mesh.hexas.size(); ++i) {
+            Hexa& h = mesh.hexas[i];
+            Vector3f v[8];
+            int j = 0;
+            auto nav = mesh.navigate(h);
+            Vert& a = nav.vert();
+            do {
+                v[j++] = nav.vert().position;
+                nav = nav.rotate_on_face();
+            } while (nav.vert() != a);
+            nav = nav.rotate_on_hexa().rotate_on_hexa().flip_vert();
+            Vert& b = nav.vert();
+            do {
+                v[j++] = nav.vert().position;
+                nav = nav.rotate_on_face();
+            } while (nav.vert() != b);
+            float q = QualityMeasureFun::volume(v[4], v[5], v[6], v[7], v[0], v[1], v[2], v[3], nullptr);
+            HL_ASSERT(q > 0);
+        }
+
         auto dt = milli_from_sample(t0);
 
-        HL_LOG("[Mesh validator] Surface darts: %d/%d\n", surface_darts, mesh.darts.size());
-        HL_LOG("[Mesh validator] Validation took %dms.\n", dt);
+        HL_LOG("[Validator] Surface darts: %d/%d\n", surface_darts, mesh.darts.size());
+        HL_LOG("[Validator] Validation took %dms.\n", dt);
 
         return true;
     }
