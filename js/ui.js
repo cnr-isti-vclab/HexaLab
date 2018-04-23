@@ -601,13 +601,31 @@ function dataURItoBlob(dataURI) {
 
 HexaLab.UI.quality_plot = function(container, axis) {
     if (HexaLab.UI.settings.color.quality_map_name == 'Parula') {
-        container.find('#bar_img').attr('src', 'img/parula.png').height(container.height() - 10).width('16px').css('padding', '5px')
+        HexaLab.UI.settings.color.quality_map_bar_filename = axis == 'x' ? 'img/parula-h.png' : 'img/parula-v.png'
     } else if (HexaLab.UI.settings.color.quality_map_name == 'Jet') {
-        container.find('#bar_img').attr('src', 'img/jet.png').height(container.height() - 10).width('16px').css('padding', '5px')
+        HexaLab.UI.settings.color.quality_map_bar_filename = axis == 'x' ? 'img/jet-h.png' : 'img/jet-v.png'
     } else if (HexaLab.UI.settings.color.quality_map_name == 'RedBlue') {
-        container.find('#bar_img').attr('src', 'img/redblue.png').height(container.height() - 10).width('16px').css('padding', '5px')
+        HexaLab.UI.settings.color.quality_map_bar_filename = axis ==  'x' ? 'img/redblue-h.png' : 'img/redblue-v.png'
     }
-    container.find("#plot_div").height(container.height()).width(container.width() - 16 - 10)
+    if (axis == 'x') {
+        container.find('#bar_img').attr('src', HexaLab.UI.settings.color.quality_map_bar_filename).
+            height('16px')
+            .width(container.width() - 60 - 30)
+            .css('padding', '5px')
+            .css('padding-left', '60px')
+        container.find("#plot_div")
+            .height(container.height() - 16 - 10)
+            .width(container.width())
+        container.find("#plot_container")[0].style.flexDirection = "column-reverse"//.css('flex-direction', 'column-reverse;')
+    } else {
+        container.find('#bar_img').attr('src', HexaLab.UI.settings.color.quality_map_bar_filename).
+            height(container.height() - 30 - 50)
+            .width('16px')
+            .css('padding', '5px')
+            .css('padding-top', '30px')
+        container.find("#plot_div").height(container.height()).width(container.width() - 16 - 10)
+        container.find("#plot_container")[0].style.flexDirection = "row"
+    }
 
     // https://community.plot.ly/t/using-colorscale-with-histograms/150
     let data = []
@@ -686,8 +704,8 @@ HexaLab.UI.quality_plot = function(container, axis) {
         plot_bgcolor:  'rgba(255, 255, 255, 0.2)',
         autosize:       true,
         margin: {
-            l:  50,
-            r:  10,
+            l:  60,
+            r:  30,
             b:  50,
             t:  30,
             pad: 4
@@ -699,7 +717,7 @@ HexaLab.UI.quality_plot = function(container, axis) {
         type:       'linear',
         ticks:      'outside',
         tick0:      0,
-        dtick:      0.25,
+        dtick:      (range_max - range_min) / 8, //0.25,
         ticklen:    2,
         tickwidth:  2,
         tickcolor:  '#444444'
@@ -722,33 +740,58 @@ HexaLab.UI.quality_plot = function(container, axis) {
                 name: 'Save',
                 icon: Plotly.Icons['camera'],
                 click: function() {
+                    plot_layout.paper_bgcolor = 'rgba(255, 255, 255, 1)'
+                    plot_layout.plot_bgcolor = 'rgba(255, 255, 255, 1)'
+                    Plotly.newPlot($("<div></div>")[0], {
+                        data: plot_data,
+                        layout: plot_layout,
+                        config: plot_config
+                    })
                     Plotly.toImage(container.find('#plot_div')[0], {
                         format: 'png', 
-                        width: 800, 
-                        height: 600,
-                    }).then(function(_) {
-                        // window.open(blob, '_blank');
-                        plot_layout.paper_bgcolor = 'rgba(255, 255, 255, 1)'
-                        plot_layout.plot_bgcolor = 'rgba(255, 255, 255, 1)'
-                        Plotly.newPlot($("<div></div>")[0], {
-                            data: plot_data,
-                            layout: plot_layout,
-                            config: plot_config
-                        })
-                        Plotly.toImage(container.find('#plot_div')[0], {
-                            format: 'png', 
-                            width: 800, 
-                            height: 600,
-                        }).then(function(data) {
-                            saveAs(dataURItoBlob(data), "HLplot.png")
-                        })
-                        plot_layout.paper_bgcolor = 'rgba(255, 255, 255, 0.2)'
-                        plot_layout.plot_bgcolor = 'rgba(255, 255, 255, 0.2)'
-                        Plotly.newPlot(container.find('#plot_div')[0], {
-                            data: plot_data,
-                            layout: plot_layout,
-                            config: plot_config
-                        })
+                        width: container.find('#plot_div').width(), 
+                        height: container.find('#plot_div').height(),
+                    }).then(function(data) {
+                        let canvas_width, canvas_height
+                        if (axis == 'x') {
+                            canvas_width  = container.find('#plot_div').width()
+                            canvas_height = container.find('#plot_div').height() + 16 + 10
+                        } else {
+                            canvas_width  = container.find('#plot_div').width()  + 16 + 10
+                            canvas_height = container.find('#plot_div').height()
+                        }
+                        let c = $('<canvas width="' + canvas_width
+                                     + '" height="' + canvas_height
+                                     + '"></canvas>')[0]
+                        let ctx = c.getContext("2d")
+                        ctx.fillStyle = "white";
+                        ctx.fillRect(0, 0, canvas_width, canvas_height);
+
+                        let plot_img = new Image()
+                        let bar_img  = new Image()
+                        
+                        plot_img.src = data
+                        plot_img.onload = function() {
+                            bar_img.src = HexaLab.UI.settings.color.quality_map_bar_filename
+                            bar_img.onload = function() {
+                                if (axis == 'x') {
+                                    ctx.drawImage(plot_img, 0, 0)
+                                    ctx.drawImage(bar_img, 60, canvas_height - 16 - 5, canvas_width - 60 - 30, 16)
+                                } else {
+                                    ctx.drawImage(bar_img, 5, 30, 16, canvas_height - 30 - 50)
+                                    ctx.drawImage(plot_img, 5 + 16, 0)
+                                }
+                                let img = c.toDataURL("image/png")
+                                saveAs(dataURItoBlob(img), "HLplot.png")
+                            }
+                        }
+                    })
+                    plot_layout.paper_bgcolor = 'rgba(255, 255, 255, 0.2)'
+                    plot_layout.plot_bgcolor = 'rgba(255, 255, 255, 0.2)'
+                    Plotly.newPlot(container.find('#plot_div')[0], {
+                        data: plot_data,
+                        layout: plot_layout,
+                        config: plot_config
                     })
                 }
             }]
@@ -784,9 +827,10 @@ HexaLab.UI.menu.on('resize', function () {
         } else {
             HexaLab.UI.menu_resize_timeout = false
             if (HexaLab.UI.plot_overlay) {
-                HexaLab.UI.plot_overlay.remove()
-                delete HexaLab.UI.plot_overlay
-                HexaLab.UI.create_plot_panel()
+                // TODO move?
+                // HexaLab.UI.plot_overlay.remove()
+                // delete HexaLab.UI.plot_overlay
+                // HexaLab.UI.create_plot_panel()
             }
         }  
     }
@@ -824,20 +868,20 @@ HexaLab.UI.create_plot_panel = function () {
     var width = size.width / 4
     var height = size.height - 2
     HexaLab.UI.plot_overlay = HexaLab.UI.overlay(x, y, width, height,
-        '<div style="display:flex;"><div id="plot_div"></div><div id="bar_div"><img id="bar_img" /></div></div>').appendTo(document.body)
+        '<div id="plot_container" style="display:flex;"><div id="bar_div"><img id="bar_img" /></div><div id="plot_div"></div></div>').appendTo(document.body)
     HexaLab.UI.quality_plot(HexaLab.UI.plot_overlay, 'y')
     HexaLab.UI.plot_overlay.on('resize', function () {
         HexaLab.UI.quality_plot_update()
     })
 }
 
-window.addEventListener('resize', function () {
-    if (HexaLab.UI.plot_overlay) {
-        HexaLab.UI.plot_overlay.remove()
-        delete HexaLab.UI.plot_overlay
-        HexaLab.UI.create_plot_panel()
-    }
-})
+// window.addEventListener('resize', function () {
+//     if (HexaLab.UI.plot_overlay) {
+//         HexaLab.UI.plot_overlay.remove()
+//         delete HexaLab.UI.plot_overlay
+//         HexaLab.UI.create_plot_panel()
+//     }
+// })
 
 HexaLab.UI.topbar.plot.on('click', function () {
     if (HexaLab.UI.plot_overlay) {
