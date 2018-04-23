@@ -85,7 +85,7 @@ EMSCRIPTEN_BINDINGS(HexaLab) {
     enum_<ColorMap::Palette>("ColorMap")
         .value("Parula",                    ColorMap::Palette::Parula)
         .value("Jet",                       ColorMap::Palette::Jet)
-        .value("RedGreen",                  ColorMap::Palette::RedGreen)
+        .value("RedBlue",                   ColorMap::Palette::RedBlue)
         ;
 
     enum_<QualityMeasureEnum>("QualityMeasure")

@@ -14,7 +14,7 @@ namespace HexaLab {
 		enum class Palette {
 			Parula = 0,
 			Jet,
-			RedGreen
+			RedBlue
 		};
 
 		ColorMap() : ColorMap(default_palette) {};

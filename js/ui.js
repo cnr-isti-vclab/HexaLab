@@ -269,6 +269,7 @@ HexaLab.UI.on_set_occlusion = function (ao) {
 }
 
 HexaLab.UI.on_set_color_map = function (value) {
+    HexaLab.UI.settings.color.quality_map_name = value
     HexaLab.UI.settings.color.quality_map.val(value)
     HexaLab.UI.quality_plot_update()
 }
@@ -569,37 +570,45 @@ HexaLab.UI.quality_plot_dialog = $('<div></div>')
 
 HexaLab.UI.quality_plot_update = function () {
     if (HexaLab.UI.plot_overlay) {
-        var axis = HexaLab.UI.plot_overlay[0].axis
-        HexaLab.UI.quality_plot(HexaLab.UI.plot_overlay[0], axis)
+        var axis = HexaLab.UI.plot_overlay.axis
+        HexaLab.UI.quality_plot(HexaLab.UI.plot_overlay, axis)
     }
 }
 
 function dataURItoBlob(dataURI) {
-  // convert base64 to raw binary data held in a string
-  // doesn't handle URLEncoded DataURIs - see SO answer #6850276 for code that does this
-  var byteString = atob(dataURI.split(',')[1]);
+    // convert base64 to raw binary data held in a string
+    // doesn't handle URLEncoded DataURIs - see SO answer #6850276 for code that does this
+    var byteString = atob(dataURI.split(',')[1]);
 
-  // separate out the mime component
-  var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0]
+    // separate out the mime component
+    var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0]
 
-  // write the bytes of the string to an ArrayBuffer
-  var ab = new ArrayBuffer(byteString.length);
+    // write the bytes of the string to an ArrayBuffer
+    var ab = new ArrayBuffer(byteString.length);
 
-  // create a view into the buffer
-  var ia = new Uint8Array(ab);
+    // create a view into the buffer
+    var ia = new Uint8Array(ab);
 
-  // set the bytes of the buffer to the correct values
-  for (var i = 0; i < byteString.length; i++) {
-      ia[i] = byteString.charCodeAt(i);
-  }
+    // set the bytes of the buffer to the correct values
+    for (var i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+    }
 
-  // write the ArrayBuffer to a blob, and you're done
-  var blob = new Blob([ab], {type: mimeString});
-  return blob;
-
+    // write the ArrayBuffer to a blob, and you're done
+    var blob = new Blob([ab], {type: mimeString});
+    return blob;
 }
 
 HexaLab.UI.quality_plot = function(container, axis) {
+    if (HexaLab.UI.settings.color.quality_map_name == 'Parula') {
+        container.find('#bar_img').attr('src', 'img/parula.png').height(container.height() - 10).width('16px').css('padding', '5px')
+    } else if (HexaLab.UI.settings.color.quality_map_name == 'Jet') {
+        container.find('#bar_img').attr('src', 'img/jet.png').height(container.height() - 10).width('16px').css('padding', '5px')
+    } else if (HexaLab.UI.settings.color.quality_map_name == 'RedBlue') {
+        container.find('#bar_img').attr('src', 'img/redblue.png').height(container.height() - 10).width('16px').css('padding', '5px')
+    }
+    container.find("#plot_div").height(container.height()).width(container.width() - 16 - 10)
+
     // https://community.plot.ly/t/using-colorscale-with-histograms/150
     let data = []
     let bins_colors = []
@@ -634,7 +643,8 @@ HexaLab.UI.quality_plot = function(container, axis) {
 
     for (let i = 0; i <= 10; ++i) {
         let v = i / 10
-        let rgb = HexaLab.app.backend.map_value_to_color(1 - v)
+        let v2 = range_min < range_max ? 1 - v : v
+        let rgb = HexaLab.app.backend.map_value_to_color(v2)
         let r = (rgb.x() * 255).toFixed(0)
         let g = (rgb.y() * 255).toFixed(0)
         let b = (rgb.z() * 255).toFixed(0)
@@ -649,19 +659,19 @@ HexaLab.UI.quality_plot = function(container, axis) {
         autobinx:   false,
         //nbinsx: 100,
         marker: {
-            showscale: true,
+            // showscale: true,
             cmin:   0,
             cmax:   bins - 1,
             color:  bins_colors,
             colorscale: colorscale,
-            colorbar: {
-                thickness: 15,
-                showticklabels: false,
-                // xanchor: "right",
-                // x: -1.3,
-                len: 1.03,
-                //lenmode: "pixels",
-            }
+            // colorbar: {
+            //     thickness: 15,
+            //     showticklabels: false,
+            //     // xanchor: "right",
+            //     // x: -1.3,
+            //     len: 1,
+            //     //lenmode: "pixels",
+            // }
         },
     }]
     plot_data[0][axis] = data
@@ -712,7 +722,7 @@ HexaLab.UI.quality_plot = function(container, axis) {
                 name: 'Save',
                 icon: Plotly.Icons['camera'],
                 click: function() {
-                    Plotly.toImage(container, {
+                    Plotly.toImage(container.find('#plot_div')[0], {
                         format: 'png', 
                         width: 800, 
                         height: 600,
@@ -720,12 +730,12 @@ HexaLab.UI.quality_plot = function(container, axis) {
                         // window.open(blob, '_blank');
                         plot_layout.paper_bgcolor = 'rgba(255, 255, 255, 1)'
                         plot_layout.plot_bgcolor = 'rgba(255, 255, 255, 1)'
-                        Plotly.newPlot(null, {
+                        Plotly.newPlot($("<div></div>")[0], {
                             data: plot_data,
                             layout: plot_layout,
                             config: plot_config
                         })
-                        Plotly.toImage(container, {
+                        Plotly.toImage(container.find('#plot_div')[0], {
                             format: 'png', 
                             width: 800, 
                             height: 600,
@@ -734,7 +744,7 @@ HexaLab.UI.quality_plot = function(container, axis) {
                         })
                         plot_layout.paper_bgcolor = 'rgba(255, 255, 255, 0.2)'
                         plot_layout.plot_bgcolor = 'rgba(255, 255, 255, 0.2)'
-                        Plotly.newPlot(container, {
+                        Plotly.newPlot(container.find('#plot_div')[0], {
                             data: plot_data,
                             layout: plot_layout,
                             config: plot_config
@@ -749,7 +759,7 @@ HexaLab.UI.quality_plot = function(container, axis) {
 
     container.axis = axis
 
-    Plotly.newPlot(container, {
+    Plotly.newPlot(container.find('#plot_div')[0], {
         data: plot_data,
         layout: plot_layout,
         config: plot_config
@@ -813,8 +823,9 @@ HexaLab.UI.create_plot_panel = function () {
     var y = 0
     var width = size.width / 4
     var height = size.height - 2
-    HexaLab.UI.plot_overlay = HexaLab.UI.overlay(x, y, width, height, '').appendTo(document.body)
-    HexaLab.UI.quality_plot(HexaLab.UI.plot_overlay[0], 'y')
+    HexaLab.UI.plot_overlay = HexaLab.UI.overlay(x, y, width, height,
+        '<div style="display:flex;"><div id="plot_div"></div><div id="bar_div"><img id="bar_img" /></div></div>').appendTo(document.body)
+    HexaLab.UI.quality_plot(HexaLab.UI.plot_overlay, 'y')
     HexaLab.UI.plot_overlay.on('resize', function () {
         HexaLab.UI.quality_plot_update()
     })

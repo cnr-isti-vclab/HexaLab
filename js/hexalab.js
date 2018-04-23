@@ -1230,7 +1230,7 @@ Object.assign(HexaLab.App.prototype, {
         const map = this.color_map
         if      (map == 'Jet')      this.backend.enable_quality_color_mapping(Module.ColorMap.Jet)
         else if (map == 'Parula')   this.backend.enable_quality_color_mapping(Module.ColorMap.Parula)
-        else if (map == 'RedGreen') this.backend.enable_quality_color_mapping(Module.ColorMap.RedGreen)
+        else if (map == 'RedBlue') this.backend.enable_quality_color_mapping(Module.ColorMap.RedBlue)
         this.viewer.on_color_buffers_update()
     },
 

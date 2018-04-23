@@ -146,9 +146,10 @@ namespace HexaLab {
 		{0.552941176f,  0.f,            0.f },
 	};
 
-	static const vector<Vector3f> color_map_red_green = {
+	static const vector<Vector3f> color_map_red_blue = {
+		{0.f,           0.f,            1.f},
+		{1.f,           1.f,            1.f},
 		{1.f,           0.f,            0.f},
-		{0.f,           1.f,            0.f}
 	};
 
 	ColorMap::Palette ColorMap::default_palette = ColorMap::Palette::Parula;
@@ -162,8 +163,8 @@ namespace HexaLab {
 		case Palette::Jet:
 			this->palette = &color_map_jet;
 			break;
-		case Palette::RedGreen:
-			this->palette = &color_map_red_green;
+		case Palette::RedBlue:
+			this->palette = &color_map_red_blue;
 			break;
 		default:
 			HL_LOG("[Color Map] Palette name unrecognized. Default palette selected.");
