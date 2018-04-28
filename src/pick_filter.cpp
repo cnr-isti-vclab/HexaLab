@@ -42,7 +42,7 @@ namespace HexaLab {
             std::sort(this->filtered_hexas.begin(), this->filtered_hexas.end());
             return min_i;
         } else {
-            HL_LOG("[Pick Filter]: Raycast miss\n");
+            HL_LOG("[Pick Filter] Miss\n");
         }
         return -1;
     }
@@ -70,7 +70,7 @@ namespace HexaLab {
             this->filtered_hexas.erase(std::find(this->filtered_hexas.begin(), this->filtered_hexas.end(), max_i));
             return max_i;
         } else {
-            HL_LOG("[Pick Filter]: Raycast miss\n");
+            HL_LOG("[Pick Filter] Miss\n");
         }
         return -1;
     }
