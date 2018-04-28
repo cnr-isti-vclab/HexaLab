@@ -206,7 +206,7 @@ HexaLab.UI.settings.color.default.inside.spectrum({
     HexaLab.app.set_visible_surface_default_inside_color($(this).spectrum('get').toHexString())
 })
 
-HexaLab.UI.settings.silhouette.slider().on('slide', function (e, ui) {
+HexaLab.UI.settings.silhouette.slider().addClass('mini-slider').on('slide', function (e, ui) {
     HexaLab.app.set_filtered_surface_opacity(ui.value / 100)
 })
 
@@ -214,7 +214,7 @@ HexaLab.UI.settings.color.quality_map.on('change', function () {
     HexaLab.app.set_color_map(this.options[this.selectedIndex].value)
 })
 
-HexaLab.UI.settings.wireframe.slider().on('slide', function (e, ui) {
+HexaLab.UI.settings.wireframe.slider().addClass('mini-slider').on('slide', function (e, ui) {
     HexaLab.app.set_visible_wireframe_opacity(ui.value / 100)
 })
 
@@ -223,7 +223,7 @@ HexaLab.UI.settings.singularity_mode.slider({
     min: 0,
     max: 4,
     step: 1
-}).on('slide', function (e, ui) {
+}).addClass('mini-slider').on('slide', function (e, ui) {
     HexaLab.app.set_singularity_mode(ui.value)
 })
 
@@ -492,11 +492,30 @@ HexaLab.UI.setup_dataset_content = function () {
     HexaLab.UI.mesh.dataset_content.show()
 }
 
+// HexaLab.UI.mesh.source.on("click", function () {
+//     if (HexaLab.UI.mesh.source.select_focus_file_flag) {
+//         HexaLab.UI.mesh.source.select_focus_file_flag = 0
+//         return
+//     }
+//     this.selectedIndex = -1
+// })
+
+HexaLab.UI.mesh.source.on("click", function () {
+    if (HexaLab.UI.mesh.source.select_click_flag) {
+        HexaLab.UI.mesh.source.select_click_flag = 0
+        return
+    }
+    this.selectedIndex = -1
+})
+
 HexaLab.UI.mesh.source.on("change", function () {
     HexaLab.UI.mesh.source.css('font-style', 'normal')
+    
+    HexaLab.UI.mesh.source.select_click_flag = 1
 
     var v = this.options[this.selectedIndex].value
     if (v == "-1") {
+        // HexaLab.UI.mesh.source.select_focus_file_flag = 1
         HexaLab.UI.clear_mesh_info()
         if (HexaLab.UI.view_source == 1) HexaLab.UI.setup_mesh_stats(HexaLab.FS.short_path(HexaLab.UI.mesh_long_name))
         HexaLab.FS.trigger_file_picker(HexaLab.UI.import_local_mesh)
@@ -506,7 +525,16 @@ HexaLab.UI.mesh.source.on("change", function () {
     }
 })
 
+HexaLab.UI.mesh.dataset_content.on("click", function () {
+    // TODO Do we want this?
+    // if (HexaLab.UI.mesh.dataset_content.select_click_flag) {
+    //     HexaLab.UI.mesh.dataset_content.select_click_flag = 0
+    // }
+    // this.selectedIndex = -1
+})
+
 HexaLab.UI.mesh.dataset_content.on("change", function () {
+    HexaLab.UI.mesh.dataset_content.select_click_flag = 1
     var v = this.options[this.selectedIndex].value
     var i = parseInt(v)
     var j = parseInt(HexaLab.UI.mesh.source[0].options[HexaLab.UI.mesh.source[0].selectedIndex].value)

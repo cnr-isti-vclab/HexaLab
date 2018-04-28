@@ -327,6 +327,17 @@ input {
 	margin-right: 10px;
 }
 
+.menu_area .menu_content .menu_row .menu_row_input .mini-slider {
+    flex-grow: 0;
+    width: 250px;
+}
+
+.menu_area .menu_content .menu_row .menu_row_input .mini-slider .ui-slider-handle {
+    width: 5px;
+    padding-left: 5px;
+    height: 15px;
+}
+
 .menu_area .menu_content .menu_row .menu_row_input_block {
 	margin-left: 10px;
 }
