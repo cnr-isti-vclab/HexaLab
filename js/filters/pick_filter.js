@@ -36,7 +36,7 @@ HexaLab.PickFilter = function () {
     this.filling = false
 
     this.default_settings = {
-        enabled: true,
+        enabled: false,
         filtered_hexas: []
     }
 

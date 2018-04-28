@@ -43,7 +43,7 @@ HexaLab.PeelingFilter = function () {
 
     // State
     this.default_settings = {
-        enabled: true,
+        enabled: false,
         depth: 0
     }
 }

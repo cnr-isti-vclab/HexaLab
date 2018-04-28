@@ -1056,7 +1056,7 @@ HexaLab.App = function (dom_element) {
     for (var k in HexaLab.filters) {
         this.filters[k] = HexaLab.filters[k];
         if (this.filters[k].default_settings) {
-            this.filters[k].set_settings(this.filters[k].default_settings);
+            //this.filters[k].set_settings(this.filters[k].default_settings);
         }
         this.backend.add_filter(this.filters[k].backend);
     }

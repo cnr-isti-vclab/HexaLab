@@ -96,7 +96,7 @@ HexaLab.PlaneFilter = function () {
     self.visible_edge = false
 
     this.default_settings = {
-        enabled: true,
+        enabled: false,
         normal: new THREE.Vector3(1, 0, 0),
         offset: 0,
         opacity: 0.3,
