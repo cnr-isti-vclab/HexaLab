@@ -107,7 +107,7 @@
                     <div id="plane_menu" class="menu_area">
                         <div class="menu_title_wrapper">
                             <div class="menu_title">Plane Filter</div>
-                            <label class="switch menu_switch" title="Toggle the filtering of cells beyond a given plane">
+                            <label class="switch menu_switch" title="Enable/disable plane filtering">
                                 <input type="checkbox" id="plane_enabled">
                                 <span class="switch-slider"></span>
                             </label>
@@ -153,7 +153,7 @@
                     <div id="quality_menu" class="menu_area">
                         <div class="menu_title_wrapper">
                             <div class="menu_title">Quality Filter</div>
-                            <label class="switch menu_switch" title="Toggle the filtering of cells based on their estimated quality">
+                            <label class="switch menu_switch" title="Enable/disable quality filtering">
                                 <input type="checkbox" id="quality_enabled">
                                 <span class="switch-slider"></span>
                             </label>
@@ -174,7 +174,7 @@
                     <div id="peeling_menu" class="menu_area">
                         <div class="menu_title_wrapper">
                             <div class="menu_title">Peeling Filter</div>
-                            <label class="switch menu_switch" title="Toggle the filtering of cells based on their depth">
+                            <label class="switch menu_switch" title="Enable/disable depth filtering">
                                 <input type="checkbox" id="peeling_enabled">
                                 <span class="switch-slider"></span>
                             </label>
@@ -186,6 +186,31 @@
                                     <div class="slider" id="peeling_depth_slider"></div>
                                     <div class="menu_row_input_block">
                                         <input type="number" id="peeling_depth_number">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="pick_menu" class="menu_area">
+                        <div class="menu_title_wrapper">
+                            <div class="menu_title">Pick Filter</div>
+                            <label class="switch menu_switch" title="Enable/disable manual pick filtering">
+                                <input type="checkbox" id="pick_enabled">
+                                <span class="switch-slider"></span>
+                            </label>
+                        </div>
+                        <div class="menu_content">
+                            <div class="menu_row">
+                                <div class="menu_row_input">
+                                    <div class="menu_row_input_block">
+                                        <div class="menu_row_label"></div>
+                                        <div class="menu_row_input">
+                                            <div class="menu_row_input_block">
+                                                <button id="pick_clear_button" title="Unfilter all previously picked hexas">Clear</button>
+                                                <button id="fill_button" title="Manually pick hexas to unfilter">Fill</button>
+                                                <button id="pick_button" title="Manually pick hexas to filter">Pick</button>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -257,7 +282,7 @@
         <div id="frame">
             <div id="drag_drop_overlay" class="first_drag_drop">
                 <div>
-                    <span id="drag_drop_header">Drop a file in the box below<br/> or use the sidebar</span>
+                    <span id="drag_drop_header">Drop a mesh file in the box below<br/> or use the menu to the side</span>
                 </div>
                 <div id="mesh_drag_drop_area">
                     <div id="mesh_drag_drop_quad" class="drag_drop_quad_off">
@@ -296,6 +321,7 @@
     <script src="js/filters/plane_filter.js"></script>
     <script src="js/filters/quality_filter.js"></script>
     <script src="js/filters/peeling_filter.js"></script>
+    <script src="js/filters/pick_filter.js"></script>
 
     <script type="text/javascript">
         window.onload = function () {

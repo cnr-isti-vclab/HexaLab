@@ -10,9 +10,7 @@ namespace HexaLab {
     std::unordered_map<Builder::FaceMapKey, Index> Builder::faces_map;
 
     constexpr Index Builder::hexa_face[6][4];
-
    
-
     void Builder::add_edge(Mesh& mesh, Index h, Index f, const Index* edge) {
         // Lookup/add the edge
         Index e;
@@ -39,8 +37,8 @@ namespace HexaLab {
         mesh.darts[mesh.darts.size() - 2].vert_neighbor = mesh.darts.size() - 1;
     }
 
-    // h: index of the hexa to whom the face is part of.
-    // face: array of 4 indices representing the face.
+    // h:    index of the hexa the face is part of.
+    // face: array of 4 vertex indices representing the face.
     void Builder::add_face(Mesh& mesh, Index h, const Index* face) {
         // Lookup/add the face
         Index f;
@@ -61,7 +59,7 @@ namespace HexaLab {
             add_edge(mesh, h, f, edge_indices);
         }
 
-        // Compute face normal, if its the first match
+        // Compute face normal, if it is the first match
         if (search_result == faces_map.end()) {
             Vector3f normal(0, 0, 0);
             Vector3f a, b;
@@ -82,6 +80,9 @@ namespace HexaLab {
         }
 
         // Link faces with the adjacent hexa, if there's one
+        // Worst case, compares each dart of the new face with each dart of the old face.
+        // Average case is half of that, which is still quadratic.
+        // There might be a better way to do this, maybe by using a better ordering of the vertices composing the hexa.
         if (search_result != faces_map.end()) {
             Index f1_base = mesh.faces[f].dart;
             
@@ -109,7 +110,7 @@ namespace HexaLab {
         }
     }
 
-    // hexa: array of 8 indices representing the hexa.
+    // hexa: array of 8 vertex indices representing the hexa.
     void Builder::add_hexa(Mesh& mesh, const Index* hexa) {
         const Index h = mesh.hexas.size();
         mesh.hexas.emplace_back(mesh.darts.size());
@@ -124,6 +125,9 @@ namespace HexaLab {
             add_face(mesh, h, face_indices);
         }
 
+        // The following code links the faces of the hexa between each other.
+        // It is completely dependent on the way the hexas are built, there probably is a better and nicer way to do this but i couldn't come up with one.
+        
         // Link side faces
         const int face_size = 8;        // darts in a face
         const int edge_offset = 4;      // dart offset between two side edges (e.g. two left darts, two top darts, two right darts => offset == 4)
@@ -170,14 +174,9 @@ namespace HexaLab {
         }
     }
     
-    /**
-     * @brief Builder::build
-     * @param mesh an empty mesh to be filled 
-     * @param vertices a set of vertices
-     * @param indices a set of 8*n indexes representing the hexahedra
-     * 
-     */
-
+    // mesh:     empty mesh to be filled
+    // vertices: mesh vertices
+    // indices:  8*n vertex indices
     void Builder::build(Mesh& mesh, const vector<Vector3f>& vertices, const vector<Index>& indices) {
         assert(indices.size() % 8 == 0);
 
@@ -208,7 +207,7 @@ namespace HexaLab {
             }
             add_hexa(mesh, &indices[h * 8]);
         }
-        HL_LOG("\n");
+        HL_LOG("100%%\n");
 
         mesh.hexa_quality.resize(hexa_count);
         for (size_t i = 0; i < hexa_count; ++i) {

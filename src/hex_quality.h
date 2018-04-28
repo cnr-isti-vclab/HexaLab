@@ -1,5 +1,4 @@
-#ifndef HEX_QUALITY_H
-#define HEX_QUALITY_H
+#pragma once
 
 #include <vector>
 #include <algorithm>
@@ -473,5 +472,3 @@ HL_QUALITY_MEASURE_DEF(taper)
 
 }
 } // end namespace
-
-#endif // HEX_QUALITY_H

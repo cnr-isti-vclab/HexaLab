@@ -438,6 +438,7 @@ Object.assign(HexaLab.Viewer.prototype, {
 
     get_element: function () { return this.renderer.domElement },
     get_scene_camera: function () { return this.scene_camera },
+    get_models_transform: function () { return new THREE.Matrix4().makeTranslation(this.mesh_offset.x, this.mesh_offset.y, this.mesh_offset.z) },
 
     // Settings
     set_background_color:   function (color) { this.settings.background = color },
@@ -863,7 +864,7 @@ Object.assign(HexaLab.Viewer.prototype, {
         }
         this.dirty_geometry = false
         this.dirty_color    = false
-        this.dirty_osao = false
+        this.dirty_osao     = false
 
         // -- main render sequence --
 
@@ -871,6 +872,8 @@ Object.assign(HexaLab.Viewer.prototype, {
         clear_rt()
         clear_scene()
         this.scene.add(this.renderables.visible.surface)
+        // The whole scene is translated so that the center of the mesh lies on the origin.
+        // As long as the camera is not added to the scene, this offset does not affect the camera.
         this.scene.position.set(this.mesh_offset.x, this.mesh_offset.y, this.mesh_offset.z)
         this.renderer.render(this.scene, this.scene_camera)
 

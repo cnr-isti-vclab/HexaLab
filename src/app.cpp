@@ -354,6 +354,7 @@ namespace HexaLab {
         } while (nav.vert() != vert);
         add_triangle(idx + 0, idx + 1, idx + 2);
         add_triangle(idx + 2, idx + 3, idx + 0);
+        nav.face().viewer_normal = nav.face().normal * normal_sign;
     }
 
     void App::add_visible_wireframe(Dart& dart) {

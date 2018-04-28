@@ -1,5 +1,4 @@
-#ifndef _HL_APP_H_
-#define _HL_APP_H_
+#pragma once
 
 #include <mesh.h>
 #include <mesh_navigator.h>
@@ -131,5 +130,3 @@ namespace HexaLab {
         void build_singularity_models();
     };
 }
-
-#endif

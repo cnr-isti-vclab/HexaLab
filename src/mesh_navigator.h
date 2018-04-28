@@ -1,5 +1,4 @@
-#ifndef _HL_MESH_NAVIGATOR_H_
-#define _HL_MESH_NAVIGATOR_H_
+#pragma once
 
 namespace HexaLab {
     class Mesh;
@@ -63,5 +62,3 @@ namespace HexaLab {
         }
     };
 }
-
-#endif

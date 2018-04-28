@@ -1,5 +1,4 @@
-#ifndef _HL_COMMON_H_
-#define _HL_COMMON_H_
+#pragma once
 
 #include <stdio.h>
 #include <stdint.h>
@@ -28,5 +27,3 @@ namespace HexaLab {
         return std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
     }
 }
-
-#endif

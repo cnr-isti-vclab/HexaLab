@@ -1,5 +1,4 @@
-#ifndef _HL_MESH_H_
-#define _HL_MESH_H_
+#pragma once
 
 #include <vector>
 #include <unordered_map>
@@ -74,7 +73,9 @@ namespace HexaLab {
     struct Face {
         Index dart = -1;
         Vector3f normal;
-        // is_surface is given by simply checking the existence of a neighboring hexa
+        Vector3f viewer_normal;
+        // is_surface is given by simply checking the existence of a neighboring hexa.
+        // the normal is stored with respect to the hexa that the dart belongs to. flip it if you want it with respect to the other.
 
         Face(){}
         Face(Index dart) { this->dart = dart; }
@@ -145,5 +146,3 @@ namespace HexaLab {
         vector<float>      normalized_hexa_quality;
 	};
 }
-
-#endif

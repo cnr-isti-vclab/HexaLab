@@ -1,5 +1,4 @@
-#ifndef _HL_BUILDER_H_
-#define _HL_BUILDER_H_
+#pragma once
 
 #include <mesh.h>
 
@@ -95,5 +94,3 @@ namespace std {
 		}
 	};
 }
-    
-#endif

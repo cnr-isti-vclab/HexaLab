@@ -1,5 +1,4 @@
-#ifndef _HL_COLOR_MAP_H_
-#define _HL_COLOR_MAP_H_
+#pragma once
 
 #include <Eigen/Dense>
 #include <vector>
@@ -29,5 +28,3 @@ namespace HexaLab {
 		Palette palette_enum;
 	};
 }
-
-#endif

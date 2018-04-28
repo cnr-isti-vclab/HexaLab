@@ -1,8 +1,6 @@
-#ifndef _HL_PLANE_FILTER_H_
-#define _HL_PLANE_FILTER_H_
+#pragma once
 
 #include <mesh.h>
-#include <model.h>
 #include <ifilter.h>
 
 namespace HexaLab {
@@ -33,5 +31,3 @@ namespace HexaLab {
         bool plane_cull_test(Mesh& mesh, Face& face);
     };
 }
-
-#endif

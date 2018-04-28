@@ -2,6 +2,7 @@
 #include <plane_filter.h>
 #include <quality_filter.h>
 #include <peeling_filter.h>
+#include <pick_filter.h>
 #include <color_map.h>
 #include <hex_quality.h>
 #include <hex_quality_color_maps.h>
@@ -41,6 +42,17 @@ float get_upper_quality_range_bound(App& app) {
     QualityMeasureEnum m = app.get_quality_measure();
     MeshStats& s = *app.get_mesh_stats();
     return denormalize_quality_measure(m, 1, s.quality_min, s.quality_max);
+}
+
+// Vector3f
+void vec3_set_x(Vector3f& vec, float val) {
+    vec.x() = val;
+}
+void vec3_set_y(Vector3f& vec, float val) {
+    vec.y() = val;
+}
+void vec3_set_z(Vector3f& vec, float val) {
+    vec.z() = val;
 }
 
 #ifdef __EMSCRIPTEN__
@@ -176,13 +188,26 @@ EMSCRIPTEN_BINDINGS(HexaLab) {
         .property("max_depth",              &PeelingFilter::max_depth)
         ;
 
+    class_<PickFilter, base<IFilter>>("PickFilter")
+        .constructor<>()
+        .function("filter",                 &PickFilter::filter)
+        .function("on_mesh_set",            static_cast<void(PickFilter::*)(Mesh&)>(&IFilter::on_mesh_set))
+        .function("filter_hexa",            &PickFilter::filter_hexa)
+        .function("unfilter_hexa",          &PickFilter::unfilter_hexa)
+        .function("clear_filtered_hexas",   &PickFilter::clear_filtered_hexas)
+        .function("filter_hexa_idx",        &PickFilter::filter_hexa_idx)
+        ;
+
     // MISC
 
-    class_<Vector3f>("float3")
+    class_<Vector3f>("vec3")
         .constructor<>()
         .function("x",                      static_cast<float&(Vector3f::*)()>(select_overload<float&()>(&Vector3f::x)))
         .function("y",                      static_cast<float&(Vector3f::*)()>(select_overload<float&()>(&Vector3f::y)))
         .function("z",                      static_cast<float&(Vector3f::*)()>(select_overload<float&()>(&Vector3f::z)))
+        .function("set_x",                  &vec3_set_x)
+        .function("set_y",                  &vec3_set_y)
+        .function("set_z",                  &vec3_set_z)
         ;
 
     class_<vector<Vector3f>>("buffer3f")

@@ -1,5 +1,4 @@
-#ifndef  _HL_PEELING_FILTER_H
-#define  _HL_PEELING_FILTER_H
+#pragma once
 
 #include <mesh.h>
 #include <model.h>
@@ -18,5 +17,3 @@ namespace HexaLab {
         void on_mesh_set(Mesh& mesh);
     };
 }
-
-#endif // PEELING_FILTER_H
