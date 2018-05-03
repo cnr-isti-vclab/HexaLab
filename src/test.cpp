@@ -42,7 +42,6 @@ int main() {
             ++meshCnt;
             string filename = dataVec[j];
             const string basepath = "../datasets/";
-            //bool ret = app.import_mesh("../datasets/Skeleton-driven Adaptive Hexahedral Meshing of Tubular Shapes/dinopet_graded.mesh");
             bool ret = app.import_mesh ( basepath + path + "/" + filename );
             app.update_models();
 
@@ -50,44 +49,9 @@ int main() {
                 ++failCnt;
             }
 
-            PeelingFilter lf;
-            lf.on_mesh_set ( *app.get_mesh() );
-            lf.depth_threshold = 2;
-            lf.filter ( *app.get_mesh() );
-            PickFilter pf;
+            PeelingFilter pf;
             pf.on_mesh_set ( *app.get_mesh() );
-            //Vector3f pos(0.502425, 0.500157, 2.094534);
-            //Vector3f dir(-0.283835, -0.002638, -0.958870);
-            Vector3f pos(0.502425, 0.500157, 2.094534);
-            Vector3f dir(-0.283349, -0.003166, -0.959012);
-            //Vector3f pos ( 0.502425, 0.500157, 2.094534 );
-            //Vector3f dir ( 0, 0, -1 );
-            pf.filter_hexa ( pos, dir );
-            pf.filter ( *app.get_mesh() );
-            app.update_models();
-            pf.unfilter_hexa ( pos, dir );
-            pf.filter ( *app.get_mesh() );
-            pf.filter_hexa ( pos, dir );
-            pf.filter ( *app.get_mesh() );
-            pf.filter_hexa ( pos, dir );
-            pf.filter ( *app.get_mesh() );
-            pf.filter_hexa ( pos, dir );
-            pf.filter ( *app.get_mesh() );
-            pf.filter_hexa ( pos, dir );
-            pf.filter ( *app.get_mesh() );
-            pf.filter_hexa ( pos, dir );
-            pf.filter ( *app.get_mesh() );
-            pf.filter_hexa ( pos, dir );
-            pf.filter ( *app.get_mesh() );
-            pf.filter_hexa ( pos, dir );
-            pf.filter ( *app.get_mesh() );
-            pf.filter_hexa ( pos, dir );
-            pf.filter ( *app.get_mesh() );
-            pf.filter ( *app.get_mesh() );
-            pf.filter_hexa ( pos, dir );
-            pf.filter ( *app.get_mesh() );
-            pf.filter_hexa ( pos, dir );
-            pf.filter_hexa ( pos, dir );
+           
             fflush ( stdout );
         }
     }
