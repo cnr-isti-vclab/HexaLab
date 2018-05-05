@@ -73,7 +73,6 @@ namespace HexaLab {
     struct Face {
         Index dart = -1;
         Vector3f normal;
-        Vector3f viewer_normal;
         // is_surface is given by simply checking the existence of a neighboring hexa.
         // the normal is stored with respect to the hexa that the dart belongs to. flip it if you want it with respect to the other.
 

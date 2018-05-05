@@ -119,11 +119,15 @@ namespace HexaLab {
         void add_filtered_face(Dart& dart);
         void add_filtered_wireframe(Dart& dart);
 
-        void add_vertex(Vector3f pos, Vector3f norm, Vector3f color);
-        void add_triangle(Index i1, Index i2, Index i3);
+        size_t add_vertex(Vector3f pos, Vector3f norm, Vector3f color);
+        void add_triangle(size_t i1, size_t i2, size_t i3);
+        void add_quad(size_t i1, size_t i2, size_t i3, size_t i4);
 
         void prepare_geometry();
-        void prepare_round_geometry();
+        void prepare_cracked_geometry();
+        void prepare_smooth_geometry();
+
+        void build_gap_hexa(const Vector3f pp[8], const Vector3f nn[6], const bool vv[8], const Vector3f[6]);
 
         void compute_hexa_quality();
         void build_surface_models();

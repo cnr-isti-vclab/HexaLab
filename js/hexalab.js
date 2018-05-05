@@ -150,6 +150,7 @@ HexaLab.Viewer = function (canvas_width, canvas_height) {
         vertexColors:                   THREE.VertexColors,
         polygonOffset:                  true,
         polygonOffsetFactor:            0.5,
+        side:                           THREE.DoubleSide,
     })
     this.materials.visible_wireframe    = new THREE.LineBasicMaterial({
         transparent:                    true,
@@ -428,7 +429,7 @@ Object.assign(HexaLab.Viewer.prototype, {
         this.renderer = new THREE.WebGLRenderer({
             antialias: this.settings.aa == 'msaa',
             preserveDrawingBuffer: true,    // disable hidden/automatic clear of the rendertarget
-            alpha: true                     // to have an alpha on the rendertarget? (needed for setClearAlpha to work)
+            alpha: true,                    // to have an alpha on the rendertarget? (needed for setClearAlpha to work)
         });
         this.renderer.setSize(this.width, this.height)
         this.renderer.autoClear = false

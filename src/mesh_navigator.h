@@ -9,13 +9,13 @@ namespace HexaLab {
     struct Dart;
 
     class MeshNavigator {
-    private:
+      private:
         Dart* _dart;
         Mesh* _mesh;
-    public:
-        MeshNavigator(Dart& dart, Mesh& mesh)
-            : _dart(&dart)
-            , _mesh(&mesh) {}
+      public:
+        MeshNavigator ( Dart& dart, Mesh& mesh )
+            : _dart ( &dart )
+            , _mesh ( &mesh ) {}
 
         // -- 'Atomic' fkil operations
         // Simple flipping of one combinatorial map element
@@ -32,6 +32,8 @@ namespace HexaLab {
         // 'Rotates' around the current hexa's 4 side faces, changing vert, edge and face.
         // Each call changes face; 4 calls to do a full rotation.
         MeshNavigator rotate_on_hexa();
+        // Moves to the corresponding dart as the current, but on the opposite face (e.g. front -> back, back->front, left-> right, ...)
+        MeshNavigator flip_side();
 
         // Useful to iterate over the faces of a hexa.
         // Each call gets to a new face, so 6 to do a full iteration.
@@ -41,7 +43,7 @@ namespace HexaLab {
         bool is_face_boundary() const;
         // Gets the number of faces that are incident on the current edge
         int incident_face_on_edge_num() const;
-        void collect_face_vertex_position_vector(std::vector<Eigen::Vector3f> &posVec) const;
+        void collect_face_vertex_position_vector ( std::vector<Eigen::Vector3f>& posVec ) const;
 
         Hexa& hexa();
         Face& face();
@@ -56,9 +58,9 @@ namespace HexaLab {
 
 
         const Dart& dart() const;
-        bool operator==(const MeshNavigator& other) const {
-          return this->_dart == other._dart
-              && this->_mesh == other._mesh;
+        bool operator== ( const MeshNavigator& other ) const {
+            return this->_dart == other._dart
+                   && this->_mesh == other._mesh;
         }
     };
 }
