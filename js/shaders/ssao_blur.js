@@ -37,7 +37,7 @@ THREE.SSAOBlur = {
 		    "float y = tex.y * 2.0 - 1.0;",
 		    "float z = getLinearDepth(tex);",
 		    "return vec3(x, y, z);",
-		"}", 
+		"}",
 
 		"vec3 getViewPos(const in vec3 screenPos) {",
 			"vec4 viewPos = uInvProj * vec4(screenPos, 1.0);",
@@ -64,7 +64,6 @@ THREE.SSAOBlur = {
 	         		"weightSum += w;",
 	      		"}",
 	   		"}",
-		 
 		 	"result = result / weightSum + 0.0001;",
 			"gl_FragColor = vec4(vec3(result), 1.0);",
 			//"float ssao = texture2D(tSSAO, vUv).r;",

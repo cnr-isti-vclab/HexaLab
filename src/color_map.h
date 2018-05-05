@@ -1,5 +1,4 @@
-#ifndef _HL_COLOR_MAP_H_
-#define _HL_COLOR_MAP_H_
+#pragma once
 
 #include <Eigen/Dense>
 #include <vector>
@@ -12,19 +11,20 @@ namespace HexaLab {
 	class ColorMap {
 	public:
 		enum class Palette {
-			Parula,
+			Parula = 0,
 			Jet,
-			RedGreen
+			RedBlue
 		};
 
 		ColorMap() : ColorMap(default_palette) {};
 		ColorMap(ColorMap::Palette palette);
+		
 		Vector3f get(float value);
+		Palette get_enum() { return this->palette_enum; }
 
 	private:
 		static Palette default_palette;
 		const vector<Vector3f>* palette;
+		Palette palette_enum;
 	};
 }
-
-#endif

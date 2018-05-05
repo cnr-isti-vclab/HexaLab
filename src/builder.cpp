@@ -2,15 +2,15 @@
 
 #include <builder.h>
 
+#include <hex_quality.h>
+
 namespace HexaLab {
 
     std::unordered_map<Builder::EdgeMapKey, Index> Builder::edges_map;
     std::unordered_map<Builder::FaceMapKey, Index> Builder::faces_map;
 
     constexpr Index Builder::hexa_face[6][4];
-
    
-
     void Builder::add_edge(Mesh& mesh, Index h, Index f, const Index* edge) {
         // Lookup/add the edge
         Index e;
@@ -37,8 +37,8 @@ namespace HexaLab {
         mesh.darts[mesh.darts.size() - 2].vert_neighbor = mesh.darts.size() - 1;
     }
 
-    // h: index of the hexa to whom the face is part of.
-    // face: array of 4 indices representing the face.
+    // h:    index of the hexa the face is part of.
+    // face: array of 4 vertex indices representing the face.
     void Builder::add_face(Mesh& mesh, Index h, const Index* face) {
         // Lookup/add the face
         Index f;
@@ -59,7 +59,7 @@ namespace HexaLab {
             add_edge(mesh, h, f, edge_indices);
         }
 
-        // Compute face normal, if its the first match
+        // Compute face normal, if it is the first match
         if (search_result == faces_map.end()) {
             Vector3f normal(0, 0, 0);
             Vector3f a, b;
@@ -80,6 +80,9 @@ namespace HexaLab {
         }
 
         // Link faces with the adjacent hexa, if there's one
+        // Worst case, compares each dart of the new face with each dart of the old face.
+        // Average case is half of that, which is still quadratic.
+        // There might be a better way to do this, maybe by using a better ordering of the vertices composing the hexa.
         if (search_result != faces_map.end()) {
             Index f1_base = mesh.faces[f].dart;
             
@@ -107,7 +110,7 @@ namespace HexaLab {
         }
     }
 
-    // hexa: array of 8 indices representing the hexa.
+    // hexa: array of 8 vertex indices representing the hexa.
     void Builder::add_hexa(Mesh& mesh, const Index* hexa) {
         const Index h = mesh.hexas.size();
         mesh.hexas.emplace_back(mesh.darts.size());
@@ -122,6 +125,9 @@ namespace HexaLab {
             add_face(mesh, h, face_indices);
         }
 
+        // The following code links the faces of the hexa between each other.
+        // It is completely dependent on the way the hexas are built, there probably is a better and nicer way to do this but i couldn't come up with one.
+        
         // Link side faces
         const int face_size = 8;        // darts in a face
         const int edge_offset = 4;      // dart offset between two side edges (e.g. two left darts, two top darts, two right darts => offset == 4)
@@ -168,14 +174,9 @@ namespace HexaLab {
         }
     }
     
-    /**
-     * @brief Builder::build
-     * @param mesh an empty mesh to be filled 
-     * @param vertices a set of vertices
-     * @param indices a set of 8*n indexes representing the hexahedra
-     * 
-     */
-
+    // mesh:     empty mesh to be filled
+    // vertices: mesh vertices
+    // indices:  8*n vertex indices
     void Builder::build(Mesh& mesh, const vector<Vector3f>& vertices, const vector<Index>& indices) {
         assert(indices.size() % 8 == 0);
 
@@ -193,9 +194,21 @@ namespace HexaLab {
         }
 
         size_t hexa_count = indices.size() / 8;
+        size_t p25 = hexa_count * 0.25;
+        size_t p50 = hexa_count * 0.5;
+        size_t p75 = hexa_count * 0.75;
         for (size_t h = 0; h < hexa_count; ++h) {
+            if (h == p25) {
+                HL_LOG("[Builder] 25%%... ");
+            } else if (h == p50) {
+                HL_LOG("50%%... ");
+            } else if (h == p75) {
+                HL_LOG("75%%... ");
+            }
             add_hexa(mesh, &indices[h * 8]);
         }
+        HL_LOG("100%%\n");
+
         mesh.hexa_quality.resize(hexa_count);
         for (size_t i = 0; i < hexa_count; ++i) {
             // compute quality
@@ -225,10 +238,11 @@ namespace HexaLab {
             Face& begin = nav.face();
             do {
                 if (nav.dart().hexa_neighbor == -1) {
-                    nav.edge().surface_flag = true;
+                    nav.edge().is_surface = true;
+                    // nav.vert().is_surface = true;
+                    // nav.flip_vert().vert().is_surface = true;
                 }
                 nav = nav.rotate_on_edge();
-//                ++mesh.edges[i].face_count;
             } while (nav.face() != begin);
         }
 
@@ -316,10 +330,30 @@ namespace HexaLab {
             }
         }
 
+        for (size_t i = 0; i < mesh.hexas.size(); ++i) {
+            Hexa& h = mesh.hexas[i];
+            Vector3f v[8];
+            int j = 0;
+            auto nav = mesh.navigate(h);
+            Vert& a = nav.vert();
+            do {
+                v[j++] = nav.vert().position;
+                nav = nav.rotate_on_face();
+            } while (nav.vert() != a);
+            nav = nav.rotate_on_hexa().rotate_on_hexa().flip_vert();
+            Vert& b = nav.vert();
+            do {
+                v[j++] = nav.vert().position;
+                nav = nav.rotate_on_face();
+            } while (nav.vert() != b);
+            float q = QualityMeasureFun::volume(v[4], v[5], v[6], v[7], v[0], v[1], v[2], v[3], nullptr);
+            HL_ASSERT(q > 0);
+        }
+
         auto dt = milli_from_sample(t0);
 
-        HL_LOG("[Mesh validator] Surface darts: %d/%d\n", surface_darts, mesh.darts.size());
-        HL_LOG("[Mesh validator] Validation took %dms.\n", dt);
+        HL_LOG("[Validator] Surface darts: %d/%d\n", surface_darts, mesh.darts.size());
+        HL_LOG("[Validator] Validation took %dms.\n", dt);
 
         return true;
     }

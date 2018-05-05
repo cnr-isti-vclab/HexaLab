@@ -1,5 +1,4 @@
-#ifndef _HL_LOW_QUALITY_VIEW_H_
-#define _HL_LOW_QUALITY_VIEW_H_
+#pragma once
 
 #include <mesh.h>
 #include <ifilter.h>
@@ -7,8 +6,6 @@
 namespace HexaLab {
     class QualityFilter : public IFilter {
     public:
-      std::vector<float> ScaledJacobian;
-      
     	enum class Operator {
     		Inside,
     		Outside
@@ -16,9 +13,9 @@ namespace HexaLab {
 
         float quality_threshold_min;
         float quality_threshold_max;
-        Operator op = Operator::Inside;
+        Operator op;
+        
         void filter(Mesh& mesh);
+        void on_mesh_set(Mesh& _mesh);
     };
 }
-
-#endif
