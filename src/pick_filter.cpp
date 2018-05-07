@@ -122,7 +122,7 @@ namespace HexaLab {
                 Vector3f v1 = nav.vert().position;
                 Vector3f e = v1 - v0;
                 Vector3f c = p - v0;
-                if ( planes[i].norm.dot( e.cross( c ) ) < 0 ) {
+                if ( planes[i].norm.dot( c.cross( e ) ) < 0 ) {
                     inside = false;
                     break;
                 }

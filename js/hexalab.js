@@ -150,7 +150,7 @@ HexaLab.Viewer = function (canvas_width, canvas_height) {
         vertexColors:                   THREE.VertexColors,
         polygonOffset:                  true,
         polygonOffsetFactor:            0.5,
-        side:                           THREE.DoubleSide,
+
     })
     this.materials.visible_wireframe    = new THREE.LineBasicMaterial({
         transparent:                    true,

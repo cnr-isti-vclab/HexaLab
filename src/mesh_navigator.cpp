@@ -62,5 +62,6 @@ namespace HexaLab {
     Index MeshNavigator::vert_index() { return _dart->vert; }
     Index MeshNavigator::dart_index() { return std::distance(&*_mesh->darts.begin(),_dart); }
     const Dart& MeshNavigator::dart() const { return *_dart; }
+
     Dart& MeshNavigator::dart() { return *_dart; }
 }

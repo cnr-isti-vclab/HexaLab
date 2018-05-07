@@ -72,7 +72,7 @@ namespace HexaLab {
                 nav = nav.rotate_on_face();
             } while ( nav.vert() != b );
 
-            avg_v += QualityMeasureFun::volume ( v[4], v[5], v[6], v[7], v[0], v[1], v[2], v[3], nullptr );
+            avg_v += QualityMeasureFun::volume ( v[0], v[1], v[2], v[3], v[4], v[5], v[6], v[7], nullptr );
         }
 
         avg_v /= mesh->hexas.size();
@@ -209,7 +209,7 @@ namespace HexaLab {
                 nav = nav.rotate_on_face();
             } while ( nav.vert() != b );
 
-            float q = fun ( v[4], v[5], v[6], v[7], v[0], v[1], v[2], v[3], arg );
+            float q = fun ( v[0], v[1], v[2], v[3], v[4], v[5], v[6], v[7], arg );
             mesh->hexa_quality[i] = q;
 
             if ( min > q ) {
@@ -386,6 +386,7 @@ namespace HexaLab {
         add_triangle ( i3, i4, i1 );
     }
 
+    // dart: first dart in the face to render
     void App::add_visible_face ( Dart& dart, float normal_sign ) {
         MeshNavigator nav = mesh->navigate ( dart );
 
@@ -414,6 +415,7 @@ namespace HexaLab {
         }
 
         nav = mesh->navigate ( dart );
+        // nav = mesh->navigate(nav.hexa());   // TODO remove this
 
         if ( normal_sign == -1 ) {
             nav = nav.flip_vert();    // TODO flip hexa/edge instead? same thing?
@@ -427,8 +429,8 @@ namespace HexaLab {
             nav = nav.rotate_on_face();
         } while ( nav.vert() != vert );
 
-        add_triangle ( idx + 0, idx + 1, idx + 2 );
-        add_triangle ( idx + 2, idx + 3, idx + 0 );
+        add_triangle ( idx + 2, idx + 1, idx + 0 );
+        add_triangle ( idx + 0, idx + 3, idx + 2 );
     }
 
     void App::add_visible_wireframe ( Dart& dart ) {
@@ -529,11 +531,11 @@ namespace HexaLab {
             // hexa a visible, hexa b not existing or not visible
             if ( !mesh->is_marked ( nav.hexa() ) && ( nav.dart().hexa_neighbor == -1 || mesh->is_marked ( nav.flip_hexa().hexa() ) ) ) {
                 this->add_visible_face ( nav.dart(), 1 );
-                // hexa a invisible, hexa b existing and visible
+            // hexa a invisible, hexa b existing and visible
             } else if ( mesh->is_marked ( nav.hexa() ) && nav.dart().hexa_neighbor != -1 && !mesh->is_marked ( nav.flip_hexa().hexa() ) ) {
                 this->add_visible_face ( nav.dart(), -1 );
                 // add_filtered_face(nav.dart());
-                // face was culled by the plane, is surface
+            // face was culled by the plane, is surface
             } else if ( mesh->is_marked ( nav.hexa() ) && nav.dart().hexa_neighbor == -1 ) {
                 this->add_filtered_face ( nav.dart() );
             }
@@ -562,12 +564,18 @@ namespace HexaLab {
                     add_vertex ( ( !vv[v1] ) ? pp[v1] : ( pp[v1] * ( 1 - gap ) + bari ), nn[fi], ww[fi] )
                 );
         };
-        addSide ( 0 + 0, 2 + 0, 6 + 0, 4 + 0, 1 );
-        addSide ( 2 + 1, 0 + 1, 4 + 1, 6 + 1, 0 );
-        addSide ( 0 + 0, 1 + 0, 3 + 0, 2 + 0, 5 );
-        addSide ( 1 + 4, 0 + 4, 2 + 4, 3 + 4, 4 );
-        addSide ( 0 + 0, 4 + 0, 5 + 0, 1 + 0, 3 );
-        addSide ( 4 + 2, 0 + 2, 1 + 2, 5 + 2, 2 );
+        addSide(0 + 0, 2 + 0, 6 + 0, 4 + 0, 0);
+        addSide(2 + 1, 0 + 1, 4 + 1, 6 + 1, 1);
+        addSide(0 + 0, 1 + 0, 3 + 0, 2 + 0, 4);
+        addSide(1 + 4, 0 + 4, 2 + 4, 3 + 4, 5);
+        addSide(0 + 0, 4 + 0, 5 + 0, 1 + 0, 2);
+        addSide(4 + 2, 0 + 2, 1 + 2, 5 + 2, 3);
+        //addSide ( 0 + 0, 2 + 0, 6 + 0, 4 + 0, 1 );
+        //addSide ( 2 + 1, 0 + 1, 4 + 1, 6 + 1, 0 );
+        //addSide ( 0 + 0, 1 + 0, 3 + 0, 2 + 0, 5 );
+        //addSide ( 1 + 4, 0 + 4, 2 + 4, 3 + 4, 4 );
+        //addSide ( 0 + 0, 4 + 0, 5 + 0, 1 + 0, 3 );
+        //addSide ( 4 + 2, 0 + 2, 1 + 2, 5 + 2, 2 );
     }
 
     float smooth = 0.15;
@@ -615,12 +623,12 @@ namespace HexaLab {
 
         for ( int z = 0; z < 4; z++ ) {
             for ( int y = 0; y < 4; y++ ) {
-                n[0][y][z] += nn[1];
-                n[3][y][z] += nn[0];
-                n[y][0][z] += nn[3];
-                n[y][3][z] += nn[2];
-                n[y][z][0] += nn[5];
-                n[y][z][3] += nn[4];
+                n[0][y][z] += nn[0];
+                n[3][y][z] += nn[1];
+                n[y][0][z] += nn[2];
+                n[y][3][z] += nn[3];
+                n[y][z][0] += nn[4];
+                n[y][z][3] += nn[5];
                 w[0][y][z] = ww[0];    // TODO
                 w[3][y][z] = ww[1];
                 w[y][0][z] = ww[2];

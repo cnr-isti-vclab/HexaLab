@@ -29,8 +29,8 @@ namespace HexaLab {
             { 5, 4, 7, 6 },   // Back
             { 1, 5, 6, 2 },   // Left
             { 4, 0, 3, 7 },   // Right
-            { 4, 5, 1, 0 },   // Top
             { 6, 7, 3, 2 },   // Bottom
+            { 4, 5, 1, 0 },   // Top
         };
 
         enum HexaFace {
@@ -38,8 +38,8 @@ namespace HexaLab {
             Back,
             Left,
             Right,
-            Top,
             Bottom,
+            Top,
         };
 
       public:

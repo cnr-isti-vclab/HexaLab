@@ -172,17 +172,17 @@ namespace HexaLab {
         if ( search_result == faces_map.end() ) {
             Vector3f normal ( 0, 0, 0 );
             Vector3f a, b;
-            a = mesh.verts[face[1]].position - mesh.verts[face[0]].position;
-            b = mesh.verts[face[3]].position - mesh.verts[face[0]].position;
+            a = mesh.verts[face[3]].position - mesh.verts[face[0]].position;
+            b = mesh.verts[face[1]].position - mesh.verts[face[0]].position;
             normal += a.cross ( b ).normalized();
-            a = mesh.verts[face[2]].position - mesh.verts[face[1]].position;
-            b = mesh.verts[face[0]].position - mesh.verts[face[1]].position;
+            a = mesh.verts[face[0]].position - mesh.verts[face[1]].position;
+            b = mesh.verts[face[2]].position - mesh.verts[face[1]].position;
             normal += a.cross ( b ).normalized();
-            a = mesh.verts[face[3]].position - mesh.verts[face[2]].position;
-            b = mesh.verts[face[1]].position - mesh.verts[face[2]].position;
+            a = mesh.verts[face[1]].position - mesh.verts[face[2]].position;
+            b = mesh.verts[face[3]].position - mesh.verts[face[2]].position;
             normal += a.cross ( b ).normalized();
-            a = mesh.verts[face[0]].position - mesh.verts[face[3]].position;
-            b = mesh.verts[face[2]].position - mesh.verts[face[3]].position;
+            a = mesh.verts[face[2]].position - mesh.verts[face[3]].position;
+            b = mesh.verts[face[0]].position - mesh.verts[face[3]].position;
             normal += a.cross ( b ).normalized();
             ( normal /= 4 ).normalize();
             mesh.faces.back().normal = normal;
