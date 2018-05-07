@@ -29,35 +29,6 @@
             "sculpture/sculpture-B.mesh"
         ]
     }, {
-      "paper": {
-          "title": "All-hex Meshing Using Singularity-restricted Field",
-          "venue": "ACM Transactions on Graphics Volume 31 Issue 6",
-          "authors": "Yufei Li, Yang Liu, Weiwei Xu, Wenping Wang, Baining Guo",
-          "year": "2012",
-          "PDF": "http://i.cs.hku.hk/~yfli/All-hex/allhex.pdf",
-          "web": "http://www.cs.ubc.ca/labs/imager/tr/2015/untangler/",
-          "DOI": "10.1145/2366145.2366196"
-      },
-      "path": "All-Hex Meshing using Singularity-Restricted Field",
-      "label": "2012 - All-Hex Meshing Using Singularity-Restricted Field",
-      "data": [
-          "bone/bone.mesh",
-          "bunny/bunny.mesh",
-          "double torus/double torus.mesh",
-          "ellipsoid/ellipsoid-A.mesh",
-          "ellipsoid/ellipsoid-B.mesh",
-          "ellipsoid/ellipsoid-C.mesh",
-          "fandisk/fandisk.mesh",
-          "fertility/fertility.mesh",
-          "hanger/hanger.mesh",
-          "impeller/impeller.mesh",
-          "joint/joint.mesh",
-          "rockerarm/rockerarm.mesh",
-          "rod/rod.mesh",
-          "sculpture/sculpture-A.mesh",
-          "sculpture/sculpture-B.mesh"
-      ]
-  }, {
         "paper": {
             "title": "Practical Hex-Mesh Optimization via Edge-Cone Rectification",
             "venue": "ACM Transactions on Graphics Volume 34 Issue 4",
