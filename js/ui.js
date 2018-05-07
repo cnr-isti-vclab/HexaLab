@@ -155,6 +155,7 @@ HexaLab.UI = {
         wireframe:          $('#wireframe_slider'),
         occlusion:          $("#show_occlusion"),
         singularity_mode:   $('#singularity_slider'),
+        geometry_mode:      $('#geometry_mode'),
     },
     
     // Mesh sources
@@ -231,6 +232,10 @@ HexaLab.UI.settings.occlusion.on('click', function () {
     HexaLab.app.set_occlusion(this.checked ? 'object space' : 'none')
 })
 
+HexaLab.UI.settings.geometry_mode.on('change', function () {
+    HexaLab.app.set_geometry_mode(this.options[this.selectedIndex].value)
+})
+
 // App -> UI events
 HexaLab.UI.on_set_visible_surface_default_outside_color = function (color) {
     HexaLab.UI.settings.color.default.outside.spectrum('set', color)
@@ -284,6 +289,11 @@ HexaLab.UI.on_first_mesh = function () {
     HexaLab.UI.dragdrop.settings.show();
 }
 
+HexaLab.UI.clear_mesh_info_keep_source = function () {
+    HexaLab.UI.mesh.infobox_2.element.hide()
+    HexaLab.UI.mesh.dataset_content.hide()
+}
+
 HexaLab.UI.clear_mesh_info = function () {
     HexaLab.UI.mesh.infobox_1.element.hide();
     HexaLab.UI.mesh.infobox_2.element.hide()
@@ -329,7 +339,7 @@ HexaLab.UI.import_remote_mesh = function (source, name) {
     }
     request.send();
 
-    HexaLab.UI.clear_mesh_info()
+    HexaLab.UI.clear_mesh_info_keep_source()
     $.each(HexaLab.UI.mesh.source[0].options, function() {
         if ($(this).text() == source.text) $(this).prop('selected', true);
     })
@@ -340,17 +350,22 @@ HexaLab.UI.import_remote_mesh = function (source, name) {
     HexaLab.UI.mesh.infobox_2.element.show().css('display', 'flex');
 }
 
-HexaLab.UI.setup_mesh_stats = function() {
+HexaLab.UI.setup_mesh_stats = function(name) {
     var mesh = HexaLab.app.backend.get_mesh()
     HexaLab.UI.mesh.infobox_2.element.show()
     HexaLab.UI.mesh.infobox_2.text.empty()
-    HexaLab.UI.mesh.infobox_2.text.append('<div class="menu_row"><div class="menu_row_label" style="font-weight:bold;line-height:100%;padding-bottom:10px;">Geometry</div></div>')
-    HexaLab.UI.mesh.infobox_2.text.append('<div id="mesh_stats_wrapper">' +
-        '<div><span class="mesh_stat">vertices: </span>' + mesh.vert_count + '</div>' +
-        '<div><span class="mesh_stat">hexas:    </span>' + mesh.hexa_count + '</div>' +
-        '</div>'
-    )
-    HexaLab.UI.mesh.infobox_2.text.append('<div class="menu_row"><div class="menu_row_label" style="font-weight:bold;">Quality</div>\
+    const name_html = HexaLab.UI.view_source == 1 ? '<div class="menu_row_label" style="line-height: 100%; padding-bottom: 10px;">' + name + '</div>' : ''
+    HexaLab.UI.mesh.infobox_2.text.append('<div class="menu_row">' + name_html +
+            '<div class="menu_row_input simple-font" style="line-height: 100%; padding-bottom: 10px;">' +
+                mesh.vert_count + ' vertices, ' + mesh.hexa_count + ' hexas' +
+            '</div>' +
+        '</div>')
+    // HexaLab.UI.mesh.infobox_2.text.append('<div id="mesh_stats_wrapper">' +
+    //     '<div><span class="mesh_stat">vertices: </span><span class="simple-font">' + mesh.vert_count + '</span></div>' +
+    //     '<div><span class="mesh_stat">hexas:    </span><span class="simple-font">' + mesh.hexa_count + '</span></div>' +
+    //     '</div>'
+    // )
+    HexaLab.UI.mesh.infobox_2.text.append('<div class="menu_row"><div class="menu_row_label">Quality</div>\
     <div class="menu_row_input">\
         <div class="menu_row_input_block">\
             <select id="quality_type" title="Choose Hex Quality measure">\
@@ -385,13 +400,21 @@ HexaLab.UI.setup_mesh_stats = function() {
     if (max == 0) max = mesh.quality_max.toExponential(2)
     if (avg == 0) avg = mesh.quality_avg.toExponential(2)
     if (vri == 0) vri = mesh.quality_var.toExponential(2)
-    HexaLab.UI.mesh.infobox_2.text.append('<div id="mesh_stats_wrapper">' +
-        '<div><span class="mesh_stat">min: </span>' + min + '</div>' +
-        '<div><span class="mesh_stat">max: </span>' + max + '</div>' +
-        '<div><span class="mesh_stat">avg: </span>' + avg + '</div>' +
-        '<div><span class="mesh_stat">var: </span>' + vri + '</div>' +
-        '</div>'
+    HexaLab.UI.mesh.infobox_2.text.append('<table style="width:100%;">' +
+        // '<tr> <th>Min</th> <th>Max</th> <th>Avg</th> <th>Var</th> </tr>' +
+        '<tr> <td align="center"><span class="simple-font">Min: </span> <span class="simple-font">' + min + '</span></td>' +
+            ' <td align="center"><span class="simple-font">Max: </span> <span class="simple-font">' + max + '</span></td>' +
+            ' <td align="center"><span class="simple-font">Avg: </span> <span class="simple-font">' + avg + '</span></td>' + 
+            ' <td align="center"><span class="simple-font">Var: </span> <span class="simple-font">' + vri + '</span></td> </tr>' +
+        '</table>'
     )
+    // HexaLab.UI.mesh.infobox_2.text.append('<div id="mesh_stats_wrapper">' +
+    //     '<div><span class="mesh_stat">min: </span>' + min + '</div>' +
+    //     '<div><span class="mesh_stat">max: </span>' + max + '</div>' +
+    //     '<div><span class="mesh_stat">avg: </span>' + avg + '</div>' +
+    //     '<div><span class="mesh_stat">var: </span>' + vri + '</div>' +
+    //     '</div>'
+    // )
     $('#quality_type').on('change', function () {
         var v = this.options[this.selectedIndex].value
         HexaLab.app.set_quality_measure(v);
@@ -404,9 +427,13 @@ HexaLab.UI.on_set_quality_measure = function (measure) {
     HexaLab.UI.quality_plot_update()
 }
 
+HexaLab.UI.on_set_geometry_mode = function (mode) {
+    HexaLab.UI.settings.geometry_mode.val(mode)
+}
+
 HexaLab.UI.on_import_mesh = function (name) {
     HexaLab.UI.topbar.on_mesh_import()
-    if (HexaLab.UI.view_source == 1) HexaLab.UI.show_mesh_name(name)
+    // if (HexaLab.UI.view_source == 1) HexaLab.UI.show_mesh_name(name)
     if (HexaLab.UI.view_source == 2) HexaLab.UI.setup_dataset_content()
     HexaLab.UI.setup_mesh_stats(name)
     HexaLab.UI.quality_plot_update()

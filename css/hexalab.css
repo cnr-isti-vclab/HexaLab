@@ -13,6 +13,10 @@ html, body {
 	font-family: 'Raleway', sans-serif;
 }
 
+.simple-font {
+    font-family: sans-serif;
+}
+
 canvas {
     display: block;
 }
@@ -329,7 +333,7 @@ input {
 
 .menu_area .menu_content .menu_row .menu_row_input .mini-slider {
     flex-grow: 0;
-    width: 250px;
+    width: 60%;
 }
 
 .menu_area .menu_content .menu_row .menu_row_input .mini-slider .ui-slider-handle {

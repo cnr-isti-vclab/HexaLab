@@ -7,13 +7,20 @@ namespace HexaLab {
 
         /*
 
-             6------7
+            The expected input are two faces having no edge in common and opposite front face vertices winding (same if looking from the same pov), like so:
+
+             5------4
             /|     /|
-           2------3 |
+           1------0 |
            | |    | |
-           | 5----|-4
+           | 6----|-7
            |/     |/
-           1------0
+           2------3
+
+           This ordering is expected to be coherent across all hexas inside a mesh file.
+
+           The front face is defined arbitrarily based on the order in which the vertices are provided.
+           Calling it 'front' is just a way to identify it, it doesn't necessarily have to be 'in front' of anything.
 
         */
 

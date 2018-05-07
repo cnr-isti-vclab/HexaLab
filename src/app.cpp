@@ -119,6 +119,11 @@ namespace HexaLab {
         }
     }
 
+    void App::set_geometry_mode ( GeometryMode mode ) {
+        this->geometry_mode = mode;
+        this->flag_models_as_dirty();
+    }
+
     void App::set_default_outside_color ( float r, float g, float b ) {
         this->default_outside_color = Vector3f ( r, g, b );
 
@@ -557,12 +562,213 @@ namespace HexaLab {
                     add_vertex ( ( !vv[v1] ) ? pp[v1] : ( pp[v1] * ( 1 - gap ) + bari ), nn[fi], ww[fi] )
                 );
         };
-        addSide ( 0 + 0, 1 + 0, 3 + 0, 2 + 0, 0 );
-        addSide ( 1 + 4, 0 + 4, 2 + 4, 3 + 4, 1 );
-        addSide ( 0 + 0, 4 + 0, 5 + 0, 1 + 0, 2 );
-        addSide ( 4 + 2, 0 + 2, 1 + 2, 5 + 2, 3 );
-        addSide ( 0 + 0, 2 + 0, 6 + 0, 4 + 0, 4 );
-        addSide ( 2 + 1, 0 + 1, 4 + 1, 6 + 1, 5 );
+        addSide ( 0 + 0, 2 + 0, 6 + 0, 4 + 0, 1 );
+        addSide ( 2 + 1, 0 + 1, 4 + 1, 6 + 1, 0 );
+        addSide ( 0 + 0, 1 + 0, 3 + 0, 2 + 0, 5 );
+        addSide ( 1 + 4, 0 + 4, 2 + 4, 3 + 4, 4 );
+        addSide ( 0 + 0, 4 + 0, 5 + 0, 1 + 0, 3 );
+        addSide ( 4 + 2, 0 + 2, 1 + 2, 5 + 2, 2 );
+    }
+
+    float smooth = 0.15;
+
+    /*
+    float len(vec3 p){
+    return p[0]*p[0]+p[1]*p[1]+p[2]*p[2];
+    }*/
+
+    // 8 [pp]ositions, 6 [nn]ormals, 8 [vv]isible 6 [ww]hite_or_not
+    void App::build_smooth_hexa ( const Vector3f pp[8], const Vector3f nn[6], const bool vv[8], const Vector3f ww[6] ) {
+        if ( !vv[0] && !vv[1] && !vv[2] && !vv[3] && !vv[4] && !vv[5] && !vv[6] && !vv[7] ) {
+            return;
+        }
+
+        static Vector3f p[4][4][4];
+        static Vector3f n[4][4][4];
+        static Vector3f w[4][4][4]; // TODO
+        static int     iv[4][4][4]; // indices
+        auto addSide = [&] ( int v0, int v1, int v2, int v3, bool side ) {
+            if ( ( v0 != -1 ) && ( v1 != -1 ) && ( v2 != -1 ) && ( v3 != -1 ) ) {
+                add_quad ( v0, v1, v2, v3 );
+            } else if ( side ) {
+                if ( ( v0 != -1 ) && ( v1 != -1 ) && ( v2 != -1 ) ) {
+                    add_triangle ( v0, v1, v2 );
+                } else if ( ( v0 != -1 ) && ( v1 != -1 ) && ( v3 != -1 ) ) {
+                    add_triangle ( v0, v1, v3 );
+                } else if ( ( v0 != -1 ) && ( v2 != -1 ) && ( v3 != -1 ) ) {
+                    add_triangle ( v0, v2, v3 );
+                } else if ( ( v1 != -1 ) && ( v2 != -1 ) && ( v3 != -1 ) ) {
+                    add_triangle ( v1, v2, v3 );
+                }
+            }
+        };
+
+        // compute normals / whites (from per face to per vertex)
+        for ( int z = 0; z < 4; z++ ) {
+            for ( int y = 0; y < 4; y++ ) {
+                for ( int x = 0; x < 4; x++ ) {
+                    n[x][y][z] = Vector3f ( 0, 0, 0 ); // todo: memfill or something
+                    w[x][y][z] = Vector3f ( 1, 1, 1 );
+                }
+            }
+        }
+
+        for ( int z = 0; z < 4; z++ ) {
+            for ( int y = 0; y < 4; y++ ) {
+                n[0][y][z] += nn[1];
+                n[3][y][z] += nn[0];
+                n[y][0][z] += nn[3];
+                n[y][3][z] += nn[2];
+                n[y][z][0] += nn[5];
+                n[y][z][3] += nn[4];
+                w[0][y][z] = ww[0];    // TODO
+                w[3][y][z] = ww[1];
+                w[y][0][z] = ww[2];
+                w[y][3][z] = ww[3];
+                w[y][z][0] = ww[4];
+                w[y][z][3] = ww[5];
+            }
+        }
+
+        for ( int i = 0; i < 4; ++i ) {
+            for ( int j = 0; j < 4; ++j ) {
+                for ( int k = 0; k < 4; ++k ) {
+                    n[i][j][k].normalize();
+                }
+            }
+        }
+
+        for ( int z = 0; z < 4; z++ ) {
+            for ( int y = 0; y < 4; y++ ) {
+                for ( int x = 0; x < 4; x++ ) {
+                    int ii = ( x / 2 ) + ( y / 2 ) * 2 + ( z / 2 ) * 4;
+                    p[x][y][z] = pp[ii];
+                    iv[x][y][z] = -1;
+                }
+            }
+        }
+
+        for ( int z = 0; z < 4; z += 3 ) {
+            for ( int y = 0; y < 4; y += 3 ) {
+                for ( int x = 0; x < 4; x += 3 ) {
+                    //std::cout << " ";
+                    for ( int D = 0; D < 3; D++ ) {
+                        int dA[3] = { 0, 0, 0 };
+                        int dB[3] = { 0, 0, 0 };
+                        int dC[3] = { 0, 0, 0 };
+                        int s[3];
+                        dA[D] = 1;
+                        dB[ ( D + 1 ) % 3] = 1;
+                        dC[ ( D + 2 ) % 3] = 1;
+                        s[0] = ( x > 1 ) ? -1 : +1;
+                        s[1] = ( y > 1 ) ? -1 : +1;
+                        s[2] = ( z > 1 ) ? -1 : +1;
+                        int ii = ( x / 2 ) + ( y / 2 ) * 2 + ( z / 2 ) * 4;
+
+                        if ( vv[ii] ) {
+                            int jj = ( ii ^ ( 1 << D ) );
+                            Vector3f edge0 = ( pp[jj] - pp[ii] ) * smooth;
+                            Vector3f edge1 = ( pp[jj] - pp[ii] ) * ( smooth * ( 1 - ( sqrt ( 2 ) / 2 ) ) );
+                            Vector3f edge2 = ( pp[jj] - pp[ii] ) * ( smooth * ( 1 - ( sqrt ( 3 ) / 3 ) ) );
+                            p[x + s[0] * ( dA[0] )][y + s[1] * ( dA[1] )][z + s[2] * ( dA[2] )] += edge0;
+                            p[x + s[0] * ( dB[0] + dA[0] )][y + s[1] * ( dB[1] + dA[1] )][z + s[2] * ( dB[2] + dA[2] )] += edge0;
+                            p[x + s[0] * ( dC[0] + dA[0] )][y + s[1] * ( dC[1] + dA[1] )][z + s[2] * ( dC[2] + dA[2] )] += edge0;
+                            p[x + s[0] * ( dB[0] )][y + s[1] * ( dB[1] )][z + s[2] * ( dB[2] )] += edge1;
+                            p[x + s[0] * ( dC[0] )][y + s[1] * ( dC[1] )][z + s[2] * ( dC[2] )] += edge1;
+                            p[x][y][z] += edge2;
+                        }
+                    }
+                }
+            }
+        }
+
+        for ( int z = 0; z < 4; z++ ) {
+            for ( int y = 0; y < 4; y++ ) {
+                for ( int x = 0; x < 4; x++ ) {
+                    int i = ( x / 2 ) + ( y / 2 ) * 2 + ( z / 2 ) * 4;
+                    bool mx = ( ( x > 0 ) && ( x < 3 ) ); // mid
+                    bool my = ( ( y > 0 ) && ( y < 3 ) );
+                    bool mz = ( ( z > 0 ) && ( z < 3 ) );
+                    int category = 0;
+
+                    if ( mx ) {
+                        category++;
+                    }
+
+                    if ( my ) {
+                        category++;
+                    }
+
+                    if ( mz ) {
+                        category++;
+                    }
+
+                    int j = i;
+
+                    if ( category == 1 ) {
+                        if ( mx ) {
+                            j ^= 1;
+                        }
+
+                        if ( my ) {
+                            j ^= 2;
+                        }
+
+                        if ( mz ) {
+                            j ^= 4;
+                        }
+                    }
+
+                    /*
+                    v[i][j][k] =    (category==3)  // midpoint: never show
+                    || (category==0 && !vv[i])  // corner: show only if corner visible
+                    || (category==1 && !vv[i] && !vv[j])  // mid edge: show only if corner visible
+                    || (category==2 && !vv[i]); // mid face: show only if corner visible*/
+
+                    if ( category == 0 && !vv[i] ) {
+                        continue;    // corner: show only if corner visible
+                    }
+
+                    if ( category == 1 && !vv[i] && !vv[j] ) {
+                        continue;    // mid edge: show only if corner visible
+                    }
+
+                    if ( category == 2 && !vv[i] ) {
+                        continue;    // mid face: show only if corner visible*/
+                    }
+
+                    if ( category == 3 ) {
+                        continue;    // midpoint: never show
+                    }
+
+                    iv[x][y][z] = add_vertex ( p[x][y][z], n[x][y][z], w[x][y][z] ); // TODO
+                    //std::cout<<"Range = "<<len(p[x][y][z]-vec3(1,1,1))<<"\n"; // test: smooth = 0.5 --> perfect sphere
+                }
+            }
+        }
+
+        for ( int x = 0; x < 3; x++ ) {
+            for ( int y = 0; y < 3; y++ ) {
+                bool mx = ( x == 1 ); // mid
+                bool my = ( y == 1 );
+                int category = 0;
+
+                if ( mx ) {
+                    category++;
+                }
+
+                if ( my ) {
+                    category++;
+                }
+
+                addSide ( iv[x][y][0], iv[x][y + 1][0], iv[x + 1][y + 1][0], iv[x + 1][y][0], category == 1 );
+                addSide ( iv[x][y][3], iv[x + 1][y][3], iv[x + 1][y + 1][3], iv[x][y + 1][3], category == 1 );
+                addSide ( iv[x][0][y], iv[x + 1][0][y], iv[x + 1][0][y + 1], iv[x][0][y + 1], category == 1 );
+                addSide ( iv[x][3][y], iv[x][3][y + 1], iv[x + 1][3][y + 1], iv[x + 1][3][y], category == 1 );
+                addSide ( iv[0][x][y], iv[0][x][y + 1], iv[0][x + 1][y + 1], iv[0][x + 1][y], category == 1 );
+                addSide ( iv[3][x][y], iv[3][x + 1][y], iv[3][x + 1][y + 1], iv[3][x][y + 1], category == 1 );
+            }
+        }
     }
 
     void App::prepare_cracked_geometry() {
@@ -571,7 +777,7 @@ namespace HexaLab {
             Vert& vert = nav.vert();
 
             do {
-                nav.vert().is_visible = true;
+                mesh->mark ( nav.vert() );
                 nav = nav.rotate_on_face();
             } while ( nav.vert() != vert );
         };
@@ -590,16 +796,20 @@ namespace HexaLab {
         Vector3f colors[6];
 
         for ( size_t i = 0; i < 6; ++i ) {
-            colors[i] = Vector3f ( 1, 0, 0 );
+            colors[i] = Vector3f ( 1, 1, 1 );
         }
 
         for ( size_t i = 0; i < mesh->hexas.size(); ++i ) {
+            if ( mesh->is_marked ( mesh->hexas[i] ) ) {
+                continue;
+            }
+
             // ******
             //    P6------P7
             //   / |     / |
-            //  P4------P5 |
+            //  P2------P3 |
             //  |  |    |  |
-            //  | P2----|--P3
+            //  | P4----|--P5
             //  | /     | /
             //  P0------P1
             Vector3f    verts_pos[8];
@@ -610,6 +820,7 @@ namespace HexaLab {
             // Extract face normals
             MeshNavigator nav = this->mesh->navigate ( mesh->hexas[i] );
             Face& face = nav.face();
+            Vector3f    norms_buffer[6];
 
             for ( size_t f = 0; f < 6; ++f ) {
                 MeshNavigator n2 = this->mesh->navigate ( nav.face() );
@@ -622,33 +833,39 @@ namespace HexaLab {
                     n2 = n2.flip_hexa().flip_edge();
                 }
 
-                faces_norms[f] = n2.face().normal * normal_sign;
+                norms_buffer[f] = n2.face().normal * normal_sign;
                 faces_vis[f] = n2.dart().hexa_neighbor == -1;
                 nav = nav.next_hexa_face();
             }
 
+            faces_norms[0] = norms_buffer[4];
+            faces_norms[1] = norms_buffer[1];
+            faces_norms[2] = norms_buffer[5];
+            faces_norms[3] = norms_buffer[2];
+            faces_norms[4] = norms_buffer[0];
+            faces_norms[5] = norms_buffer[3];
             // Extract vertices
             nav = mesh->navigate ( mesh->hexas[i] );
             auto store_vert = [&] ( size_t i ) {
                 verts_pos[i] = nav.vert().position;
-                verts_vis[i] = nav.vert().is_visible;
+                verts_vis[i] = mesh->is_marked ( nav.vert() );
             };
             nav = mesh->navigate ( mesh->hexas[i] ).flip_vert();
-            store_vert ( 0 );
-            nav = mesh->navigate ( mesh->hexas[i] );
             store_vert ( 1 );
+            nav = mesh->navigate ( mesh->hexas[i] );
+            store_vert ( 0 );
             nav = mesh->navigate ( mesh->hexas[i] ).flip_side().flip_vert();
-            store_vert ( 2 );
-            nav = mesh->navigate ( mesh->hexas[i] ).flip_side();
-            store_vert ( 3 );
-            nav = mesh->navigate ( mesh->hexas[i] ).flip_vert().flip_edge().flip_vert();
-            store_vert ( 4 );
-            nav = mesh->navigate ( mesh->hexas[i] ).flip_edge().flip_vert();
             store_vert ( 5 );
+            nav = mesh->navigate ( mesh->hexas[i] ).flip_side();
+            store_vert ( 4 );
+            nav = mesh->navigate ( mesh->hexas[i] ).flip_vert().flip_edge().flip_vert();
+            store_vert ( 3 );
+            nav = mesh->navigate ( mesh->hexas[i] ).flip_edge().flip_vert();
+            store_vert ( 2 );
             nav = mesh->navigate ( mesh->hexas[i] ).flip_side().flip_vert().flip_edge().flip_vert();
-            store_vert ( 6 );
-            nav = mesh->navigate ( mesh->hexas[i] ).flip_side().flip_edge().flip_vert();
             store_vert ( 7 );
+            nav = mesh->navigate ( mesh->hexas[i] ).flip_side().flip_edge().flip_vert();
+            store_vert ( 6 );
             build_gap_hexa ( verts_pos, faces_norms, verts_vis, colors );
         }
     }
@@ -659,7 +876,7 @@ namespace HexaLab {
             Vert& vert = nav.vert();
 
             do {
-                nav.vert().is_visible = true;
+                mesh->mark ( nav.vert() );
                 nav = nav.rotate_on_face();
             } while ( nav.vert() != vert );
         };
@@ -678,10 +895,14 @@ namespace HexaLab {
         Vector3f colors[6];
 
         for ( size_t i = 0; i < 6; ++i ) {
-            colors[i] = Vector3f ( 1, 0, 0 );
+            colors[i] = Vector3f ( 1, 1, 1 );
         }
 
         for ( size_t i = 0; i < mesh->hexas.size(); ++i ) {
+            if ( mesh->is_marked ( mesh->hexas[i] ) ) {
+                continue;
+            }
+
             // ******
             //    P6------P7
             //   / |     / |
@@ -698,6 +919,7 @@ namespace HexaLab {
             // Extract face normals
             MeshNavigator nav = this->mesh->navigate ( mesh->hexas[i] );
             Face& face = nav.face();
+            Vector3f    norms_buffer[6];
 
             for ( size_t f = 0; f < 6; ++f ) {
                 MeshNavigator n2 = this->mesh->navigate ( nav.face() );
@@ -710,34 +932,40 @@ namespace HexaLab {
                     n2 = n2.flip_hexa().flip_edge();
                 }
 
-                faces_norms[f] = n2.face().normal * normal_sign;
+                norms_buffer[f] = n2.face().normal * normal_sign;
                 faces_vis[f] = n2.dart().hexa_neighbor == -1;
                 nav = nav.next_hexa_face();
             }
 
+            faces_norms[0] = norms_buffer[4];
+            faces_norms[1] = norms_buffer[1];
+            faces_norms[2] = norms_buffer[5];
+            faces_norms[3] = norms_buffer[2];
+            faces_norms[4] = norms_buffer[0];
+            faces_norms[5] = norms_buffer[3];
             // Extract vertices
             nav = mesh->navigate ( mesh->hexas[i] );
             auto store_vert = [&] ( size_t i ) {
                 verts_pos[i] = nav.vert().position;
-                verts_vis[i] = nav.vert().is_visible;
+                verts_vis[i] = mesh->is_marked ( nav.vert() );
             };
             nav = mesh->navigate ( mesh->hexas[i] ).flip_vert();
-            store_vert ( 0 );
-            nav = mesh->navigate ( mesh->hexas[i] );
             store_vert ( 1 );
+            nav = mesh->navigate ( mesh->hexas[i] );
+            store_vert ( 0 );
             nav = mesh->navigate ( mesh->hexas[i] ).flip_side().flip_vert();
-            store_vert ( 2 );
-            nav = mesh->navigate ( mesh->hexas[i] ).flip_side();
-            store_vert ( 3 );
-            nav = mesh->navigate ( mesh->hexas[i] ).flip_vert().flip_edge().flip_vert();
-            store_vert ( 4 );
-            nav = mesh->navigate ( mesh->hexas[i] ).flip_edge().flip_vert();
             store_vert ( 5 );
+            nav = mesh->navigate ( mesh->hexas[i] ).flip_side();
+            store_vert ( 4 );
+            nav = mesh->navigate ( mesh->hexas[i] ).flip_vert().flip_edge().flip_vert();
+            store_vert ( 3 );
+            nav = mesh->navigate ( mesh->hexas[i] ).flip_edge().flip_vert();
+            store_vert ( 2 );
             nav = mesh->navigate ( mesh->hexas[i] ).flip_side().flip_vert().flip_edge().flip_vert();
-            store_vert ( 6 );
-            nav = mesh->navigate ( mesh->hexas[i] ).flip_side().flip_edge().flip_vert();
             store_vert ( 7 );
-            build_gap_hexa ( verts_pos, faces_norms, verts_vis, colors );
+            nav = mesh->navigate ( mesh->hexas[i] ).flip_side().flip_edge().flip_vert();
+            store_vert ( 6 );
+            build_smooth_hexa ( verts_pos, faces_norms, verts_vis, colors );
         }
     }
 
@@ -755,6 +983,18 @@ namespace HexaLab {
             filters[i]->filter ( *mesh );
         }
 
-        this->prepare_smooth_geometry();
+        switch ( this->geometry_mode ) {
+            case GeometryMode::Default:
+                this->prepare_geometry();
+                break;
+
+            case GeometryMode::Cracked:
+                this->prepare_cracked_geometry();
+                break;
+
+            case GeometryMode::Smooth:
+                this->prepare_smooth_geometry();
+                break;
+        }
     }
 }

@@ -37,6 +37,9 @@ namespace HexaLab {
 
         // Useful to iterate over the faces of a hexa.
         // Each call gets to a new face, so 6 to do a full iteration.
+        // It is also a rotation, meaning that after 6 calls, the next call will return to the starting point.
+        // If the iteration starts from the front face, its full order is: front -> left -> bottom -> back -> right -> top ( -> front -> left -> ... )
+        //                                                                 front -> right -> top -> back -> left -> bottom -> ...
         MeshNavigator next_hexa_face();
         // True if the current face is a 'natural surface', meaning,
         // it does not have another hexa adjacent to it.

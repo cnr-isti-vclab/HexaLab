@@ -876,6 +876,10 @@ Object.assign(HexaLab.Viewer.prototype, {
         // The whole scene is translated so that the center of the mesh lies on the origin.
         // As long as the camera is not added to the scene, this offset does not affect the camera.
         this.scene.position.set(this.mesh_offset.x, this.mesh_offset.y, this.mesh_offset.z)
+        // this.scene_light.position.set(this.scene_camera.position.x - this.scene.position.x, 
+        //     this.scene_camera.position.y - this.scene.position.y, 
+        //     this.scene_camera.position.z - this.scene.position.z)
+        // this.scene.add(this.scene_light)
         this.renderer.render(this.scene, this.scene_camera)
 
         // AO
@@ -1021,6 +1025,7 @@ HexaLab.App = function (dom_element) {
         singularity_mode:   0,
         color_map:          'Parula',
         quality_measure:    'Scaled Jacobian',
+        geometry_mode:      'Default',
     }
 
     // Materials
@@ -1131,6 +1136,7 @@ Object.assign(HexaLab.App.prototype, {
             quality_measure:                        this.quality_measure,
             apply_color_map:                        this.apply_color_map,
             color_map:                              this.color_map,
+            geometry_mode:                          this.geometry_mode,
         }
         return x
     },
@@ -1186,6 +1192,7 @@ Object.assign(HexaLab.App.prototype, {
         this.show_visible_quality(settings.apply_color_map)
         this.set_singularity_mode(settings.singularity_mode)
         this.set_quality_measure(settings.quality_measure)
+        this.set_geometry_mode(settings.geometry_mode)
     },
 
     get_settings: function () {
@@ -1287,6 +1294,15 @@ Object.assign(HexaLab.App.prototype, {
         this.quality_measure = measure
         this.queue_geometry_update()    // TODO update only on real need (needs to query quality filter enabled state)
         HexaLab.UI.on_set_quality_measure(measure)
+    },
+
+    set_geometry_mode: function (mode) {
+        if      (mode == 'Default')     this.backend.set_geometry_mode(Module.GeometryMode.Default)
+        else if (mode == 'Cracked')     this.backend.set_geometry_mode(Module.GeometryMode.Cracked)
+        else if (mode == 'Smooth')      this.backend.set_geometry_mode(Module.GeometryMode.Smooth)
+        this.geometry_mode = mode
+        this.queue_geometry_update()
+        HexaLab.UI.on_set_geometry_mode(mode)
     },
 
     show_visible_quality: function (show) {
