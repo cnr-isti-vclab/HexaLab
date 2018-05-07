@@ -17,6 +17,14 @@ namespace HexaLab {
            |/     |/
            2------3
 
+             7------6
+            /|     /|
+           3------2 |
+           | |    | |
+           | 4----|-5
+           |/     |/
+           0------1
+
            This ordering is expected to be coherent across all hexas inside a mesh file.
 
            The front face is defined arbitrarily based on the order in which the vertices are provided.
@@ -27,10 +35,10 @@ namespace HexaLab {
         static constexpr Index hexa_face[6][4] = {
             { 0, 1, 2, 3 },   // Front
             { 5, 4, 7, 6 },   // Back
-            { 1, 5, 6, 2 },   // Left
-            { 4, 0, 3, 7 },   // Right
-            { 6, 7, 3, 2 },   // Bottom
-            { 4, 5, 1, 0 },   // Top
+            { 4, 0, 3, 7 },   // Left
+            { 1, 5, 6, 2 },   // Right
+            { 4, 5, 1, 0 },   // Bottom
+            { 6, 7, 3, 2 },   // Top
         };
 
         enum HexaFace {

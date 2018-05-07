@@ -24,8 +24,8 @@ namespace HexaLab {
         HL_LOG ( "Building...\n" );
         Builder::build ( *mesh, verts, indices );
         // Validate
-        // HL_LOG ( "Validating...\n" );
-        // Builder::validate ( *mesh );
+         HL_LOG ( "Validating...\n" );
+         Builder::validate ( *mesh );
         // Update stats
         float max = std::numeric_limits<float>::lowest();
         float min = std::numeric_limits<float>::max();
@@ -564,6 +564,14 @@ namespace HexaLab {
                     add_vertex ( ( !vv[v1] ) ? pp[v1] : ( pp[v1] * ( 1 - gap ) + bari ), nn[fi], ww[fi] )
                 );
         };
+        //    P6------P7
+        //   / |     / |
+        //  P2------P3 |
+        //  |  |    |  |
+        //  | P4----|--P5
+        //  | /     | /
+        //  P0------P1
+        //
         addSide(0 + 0, 2 + 0, 6 + 0, 4 + 0, 0);
         addSide(2 + 1, 0 + 1, 4 + 1, 6 + 1, 1);
         addSide(0 + 0, 1 + 0, 3 + 0, 2 + 0, 4);
@@ -576,6 +584,12 @@ namespace HexaLab {
         //addSide ( 1 + 4, 0 + 4, 2 + 4, 3 + 4, 4 );
         //addSide ( 0 + 0, 4 + 0, 5 + 0, 1 + 0, 3 );
         //addSide ( 4 + 2, 0 + 2, 1 + 2, 5 + 2, 2 );
+        //{ 0, 1, 2, 3 },   // Front
+        //{ 5, 4, 7, 6 },   // Back
+        //{ 1, 5, 6, 2 },   // Left
+        //{ 4, 0, 3, 7 },   // Right
+        //{ 6, 7, 3, 2 },   // Bottom
+        //{ 4, 5, 1, 0 },   // Top
     }
 
     float smooth = 0.15;
@@ -800,13 +814,6 @@ namespace HexaLab {
             }
         }
 
-        // TODO
-        Vector3f colors[6];
-
-        for ( size_t i = 0; i < 6; ++i ) {
-            colors[i] = Vector3f ( 1, 1, 1 );
-        }
-
         for ( size_t i = 0; i < mesh->hexas.size(); ++i ) {
             if ( mesh->is_marked ( mesh->hexas[i] ) ) {
                 continue;
@@ -822,13 +829,14 @@ namespace HexaLab {
             //  P0------P1
             Vector3f    verts_pos[8];
             bool        verts_vis[8];
-            bool        faces_vis[6]; // true: external, false: internal
+            Vector3f    faces_colors[6];
             Vector3f    faces_norms[6];
             // ******
             // Extract face normals
             MeshNavigator nav = this->mesh->navigate ( mesh->hexas[i] );
             Face& face = nav.face();
             Vector3f    norms_buffer[6];
+            Vector3f    colors_buffer[6];
 
             for ( size_t f = 0; f < 6; ++f ) {
                 MeshNavigator n2 = this->mesh->navigate ( nav.face() );
@@ -842,16 +850,26 @@ namespace HexaLab {
                 }
 
                 norms_buffer[f] = n2.face().normal * normal_sign;
-                faces_vis[f] = n2.dart().hexa_neighbor == -1;
+                // color
+                if (is_quality_color_mapping_enabled()) {
+                    colors_buffer[f] = color_map.get(mesh->normalized_hexa_quality[nav.hexa_index()]);
+                } else {
+                    colors_buffer[f] = nav.is_face_boundary() ? this->default_outside_color : this->default_inside_color;
+                }
                 nav = nav.next_hexa_face();
             }
-
             faces_norms[0] = norms_buffer[4];
             faces_norms[1] = norms_buffer[1];
             faces_norms[2] = norms_buffer[5];
             faces_norms[3] = norms_buffer[2];
             faces_norms[4] = norms_buffer[0];
             faces_norms[5] = norms_buffer[3];
+            faces_colors[0] = colors_buffer[4];
+            faces_colors[1] = colors_buffer[1];
+            faces_colors[2] = colors_buffer[5];
+            faces_colors[3] = colors_buffer[2];
+            faces_colors[4] = colors_buffer[0];
+            faces_colors[5] = colors_buffer[3];
             // Extract vertices
             nav = mesh->navigate ( mesh->hexas[i] );
             auto store_vert = [&] ( size_t i ) {
@@ -874,7 +892,7 @@ namespace HexaLab {
             store_vert ( 7 );
             nav = mesh->navigate ( mesh->hexas[i] ).flip_side().flip_edge().flip_vert();
             store_vert ( 6 );
-            build_gap_hexa ( verts_pos, faces_norms, verts_vis, colors );
+            build_gap_hexa ( verts_pos, faces_norms, verts_vis, faces_colors );
         }
     }
 

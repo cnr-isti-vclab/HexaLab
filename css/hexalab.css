@@ -425,7 +425,6 @@ input:checked + .switch-slider:before {
 #toolbar_wrapper {
 	width: 100%;
 	margin: 5px;
-	padding: 5px;
 }
 
 #toolbar_wrapper h1 {
