@@ -537,7 +537,7 @@ namespace HexaLab {
                 // add_filtered_face(nav.dart());
             // face was culled by the plane, is surface
             } else if ( mesh->is_marked ( nav.hexa() ) && nav.dart().hexa_neighbor == -1 ) {
-                this->add_filtered_face ( nav.dart() );
+                this->add_filtered_face ( nav.flip_edge().dart() );
             }
         }
     }
@@ -823,7 +823,7 @@ namespace HexaLab {
         for (size_t i = 0; i < mesh->faces.size(); ++i) {
             MeshNavigator nav = mesh->navigate(mesh->faces[i]);
             if (mesh->is_marked(nav.hexa()) && nav.dart().hexa_neighbor == -1) {
-                this->add_filtered_face(nav.dart());
+                this->add_filtered_face(nav.flip_edge().dart());
             }
         }
 
@@ -933,7 +933,7 @@ namespace HexaLab {
         for (size_t i = 0; i < mesh->faces.size(); ++i) {
             MeshNavigator nav = mesh->navigate(mesh->faces[i]);
             if (mesh->is_marked(nav.hexa()) && nav.dart().hexa_neighbor == -1) {
-                this->add_filtered_face(nav.dart());
+                this->add_filtered_face(nav.flip_edge().dart());
             }
         }
 

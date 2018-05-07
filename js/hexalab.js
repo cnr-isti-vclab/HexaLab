@@ -150,7 +150,6 @@ HexaLab.Viewer = function (canvas_width, canvas_height) {
         vertexColors:                   THREE.VertexColors,
         polygonOffset:                  true,
         polygonOffsetFactor:            0.5,
-
     })
     this.materials.visible_wireframe    = new THREE.LineBasicMaterial({
         transparent:                    true,
@@ -162,6 +161,7 @@ HexaLab.Viewer = function (canvas_width, canvas_height) {
     this.materials.filtered_surface     = new THREE.MeshBasicMaterial({
         transparent:                    true,
         depthWrite:                     false,
+        depthTest:                      true,
     })
     this.materials.filtered_wireframe   = new THREE.LineBasicMaterial({
         transparent:                    true,
