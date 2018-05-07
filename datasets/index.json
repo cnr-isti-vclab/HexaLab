@@ -29,39 +29,35 @@
             "sculpture/sculpture-B.mesh"
         ]
     }, {
-        "paper": {
-            "title": "ℓ1-Based Construction of Polycube Maps from Complex Shapes",
-            "venue": "ACM Transactions on Graphics Volume 33 Issue 3",
-            "authors": "Jin Huang, Tengfei Jiang, Zeyun Shi, Yiying Tong, Hujun Bao, Mathieu Desbrun",
-            "year": "2014",
-            "PDF": "http://www.geometry.caltech.edu/pubs/HJSTBD13.pdf",
-            "web": "",
-            "DOI": "10.1145/2602141"
-        },
-        "path": "l1-Based Construction of Polycube Maps from Complex Shapes",
-        "label": "2014 - ℓ1-Based Construction of Polycube Maps from Complex Shapes",
-        "data": [
-            "anc101/hex.mesh",
-            "angel_1/hex.mesh",
-            "angel_2/hex.mesh",
-            "angel_3/hex.mesh",
-            "bumpy_torus/hex.mesh",
-            "bunny/hex.mesh",
-            "buste/hex.mesh",
-            "canewt/hex.mesh",
-            "cognit/hex.mesh",
-            "dancing-children-2/hex.mesh",
-            "dragon/hex.mesh",
-            "elephant/hex.mesh",
-            "fertility/hex.mesh",
-            "gargoyle/hex.mesh",
-            "kiss/hex.mesh",
-            "kitty/hex.mesh",
-            "rockerArm_1/hex.mesh",
-            "rockerArm_2/hex.mesh",
-            "rod/hex.mesh"
-        ]
-    }, {
+      "paper": {
+          "title": "All-hex Meshing Using Singularity-restricted Field",
+          "venue": "ACM Transactions on Graphics Volume 31 Issue 6",
+          "authors": "Yufei Li, Yang Liu, Weiwei Xu, Wenping Wang, Baining Guo",
+          "year": "2012",
+          "PDF": "http://i.cs.hku.hk/~yfli/All-hex/allhex.pdf",
+          "web": "http://www.cs.ubc.ca/labs/imager/tr/2015/untangler/",
+          "DOI": "10.1145/2366145.2366196"
+      },
+      "path": "All-Hex Meshing using Singularity-Restricted Field",
+      "label": "2012 - All-Hex Meshing Using Singularity-Restricted Field",
+      "data": [
+          "bone/bone.mesh",
+          "bunny/bunny.mesh",
+          "double torus/double torus.mesh",
+          "ellipsoid/ellipsoid-A.mesh",
+          "ellipsoid/ellipsoid-B.mesh",
+          "ellipsoid/ellipsoid-C.mesh",
+          "fandisk/fandisk.mesh",
+          "fertility/fertility.mesh",
+          "hanger/hanger.mesh",
+          "impeller/impeller.mesh",
+          "joint/joint.mesh",
+          "rockerarm/rockerarm.mesh",
+          "rod/rod.mesh",
+          "sculpture/sculpture-A.mesh",
+          "sculpture/sculpture-B.mesh"
+      ]
+  }, {
         "paper": {
             "title": "Practical Hex-Mesh Optimization via Edge-Cone Rectification",
             "venue": "ACM Transactions on Graphics Volume 34 Issue 4",
@@ -300,6 +296,49 @@
             "cube - pone.0177603.s001.mesh",
             "fandisk - pone.0177603.s002.mesh",
             "joint - pone.0177603.s003.mesh"
+        ]
+    }, {
+        "paper": {
+            "title": "Polycut: Monotone Graph-Cuts for PolyCube Base-Complex Construction",
+            "venue": "ACM Transactions on Graphics Volume 32 Issue 6",
+            "authors": "Marco Livesu, Nicolas Vining, Alla Sheffer, James Gregson, Riccardo Scateni",
+            "year": "2013",
+            "PDF": "http://www.cs.ubc.ca/labs/imager/tr/2013/polycut/downloads/polycut.pdf",
+            "web": "http://www.cs.ubc.ca/labs/imager/tr/2013/polycut/",
+            "DOI": "10.1145/2508363.2508388"
+        },
+        "path": "PolyCut - Monotone Graph-Cuts for PolyCube Base-Complex Construction",
+        "label": "2013 - Polycut: Monotone Graph-Cuts for PolyCube Base-Complex Construction",
+        "data": [
+            "BU_hex_opt.mesh",
+            "bunny_hex_opt.mesh",
+            "carter_hex_opt.mesh",
+            "fertility_hex_opt.mesh",
+            "rocker_arm_hex_opt.mesh"
+        ]
+    }, {
+        "paper": {
+            "title": "Explicit Cylindrical Maps for General Tubular Shapes",
+            "venue": "Elsevier Computer-Aided Design Volume 90",
+            "authors": "Marco Livesu, Marco Attene, Giuseppe Patanè, Michela Spagnuolo",
+            "year": "2017",
+            "PDF": "http://pers.ge.imati.cnr.it/livesu/papers/LAPS17/LAPS17.pdf",
+            "web": "",
+            "DOI": "10.1016/j.cad.2017.05.002"
+        },
+        "path": "Explicit Cylindrical Maps for General Tubular Shapes",
+        "label": "2017 - Explicit Cylindrical Maps for General Tubular Shapes",
+        "data": [
+            "cactus.mesh",
+            "cylinder_grid.mesh",
+            "cylinder_mixed.mesh",
+            "cylinder_mixed_w_torsion.mesh",
+            "cylinder_polar.mesh",
+            "spring.mesh",
+            "femur.mesh",
+            "femur_shell0.mesh",
+            "femur_shell1.mesh",
+            "femur_shell2.mesh"
         ]
     }]
 }
