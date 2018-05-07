@@ -139,7 +139,7 @@ namespace HexaLab {
         void prepare_smooth_geometry();
 
         void build_gap_hexa ( const Vector3f pp[8], const Vector3f nn[6], const bool vv[8], const Vector3f ww[6] );
-        void build_smooth_hexa ( const Vector3f pp[8], const Vector3f nn[6], const bool vv[8], const Vector3f ww[6] );
+        void build_smooth_hexa ( const Vector3f pp[8], const Vector3f nn[6], const bool vv[8], const bool ww[6], Index hexa_idx );
 
         void compute_hexa_quality();
         void build_surface_models();

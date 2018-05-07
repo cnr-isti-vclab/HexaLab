@@ -600,14 +600,14 @@ namespace HexaLab {
     }*/
 
     // 8 [pp]ositions, 6 [nn]ormals, 8 [vv]isible 6 [ww]hite_or_not
-    void App::build_smooth_hexa ( const Vector3f pp[8], const Vector3f nn[6], const bool vv[8], const Vector3f ww[6] ) {
+    void App::build_smooth_hexa ( const Vector3f pp[8], const Vector3f nn[6], const bool vv[8], const bool ww[6], Index hexa_idx ) {
         if ( !vv[0] && !vv[1] && !vv[2] && !vv[3] && !vv[4] && !vv[5] && !vv[6] && !vv[7] ) {
             return;
         }
 
         static Vector3f p[4][4][4];
         static Vector3f n[4][4][4];
-        static Vector3f w[4][4][4]; // TODO
+        static bool     w[4][4][4]; // TODO
         static int     iv[4][4][4]; // indices
         auto addSide = [&] ( int v0, int v1, int v2, int v3, bool side ) {
             if ( ( v0 != -1 ) && ( v1 != -1 ) && ( v2 != -1 ) && ( v3 != -1 ) ) {
@@ -629,8 +629,8 @@ namespace HexaLab {
         for ( int z = 0; z < 4; z++ ) {
             for ( int y = 0; y < 4; y++ ) {
                 for ( int x = 0; x < 4; x++ ) {
-                    n[x][y][z] = Vector3f ( 0, 0, 0 ); // todo: memfill or something
-                    w[x][y][z] = Vector3f ( 1, 1, 1 );
+                    n[x][y][z] = Vector3f ( 0, 0, 0 ); // todo: memfill or something - ?
+                    w[x][y][z] = false;
                 }
             }
         }
@@ -643,12 +643,12 @@ namespace HexaLab {
                 n[y][3][z] += nn[3];
                 n[y][z][0] += nn[4];
                 n[y][z][3] += nn[5];
-                w[0][y][z] = ww[0];    // TODO
-                w[3][y][z] = ww[1];
-                w[y][0][z] = ww[2];
-                w[y][3][z] = ww[3];
-                w[y][z][0] = ww[4];
-                w[y][z][3] = ww[5];
+                w[0][y][z] |= ww[0];    // TODO
+                w[3][y][z] |= ww[1];
+                w[y][0][z] |= ww[2];
+                w[y][3][z] |= ww[3];
+                w[y][z][0] |= ww[4];
+                w[y][z][3] |= ww[5];
             }
         }
 
@@ -763,7 +763,13 @@ namespace HexaLab {
                         continue;    // midpoint: never show
                     }
 
-                    iv[x][y][z] = add_vertex ( p[x][y][z], n[x][y][z], w[x][y][z] ); // TODO
+                    Vector3f c;
+                    if (is_quality_color_mapping_enabled()) {
+                        c = color_map.get(mesh->normalized_hexa_quality[hexa_idx]);
+                    } else {
+                        c = w[x][y][z] ? this->default_outside_color : this->default_inside_color;
+                    }
+                    iv[x][y][z] = add_vertex ( p[x][y][z], n[x][y][z], c );
                     //std::cout<<"Range = "<<len(p[x][y][z]-vec3(1,1,1))<<"\n"; // test: smooth = 0.5 --> perfect sphere
                 }
             }
@@ -811,6 +817,13 @@ namespace HexaLab {
                 mark_face_as_visible ( this->mesh, nav.dart() );
             } else if ( mesh->is_marked ( nav.hexa() ) && nav.dart().hexa_neighbor != -1 && !mesh->is_marked ( nav.flip_hexa().hexa() ) ) {
                 mark_face_as_visible ( this->mesh, nav.dart() );
+            }
+        }
+
+        for (size_t i = 0; i < mesh->faces.size(); ++i) {
+            MeshNavigator nav = mesh->navigate(mesh->faces[i]);
+            if (mesh->is_marked(nav.hexa()) && nav.dart().hexa_neighbor == -1) {
+                this->add_filtered_face(nav.dart());
             }
         }
 
@@ -917,11 +930,11 @@ namespace HexaLab {
             }
         }
 
-        // TODO
-        Vector3f colors[6];
-
-        for ( size_t i = 0; i < 6; ++i ) {
-            colors[i] = Vector3f ( 1, 1, 1 );
+        for (size_t i = 0; i < mesh->faces.size(); ++i) {
+            MeshNavigator nav = mesh->navigate(mesh->faces[i]);
+            if (mesh->is_marked(nav.hexa()) && nav.dart().hexa_neighbor == -1) {
+                this->add_filtered_face(nav.dart());
+            }
         }
 
         for ( size_t i = 0; i < mesh->hexas.size(); ++i ) {
@@ -946,6 +959,7 @@ namespace HexaLab {
             MeshNavigator nav = this->mesh->navigate ( mesh->hexas[i] );
             Face& face = nav.face();
             Vector3f    norms_buffer[6];
+            bool        vis_buffer[6];
 
             for ( size_t f = 0; f < 6; ++f ) {
                 MeshNavigator n2 = this->mesh->navigate ( nav.face() );
@@ -959,7 +973,7 @@ namespace HexaLab {
                 }
 
                 norms_buffer[f] = n2.face().normal * normal_sign;
-                faces_vis[f] = n2.dart().hexa_neighbor == -1;
+                vis_buffer[f] = n2.dart().hexa_neighbor == -1;
                 nav = nav.next_hexa_face();
             }
 
@@ -969,6 +983,12 @@ namespace HexaLab {
             faces_norms[3] = norms_buffer[2];
             faces_norms[4] = norms_buffer[0];
             faces_norms[5] = norms_buffer[3];
+            faces_vis[0] = vis_buffer[4];
+            faces_vis[1] = vis_buffer[1];
+            faces_vis[2] = vis_buffer[5];
+            faces_vis[3] = vis_buffer[2];
+            faces_vis[4] = vis_buffer[0];
+            faces_vis[5] = vis_buffer[3];
             // Extract vertices
             nav = mesh->navigate ( mesh->hexas[i] );
             auto store_vert = [&] ( size_t i ) {
@@ -991,7 +1011,7 @@ namespace HexaLab {
             store_vert ( 7 );
             nav = mesh->navigate ( mesh->hexas[i] ).flip_side().flip_edge().flip_vert();
             store_vert ( 6 );
-            build_smooth_hexa ( verts_pos, faces_norms, verts_vis, colors );
+            build_smooth_hexa ( verts_pos, faces_norms, verts_vis, faces_vis, nav.hexa_index() );
         }
     }
 
