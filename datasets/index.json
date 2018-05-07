@@ -340,5 +340,38 @@
             "femur_shell1.mesh",
             "femur_shell2.mesh"
         ]
+    },{
+        "paper": {
+          "title": "ℓ1-Based Construction of Polycube Maps from Complex Shapes",
+          "venue": "ACM Transactions on Graphics Volume 33 Issue 3",
+          "authors": "Jin Huang, Tengfei Jiang, Zeyun Shi, Yiying Tong, Hujun Bao, Mathieu Desbrun",
+          "year": "2014",
+          "PDF": "http://www.geometry.caltech.edu/pubs/HJSTBD13.pdf",
+          "web": "",
+          "DOI": "10.1145/2602141"
+        },
+        "path": "l1-Based Construction of Polycube Maps from Complex Shapes",
+        "label": "2014 - ℓ1-Based Construction of Polycube Maps from Complex Shapes",
+        "data": [
+          "anc101/hex.mesh",
+          "angel_1/hex.mesh",
+          "angel_2/hex.mesh",
+          "angel_3/hex.mesh",
+          "bumpy_torus/hex.mesh",
+          "bunny/hex.mesh",
+          "buste/hex.mesh",
+          "canewt/hex.mesh",
+          "cognit/hex.mesh",
+          "dancing-children-2/hex.mesh",
+          "dragon/hex.mesh",
+          "elephant/hex.mesh",
+          "fertility/hex.mesh",
+          "gargoyle/hex.mesh",
+          "kiss/hex.mesh",
+          "kitty/hex.mesh",
+          "rockerArm_1/hex.mesh",
+          "rockerArm_2/hex.mesh",
+          "rod/hex.mesh"
+        ]
     }]
 }
