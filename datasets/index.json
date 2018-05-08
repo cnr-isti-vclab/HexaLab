@@ -30,6 +30,58 @@
         ]
     }, {
         "paper": {
+            "title": "Polycut: Monotone Graph-Cuts for PolyCube Base-Complex Construction",
+            "venue": "ACM Transactions on Graphics Volume 32 Issue 6",
+            "authors": "Marco Livesu, Nicolas Vining, Alla Sheffer, James Gregson, Riccardo Scateni",
+            "year": "2013",
+            "PDF": "http://www.cs.ubc.ca/labs/imager/tr/2013/polycut/downloads/polycut.pdf",
+            "web": "http://www.cs.ubc.ca/labs/imager/tr/2013/polycut/",
+            "DOI": "10.1145/2508363.2508388"
+        },
+        "path": "PolyCut - Monotone Graph-Cuts for PolyCube Base-Complex Construction",
+        "label": "2013 - Polycut: Monotone Graph-Cuts for PolyCube Base-Complex Construction",
+        "data": [
+            "BU_hex_opt.mesh",
+            "bunny_hex_opt.mesh",
+            "carter_hex_opt.mesh",
+            "fertility_hex_opt.mesh",
+            "rocker_arm_hex_opt.mesh"
+        ]
+    }, {
+        "paper": {
+          "title": "ℓ1-Based Construction of Polycube Maps from Complex Shapes",
+          "venue": "ACM Transactions on Graphics Volume 33 Issue 3",
+          "authors": "Jin Huang, Tengfei Jiang, Zeyun Shi, Yiying Tong, Hujun Bao, Mathieu Desbrun",
+          "year": "2014",
+          "PDF": "http://www.geometry.caltech.edu/pubs/HJSTBD13.pdf",
+          "web": "",
+          "DOI": "10.1145/2602141"
+        },
+        "path": "l1-Based Construction of Polycube Maps from Complex Shapes",
+        "label": "2014 - ℓ1-Based Construction of Polycube Maps from Complex Shapes",
+        "data": [
+          "anc101/hex.mesh",
+          "angel_1/hex.mesh",
+          "angel_2/hex.mesh",
+          "angel_3/hex.mesh",
+          "bumpy_torus/hex.mesh",
+          "bunny/hex.mesh",
+          "buste/hex.mesh",
+          "canewt/hex.mesh",
+          "cognit/hex.mesh",
+          "dancing-children-2/hex.mesh",
+          "dragon/hex.mesh",
+          "elephant/hex.mesh",
+          "fertility/hex.mesh",
+          "gargoyle/hex.mesh",
+          "kiss/hex.mesh",
+          "kitty/hex.mesh",
+          "rockerArm_1/hex.mesh",
+          "rockerArm_2/hex.mesh",
+          "rod/hex.mesh"
+        ]
+    }, {
+        "paper": {
             "title": "Practical Hex-Mesh Optimization via Edge-Cone Rectification",
             "venue": "ACM Transactions on Graphics Volume 34 Issue 4",
             "authors": "Marco Livesu, Alla Sheffer, Nicholas Vining, Marco Tarini",
@@ -114,7 +166,7 @@
             "Sphinx_hex-e.mesh",
             "Sphinx_hex-f.mesh"
         ]
-    },{
+    }, {
         "paper": {
             "title": "Polycube Simplification for Coarse Layouts of Surfaces and Volumes",
             "venue": "Computer Graphics Forum, Volume 35, Issue 5",
@@ -270,25 +322,6 @@
         ]
     }, {
         "paper": {
-            "title": "Polycut: Monotone Graph-Cuts for PolyCube Base-Complex Construction",
-            "venue": "ACM Transactions on Graphics Volume 32 Issue 6",
-            "authors": "Marco Livesu, Nicolas Vining, Alla Sheffer, James Gregson, Riccardo Scateni",
-            "year": "2013",
-            "PDF": "http://www.cs.ubc.ca/labs/imager/tr/2013/polycut/downloads/polycut.pdf",
-            "web": "http://www.cs.ubc.ca/labs/imager/tr/2013/polycut/",
-            "DOI": "10.1145/2508363.2508388"
-        },
-        "path": "PolyCut - Monotone Graph-Cuts for PolyCube Base-Complex Construction",
-        "label": "2013 - Polycut: Monotone Graph-Cuts for PolyCube Base-Complex Construction",
-        "data": [
-            "BU_hex_opt.mesh",
-            "bunny_hex_opt.mesh",
-            "carter_hex_opt.mesh",
-            "fertility_hex_opt.mesh",
-            "rocker_arm_hex_opt.mesh"
-        ]
-    }, {
-        "paper": {
             "title": "Explicit Cylindrical Maps for General Tubular Shapes",
             "venue": "Elsevier Computer-Aided Design Volume 90",
             "authors": "Marco Livesu, Marco Attene, Giuseppe Patanè, Michela Spagnuolo",
@@ -310,39 +343,6 @@
             "femur_shell0.mesh",
             "femur_shell1.mesh",
             "femur_shell2.mesh"
-        ]
-    },{
-        "paper": {
-          "title": "ℓ1-Based Construction of Polycube Maps from Complex Shapes",
-          "venue": "ACM Transactions on Graphics Volume 33 Issue 3",
-          "authors": "Jin Huang, Tengfei Jiang, Zeyun Shi, Yiying Tong, Hujun Bao, Mathieu Desbrun",
-          "year": "2014",
-          "PDF": "http://www.geometry.caltech.edu/pubs/HJSTBD13.pdf",
-          "web": "",
-          "DOI": "10.1145/2602141"
-        },
-        "path": "l1-Based Construction of Polycube Maps from Complex Shapes",
-        "label": "2014 - ℓ1-Based Construction of Polycube Maps from Complex Shapes",
-        "data": [
-          "anc101/hex.mesh",
-          "angel_1/hex.mesh",
-          "angel_2/hex.mesh",
-          "angel_3/hex.mesh",
-          "bumpy_torus/hex.mesh",
-          "bunny/hex.mesh",
-          "buste/hex.mesh",
-          "canewt/hex.mesh",
-          "cognit/hex.mesh",
-          "dancing-children-2/hex.mesh",
-          "dragon/hex.mesh",
-          "elephant/hex.mesh",
-          "fertility/hex.mesh",
-          "gargoyle/hex.mesh",
-          "kiss/hex.mesh",
-          "kitty/hex.mesh",
-          "rockerArm_1/hex.mesh",
-          "rockerArm_2/hex.mesh",
-          "rod/hex.mesh"
         ]
     }]
 }
