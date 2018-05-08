@@ -2,6 +2,7 @@
 #include <plane_filter.h>
 #include <quality_filter.h>
 #include <peeling_filter.h>
+#include <pick_filter.h>
 #include <color_map.h>
 #include <hex_quality.h>
 #include <hex_quality_color_maps.h>
@@ -43,6 +44,17 @@ float get_upper_quality_range_bound(App& app) {
     return denormalize_quality_measure(m, 1, s.quality_min, s.quality_max);
 }
 
+// Vector3f
+void vec3_set_x(Vector3f& vec, float val) {
+    vec.x() = val;
+}
+void vec3_set_y(Vector3f& vec, float val) {
+    vec.y() = val;
+}
+void vec3_set_z(Vector3f& vec, float val) {
+    vec.z() = val;
+}
+
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #include <emscripten/bind.h>
@@ -64,6 +76,7 @@ EMSCRIPTEN_BINDINGS(HexaLab) {
         .function("set_quality_measure",                &App::set_quality_measure)
         .function("show_boundary_singularity",          &App::show_boundary_singularity)
         .function("show_boundary_creases",              &App::show_boundary_creases)
+        .function("set_geometry_mode",                  &App::set_geometry_mode)
 
         .function("get_visible_model",                  &App::get_visible_model, allow_raw_pointers())
         .function("get_filtered_model",                 &App::get_filtered_model, allow_raw_pointers())
@@ -85,7 +98,7 @@ EMSCRIPTEN_BINDINGS(HexaLab) {
     enum_<ColorMap::Palette>("ColorMap")
         .value("Parula",                    ColorMap::Palette::Parula)
         .value("Jet",                       ColorMap::Palette::Jet)
-        .value("RedGreen",                  ColorMap::Palette::RedGreen)
+        .value("RedBlue",                   ColorMap::Palette::RedBlue)
         ;
 
     enum_<QualityMeasureEnum>("QualityMeasure")
@@ -137,6 +150,12 @@ EMSCRIPTEN_BINDINGS(HexaLab) {
         .property("normalized_quality_max", &MeshStats::normalized_quality_max)
         ;
 
+    enum_<GeometryMode>("GeometryMode")
+        .value("Default",                   GeometryMode::Default)
+        .value("Cracked",                   GeometryMode::Cracked)
+        .value("Smooth",                    GeometryMode::Smooth)
+        ;
+
     // FILTERS
 
     class_<IFilter>("Filter")
@@ -176,13 +195,26 @@ EMSCRIPTEN_BINDINGS(HexaLab) {
         .property("max_depth",              &PeelingFilter::max_depth)
         ;
 
+    class_<PickFilter, base<IFilter>>("PickFilter")
+        .constructor<>()
+        .function("filter",                 &PickFilter::filter)
+        .function("on_mesh_set",            static_cast<void(PickFilter::*)(Mesh&)>(&IFilter::on_mesh_set))
+        .function("filter_hexa",            &PickFilter::filter_hexa)
+        .function("unfilter_hexa",          &PickFilter::unfilter_hexa)
+        .function("clear_filtered_hexas",   &PickFilter::clear_filtered_hexas)
+        .function("filter_hexa_idx",        &PickFilter::filter_hexa_idx)
+        ;
+
     // MISC
 
-    class_<Vector3f>("float3")
+    class_<Vector3f>("vec3")
         .constructor<>()
         .function("x",                      static_cast<float&(Vector3f::*)()>(select_overload<float&()>(&Vector3f::x)))
         .function("y",                      static_cast<float&(Vector3f::*)()>(select_overload<float&()>(&Vector3f::y)))
         .function("z",                      static_cast<float&(Vector3f::*)()>(select_overload<float&()>(&Vector3f::z)))
+        .function("set_x",                  &vec3_set_x)
+        .function("set_y",                  &vec3_set_y)
+        .function("set_z",                  &vec3_set_z)
         ;
 
     class_<vector<Vector3f>>("buffer3f")

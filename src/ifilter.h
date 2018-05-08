@@ -1,5 +1,4 @@
-#ifndef _HL_IFILTER_H_
-#define _HL_IFILTER_H_
+#pragma once
 
 #include <mesh.h>
 
@@ -12,5 +11,3 @@ namespace HexaLab {
         virtual void filter(Mesh& mesh) = 0;
     };
 }
-
-#endif

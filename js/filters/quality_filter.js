@@ -45,7 +45,7 @@ HexaLab.QualityFilter = function () {
     this.default_settings = {
         enabled: false,
         min: 0,
-        max: 0.8,
+        max: 1,
         op: 'inside'
     }
 }

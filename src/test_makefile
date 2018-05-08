@@ -24,6 +24,7 @@ OBJ = hexalab_js.o \
 			plane_filter.o \
 			peeling_filter.o \
 			quality_filter.o \
+			pick_filter.o \
 			mesh_navigator.o
 
 DEPS = app.h \
@@ -39,10 +40,11 @@ DEPS = app.h \
 			 model.h \
 			 peeling_filter.h \
 			 plane_filter.h \
-			 quality_filter.h
+			 quality_filter.h \
+			 pick_filter.h 
 
 %.o: %.cpp $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 test: test.cpp $(OBJ) 
-		$(CC) -o test/$@ $^ $(CFLAGS)
+	$(CC) -o test/$@ $^ $(CFLAGS)

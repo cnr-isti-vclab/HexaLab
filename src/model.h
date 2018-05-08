@@ -1,5 +1,4 @@
-#ifndef _HL_MODEL_H_
-#define _HL_MODEL_H_
+#pragma once
 
 #include <common.h>
 #include <mesh.h>
@@ -28,5 +27,3 @@ namespace HexaLab {
         }
     };
 }
-
-#endif

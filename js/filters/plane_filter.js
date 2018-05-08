@@ -17,7 +17,7 @@ HexaLab.UI.plane_swap           = $('#plane_swap_sign')
 HexaLab.UI.plane_snap_camera    = $('#plane_snap_camera')
 
 // --------------------------------------------------------------------------------
-// Logic
+// Filter class
 // --------------------------------------------------------------------------------
 HexaLab.PlaneFilter = function () {
 
@@ -96,7 +96,7 @@ HexaLab.PlaneFilter = function () {
     self.visible_edge = false
 
     this.default_settings = {
-        enabled: true,
+        enabled: false,
         normal: new THREE.Vector3(1, 0, 0),
         offset: 0,
         opacity: 0.3,
@@ -128,13 +128,6 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
         this.set_plane_color(settings.color)
     },
 
-    read_normal_from_backend: function () {
-        const n = this.backend.get_plane_normal()
-        const v = new THREE.Vector3(n.x(), n.y(), n.z())
-        n.delete()
-        return v
-    },
-
     on_mesh_change: function (mesh) {
         this.object_mesh = mesh
 
@@ -164,6 +157,15 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
         this.on_plane_offset_set(this.backend.get_plane_offset())
 
         this.update_mesh();
+    },
+
+    // misc
+
+    read_normal_from_backend: function () {
+        const n = this.backend.get_plane_normal()
+        const v = new THREE.Vector3(n.x(), n.y(), n.z())
+        n.delete()
+        return v
     },
 
     // system -> UI

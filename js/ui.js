@@ -155,6 +155,7 @@ HexaLab.UI = {
         wireframe:          $('#wireframe_slider'),
         occlusion:          $("#show_occlusion"),
         singularity_mode:   $('#singularity_slider'),
+        geometry_mode:      $('#geometry_mode'),
     },
     
     // Mesh sources
@@ -206,7 +207,7 @@ HexaLab.UI.settings.color.default.inside.spectrum({
     HexaLab.app.set_visible_surface_default_inside_color($(this).spectrum('get').toHexString())
 })
 
-HexaLab.UI.settings.silhouette.slider().on('slide', function (e, ui) {
+HexaLab.UI.settings.silhouette.slider().addClass('mini-slider').on('slide', function (e, ui) {
     HexaLab.app.set_filtered_surface_opacity(ui.value / 100)
 })
 
@@ -214,7 +215,7 @@ HexaLab.UI.settings.color.quality_map.on('change', function () {
     HexaLab.app.set_color_map(this.options[this.selectedIndex].value)
 })
 
-HexaLab.UI.settings.wireframe.slider().on('slide', function (e, ui) {
+HexaLab.UI.settings.wireframe.slider().addClass('mini-slider').on('slide', function (e, ui) {
     HexaLab.app.set_visible_wireframe_opacity(ui.value / 100)
 })
 
@@ -223,12 +224,16 @@ HexaLab.UI.settings.singularity_mode.slider({
     min: 0,
     max: 4,
     step: 1
-}).on('slide', function (e, ui) {
+}).addClass('mini-slider').on('slide', function (e, ui) {
     HexaLab.app.set_singularity_mode(ui.value)
 })
 
 HexaLab.UI.settings.occlusion.on('click', function () {
     HexaLab.app.set_occlusion(this.checked ? 'object space' : 'none')
+})
+
+HexaLab.UI.settings.geometry_mode.on('change', function () {
+    HexaLab.app.set_geometry_mode(this.options[this.selectedIndex].value)
 })
 
 // App -> UI events
@@ -269,6 +274,7 @@ HexaLab.UI.on_set_occlusion = function (ao) {
 }
 
 HexaLab.UI.on_set_color_map = function (value) {
+    HexaLab.UI.settings.color.quality_map_name = value
     HexaLab.UI.settings.color.quality_map.val(value)
     HexaLab.UI.quality_plot_update()
 }
@@ -281,6 +287,11 @@ HexaLab.UI.on_first_mesh = function () {
     HexaLab.UI.dragdrop.overlay.removeClass('first_drag_drop').hide();
     HexaLab.UI.dragdrop.mesh.css('margin-left', '20%');
     HexaLab.UI.dragdrop.settings.show();
+}
+
+HexaLab.UI.clear_mesh_info_keep_source = function () {
+    HexaLab.UI.mesh.infobox_2.element.hide()
+    HexaLab.UI.mesh.dataset_content.hide()
 }
 
 HexaLab.UI.clear_mesh_info = function () {
@@ -328,7 +339,7 @@ HexaLab.UI.import_remote_mesh = function (source, name) {
     }
     request.send();
 
-    HexaLab.UI.clear_mesh_info()
+    HexaLab.UI.clear_mesh_info_keep_source()
     $.each(HexaLab.UI.mesh.source[0].options, function() {
         if ($(this).text() == source.text) $(this).prop('selected', true);
     })
@@ -339,17 +350,22 @@ HexaLab.UI.import_remote_mesh = function (source, name) {
     HexaLab.UI.mesh.infobox_2.element.show().css('display', 'flex');
 }
 
-HexaLab.UI.setup_mesh_stats = function() {
+HexaLab.UI.setup_mesh_stats = function(name) {
     var mesh = HexaLab.app.backend.get_mesh()
     HexaLab.UI.mesh.infobox_2.element.show()
     HexaLab.UI.mesh.infobox_2.text.empty()
-    HexaLab.UI.mesh.infobox_2.text.append('<div class="menu_row"><div class="menu_row_label" style="font-weight:bold;line-height:100%;padding-bottom:10px;">Geometry</div></div>')
-    HexaLab.UI.mesh.infobox_2.text.append('<div id="mesh_stats_wrapper">' +
-        '<div><span class="mesh_stat">vertices: </span>' + mesh.vert_count + '</div>' +
-        '<div><span class="mesh_stat">hexas:    </span>' + mesh.hexa_count + '</div>' +
-        '</div>'
-    )
-    HexaLab.UI.mesh.infobox_2.text.append('<div class="menu_row"><div class="menu_row_label" style="font-weight:bold;">Quality</div>\
+    const name_html = HexaLab.UI.view_source == 1 ? '<div class="menu_row_label" style="line-height: 100%; padding-bottom: 10px;">' + name + '</div>' : ''
+    HexaLab.UI.mesh.infobox_2.text.append('<div class="menu_row">' + name_html +
+            '<div class="menu_row_input simple-font" style="line-height: 100%; padding-bottom: 10px;">' +
+                mesh.vert_count + ' vertices, ' + mesh.hexa_count + ' hexas' +
+            '</div>' +
+        '</div>')
+    // HexaLab.UI.mesh.infobox_2.text.append('<div id="mesh_stats_wrapper">' +
+    //     '<div><span class="mesh_stat">vertices: </span><span class="simple-font">' + mesh.vert_count + '</span></div>' +
+    //     '<div><span class="mesh_stat">hexas:    </span><span class="simple-font">' + mesh.hexa_count + '</span></div>' +
+    //     '</div>'
+    // )
+    HexaLab.UI.mesh.infobox_2.text.append('<div class="menu_row"><div class="menu_row_label">Quality</div>\
     <div class="menu_row_input">\
         <div class="menu_row_input_block">\
             <select id="quality_type" title="Choose Hex Quality measure">\
@@ -384,13 +400,21 @@ HexaLab.UI.setup_mesh_stats = function() {
     if (max == 0) max = mesh.quality_max.toExponential(2)
     if (avg == 0) avg = mesh.quality_avg.toExponential(2)
     if (vri == 0) vri = mesh.quality_var.toExponential(2)
-    HexaLab.UI.mesh.infobox_2.text.append('<div id="mesh_stats_wrapper">' +
-        '<div><span class="mesh_stat">min: </span>' + min + '</div>' +
-        '<div><span class="mesh_stat">max: </span>' + max + '</div>' +
-        '<div><span class="mesh_stat">avg: </span>' + avg + '</div>' +
-        '<div><span class="mesh_stat">var: </span>' + vri + '</div>' +
-        '</div>'
+    HexaLab.UI.mesh.infobox_2.text.append('<table style="width:100%;">' +
+        // '<tr> <th>Min</th> <th>Max</th> <th>Avg</th> <th>Var</th> </tr>' +
+        '<tr> <td align="center"><span class="simple-font">Min: </span> <span class="simple-font">' + min + '</span></td>' +
+            ' <td align="center"><span class="simple-font">Max: </span> <span class="simple-font">' + max + '</span></td>' +
+            ' <td align="center"><span class="simple-font">Avg: </span> <span class="simple-font">' + avg + '</span></td>' + 
+            ' <td align="center"><span class="simple-font">Var: </span> <span class="simple-font">' + vri + '</span></td> </tr>' +
+        '</table>'
     )
+    // HexaLab.UI.mesh.infobox_2.text.append('<div id="mesh_stats_wrapper">' +
+    //     '<div><span class="mesh_stat">min: </span>' + min + '</div>' +
+    //     '<div><span class="mesh_stat">max: </span>' + max + '</div>' +
+    //     '<div><span class="mesh_stat">avg: </span>' + avg + '</div>' +
+    //     '<div><span class="mesh_stat">var: </span>' + vri + '</div>' +
+    //     '</div>'
+    // )
     $('#quality_type').on('change', function () {
         var v = this.options[this.selectedIndex].value
         HexaLab.app.set_quality_measure(v);
@@ -403,9 +427,13 @@ HexaLab.UI.on_set_quality_measure = function (measure) {
     HexaLab.UI.quality_plot_update()
 }
 
+HexaLab.UI.on_set_geometry_mode = function (mode) {
+    HexaLab.UI.settings.geometry_mode.val(mode)
+}
+
 HexaLab.UI.on_import_mesh = function (name) {
     HexaLab.UI.topbar.on_mesh_import()
-    if (HexaLab.UI.view_source == 1) HexaLab.UI.show_mesh_name(name)
+    // if (HexaLab.UI.view_source == 1) HexaLab.UI.show_mesh_name(name)
     if (HexaLab.UI.view_source == 2) HexaLab.UI.setup_dataset_content()
     HexaLab.UI.setup_mesh_stats(name)
     HexaLab.UI.quality_plot_update()
@@ -491,11 +519,30 @@ HexaLab.UI.setup_dataset_content = function () {
     HexaLab.UI.mesh.dataset_content.show()
 }
 
+// HexaLab.UI.mesh.source.on("click", function () {
+//     if (HexaLab.UI.mesh.source.select_focus_file_flag) {
+//         HexaLab.UI.mesh.source.select_focus_file_flag = 0
+//         return
+//     }
+//     this.selectedIndex = -1
+// })
+
+HexaLab.UI.mesh.source.on("click", function () {
+    if (HexaLab.UI.mesh.source.select_click_flag) {
+        HexaLab.UI.mesh.source.select_click_flag = 0
+        return
+    }
+    this.selectedIndex = -1
+})
+
 HexaLab.UI.mesh.source.on("change", function () {
     HexaLab.UI.mesh.source.css('font-style', 'normal')
+    
+    HexaLab.UI.mesh.source.select_click_flag = 1
 
     var v = this.options[this.selectedIndex].value
     if (v == "-1") {
+        // HexaLab.UI.mesh.source.select_focus_file_flag = 1
         HexaLab.UI.clear_mesh_info()
         if (HexaLab.UI.view_source == 1) HexaLab.UI.setup_mesh_stats(HexaLab.FS.short_path(HexaLab.UI.mesh_long_name))
         HexaLab.FS.trigger_file_picker(HexaLab.UI.import_local_mesh)
@@ -505,7 +552,16 @@ HexaLab.UI.mesh.source.on("change", function () {
     }
 })
 
+HexaLab.UI.mesh.dataset_content.on("click", function () {
+    // TODO Do we want this?
+    // if (HexaLab.UI.mesh.dataset_content.select_click_flag) {
+    //     HexaLab.UI.mesh.dataset_content.select_click_flag = 0
+    // }
+    // this.selectedIndex = -1
+})
+
 HexaLab.UI.mesh.dataset_content.on("change", function () {
+    HexaLab.UI.mesh.dataset_content.select_click_flag = 1
     var v = this.options[this.selectedIndex].value
     var i = parseInt(v)
     var j = parseInt(HexaLab.UI.mesh.source[0].options[HexaLab.UI.mesh.source[0].selectedIndex].value)
@@ -569,37 +625,63 @@ HexaLab.UI.quality_plot_dialog = $('<div></div>')
 
 HexaLab.UI.quality_plot_update = function () {
     if (HexaLab.UI.plot_overlay) {
-        var axis = HexaLab.UI.plot_overlay[0].axis
-        HexaLab.UI.quality_plot(HexaLab.UI.plot_overlay[0], axis)
+        var axis = HexaLab.UI.plot_overlay.axis
+        HexaLab.UI.quality_plot(HexaLab.UI.plot_overlay, axis)
     }
 }
 
 function dataURItoBlob(dataURI) {
-  // convert base64 to raw binary data held in a string
-  // doesn't handle URLEncoded DataURIs - see SO answer #6850276 for code that does this
-  var byteString = atob(dataURI.split(',')[1]);
+    // convert base64 to raw binary data held in a string
+    // doesn't handle URLEncoded DataURIs - see SO answer #6850276 for code that does this
+    var byteString = atob(dataURI.split(',')[1]);
 
-  // separate out the mime component
-  var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0]
+    // separate out the mime component
+    var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0]
 
-  // write the bytes of the string to an ArrayBuffer
-  var ab = new ArrayBuffer(byteString.length);
+    // write the bytes of the string to an ArrayBuffer
+    var ab = new ArrayBuffer(byteString.length);
 
-  // create a view into the buffer
-  var ia = new Uint8Array(ab);
+    // create a view into the buffer
+    var ia = new Uint8Array(ab);
 
-  // set the bytes of the buffer to the correct values
-  for (var i = 0; i < byteString.length; i++) {
-      ia[i] = byteString.charCodeAt(i);
-  }
+    // set the bytes of the buffer to the correct values
+    for (var i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+    }
 
-  // write the ArrayBuffer to a blob, and you're done
-  var blob = new Blob([ab], {type: mimeString});
-  return blob;
-
+    // write the ArrayBuffer to a blob, and you're done
+    var blob = new Blob([ab], {type: mimeString});
+    return blob;
 }
 
 HexaLab.UI.quality_plot = function(container, axis) {
+    if (HexaLab.UI.settings.color.quality_map_name == 'Parula') {
+        HexaLab.UI.settings.color.quality_map_bar_filename = axis == 'x' ? 'img/parula-h.png' : 'img/parula-v.png'
+    } else if (HexaLab.UI.settings.color.quality_map_name == 'Jet') {
+        HexaLab.UI.settings.color.quality_map_bar_filename = axis == 'x' ? 'img/jet-h.png' : 'img/jet-v.png'
+    } else if (HexaLab.UI.settings.color.quality_map_name == 'RedBlue') {
+        HexaLab.UI.settings.color.quality_map_bar_filename = axis ==  'x' ? 'img/redblue-h.png' : 'img/redblue-v.png'
+    }
+    if (axis == 'x') {
+        container.find('#bar_img').attr('src', HexaLab.UI.settings.color.quality_map_bar_filename).
+            height('16px')
+            .width(container.width() - 60 - 30)
+            .css('padding', '5px')
+            .css('padding-left', '60px')
+        container.find("#plot_div")
+            .height(container.height() - 16 - 10)
+            .width(container.width())
+        container.find("#plot_container")[0].style.flexDirection = "column-reverse"//.css('flex-direction', 'column-reverse;')
+    } else {
+        container.find('#bar_img').attr('src', HexaLab.UI.settings.color.quality_map_bar_filename).
+            height(container.height() - 30 - 50)
+            .width('16px')
+            .css('padding', '5px')
+            .css('padding-top', '30px')
+        container.find("#plot_div").height(container.height()).width(container.width() - 16 - 10)
+        container.find("#plot_container")[0].style.flexDirection = "row"
+    }
+
     // https://community.plot.ly/t/using-colorscale-with-histograms/150
     let data = []
     let bins_colors = []
@@ -634,7 +716,8 @@ HexaLab.UI.quality_plot = function(container, axis) {
 
     for (let i = 0; i <= 10; ++i) {
         let v = i / 10
-        let rgb = HexaLab.app.backend.map_value_to_color(1 - v)
+        let v2 = range_min < range_max ? 1 - v : v
+        let rgb = HexaLab.app.backend.map_value_to_color(v2)
         let r = (rgb.x() * 255).toFixed(0)
         let g = (rgb.y() * 255).toFixed(0)
         let b = (rgb.z() * 255).toFixed(0)
@@ -649,19 +732,19 @@ HexaLab.UI.quality_plot = function(container, axis) {
         autobinx:   false,
         //nbinsx: 100,
         marker: {
-            showscale: true,
+            // showscale: true,
             cmin:   0,
             cmax:   bins - 1,
             color:  bins_colors,
             colorscale: colorscale,
-            colorbar: {
-                thickness: 15,
-                showticklabels: false,
-                // xanchor: "right",
-                // x: -1.3,
-                len: 1.03,
-                //lenmode: "pixels",
-            }
+            // colorbar: {
+            //     thickness: 15,
+            //     showticklabels: false,
+            //     // xanchor: "right",
+            //     // x: -1.3,
+            //     len: 1,
+            //     //lenmode: "pixels",
+            // }
         },
     }]
     plot_data[0][axis] = data
@@ -676,8 +759,8 @@ HexaLab.UI.quality_plot = function(container, axis) {
         plot_bgcolor:  'rgba(255, 255, 255, 0.2)',
         autosize:       true,
         margin: {
-            l:  50,
-            r:  10,
+            l:  60,
+            r:  30,
             b:  50,
             t:  30,
             pad: 4
@@ -689,7 +772,7 @@ HexaLab.UI.quality_plot = function(container, axis) {
         type:       'linear',
         ticks:      'outside',
         tick0:      0,
-        dtick:      0.25,
+        dtick:      (range_max - range_min) / 8, //0.25,
         ticklen:    2,
         tickwidth:  2,
         tickcolor:  '#444444'
@@ -712,33 +795,58 @@ HexaLab.UI.quality_plot = function(container, axis) {
                 name: 'Save',
                 icon: Plotly.Icons['camera'],
                 click: function() {
-                    Plotly.toImage(container, {
+                    plot_layout.paper_bgcolor = 'rgba(255, 255, 255, 1)'
+                    plot_layout.plot_bgcolor = 'rgba(255, 255, 255, 1)'
+                    Plotly.newPlot($("<div></div>")[0], {
+                        data: plot_data,
+                        layout: plot_layout,
+                        config: plot_config
+                    })
+                    Plotly.toImage(container.find('#plot_div')[0], {
                         format: 'png', 
-                        width: 800, 
-                        height: 600,
-                    }).then(function(_) {
-                        // window.open(blob, '_blank');
-                        plot_layout.paper_bgcolor = 'rgba(255, 255, 255, 1)'
-                        plot_layout.plot_bgcolor = 'rgba(255, 255, 255, 1)'
-                        Plotly.newPlot(null, {
-                            data: plot_data,
-                            layout: plot_layout,
-                            config: plot_config
-                        })
-                        Plotly.toImage(container, {
-                            format: 'png', 
-                            width: 800, 
-                            height: 600,
-                        }).then(function(data) {
-                            saveAs(dataURItoBlob(data), "HLplot.png")
-                        })
-                        plot_layout.paper_bgcolor = 'rgba(255, 255, 255, 0.2)'
-                        plot_layout.plot_bgcolor = 'rgba(255, 255, 255, 0.2)'
-                        Plotly.newPlot(container, {
-                            data: plot_data,
-                            layout: plot_layout,
-                            config: plot_config
-                        })
+                        width: container.find('#plot_div').width(), 
+                        height: container.find('#plot_div').height(),
+                    }).then(function(data) {
+                        let canvas_width, canvas_height
+                        if (axis == 'x') {
+                            canvas_width  = container.find('#plot_div').width()
+                            canvas_height = container.find('#plot_div').height() + 16 + 10
+                        } else {
+                            canvas_width  = container.find('#plot_div').width()  + 16 + 10
+                            canvas_height = container.find('#plot_div').height()
+                        }
+                        let c = $('<canvas width="' + canvas_width
+                                     + '" height="' + canvas_height
+                                     + '"></canvas>')[0]
+                        let ctx = c.getContext("2d")
+                        ctx.fillStyle = "white";
+                        ctx.fillRect(0, 0, canvas_width, canvas_height);
+
+                        let plot_img = new Image()
+                        let bar_img  = new Image()
+                        
+                        plot_img.src = data
+                        plot_img.onload = function() {
+                            bar_img.src = HexaLab.UI.settings.color.quality_map_bar_filename
+                            bar_img.onload = function() {
+                                if (axis == 'x') {
+                                    ctx.drawImage(plot_img, 0, 0)
+                                    ctx.drawImage(bar_img, 60, canvas_height - 16 - 5, canvas_width - 60 - 30, 16)
+                                } else {
+                                    ctx.drawImage(bar_img, 5, 30, 16, canvas_height - 30 - 50)
+                                    ctx.drawImage(plot_img, 5 + 16, 0)
+                                }
+                                let img = c.toDataURL("image/png")
+                                saveAs(dataURItoBlob(img), "HLplot.png")
+                            }
+                        }
+                    })
+                    plot_layout.paper_bgcolor = 'rgba(255, 255, 255, 0.2)'
+                    plot_layout.plot_bgcolor = 'rgba(255, 255, 255, 0.2)'
+                    Plotly.newPlot(container.find('#plot_div')[0], {
+                        data: plot_data,
+                        layout: plot_layout,
+                        config: plot_config
                     })
                 }
             }]
@@ -749,7 +857,7 @@ HexaLab.UI.quality_plot = function(container, axis) {
 
     container.axis = axis
 
-    Plotly.newPlot(container, {
+    Plotly.newPlot(container.find('#plot_div')[0], {
         data: plot_data,
         layout: plot_layout,
         config: plot_config
@@ -774,9 +882,10 @@ HexaLab.UI.menu.on('resize', function () {
         } else {
             HexaLab.UI.menu_resize_timeout = false
             if (HexaLab.UI.plot_overlay) {
-                HexaLab.UI.plot_overlay.remove()
-                delete HexaLab.UI.plot_overlay
-                HexaLab.UI.create_plot_panel()
+                // TODO move?
+                // HexaLab.UI.plot_overlay.remove()
+                // delete HexaLab.UI.plot_overlay
+                // HexaLab.UI.create_plot_panel()
             }
         }  
     }
@@ -813,20 +922,21 @@ HexaLab.UI.create_plot_panel = function () {
     var y = 0
     var width = size.width / 4
     var height = size.height - 2
-    HexaLab.UI.plot_overlay = HexaLab.UI.overlay(x, y, width, height, '').appendTo(document.body)
-    HexaLab.UI.quality_plot(HexaLab.UI.plot_overlay[0], 'y')
+    HexaLab.UI.plot_overlay = HexaLab.UI.overlay(x, y, width, height,
+        '<div id="plot_container" style="display:flex;"><div id="bar_div"><img id="bar_img" /></div><div id="plot_div"></div></div>').appendTo(document.body)
+    HexaLab.UI.quality_plot(HexaLab.UI.plot_overlay, 'y')
     HexaLab.UI.plot_overlay.on('resize', function () {
         HexaLab.UI.quality_plot_update()
     })
 }
 
-window.addEventListener('resize', function () {
-    if (HexaLab.UI.plot_overlay) {
-        HexaLab.UI.plot_overlay.remove()
-        delete HexaLab.UI.plot_overlay
-        HexaLab.UI.create_plot_panel()
-    }
-})
+// window.addEventListener('resize', function () {
+//     if (HexaLab.UI.plot_overlay) {
+//         HexaLab.UI.plot_overlay.remove()
+//         delete HexaLab.UI.plot_overlay
+//         HexaLab.UI.create_plot_panel()
+//     }
+// })
 
 HexaLab.UI.topbar.plot.on('click', function () {
     if (HexaLab.UI.plot_overlay) {

@@ -1,5 +1,4 @@
-#ifndef _HL_LOW_QUALITY_VIEW_H_
-#define _HL_LOW_QUALITY_VIEW_H_
+#pragma once
 
 #include <mesh.h>
 #include <ifilter.h>
@@ -20,5 +19,3 @@ namespace HexaLab {
         void on_mesh_set(Mesh& _mesh);
     };
 }
-
-#endif
