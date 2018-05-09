@@ -28,6 +28,7 @@ int main() {
     json srcVec = job["sources"];
     int meshCnt = 0;
     int failCnt = 0;
+    App app;
 
     for ( size_t i = 0; i < srcVec.size(); i++ ) {
         printf ( "Dataset %lu %lu \n", i, srcVec[i]["paper"].size() );
@@ -36,9 +37,9 @@ int main() {
         string title = paper["title"];
         json dataVec = srcVec[i]["data"];
         printf ( "-- title %s\n", title.c_str() );
-        App app;
 
         for ( size_t j = 0; j < dataVec.size(); ++j ) {
+            printf ("Mesh %i/%i on dataset %i/%i\n",j+1,dataVec.size(),i+1,srcVec.size());
             ++meshCnt;
             string filename = dataVec[j];
             const string basepath = "../datasets/";
@@ -58,5 +59,4 @@ int main() {
 
     printf ( "%i meshes in the archive (%i fails to load)\n", meshCnt, failCnt );
     printf ( "Press enter to exit.\n" );
-    getchar();
 }
