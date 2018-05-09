@@ -17,6 +17,8 @@ THREE.AOPre = {
 
         "void main() {",
             "gl_FragColor = vec4(vNorm, 1.0);",
+            // "gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);",
+            // "gl_FragColor.r = gl_FragCoord.z;",
         "}"
 
     ].join( "\n" )

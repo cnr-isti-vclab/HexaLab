@@ -352,7 +352,7 @@ HexaLab.Viewer = function (canvas_width, canvas_height) {
                 tDepth: { value: this.depth_pass.target.texture },
                 tNormals: { value: this.normal_pass.target.texture },
                 uSize: { value: new THREE.Vector2(this.width, this.height) },
-                depthThreshold: { value: 0.01 }
+                depthThreshold: { value: 0.001 }
             },
             blending: THREE.CustomBlending,
             blendEquation: THREE.AddEquation,
@@ -382,7 +382,7 @@ HexaLab.Viewer = function (canvas_width, canvas_height) {
             uniforms: {
             },
         }),
-        target: new THREE.WebGLRenderTarget(120, 120, {
+        target: new THREE.WebGLRenderTarget(256, 256, {
             format: THREE.RGBAFormat,
             type: THREE.FloatType,
             minFilter: THREE.NearestFilter,
@@ -431,6 +431,7 @@ Object.assign(HexaLab.Viewer.prototype, {
             preserveDrawingBuffer: true,    // disable hidden/automatic clear of the rendertarget
             alpha: true,                    // to have an alpha on the rendertarget? (needed for setClearAlpha to work)
         });
+        this.renderer.context.getExtension("EXT_frag_depth")
         this.renderer.setSize(this.width, this.height)
         this.renderer.autoClear = false
         this.renderer.setClearColor(this.settings.background, 1.0)
@@ -493,52 +494,53 @@ Object.assign(HexaLab.Viewer.prototype, {
             // skip the first vertex of the second face since it's the same as the last of the first face
             d.set(pos_attrib.array[index_attrib.array[i * 6 + 4] * 3 + 0], pos_attrib.array[index_attrib.array[i * 6 + 4] * 3 + 1], pos_attrib.array[index_attrib.array[i * 6 + 4] * 3 + 2])
             // skip the last vertex of the second face since it's the same as the first of the first face
-            let center = new THREE.Vector3().add(a).add(b).add(c).add(d).multiplyScalar(0.25)    // average
+            const offset = 0.0
+            let center = new THREE.Vector3().add(a).add(b).add(c).add(d).multiplyScalar(0.25 * offset)    // average
             
-            // TODO in offset calculation, account for triangle screen size ?
-            const offset = 0.01
             let v
             v = a.clone()
-            v.add(new THREE.Vector3().add(center).sub(a).normalize().multiplyScalar(offset))
+            v = v.multiplyScalar(1 - offset).add(center)
             pos_tex_data[index_attrib.array[i * 6 + 0] * 4 + 0] = v.x
             pos_tex_data[index_attrib.array[i * 6 + 0] * 4 + 1] = v.y
             pos_tex_data[index_attrib.array[i * 6 + 0] * 4 + 2] = v.z
             pos_tex_data[index_attrib.array[i * 6 + 0] * 4 + 3] = 0
 
             v = b.clone()
-            v.add(new THREE.Vector3().add(center).sub(b).normalize().multiplyScalar(offset))
+            v = v.multiplyScalar(1 - offset).add(center)
             pos_tex_data[index_attrib.array[i * 6 + 1] * 4 + 0] = v.x
             pos_tex_data[index_attrib.array[i * 6 + 1] * 4 + 1] = v.y
             pos_tex_data[index_attrib.array[i * 6 + 1] * 4 + 2] = v.z
             pos_tex_data[index_attrib.array[i * 6 + 1] * 4 + 3] = 0
 
             v = c.clone()
-            v.add(new THREE.Vector3().add(center).sub(c).normalize().multiplyScalar(offset))
+            v = v.multiplyScalar(1 - offset).add(center)
             pos_tex_data[index_attrib.array[i * 6 + 2] * 4 + 0] = v.x
             pos_tex_data[index_attrib.array[i * 6 + 2] * 4 + 1] = v.y
             pos_tex_data[index_attrib.array[i * 6 + 2] * 4 + 2] = v.z
             pos_tex_data[index_attrib.array[i * 6 + 2] * 4 + 3] = 0
 
-            v = c.clone()
-            v.add(new THREE.Vector3().add(center).sub(c).normalize().multiplyScalar(offset))
-            pos_tex_data[index_attrib.array[i * 6 + 3] * 4 + 0] = v.x
-            pos_tex_data[index_attrib.array[i * 6 + 3] * 4 + 1] = v.y
-            pos_tex_data[index_attrib.array[i * 6 + 3] * 4 + 2] = v.z
-            pos_tex_data[index_attrib.array[i * 6 + 3] * 4 + 3] = 0
+            // v = c.clone()
+            //v = v.multiplyScalar(1 - offset).add(new THREE.Vector3().add(center).multiplyScalar(offset))
+            // //v.add(new THREE.Vector3().add(center).sub(c).normalize().multiplyScalar(offset))
+            // pos_tex_data[index_attrib.array[i * 6 + 3] * 4 + 0] = v.x
+            // pos_tex_data[index_attrib.array[i * 6 + 3] * 4 + 1] = v.y
+            // pos_tex_data[index_attrib.array[i * 6 + 3] * 4 + 2] = v.z
+            // pos_tex_data[index_attrib.array[i * 6 + 3] * 4 + 3] = 0
 
             v = d.clone()
-            v.add(new THREE.Vector3().add(center).sub(d).normalize().multiplyScalar(offset))
+            v = v.multiplyScalar(1 - offset).add(center)
             pos_tex_data[index_attrib.array[i * 6 + 4] * 4 + 0] = v.x
             pos_tex_data[index_attrib.array[i * 6 + 4] * 4 + 1] = v.y
             pos_tex_data[index_attrib.array[i * 6 + 4] * 4 + 2] = v.z
             pos_tex_data[index_attrib.array[i * 6 + 4] * 4 + 3] = 0
 
-            v = a.clone()
-            v.add(new THREE.Vector3().add(center).sub(a).normalize().multiplyScalar(offset))
-            pos_tex_data[index_attrib.array[i * 6 + 5] * 4 + 0] = v.x
-            pos_tex_data[index_attrib.array[i * 6 + 5] * 4 + 1] = v.y
-            pos_tex_data[index_attrib.array[i * 6 + 5] * 4 + 2] = v.z
-            pos_tex_data[index_attrib.array[i * 6 + 5] * 4 + 3] = 0
+            // v = a.clone()
+            // v = v.multiplyScalar(1 - offset).add(new THREE.Vector3().add(center).multiplyScalar(offset))
+            // //v.add(new THREE.Vector3().add(center).sub(a).normalize().multiplyScalar(offset))
+            // pos_tex_data[index_attrib.array[i * 6 + 5] * 4 + 0] = v.x
+            // pos_tex_data[index_attrib.array[i * 6 + 5] * 4 + 1] = v.y
+            // pos_tex_data[index_attrib.array[i * 6 + 5] * 4 + 2] = v.z
+            // pos_tex_data[index_attrib.array[i * 6 + 5] * 4 + 3] = 0
         }
         for (let i = 0; i < t_size * t_size; ++i) {
             if (i < norm_attrib.count) {
@@ -693,6 +695,7 @@ Object.assign(HexaLab.Viewer.prototype, {
         }
         let samples = []
         // Mitchell's best candidate
+        samples[0] = new THREE.Vector3(10, 10, 1).normalize()
         samples[0] = sample_sphere_surface()
         for (let i = 1; i < this.ao_pass.samples; ++i) {
             let p = sample_sphere_surface()
@@ -725,7 +728,7 @@ Object.assign(HexaLab.Viewer.prototype, {
                 aabb_diagonal * 0.5,
                 aabb_diagonal * 0.5,
                 -aabb_diagonal * 0.5,
-                0, 1000
+                0, 2 * aabb_diagonal
             )
             views[i].position.set(cam_pos.x, cam_pos.y, cam_pos.z)
             views[i].up.set(0, 1, 0)
@@ -743,7 +746,8 @@ Object.assign(HexaLab.Viewer.prototype, {
         // ao pass
         this.ao_pass.views = views
         this.ao_pass.cones = cones
-        this.ao_pass.material.uniforms.uDepthBias = { value: 0.02 * mesh.get_aabb_diagonal() }
+        this.ao_pass.material.uniforms.uDepthBias = { value: 0.01 * mesh.get_aabb_diagonal() }
+        // this.ao_pass.material.uniforms.uDepthBias = { value: 0.0025 }
 
         // ssao pass
         this.ssao_pass.material.uniforms.uRadius.value = 5 * mesh.avg_edge_len;
@@ -912,10 +916,17 @@ Object.assign(HexaLab.Viewer.prototype, {
                 const light_cam = this.ao_pass.views[this.ao_pass.progress.view_i]
 
                 // depth (view pos) pass
+                const prev_clear_color = this.renderer.getClearColor().clone()
+                const prev_clear_alpha = this.renderer.getClearAlpha()
+                this.renderer.setClearColor(new THREE.Color(0, 0, -100000), 1.0)
+                this.renderer.clearTarget(this.viewpos_pass.target, true, true, true)     // TODO this is not working ?
+                this.renderer.setClearColor(prev_clear_color, prev_clear_alpha)
+
                 this.scene.overrideMaterial = this.viewpos_pass.material
-                this.renderer.render(this.scene, light_cam, this.viewpos_pass.target, true)
+                this.renderer.render(this.scene, light_cam, this.viewpos_pass.target, false)
                 this.scene.overrideMaterial = null
                 clear_scene()
+                // Module.print("[AO] ShadowMap done!")
 
                 // ao accumulation pass
                 this.fullscreen_quad.material = this.ao_pass.material
@@ -939,8 +950,10 @@ Object.assign(HexaLab.Viewer.prototype, {
 
                 this.ao_pass.progress.view_i += 1
 
-                let light = new THREE.Vector3().add(light_cam.position).normalize()
-                this.ao_pass.progress.sum += Math.max(0, new THREE.Vector3(0, 1, 0).dot(light))
+                const light = new THREE.Vector3().add(light_cam.position).normalize()
+                const first_light = this.ao_pass.views[0].position.clone().normalize()
+                this.ao_pass.progress.sum += Math.max(0, first_light.dot(light))
+                // this.ao_pass.progress.sum += Math.max(0, new THREE.Vector3(0, 1, 0).dot(light))
                 if (this.ao_pass.progress.view_i == 128 || 
                     this.ao_pass.progress.view_i == 512 || 
                     this.ao_pass.progress.view_i == this.ao_pass.samples) {

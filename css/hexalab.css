@@ -336,10 +336,13 @@ input {
     width: 60%;
 }
 
+.menu_area .menu_content .menu_row .menu_row_input .normal_value {
+    width: 30px;
+}
+
 .menu_area .menu_content .menu_row .menu_row_input .mini-slider .ui-slider-handle {
     width: 5px;
     padding-left: 5px;
-    height: 15px;
 }
 
 .menu_area .menu_content .menu_row .menu_row_input_block {
