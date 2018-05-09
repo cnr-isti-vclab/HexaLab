@@ -4,7 +4,17 @@
 
 namespace HexaLab {
     
-    bool Loader::load(const string& path, vector<Vector3f>& vertices, vector<Index>& indices) {
+    bool Loader::load(const string& path, vector<Vector3f>& vertices, vector<Index>& indices)
+    {
+        std::string ext = path.substr(path.find_last_of("."));
+        if(ext.compare(".mesh")==0 || ext.compare(".MESH")==0) return load_MESH(path, vertices, indices);
+        if(ext.compare(".vtk" )==0 || ext.compare(".VTK")==0 ) return load_VTK (path, vertices, indices);
+        return false;
+    }
+
+
+    bool Loader::load_MESH(const string& path, vector<Vector3f>& vertices, vector<Index>& indices)
+    {
         string header;
 
         vertices.clear();
@@ -15,7 +25,7 @@ namespace HexaLab {
 
         int precision;
         int dimension;
-        
+
         while (stream.good()) {
             // Read a line
             HL_ASSERT_LOG(stream >> header, "ERROR: malformed mesh file. Is the file ended correctly?\n");
@@ -75,6 +85,107 @@ namespace HexaLab {
         // Make sure at least vertex and hexa index data was read
         HL_ASSERT_LOG(vertices.size() != 0, "ERROR: mesh does not contain any vertex!\n");
         HL_ASSERT_LOG(indices.size()  != 0, "ERROR: mesh does not contain any index!\n");
+
+        return true;
+    }
+
+
+    bool Loader::load_VTK(const string& path, vector<Vector3f>& vertices, vector<Index>& indices)
+    {
+        vertices.clear();
+        indices.clear();
+
+        std::ifstream stream(path);
+        std::string   line;
+
+        bool header_found     = false;
+        bool title_found      = false;
+        bool type_found       = false;
+        bool dataset_found    = false;
+        bool point_data_found = false;
+        bool cell_data_found  = false;
+
+        // read header
+        while(!header_found && std::getline(stream,line))
+        {
+            if(line.compare("# vtk DataFile Version 2.0")==0) header_found = true;
+        }
+        HL_ASSERT_LOG(!stream.eof(), "ERROR: malformed mesh file. Could not parse header\n");
+
+        // read title (unused)
+        while(!title_found && std::getline(stream,line))
+        {
+            if (!line.empty()) title_found = true;
+        }
+        HL_ASSERT_LOG(!stream.eof(), "ERROR: malformed mesh file. Could not parse title\n");
+
+        // read dataset (only ASCII is supported right now)
+        while(!type_found && std::getline(stream,line))
+        {
+            if (line.compare("ASCII")==0) type_found = true;
+            HL_ASSERT_LOG(!(line.compare("BINARY")==0), "ERROR: malformed mesh file. ASCII is the only supported file type\n");
+        }
+        HL_ASSERT_LOG(!stream.eof(), "ERROR: malformed mesh file. Could not parse type (ASCII, BINARY)\n");
+
+        // read type (only UNSTRUCTURED_GRID is supported right now)
+        while(!dataset_found && std::getline(stream,line))
+        {
+            if (line.compare("DATASET UNSTRUCTURED_GRID")==0)  dataset_found = true;
+            else
+            if (line.compare("DATASET STRUCTURED_POINTS")==0 ||
+                line.compare("DATASET STRUCTURED_GRID")==0   ||
+                line.compare("DATASET POLYDATA")==0          ||
+                line.compare("DATASET RECTILINEAR_GRID")==0  ||
+                line.compare("DATASET FIELD")==0)
+            {
+                HL_ASSERT_LOG(false, "ERROR: malformed mesh file. UNSTRUCTURED_GRID is the only supported dataset\n");
+            }
+        }
+        HL_ASSERT_LOG(!stream.eof(), "ERROR: malformed mesh file. Could not parse dataset type\n");
+
+        // read point_data
+        while(!point_data_found && std::getline(stream,line))
+        {
+            int nverts;
+            if(sscanf(line.c_str(), "POINTS %d %*s", &nverts)==1)
+            {
+                vertices.reserve(nverts);
+                point_data_found = true;
+                HL_LOG("[Loader] Reading %d vertices...\n", nverts);
+                for(int i=0; i<nverts; ++i)
+                {
+                    Vector3f p;
+                    std::getline(stream,line);
+                    if(sscanf(line.c_str(), "%f %f %f", &p.x(), &p.y(), &p.z())==3)
+                    {
+                        vertices.push_back(p);
+                    }
+                }
+            }
+        }
+        HL_ASSERT_LOG(!stream.eof(), "ERROR: malformed mesh file. Could not parse point data\n");
+
+        // read cell_data
+        while(!cell_data_found && std::getline(stream,line))
+        {
+            int ncells;
+            if(sscanf(line.c_str(), "CELLS %d %*d", &ncells)==1)
+            {
+                indices.reserve(ncells);
+                cell_data_found = true;
+                HL_LOG("[Loader] Reading %d hexas...\n", ncells);
+                for(int i=0; i<ncells; ++i)
+                {
+                    Index v[8];
+                    std::getline(stream,line);
+                    if(sscanf(line.c_str(), "8 %d %d %d %d %d %d %d %d", &v[0], &v[1], &v[2], &v[3], &v[4], &v[5], &v[6], &v[7])==8)
+                    {
+                        for(int j=0; j<8; ++j) indices.push_back(v[j]);
+                    }
+                }
+            }
+        }
+        HL_ASSERT_LOG(!stream.eof(), "ERROR: malformed mesh file. Could not parse cell data\n");
 
         return true;
     }
