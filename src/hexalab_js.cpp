@@ -76,6 +76,7 @@ EMSCRIPTEN_BINDINGS(HexaLab) {
         .function("set_quality_measure",                &App::set_quality_measure)
         .function("show_boundary_singularity",          &App::show_boundary_singularity)
         .function("show_boundary_creases",              &App::show_boundary_creases)
+        .function("set_geometry_mode",                  &App::set_geometry_mode)
 
         .function("get_visible_model",                  &App::get_visible_model, allow_raw_pointers())
         .function("get_filtered_model",                 &App::get_filtered_model, allow_raw_pointers())
@@ -147,6 +148,12 @@ EMSCRIPTEN_BINDINGS(HexaLab) {
         .function("get_aabb_center",        &mesh_stats_center)
         .property("normalized_quality_min", &MeshStats::normalized_quality_min)
         .property("normalized_quality_max", &MeshStats::normalized_quality_max)
+        ;
+
+    enum_<GeometryMode>("GeometryMode")
+        .value("Default",                   GeometryMode::Default)
+        .value("Cracked",                   GeometryMode::Cracked)
+        .value("Smooth",                    GeometryMode::Smooth)
         ;
 
     // FILTERS

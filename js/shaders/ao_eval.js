@@ -17,7 +17,6 @@ THREE.AOEval = {
         "uniform vec3 uCamPos;",
         "uniform mat4 uProj;",
         "uniform mat4 uInvProj;",
-        "uniform vec2 uSize;",
         "uniform float uDepthBias;",
 
         "varying vec2 vUv;",
@@ -51,8 +50,9 @@ THREE.AOEval = {
             "vert = (uView * uModel * vec4(vert, 1.0)).xyz;",
             "norm = /*mat3(uView) * */ mat3(uModel) * norm;",
             "vec4 ndc = uProj * vec4(vert, 1.0);",
-            "ndc /= ndc.w;",
+            //"ndc /= ndc.w;",
             "vec2 ndc_uv = (ndc.xy + vec2(1.0, 1.0)) / 2.0;",
+            // "ndc_uv += vec2(1.0/512.0);",
             //"vec3 sampled_ndc = sample_ndc(ndc_uv);",
             //"vec3 sampled_view = ndc_to_view(sampled_ndc);",
             "vec3 sampled_view = sample_view(ndc_uv);",

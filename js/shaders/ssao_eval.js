@@ -105,7 +105,7 @@ THREE.SSAOEval = {
 			"}",
 
 			"occlusion = 1.0 - (occlusion / float(numSamples));",
-			"gl_FragColor = vec4(vec3(screenPos.z), 1.0);",
+			"gl_FragColor = vec4(vec3(occlusion), 1.0);",
 		"}"
 
 	].join( "\n" )

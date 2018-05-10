@@ -31,8 +31,14 @@ namespace HexaLab {
         float normalized_quality_max = 0;
     };
 
+    enum class GeometryMode {
+        Default,
+        Cracked,
+        Smooth,
+    };
+
     class App {
-    private:
+      private:
         // Currently loaded mesh. Initially a nullptr.
         Mesh* mesh = nullptr;
         // Data structure exposed to the .js app containing a bunch of useful info about the currently loaded mesh.
@@ -53,9 +59,9 @@ namespace HexaLab {
         bool do_show_boundary_creases = false;
 
         // Colors selected for the visible_model in the .js app. They are used when hexa quality color mapping is off.
-        Vector3f default_outside_color = Vector3f(1, 1, 1);
-        Vector3f default_inside_color  = Vector3f(1, 1, 0);
-        
+        Vector3f default_outside_color = Vector3f ( 1, 1, 1 );
+        Vector3f default_inside_color  = Vector3f ( 1, 1, 0 );
+
         // Selected quality measure. The evaluated values are stored inside the mesh, for each hexa.
         // Automatically updated on mesh or measure change.
         QualityMeasureEnum quality_measure = QualityMeasureEnum::SJ;
@@ -66,36 +72,41 @@ namespace HexaLab {
 
         bool models_dirty_flag = false;
 
-    public:
+        GeometryMode geometry_mode = GeometryMode::Default;
+
+      public:
         // Loads and imports a new mesh file into the system. Call the Loader, the Builder, updates mesh stats and
-        // evaluated quality measures, builds singularity models, notifies filters of the new mesh. 
-        bool import_mesh(string path);
+        // evaluated quality measures, builds singularity models, notifies filters of the new mesh.
+        bool import_mesh ( string path );
 
         // Adds a filter to the filters collection. On update, the filters are invoked in the order in which they were added.
-        void add_filter(IFilter* filter);
+        void add_filter ( IFilter* filter );
 
-        // Flags the models as dirty. Called by all the app setters. 
+        // Flags the models as dirty. Called by all the app setters.
         // Filters should also call this (either from their .cpp or .js portion) whenever their settings get changed.
         void flag_models_as_dirty() { this->models_dirty_flag = true; }
 
         // If models are marked dirty, it reruns all the filters and rebuilds the surface models buffers.
         // Returns true if an update has been made (the models were marked dirty), false otherwise
         bool update_models();
-        
+
         // Updates the selected color map, enabled quality color mapping and flags the model color buffer as dirty.
-        void enable_quality_color_mapping(ColorMap::Palette palette);
+        void enable_quality_color_mapping ( ColorMap::Palette palette );
         // Disables quality color mapping and flags the model color buffer as dirty (it will be rebuilt using the default colors).
         void disable_quality_color_mapping();
 
         // Updates the default colors and if quality color mapping is disabled, it flags the model color buffer as dirty.
-        void set_default_outside_color(float r, float g, float b);
-        void set_default_inside_color(float r, float g, float b);
+        void set_default_outside_color ( float r, float g, float b );
+        void set_default_inside_color ( float r, float g, float b );
 
         // Flags as dirty the model quality buffers, and also the model color buffer if quality color mapping is enabled.
-        void set_quality_measure(QualityMeasureEnum e);
+        void set_quality_measure ( QualityMeasureEnum e );
 
-        void show_boundary_singularity(bool do_show);
-        void show_boundary_creases(bool do_show);
+        // Flags as dirty the position/normal buffers.
+        void set_geometry_mode ( GeometryMode mode );
+
+        void show_boundary_singularity ( bool do_show );
+        void show_boundary_creases ( bool do_show );
 
 
         // Getters
@@ -112,18 +123,23 @@ namespace HexaLab {
         bool                is_quality_color_mapping_enabled()  { return this->quality_color_mapping_enabled; }
         QualityMeasureEnum  get_quality_measure()               { return this->quality_measure; }
 
-    private:
-        void add_visible_vert(Dart& dart, float normal_sign, Vector3f color);
-        void add_visible_face(Dart& dart, float normal_sign);
-        void add_visible_wireframe(Dart& dart);
-        void add_filtered_face(Dart& dart);
-        void add_filtered_wireframe(Dart& dart);
+      private:
+        void add_visible_vert ( Dart& dart, float normal_sign, Vector3f color );
+        void add_visible_face ( Dart& dart, float normal_sign );
+        void add_visible_wireframe ( Dart& dart );
+        void add_filtered_face ( Dart& dart );
+        void add_filtered_wireframe ( Dart& dart );
 
-        void add_vertex(Vector3f pos, Vector3f norm, Vector3f color);
-        void add_triangle(Index i1, Index i2, Index i3);
+        size_t add_vertex ( Vector3f pos, Vector3f norm, Vector3f color );
+        void add_triangle ( size_t i1, size_t i2, size_t i3 );
+        void add_quad ( size_t i1, size_t i2, size_t i3, size_t i4 );
 
         void prepare_geometry();
-        void prepare_round_geometry();
+        void prepare_cracked_geometry();
+        void prepare_smooth_geometry();
+
+        void build_gap_hexa ( const Vector3f pp[8], const Vector3f nn[6], const bool vv[8], const Vector3f ww[6] );
+        void build_smooth_hexa ( const Vector3f pp[8], const Vector3f nn[6], const bool vv[8], const bool ww[6], Index hexa_idx );
 
         void compute_hexa_quality();
         void build_surface_models();
