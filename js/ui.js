@@ -156,6 +156,7 @@ HexaLab.UI = {
         occlusion:          $("#show_occlusion"),
         singularity_mode:   $('#singularity_slider'),
         geometry_mode:      $('#geometry_mode'),
+        ao_mode:            $("#ao_mode"),
     },
     
     // Mesh sources
@@ -226,6 +227,10 @@ HexaLab.UI.settings.singularity_mode.slider({
     step: 1
 }).addClass('mini-slider').on('slide', function (e, ui) {
     HexaLab.app.set_singularity_mode(ui.value)
+})
+
+HexaLab.UI.settings.ao_mode.on('change', function () {
+    HexaLab.app.set_occlusion(this.options[this.selectedIndex].value)
 })
 
 HexaLab.UI.settings.occlusion.on('click', function () {
