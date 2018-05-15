@@ -18,23 +18,23 @@ HexaLab.BufferGeometry = function (backend) {
 
 Object.assign(HexaLab.BufferGeometry.prototype, {
     update: function () {
-        this.surface.removeAttribute('position');
+        this.surface.removeAttribute('position')
         const x = this.backend.surface_pos().size()
         if (this.backend.surface_pos().size() != 0) {
-            const buffer = new Float32Array(Module.HEAPU8.buffer, this.backend.surface_pos().data(), this.backend.surface_pos().size() * 3);
-            this.surface.addAttribute('position', new THREE.BufferAttribute(buffer, 3));
+            const buffer = new Float32Array(Module.HEAPU8.buffer, this.backend.surface_pos().data(), this.backend.surface_pos().size() * 3)
+            this.surface.addAttribute('position', new THREE.BufferAttribute(buffer, 3))
         }
-        this.surface.removeAttribute('normal');
+        this.surface.removeAttribute('normal')
         if (this.backend.surface_norm().size() != 0) {
-            const buffer = new Float32Array(Module.HEAPU8.buffer, this.backend.surface_norm().data(), this.backend.surface_norm().size() * 3);
-            this.surface.addAttribute('normal', new THREE.BufferAttribute(buffer, 3));
+            const buffer = new Float32Array(Module.HEAPU8.buffer, this.backend.surface_norm().data(), this.backend.surface_norm().size() * 3)
+            this.surface.addAttribute('normal', new THREE.BufferAttribute(buffer, 3))
         } else {
             this.surface.computeVertexNormals()
         }
-        this.surface.removeAttribute('color');
+        this.surface.removeAttribute('color')
         if (this.backend.surface_color().size() != 0) {
-            const buffer = new Float32Array(Module.HEAPU8.buffer, this.backend.surface_color().data(), this.backend.surface_color().size() * 3);
-            this.surface.addAttribute('color', new THREE.BufferAttribute(buffer, 3));
+            const buffer = new Float32Array(Module.HEAPU8.buffer, this.backend.surface_color().data(), this.backend.surface_color().size() * 3)
+            this.surface.addAttribute('color', new THREE.BufferAttribute(buffer, 3))
         }
         this.surface.setIndex(null)     // TODO ?
         if (this.backend.surface_ibuffer().size() != 0) {
@@ -43,20 +43,20 @@ Object.assign(HexaLab.BufferGeometry.prototype, {
             const size = this.backend.surface_ibuffer().size()
             const t = new Int32Array(Module.HEAPU8.buffer, data, size)
             for (let i = 0; i < size; ++i) {  // TODO no copy
-                buffer[i] = t[i];
+                buffer[i] = t[i]
             } 
             this.surface.setIndex(buffer)
         }
 
-        this.wireframe.removeAttribute('position');
+        this.wireframe.removeAttribute('position')
         if (this.backend.wireframe_pos().size() != 0) {
-            const buffer = new Float32Array(Module.HEAPU8.buffer, this.backend.wireframe_pos().data(), this.backend.wireframe_pos().size() * 3);
-            this.wireframe.addAttribute('position', new THREE.BufferAttribute(buffer, 3));
+            const buffer = new Float32Array(Module.HEAPU8.buffer, this.backend.wireframe_pos().data(), this.backend.wireframe_pos().size() * 3)
+            this.wireframe.addAttribute('position', new THREE.BufferAttribute(buffer, 3))
         }
-        this.wireframe.removeAttribute('color');
+        this.wireframe.removeAttribute('color')
         if (this.backend.wireframe_color().size() != 0) {
-            const buffer = new Float32Array(Module.HEAPU8.buffer, this.backend.wireframe_color().data(), this.backend.wireframe_color().size() * 3);
-            this.wireframe.addAttribute('color', new THREE.BufferAttribute(buffer, 3));
+            const buffer = new Float32Array(Module.HEAPU8.buffer, this.backend.wireframe_color().data(), this.backend.wireframe_color().size() * 3)
+            this.wireframe.addAttribute('color', new THREE.BufferAttribute(buffer, 3))
         }
     },
 })
@@ -66,17 +66,17 @@ Object.assign(HexaLab.BufferGeometry.prototype, {
 // --------------------------------------------------------------------------------
 
 HexaLab.Filter = function (filter_backend, name) {
-    this.backend = filter_backend;
+    this.backend = filter_backend
     this.name = name;
     this.scene = {
         objects: [],
         add: function (obj) {
-            this.objects.push(obj);
+            this.objects.push(obj)
         },
         remove: function (obj) {
-            var i = this.objects.indexOf(obj);
+            var i = this.objects.indexOf(obj)
             if (i != -1) {
-                this.objects.splice(i, 1);
+                this.objects.splice(i, 1)
             }
         }
     };
@@ -86,15 +86,15 @@ Object.assign(HexaLab.Filter.prototype, {
     // Implementation Api
 
     on_mesh_change: function (mesh) {   // cpp MeshStats data structure
-        console.warn('Function "on_mesh_change" not implemented for filter ' + this.name + '.');
+        console.warn('Function "on_mesh_change" not implemented for filter ' + this.name + '.')
     },
 
     set_settings: function (settings) { // whatever was read from the settings json
-        console.warn('Function "set_settings" not implemented for filter ' + this.name + '.');
+        console.warn('Function "set_settings" not implemented for filter ' + this.name + '.')
     },
 
     get_settings: function () {         // whatever the filter wants to write to the settings json
-        console.warn('Function "get_settings" not implemented for filter ' + this.name + '.');
+        console.warn('Function "get_settings" not implemented for filter ' + this.name + '.')
     }
 });
 
@@ -108,7 +108,7 @@ HexaLab.Viewer = function (canvas_width, canvas_height) {
         ao: 'object space',
         aa: 'msaa',
         background: 0xffffff,
-    };
+    }
 
     this.width = canvas_width
     this.height = canvas_height
@@ -250,9 +250,9 @@ HexaLab.Viewer = function (canvas_width, canvas_height) {
     */
     var num_samples = 16
     var kernel = new Float32Array(num_samples * 3)
-    var n = new THREE.Vector3(0, 0, 1);
+    var n = new THREE.Vector3(0, 0, 1)
     for (var i = 0; i < num_samples * 3; i += 3) {
-        var v;
+        var v
         do {
             v = new THREE.Vector3(
                 Math.random() * 2.0 - 1.0,
@@ -266,17 +266,17 @@ HexaLab.Viewer = function (canvas_width, canvas_height) {
         kernel[i + 1] = v.y * scale
         kernel[i + 2] = v.z * scale
     }
-    var noise_size = 4;
-    var noise = new Float32Array(noise_size * noise_size * 3);
+    var noise_size = 4
+    var noise = new Float32Array(noise_size * noise_size * 3)
     for (var i = 0; i < noise_size * noise_size * 3; i += 3) {
         var v = new THREE.Vector3(
             Math.random() * 2.0 - 1.0,
             Math.random() * 2.0 - 1.0,
             0
-        ).normalize();
-        noise[i + 0] = v.x;
-        noise[i + 1] = v.y;
-        noise[i + 2] = v.z;
+        ).normalize()
+        noise[i + 0] = v.x
+        noise[i + 1] = v.y
+        noise[i + 2] = v.z
     }
     var noise_tex = new THREE.DataTexture(noise, noise_size, noise_size, THREE.RGBFormat, THREE.FloatType,
         THREE.UVMapping, THREE.RepeatWrapping, THREE.RepeatWrapping, THREE.NearestFilter, THREE.NearestFilter)
@@ -301,8 +301,8 @@ HexaLab.Viewer = function (canvas_width, canvas_height) {
     }
     // TODO remove?
     //this.normal_pass.target.texture.generateMipmaps = false;
-    this.normal_pass.target.depthTexture = new THREE.DepthTexture();
-    this.normal_pass.target.depthTexture.type = THREE.UnsignedShortType;
+    this.normal_pass.target.depthTexture = new THREE.DepthTexture()
+    this.normal_pass.target.depthTexture.type = THREE.UnsignedShortType
 
     this.depth_pass = {
         material: new THREE.MeshDepthMaterial({
@@ -430,7 +430,7 @@ Object.assign(HexaLab.Viewer.prototype, {
             antialias: this.settings.aa == 'msaa',
             preserveDrawingBuffer: true,    // disable hidden/automatic clear of the rendertarget
             alpha: true,                    // to have an alpha on the rendertarget? (needed for setClearAlpha to work)
-        });
+        })
         this.renderer.context.getExtension("EXT_frag_depth")
         this.renderer.setSize(this.width, this.height)
         this.renderer.autoClear = false
@@ -857,7 +857,7 @@ Object.assign(HexaLab.Viewer.prototype, {
             this.buffers.update()
             // this.models.boundary_creases.update()
             // this.models.boundary_singularity.update()
-            this.delayed_osao_reset(400)
+            this.delayed_osao_reset(0)
         } else {
             if (this.dirty_osao) {
                 this.reset_osao()
