@@ -954,7 +954,10 @@ Object.assign(HexaLab.Viewer.prototype, {
                 const first_light = this.ao_pass.views[0].position.clone().normalize()
                 this.ao_pass.progress.sum += Math.max(0, first_light.dot(light))
                 // this.ao_pass.progress.sum += Math.max(0, new THREE.Vector3(0, 1, 0).dot(light))
-                if (this.ao_pass.progress.view_i == 128 || 
+                if (this.ao_pass.progress.view_i == 3   || 
+                    this.ao_pass.progress.view_i == 10  || 
+                    this.ao_pass.progress.view_i == 64  || 
+                    this.ao_pass.progress.view_i == 128 || 
                     this.ao_pass.progress.view_i == 512 || 
                     this.ao_pass.progress.view_i == this.ao_pass.samples) {
                     // if (this.ao_pass.view_i ==   1 || 

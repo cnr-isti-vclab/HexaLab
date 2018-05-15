@@ -43,7 +43,7 @@ namespace QualityMeasureFun {
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-float matrix_norm(Eigen::Matrix3Xf A, double to_the_power_of)
+inline float matrix_norm(Eigen::Matrix3Xf A, double to_the_power_of)
 {
     return pow(A.col(0).norm(), to_the_power_of) +
            pow(A.col(1).norm(), to_the_power_of) +
