@@ -43,10 +43,11 @@ namespace HexaLab {
                 HL_LOG("[Loader] Reading %d vertices...\n", vertices_count);
                 vertices.reserve(vertices_count);
                 for (int i = 0; i < vertices_count; ++i) {
-                    Vector3f v;
+                    Vector3d v;
                     float x;
                     HL_ASSERT_LOG(stream >> v.x() >> v.y() >> v.z() >> x, "ERROR: malformed mesh file. Unexpected vertex data format at vert %i.\n",i);
-                    vertices.push_back(v);
+                    
+                    vertices.push_back(v.cast<float>());
                 }
             // Quad indices
             } else if (header.compare("Quadrilaterals")==0 || header.compare("Quads") == 0) {
@@ -85,7 +86,18 @@ namespace HexaLab {
         // Make sure at least vertex and hexa index data was read
         HL_ASSERT_LOG(vertices.size() != 0, "ERROR: mesh does not contain any vertex!\n");
         HL_ASSERT_LOG(indices.size()  != 0, "ERROR: mesh does not contain any index!\n");
-
+        // Make a fast check that all the index are in range
+        vector<int> usedVert(vertices.size(),0);
+        for(size_t i = 0; i< indices.size();++i) {
+            HL_ASSERT_LOG((indices[i]>=0 && indices[i]<vertices.size()),"ERROR: hex %i has index out of range with val: %i\n",i/8,indices[i]);
+            ++usedVert[indices[i]];
+        }
+        // And yell a warning for unreferenced vertices...
+        int unrefCnt=0;
+        for(size_t i = 0; i< vertices.size();++i){
+          if(usedVert[i]==0) unrefCnt++;
+        }
+        if(unrefCnt>0) HL_LOG("WARNING: There are %i unref vertices\n",unrefCnt);          
         return true;
     }
 
