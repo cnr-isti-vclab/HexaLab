@@ -45,14 +45,9 @@ namespace QualityMeasureFun {
 
 float matrix_norm(Eigen::Matrix3Xf A, double to_the_power_of)
 {
-    Vector3f c0,c1,c2;
-    c0[0] = A(0,0);  c1[0] = A(0,1);  c2[0] = A(0,2);
-    c0[0] = A(1,0);  c1[0] = A(1,1);  c2[0] = A(1,2);
-    c0[0] = A(2,0);  c1[0] = A(2,1);  c2[0] = A(2,2);
-
-    return pow(c0.norm(),to_the_power_of) +
-           pow(c1.norm(),to_the_power_of) +
-           pow(c2.norm(),to_the_power_of);
+    return pow(A.col(0).norm(), to_the_power_of) +
+           pow(A.col(1).norm(), to_the_power_of) +
+           pow(A.col(2).norm(), to_the_power_of);
 }
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
