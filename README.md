@@ -6,7 +6,7 @@ Copyright 2017
 [Visual Computing Lab](http://vcg.isti.cnr.it)
 [ISTI](http://www.isti.cnr.it) - [CNR](http://www.cnr.it)
 
-Live view on [www.hexalab.it](http://www.hexalab.it)
+Live view on [www.hexalab.net](http://www.hexalab.net)
 
 The system aims to offer a simple tool to view, inspect and check hexahedral models in the popular `.mesh` format directly in the browser. HexaLab offers interactive clipping planes, filtering and coloring by hex quality, histograms, singularity detections and visualization and screen space ambient occlusion for enhanced perception of shapes. 
 
