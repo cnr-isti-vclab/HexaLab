@@ -624,32 +624,10 @@ Object.assign(HexaLab.Viewer.prototype, {
         if (cached) {
             const progress = this.ao_pass.progress.view_i / this.ao_pass.samples * 100
             Module.print("[AO] Cached at " + progress.toFixed(0) + "%")
-            this.apply_ao()
+            this.update_displayed_osao()
         } else {
             Module.print("[AO] Starting...")
         }
-    },
-
-    apply_ao: function () {
-        if (this.ao_pass.progress.readback_i != this.ao_pass.progress.view_i) {
-            this.renderer.readRenderTargetPixels(this.ao_pass.progress.target, 0, 0,
-                this.ao_pass.progress.target.width, this.ao_pass.progress.target.height, 
-                this.ao_pass.progress.result)
-            this.ao_pass.progress.readback_i = this.ao_pass.progress.view_i
-        }
-        const gpu_data  = this.ao_pass.progress.result
-        const scale     = this.ao_pass.progress.sum
-        const color     = this.ao_pass.original_color
-        let new_color   = new Float32Array(color.count * 3)
-
-        for (var i = 0; i < color.count * 3; ++i) {
-            new_color[i * 3 + 0] = color.array[i * 3 + 0] * (gpu_data[i * 4 + 0] - 1) / scale
-            new_color[i * 3 + 1] = color.array[i * 3 + 1] * (gpu_data[i * 4 + 1] - 1) / scale
-            new_color[i * 3 + 2] = color.array[i * 3 + 2] * (gpu_data[i * 4 + 2] - 1) / scale
-        }
-        
-        this.buffers.visible.surface.removeAttribute('color')
-        this.buffers.visible.surface.addAttribute('color', new THREE.BufferAttribute(new_color, 3))
     },
 
     delayed_osao_reset: function (delay) {
@@ -834,25 +812,179 @@ Object.assign(HexaLab.Viewer.prototype, {
 
     on_surface_color_change: function () {
         this.ao_pass.original_color = this.buffers.visible.surface.attributes.color
-        this.apply_ao()
+        this.update_displayed_osao()
     },
 
-    render: function () {
-        // -- utility --
-        const self = this
-        function clear_scene () {
-            while (self.scene.children.length > 0) {
-                self.scene.remove(self.scene.children[0])
-            }
+    clear_scene: function () {
+        while (this.scene.children.length > 0) {
+            this.scene.remove(this.scene.children[0])
         }
-        function clear_rt () {
-            self.renderer.setRenderTarget()
-            self.renderer.clear()
+        this.scene.overrideMaterial = null
+        this.scene.position.set(0, 0, 0)
+    },
+
+    clear_canvas: function () {
+        this.renderer.setRenderTarget()
+        this.renderer.clear()
+    },
+
+    draw_occluded: function () {
+        // mesh
+        this.clear_scene()
+        this.scene.add(this.renderables.visible.surface)
+        this.scene.position.set(this.mesh_offset.x, this.mesh_offset.y, this.mesh_offset.z)
+
+        // draw
+        this.renderer.render(this.scene, this.scene_camera)
+    },
+
+    prepare_ssao: function () {
+        // mesh view norm/depth
+        this.clear_scene()
+        this.scene.add(this.renderables.visible.surface)
+        this.scene.position.set(this.mesh_offset.x, this.mesh_offset.y, this.mesh_offset.z)
+
+        // bind material, draw
+        this.scene.overrideMaterial = this.depth_pass.material
+        this.renderer.render(this.scene, this.scene_camera, this.depth_pass.target, true)
+        
+        // bind material, draw
+        this.scene.overrideMaterial = this.normal_pass.material
+        this.renderer.render(this.scene, this.scene_camera, this.normal_pass.target, true)
+    },
+
+    compute_ssao: function () {
+        // quad
+        this.clear_scene()
+        this.scene.add(this.fullscreen_quad)
+        this.scene.position.set(0, 0, 0)
+
+        // update uniforms, bind material
+        this.ssao_pass.material.uniforms.uProj    = { value: this.scene_camera.projectionMatrix }
+        this.ssao_pass.material.uniforms.uInvProj = { value: new THREE.Matrix4().getInverse(this.scene_camera.projectionMatrix) }
+        this.blur_pass.material.uniforms.uInvProj = { value: new THREE.Matrix4().getInverse(this.scene_camera.projectionMatrix) }
+        this.fullscreen_quad.material             = this.ssao_pass.material
+        
+        // draw
+        this.renderer.render(this.scene, this.fullscreen_camera, this.ssao_pass.target, true)
+    },
+
+    blend_in_ssao: function () {
+        // quad
+        this.clear_scene()
+        this.scene.add(this.fullscreen_quad)
+        this.scene.position.set(0, 0, 0)
+
+        this.fullscreen_quad.material = this.blur_pass.material
+        this.renderer.render(this.scene, this.fullscreen_camera)
+    },
+
+    prepare_osao: function () {
+        // depth (view pos) pass
+        // TODO share this between SSAO and OSAO
+        this.clear_scene()
+        this.scene.add(this.renderables.visible.surface)
+        this.scene.position.set(this.mesh_offset.x, this.mesh_offset.y, this.mesh_offset.z)
+
+        // clear target to max depth
+        const prev_clear_color = this.renderer.getClearColor().clone()
+        const prev_clear_alpha = this.renderer.getClearAlpha()
+        this.renderer.setClearColor(new THREE.Color(0, 0, -100000), 1.0)
+        this.renderer.clearTarget(this.viewpos_pass.target, true, true, true)
+        this.renderer.setClearColor(prev_clear_color, prev_clear_alpha)
+
+        // bind material, fetch camera, draw
+        this.scene.overrideMaterial = this.viewpos_pass.material
+        const light_cam             = this.ao_pass.views[this.ao_pass.progress.view_i]
+        this.renderer.render(this.scene, light_cam, this.viewpos_pass.target, false)
+    },
+
+    compute_osao_step: function () {
+        // quad
+        this.clear_scene()
+        this.scene.add(this.fullscreen_quad)
+        this.scene.position.set(0, 0, 0)
+        
+        // fetch cam
+        const light_cam = this.ao_pass.views[this.ao_pass.progress.view_i]
+        
+        // update uniforms, bind material
+        this.ao_pass.material.uniforms.uView.value      = light_cam.matrixWorldInverse
+        this.ao_pass.material.uniforms.uCamPos.value    = light_cam.position
+        this.ao_pass.material.uniforms.uProj.value      = light_cam.projectionMatrix
+        this.ao_pass.material.uniforms.tDepth           = { value: this.viewpos_pass.target.texture }
+        this.ao_pass.material.uniforms.uInvProj         =  { value: new THREE.Matrix4().getInverse(light_cam.projectionMatrix) }
+        this.ao_pass.material.uniforms.uModel.value     = new THREE.Matrix4().makeTranslation(
+            this.mesh_offset.x, 
+            this.mesh_offset.y, 
+            this.mesh_offset.z
+        )
+        this.fullscreen_quad.material = this.ao_pass.material
+
+        // draw
+        this.renderer.render(this.scene, this.fullscreen_camera, this.ao_pass.progress.target, this.ao_pass.progress.view_i == 0)
+
+        // progress
+        this.ao_pass.progress.view_i += 1
+
+        const light = new THREE.Vector3().add(light_cam.position).normalize()
+        const first_light = this.ao_pass.views[0].position.clone().normalize()
+        this.ao_pass.progress.sum += Math.max(0, first_light.dot(light))
+    },
+
+    update_displayed_osao: function () {
+        if (this.ao_pass.progress.readback_i != this.ao_pass.progress.view_i) {
+            this.renderer.readRenderTargetPixels(this.ao_pass.progress.target, 0, 0,
+                this.ao_pass.progress.target.width, this.ao_pass.progress.target.height, 
+                this.ao_pass.progress.result)
+            this.ao_pass.progress.readback_i = this.ao_pass.progress.view_i
         }
+        const gpu_data  = this.ao_pass.progress.result
+        const scale     = this.ao_pass.progress.sum
+        const color     = this.ao_pass.original_color
+        let new_color   = new Float32Array(color.count * 3)
 
-        if (!this.mesh) return
+        for (var i = 0; i < color.count * 3; ++i) {
+            new_color[i * 3 + 0] = color.array[i * 3 + 0] * (gpu_data[i * 4 + 0] - 1) / scale
+            new_color[i * 3 + 1] = color.array[i * 3 + 1] * (gpu_data[i * 4 + 1] - 1) / scale
+            new_color[i * 3 + 2] = color.array[i * 3 + 2] * (gpu_data[i * 4 + 2] - 1) / scale
+        }
+        
+        this.buffers.visible.surface.removeAttribute('color')
+        this.buffers.visible.surface.addAttribute('color', new THREE.BufferAttribute(new_color, 3))
+    },
 
-        // Update buffers
+    draw_non_occluded: function() {
+        // wireframe, silhouette, singularity
+        this.clear_scene()
+        this.scene.add(this.meshes)
+        this.scene_light.position.set(this.scene_camera.position.x - this.scene.position.x, 
+            this.scene_camera.position.y - this.scene.position.y, 
+            this.scene_camera.position.z - this.scene.position.z)
+        this.scene.add(this.scene_light)
+        this.scene.add(this.renderables.visible.wireframe)
+        this.scene.add(this.renderables.filtered.surface)
+        this.scene.add(this.renderables.filtered.wireframe)
+        this.scene.add(this.renderables.singularity.surface)
+        this.scene.add(this.renderables.singularity.wireframe)
+        this.scene.position.set(this.mesh_offset.x, this.mesh_offset.y, this.mesh_offset.z)
+        
+        // draw
+        this.renderer.render(this.scene, this.scene_camera)
+    },
+
+    draw_hud: function () {
+        // axis gizmo
+        this.clear_scene()
+        this.scene.add(this.gizmo)
+        this.renderer.setViewport(this.width - 110, 10, 100, 100)
+        this.hud_camera.setRotationFromMatrix(this.scene_camera.matrixWorld)
+        this.renderer.render(this.scene, this.hud_camera)
+        this.scene.remove(this.gizmo)
+        this.renderer.setViewport(0, 0, this.width, this.height)
+    },
+
+    update_buffers: function () {
         if (this.dirty_geometry) {
             this.buffers.update()
             // this.models.boundary_creases.update()
@@ -870,136 +1002,32 @@ Object.assign(HexaLab.Viewer.prototype, {
         this.dirty_geometry = false
         this.dirty_color    = false
         this.dirty_osao     = false
+    },
 
-        // -- main render sequence --
+    render: function () {
+        // -- utility --
+        if (!this.mesh) return
 
-        // render visible surface
-        clear_rt()
-        clear_scene()
-        this.scene.add(this.renderables.visible.surface)
-        // The whole scene is translated so that the center of the mesh lies on the origin.
-        // As long as the camera is not added to the scene, this offset does not affect the camera.
-        this.scene.position.set(this.mesh_offset.x, this.mesh_offset.y, this.mesh_offset.z)
-        // this.scene_light.position.set(this.scene_camera.position.x - this.scene.position.x, 
-        //     this.scene_camera.position.y - this.scene.position.y, 
-        //     this.scene_camera.position.z - this.scene.position.z)
-        // this.scene.add(this.scene_light)
-        this.renderer.render(this.scene, this.scene_camera)
+        this.update_buffers()
 
-        // AO
+        this.clear_canvas()
+
+        this.draw_occluded()
+
         if (this.settings.ao == 'screen space') {
-            // view norm/depth prepass
-            this.scene.overrideMaterial = this.depth_pass.material
-            this.renderer.render(this.scene, this.scene_camera, this.depth_pass.target, true)
-            this.scene.overrideMaterial = this.normal_pass.material
-            this.renderer.render(this.scene, this.scene_camera, this.normal_pass.target, true)
-            this.scene.overrideMaterial = null
-
-            clear_scene()
-
-            // ssao
-            this.ssao_pass.material.uniforms.uProj    = { value: this.scene_camera.projectionMatrix }
-            this.ssao_pass.material.uniforms.uInvProj = { value: new THREE.Matrix4().getInverse(this.scene_camera.projectionMatrix) }
-            this.blur_pass.material.uniforms.uInvProj = { value: new THREE.Matrix4().getInverse(this.scene_camera.projectionMatrix) }
-            this.scene.add(this.fullscreen_quad)
-            this.scene.position.set(0, 0, 0)
-
-            this.fullscreen_quad.material = this.ssao_pass.material
-            this.renderer.render(this.scene, this.fullscreen_camera, this.ssao_pass.target, true)
-            this.fullscreen_quad.material = this.blur_pass.material
-            this.renderer.render(this.scene, this.fullscreen_camera)
-
+            this.prepare_ssao()
+            this.compute_ssao()
+            this.blend_in_ssao()
         } else if (this.settings.ao == 'object space') {
-
             if (this.ao_pass.progress.view_i < this.ao_pass.views.length && !this.ao_pass.paused) {
-                // create camera
-                const light_cam = this.ao_pass.views[this.ao_pass.progress.view_i]
-
-                // depth (view pos) pass
-                const prev_clear_color = this.renderer.getClearColor().clone()
-                const prev_clear_alpha = this.renderer.getClearAlpha()
-                this.renderer.setClearColor(new THREE.Color(0, 0, -100000), 1.0)
-                this.renderer.clearTarget(this.viewpos_pass.target, true, true, true)     // TODO this is not working ?
-                this.renderer.setClearColor(prev_clear_color, prev_clear_alpha)
-
-                this.scene.overrideMaterial = this.viewpos_pass.material
-                this.renderer.render(this.scene, light_cam, this.viewpos_pass.target, false)
-                this.scene.overrideMaterial = null
-                clear_scene()
-                // Module.print("[AO] ShadowMap done!")
-
-                // ao accumulation pass
-                this.fullscreen_quad.material = this.ao_pass.material
-                this.ao_pass.material.uniforms.uModel.value = new THREE.Matrix4().makeTranslation(
-                    this.mesh_offset.x, 
-                    this.mesh_offset.y, 
-                    this.mesh_offset.z
-                )
-                // this.ao_pass.material.uniforms.uModel.value = this.mesh_xform
-                this.ao_pass.material.uniforms.uView.value = light_cam.matrixWorldInverse
-                this.ao_pass.material.uniforms.uCamPos.value = light_cam.position
-                this.ao_pass.material.uniforms.uProj.value = light_cam.projectionMatrix
-                this.ao_pass.material.uniforms.tDepth = { value: this.viewpos_pass.target.texture }
-                this.ao_pass.material.uniforms.uInvProj =  { value: new THREE.Matrix4().getInverse(light_cam.projectionMatrix) }
-
-                this.scene.add(this.fullscreen_quad)
-                this.scene.position.set(0, 0, 0)
-                this.fullscreen_quad.material = this.ao_pass.material
-                this.renderer.render(this.scene, this.fullscreen_camera, this.ao_pass.progress.target, this.ao_pass.progress.view_i == 0)
-                this.fullscreen_quad.material = null
-
-                this.ao_pass.progress.view_i += 1
-
-                const light = new THREE.Vector3().add(light_cam.position).normalize()
-                const first_light = this.ao_pass.views[0].position.clone().normalize()
-                this.ao_pass.progress.sum += Math.max(0, first_light.dot(light))
-                // this.ao_pass.progress.sum += Math.max(0, new THREE.Vector3(0, 1, 0).dot(light))
-                if (this.ao_pass.progress.view_i == 3   || 
-                    this.ao_pass.progress.view_i == 10  || 
-                    this.ao_pass.progress.view_i == 64  || 
-                    this.ao_pass.progress.view_i == 128 || 
-                    this.ao_pass.progress.view_i == 512 || 
-                    this.ao_pass.progress.view_i == this.ao_pass.samples) {
-                    // if (this.ao_pass.view_i ==   1 || 
-                    //     this.ao_pass.view_i ==  32 || 
-                    //     this.ao_pass.view_i == 128 || 
-                    //     this.ao_pass.view_i == 512 || 
-                    //     this.ao_pass.view_i == this.ao_pass.samples) {
-                        const progress = this.ao_pass.progress.view_i / this.ao_pass.samples * 100
-                        const postfix = progress == 100 ? "" : "..."
-                        Module.print("[AO] " + progress.toFixed(0) + "%" + postfix)
-                    // }
-                    this.apply_ao()
-                }
+                this.prepare_osao()
+                this.compute_osao_step()                
+                this.update_displayed_osao()
             }
         }
 
-        clear_scene()
-
-        // render every else geometry
-        this.scene.add(this.meshes)
-        this.scene_light.position.set(this.scene_camera.position.x - this.scene.position.x, 
-            this.scene_camera.position.y - this.scene.position.y, 
-            this.scene_camera.position.z - this.scene.position.z)
-        this.scene.add(this.scene_light)
-        this.scene.add(this.renderables.visible.wireframe)
-        this.scene.add(this.renderables.filtered.surface)
-        this.scene.add(this.renderables.filtered.wireframe)
-        this.scene.add(this.renderables.singularity.surface)
-        this.scene.add(this.renderables.singularity.wireframe)
-        this.scene.position.set(this.mesh_offset.x, this.mesh_offset.y, this.mesh_offset.z)
-        this.renderer.render(this.scene, this.scene_camera)
-        this.scene.position.set(0, 0, 0)
-        clear_scene()
-
-        // finally render the gizmo hud
-        this.scene.add(this.gizmo)
-        this.renderer.setViewport(this.width - 150, 10, 100, 100)
-        this.hud_camera.setRotationFromMatrix(this.scene_camera.matrixWorld)
-        this.renderer.render(this.scene, this.hud_camera)
-        this.scene.remove(this.gizmo)
-        this.renderer.setViewport(0, 0, this.width, this.height)
-        clear_scene()
+        this.draw_non_occluded()        
+        this.draw_hud()
     }
 })
 
