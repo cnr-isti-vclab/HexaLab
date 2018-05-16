@@ -1,6 +1,6 @@
 # HexaLab
 A online hexahedral mesh viewer.
-Developed by [Matteo Bracci](https://github.com/c4stan) as part of his Bachelor Thesis in Computer Science, under the supervision of [Paolo Cignoni](http://vcg.isti.cnr.it/~cignoni) and [Nico Pietroni](http://vcg.isti.cnr.it/~pietroni).
+Developed by [Matteo Bracci](https://github.com/c4stan) as part of his Bachelor Thesis in Computer Science, under the supervision of [Paolo Cignoni](http://vcg.isti.cnr.it/~cignoni) and [Nico Pietroni](http://vcg.isti.cnr.it/~pietroni) and with the help of [Marco Tarini](http://vcg.isti.cnr.it/~tarini/) e [Marco Livesu](http://pers.ge.imati.cnr.it/livesu/).
 
 Copyright 2017 
 [Visual Computing Lab](http://vcg.isti.cnr.it)
