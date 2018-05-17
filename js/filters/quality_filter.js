@@ -110,25 +110,25 @@ HexaLab.QualityFilter.prototype = Object.assign(Object.create(HexaLab.Filter.pro
     enable: function (enabled) {
         this.backend.enabled = enabled
         this.on_enabled_set(enabled)
-        HexaLab.app.queue_geometry_update()
+        HexaLab.app.queue_buffers_update()
     },
 
     set_quality_threshold_min: function (threshold) {
         this.backend.quality_threshold_min = threshold
         this.on_quality_threshold_min_set(threshold)
-        HexaLab.app.queue_geometry_update()
+        HexaLab.app.queue_buffers_update()
     },
 
     set_quality_threshold_max: function (threshold) {
         this.backend.quality_threshold_max = threshold
         this.on_quality_threshold_max_set(threshold)
-        HexaLab.app.queue_geometry_update()
+        HexaLab.app.queue_buffers_update()
     },
 
     set_operator: function (op) {
         this.op = op
         this.on_operator_set(op)
-        HexaLab.app.queue_geometry_update()
+        HexaLab.app.queue_buffers_update()
     },
 });
 

@@ -5,6 +5,8 @@
  * @author Luca Antiga 	/ http://lantiga.github.io
  */
 
+HexaLab.controls = {}
+
 THREE.TrackballControls = function ( object, domElement ) {
 
 	var _this = this;
@@ -394,6 +396,10 @@ THREE.TrackballControls = function ( object, domElement ) {
 
 		if ( _this.enabled === false ) return;
 
+		if (HexaLab.controls.on_mouse_down) {
+			HexaLab.controls.on_mouse_down()
+		}
+
 		event.preventDefault();
 		event.stopPropagation();
 
@@ -431,6 +437,10 @@ THREE.TrackballControls = function ( object, domElement ) {
 
 		if ( _this.enabled === false ) return;
 
+		if (HexaLab.controls.on_mouse_move) {
+			HexaLab.controls.on_mouse_move()
+		}
+
 		event.preventDefault();
 		event.stopPropagation();
 
@@ -455,6 +465,10 @@ THREE.TrackballControls = function ( object, domElement ) {
 
 		if ( _this.enabled === false ) return;
 
+		if (HexaLab.controls.on_mouse_up) {
+			HexaLab.controls.on_mouse_up()
+		}
+
 		event.preventDefault();
 		event.stopPropagation();
 
@@ -469,6 +483,10 @@ THREE.TrackballControls = function ( object, domElement ) {
 	function mousewheel( event ) {
 
 		if ( _this.enabled === false ) return;
+
+		if (HexaLab.controls.on_mouse_wheel) {
+			HexaLab.controls.on_mouse_wheel()
+		}
 
 		event.preventDefault();
 		event.stopPropagation();

@@ -59,7 +59,7 @@ THREE.SSAOBlur = {
 		   	"for (int x = -2; x < 2; ++x) {",
 	    		"for (int y = -2; y < 2; ++y) {",
 		         	"vec2 offset = vec2(float(x), float(y)) * texelSize;",
-	         		"float w = 1.0;//weight(viewZ, norm, vUv + offset);",
+	         		"float w = weight(viewZ, norm, vUv + offset);",
 	         		"result += texture2D(tSSAO, vUv + offset).r * w;",
 	         		"weightSum += w;",
 	      		"}",

@@ -475,7 +475,7 @@ $.ajax({
 })
 
 HexaLab.UI.setup_dataset_content = function () {
-    var v = HexaLab.UI.mesh.source[0].options[HexaLab.UI.mesh.source[0].selectedIndex].value
+    var v = HexaLab.UI.mesh.selected_source
     var i = parseInt(v)
     var source = HexaLab.UI.datasets_index.sources[i]
 
@@ -546,6 +546,7 @@ HexaLab.UI.mesh.source.on("change", function () {
     HexaLab.UI.mesh.source.select_click_flag = 1
 
     var v = this.options[this.selectedIndex].value
+    HexaLab.UI.mesh.selected_source = v
     if (v == "-1") {
         // HexaLab.UI.mesh.source.select_focus_file_flag = 1
         HexaLab.UI.clear_mesh_info()
@@ -569,7 +570,7 @@ HexaLab.UI.mesh.dataset_content.on("change", function () {
     HexaLab.UI.mesh.dataset_content.select_click_flag = 1
     var v = this.options[this.selectedIndex].value
     var i = parseInt(v)
-    var j = parseInt(HexaLab.UI.mesh.source[0].options[HexaLab.UI.mesh.source[0].selectedIndex].value)
+    var j = parseInt(HexaLab.UI.mesh.selected_source)
     var source = HexaLab.UI.datasets_index.sources[j]
     var mesh = source.data[i]
 

@@ -451,23 +451,15 @@ Object.assign(HexaLab.Viewer.prototype, {
     get_ao_mode:            function () { return this.settings.ao },
     get_aa_mode:            function () { return this.settings.aa },
 
-    on_geometry_buffers_update: function () { this.dirty_geometry = true; HexaLab.app.backend.flag_models_as_dirty() },
-    on_color_buffers_update:    function () { this.dirty_color = true },
+    on_buffers_change:      function () { this.dirty_buffers = true; HexaLab.app.backend.flag_models_as_dirty() },
+    on_scene_change:        function () { this.dirty_canvas = true },
 
     add_mesh:               function (mesh) { this.meshes.add(mesh) },
     remove_mesh:            function (mesh) { this.meshes.remove(mesh) },
 
-    set_ao_mode: function (value) {
-        if (this.settings.ao == 'object space' && value != 'object space') {
-            Module.print("[AO] Disabled")
-            this.buffers.visible.surface.removeAttribute('color')
-            this.buffers.visible.surface.addAttribute('color', this.ao_pass.original_color)
-        } 
-        this.settings.ao = value
-        if (value == 'object space') {
-            this.dirty_osao = true
-        }
-    },
+    show_axes:              function (do_show) { this.do_show_axes = do_show },
+
+    set_ao_mode:            function (value) { this.settings.ao = value; this.update_osao_buffers(); this.dirty_canvas = true },
 
     reset_osao: function () {
         // determine ao textures size
@@ -621,45 +613,28 @@ Object.assign(HexaLab.Viewer.prototype, {
             cached = false
         }
         this.ao_pass.progress = this.ao_cache[hash]
-        if (cached) {
+        if (cached && this.ao_pass.progress.view_i > 32) {
             const progress = this.ao_pass.progress.view_i / this.ao_pass.samples * 100
             Module.print("[AO] Cached at " + progress.toFixed(0) + "%")
-            this.update_displayed_osao()
+            this.update_osao_buffers()
         } else {
             Module.print("[AO] Starting...")
         }
     },
 
-    delayed_osao_reset: function (delay) {
-        clearTimeout(this.ao_pass.timer)
-        const self = this
-        this.ao_pass.timer = setTimeout(function () {
-            if (self.settings.ao == 'object space') {
-                self.reset_osao()
-            }
-        }, delay)
-        this.ao_pass.paused = true
-    },
+    // delayed_osao_reset: function (delay) {
+    //     clearTimeout(this.ao_pass.timer)
+    //     const self = this
+    //     this.ao_pass.timer = setTimeout(function () {
+    //         if (self.settings.ao == 'object space') {
+    //             self.reset_osao()
+    //         }
+    //     }, delay)
+    //     this.ao_pass.paused = true
+    // },
 
-    on_mesh_change: function (mesh) {
-        // flush ao cache
-        this.ao_cache = {}
-
-        this.buffers.update()
-        this.dirty_osao     = true
-        this.dirty_geometry = false
-        this.dirty_color    = false
-
-        const _aabb_center = mesh.get_aabb_center()
-        const aabb_center = new THREE.Vector3(_aabb_center.x(), _aabb_center.y(), _aabb_center.z())
-        //this.renderables_node.position.set(-aabb_center.x, -aabb_center.y, -aabb_center.z)
-        this.mesh_offset = new THREE.Vector3(-aabb_center.x, -aabb_center.y, -aabb_center.z)
-            //new THREE.Matrix4().makeTranslation(-aabb_center.x, -aabb_center.y, -aabb_center.z)
-        //this.scene.position.set(-aabb_center.x, -aabb_center.y, -aabb_center.z)
-        this.mesh = mesh
-
-        // generate ao sampling dirs
-        const aabb_diagonal = mesh.get_aabb_diagonal()
+    generate_osao_povs: function () {
+        const aabb_diagonal = this.mesh.get_aabb_diagonal()
         let views = []
         let cones = []  // 3d objects to indicate position and direction of sample points
         function sample_sphere_surface () {
@@ -700,7 +675,7 @@ Object.assign(HexaLab.Viewer.prototype, {
             // sample unit sphere 
             let dir = samples[i]
             // create light camera
-            const cam_pos = dir.multiplyScalar(mesh.get_aabb_diagonal())
+            const cam_pos = dir.multiplyScalar(this.mesh.get_aabb_diagonal())
             views[i] = new THREE.OrthographicCamera(
                 -aabb_diagonal * 0.5,
                 aabb_diagonal * 0.5,
@@ -720,12 +695,28 @@ Object.assign(HexaLab.Viewer.prototype, {
             // cones[i].position.set(cam_pos.x, cam_pos.y, cam_pos.z)
             // cones[i].lookAt(new THREE.Vector3(0, 0, 0))
         }
+        this.ao_pass.views = views
+        // this.ao_pass.cones = cones
+    },
+
+    on_mesh_change: function (mesh) {
+        // empty ao cache
+        this.ao_cache = {}
+
+        this.buffers.update()
+        this.dirty_buffers = false
+        this.dirty_canvas  = true
+
+        const _aabb_center  = mesh.get_aabb_center()
+        const aabb_center   = new THREE.Vector3(_aabb_center.x(), _aabb_center.y(), _aabb_center.z())
+        this.mesh_offset    = new THREE.Vector3(-aabb_center.x, -aabb_center.y, -aabb_center.z)
+        this.mesh           = mesh
 
         // ao pass
-        this.ao_pass.views = views
-        this.ao_pass.cones = cones
+        this.generate_osao_povs()
         this.ao_pass.material.uniforms.uDepthBias = { value: 0.01 * mesh.get_aabb_diagonal() }
         // this.ao_pass.material.uniforms.uDepthBias = { value: 0.0025 }
+        this.reset_osao()
 
         // ssao pass
         this.ssao_pass.material.uniforms.uRadius.value = 5 * mesh.avg_edge_len;
@@ -812,7 +803,7 @@ Object.assign(HexaLab.Viewer.prototype, {
 
     on_surface_color_change: function () {
         this.ao_pass.original_color = this.buffers.visible.surface.attributes.color
-        this.update_displayed_osao()
+        this.update_osao_buffers()
     },
 
     clear_scene: function () {
@@ -879,7 +870,7 @@ Object.assign(HexaLab.Viewer.prototype, {
         this.renderer.render(this.scene, this.fullscreen_camera)
     },
 
-    prepare_osao: function () {
+    prepare_osao_step: function () {
         // depth (view pos) pass
         // TODO share this between SSAO and OSAO
         this.clear_scene()
@@ -932,28 +923,6 @@ Object.assign(HexaLab.Viewer.prototype, {
         this.ao_pass.progress.sum += Math.max(0, first_light.dot(light))
     },
 
-    update_displayed_osao: function () {
-        if (this.ao_pass.progress.readback_i != this.ao_pass.progress.view_i) {
-            this.renderer.readRenderTargetPixels(this.ao_pass.progress.target, 0, 0,
-                this.ao_pass.progress.target.width, this.ao_pass.progress.target.height, 
-                this.ao_pass.progress.result)
-            this.ao_pass.progress.readback_i = this.ao_pass.progress.view_i
-        }
-        const gpu_data  = this.ao_pass.progress.result
-        const scale     = this.ao_pass.progress.sum
-        const color     = this.ao_pass.original_color
-        let new_color   = new Float32Array(color.count * 3)
-
-        for (var i = 0; i < color.count * 3; ++i) {
-            new_color[i * 3 + 0] = color.array[i * 3 + 0] * (gpu_data[i * 4 + 0] - 1) / scale
-            new_color[i * 3 + 1] = color.array[i * 3 + 1] * (gpu_data[i * 4 + 1] - 1) / scale
-            new_color[i * 3 + 2] = color.array[i * 3 + 2] * (gpu_data[i * 4 + 2] - 1) / scale
-        }
-        
-        this.buffers.visible.surface.removeAttribute('color')
-        this.buffers.visible.surface.addAttribute('color', new THREE.BufferAttribute(new_color, 3))
-    },
-
     draw_non_occluded: function() {
         // wireframe, silhouette, singularity
         this.clear_scene()
@@ -974,61 +943,102 @@ Object.assign(HexaLab.Viewer.prototype, {
     },
 
     draw_hud: function () {
-        // axis gizmo
         this.clear_scene()
-        this.scene.add(this.gizmo)
-        this.renderer.setViewport(this.width - 110, 10, 100, 100)
-        this.hud_camera.setRotationFromMatrix(this.scene_camera.matrixWorld)
-        this.renderer.render(this.scene, this.hud_camera)
-        this.scene.remove(this.gizmo)
-        this.renderer.setViewport(0, 0, this.width, this.height)
-    },
-
-    update_buffers: function () {
-        if (this.dirty_geometry) {
-            this.buffers.update()
-            // this.models.boundary_creases.update()
-            // this.models.boundary_singularity.update()
-            this.delayed_osao_reset(0)
-        } else {
-            if (this.dirty_osao) {
-                this.reset_osao()
-            }
-            if (this.dirty_color) {
-                this.buffers.update()
-                this.on_surface_color_change()
-            }
+    
+        // axes gizmo        
+        if (this.do_show_axes) {
+            this.scene.add(this.gizmo)
+            this.renderer.setViewport(this.width - 110, 10, 100, 100)
+            this.hud_camera.setRotationFromMatrix(this.scene_camera.matrixWorld)
+            this.renderer.render(this.scene, this.hud_camera)
+            this.scene.remove(this.gizmo)
+            this.renderer.setViewport(0, 0, this.width, this.height)
         }
-        this.dirty_geometry = false
-        this.dirty_color    = false
-        this.dirty_osao     = false
     },
 
-    render: function () {
-        // -- utility --
+    update_geometry_buffers: function () {
+        if (!this.dirty_buffers) return
+
+        this.buffers.update()
+        this.reset_osao()
+
+        this.dirty_canvas  = true
+        this.dirty_buffers = false
+    },
+
+    update_osao_buffers: function () {
         if (!this.mesh) return
 
-        this.update_buffers()
+        if (this.settings.ao == 'object space') {
+            if (this.ao_pass.progress.readback_i != this.ao_pass.progress.view_i) {
+                this.renderer.readRenderTargetPixels(this.ao_pass.progress.target, 0, 0,
+                    this.ao_pass.progress.target.width, this.ao_pass.progress.target.height, 
+                    this.ao_pass.progress.result)
+                this.ao_pass.progress.readback_i = this.ao_pass.progress.view_i
+            }
+            const gpu_data  = this.ao_pass.progress.result
+            const scale     = this.ao_pass.progress.sum
+            const color     = this.ao_pass.original_color
+            let new_color   = new Float32Array(color.count * 3)
+
+            for (var i = 0; i < color.count * 3; ++i) {
+                new_color[i * 3 + 0] = color.array[i * 3 + 0] * (gpu_data[i * 4 + 0] - 1) / scale
+                new_color[i * 3 + 1] = color.array[i * 3 + 1] * (gpu_data[i * 4 + 1] - 1) / scale
+                new_color[i * 3 + 2] = color.array[i * 3 + 2] * (gpu_data[i * 4 + 2] - 1) / scale
+            }
+            
+            this.buffers.visible.surface.removeAttribute('color')
+            this.buffers.visible.surface.addAttribute('color', new THREE.BufferAttribute(new_color, 3))
+        } else {
+            this.buffers.visible.surface.removeAttribute('color')
+            this.buffers.visible.surface.addAttribute('color', this.ao_pass.original_color)
+        }
+    },
+
+    step_osao: function () {
+        if (this.ao_pass.progress.view_i < this.ao_pass.views.length) {
+            this.prepare_osao_step()
+            this.compute_osao_step()   
+        }
+
+         if (
+            this.ao_pass.progress.view_i == 32  ||
+            this.ao_pass.progress.view_i == 64  ||
+            this.ao_pass.progress.view_i == 128 ||
+            this.ao_pass.progress.view_i == 512 ||
+            this.ao_pass.progress.view_i == this.ao_pass.views.length
+        ) {
+            this.update_osao_buffers()
+            this.dirty_canvas = true
+        }
+    },
+
+    update_canvas: function () {
+        if (!this.dirty_canvas) return
 
         this.clear_canvas()
 
         this.draw_occluded()
 
-        if (this.settings.ao == 'screen space') {
+        if (this.settings.ao == 'screen space' || this.settings.ao == 'object space' && this.ao_pass.progress.view_i < 32) {
             this.prepare_ssao()
             this.compute_ssao()
             this.blend_in_ssao()
-        } else if (this.settings.ao == 'object space') {
-            if (this.ao_pass.progress.view_i < this.ao_pass.views.length && !this.ao_pass.paused) {
-                this.prepare_osao()
-                this.compute_osao_step()                
-                this.update_displayed_osao()
-            }
         }
 
         this.draw_non_occluded()        
         this.draw_hud()
-    }
+
+        this.dirty_canvas = false
+    },
+
+    update: function () {
+        if (!this.mesh) return
+
+        this.update_geometry_buffers()
+        this.step_osao()
+        this.update_canvas()
+    },
 })
 
 // --------------------------------------------------------------------------------
@@ -1045,7 +1055,7 @@ Object.assign(HexaLab.Viewer.prototype, {
 */
 
 HexaLab.App = function (dom_element) {
-
+    const self = this
     this.backend = new Module.App()
     HexaLab.app = this
 
@@ -1061,7 +1071,24 @@ HexaLab.App = function (dom_element) {
     }
     this.canvas.container.appendChild(this.canvas.element)
 
+    this.dirty_canvas = true
     this.controls = new THREE.TrackballControls(this.viewer.get_scene_camera(), dom_element)
+    HexaLab.controls.on_mouse_down = function () {
+        self.mouse_is_down = true
+    }
+    HexaLab.controls.on_mouse_move = function () {
+        if (self.mouse_is_down) {
+            self.viewer.show_axes(true)
+            self.queue_canvas_update()
+        }
+    }
+    HexaLab.controls.on_mouse_wheel = function () {
+        self.queue_canvas_update()
+    }
+    HexaLab.controls.on_mouse_up = function () {
+        self.mouse_is_down = false
+        self.viewer.show_axes(false)
+    }
 
     // App
     this.default_app_settings = {
@@ -1123,8 +1150,8 @@ Object.assign(HexaLab.App.prototype, {
     // Wrappers
     camera:     function () { return this.viewer.scene_camera },
     materials:  function () { return this.viewer.materials },
-    queue_geometry_update:  function () { this.viewer.on_geometry_buffers_update() },
-    queue_color_update:     function () { this.viewer.on_color_buffers_update() },
+    queue_buffers_update:   function () { this.viewer.on_buffers_change() },
+    queue_canvas_update:    function () { this.viewer.on_scene_change() },
 
     // Settings
     get_camera_settings: function () {
@@ -1286,12 +1313,12 @@ Object.assign(HexaLab.App.prototype, {
         if      (map == 'Jet')      this.backend.enable_quality_color_mapping(Module.ColorMap.Jet)
         else if (map == 'Parula')   this.backend.enable_quality_color_mapping(Module.ColorMap.Parula)
         else if (map == 'RedBlue') this.backend.enable_quality_color_mapping(Module.ColorMap.RedBlue)
-        this.viewer.on_color_buffers_update()
+        this.queue_buffers_update()
     },
 
     disable_quality_color_mapping: function () {
         this.backend.disable_quality_color_mapping()
-        this.viewer.on_color_buffers_update()
+        this.queue_buffers_update()
     },
 
     set_color_map: function (map) {
@@ -1305,13 +1332,13 @@ Object.assign(HexaLab.App.prototype, {
     set_visible_surface_default_inside_color: function (color) {
         var c = new THREE.Color(color)
         this.backend.set_default_inside_color(c.r, c.g, c.b)
-        this.viewer.on_color_buffers_update()
+        this.queue_buffers_update()
         HexaLab.UI.on_set_visible_surface_default_inside_color(color)
     },
     set_visible_surface_default_outside_color: function (color) {
         var c = new THREE.Color(color)
         this.backend.set_default_outside_color(c.r, c.g, c.b)
-        this.viewer.on_color_buffers_update()
+        this.queue_buffers_update()
         HexaLab.UI.on_set_visible_surface_default_outside_color(color)
     },
 
@@ -1336,7 +1363,7 @@ Object.assign(HexaLab.App.prototype, {
         else if (measure == "Taper")                    this.backend.set_quality_measure(Module.QualityMeasure.Taper)
         else if (measure == "Volume")                   this.backend.set_quality_measure(Module.QualityMeasure.Volume)
         this.quality_measure = measure
-        this.queue_geometry_update()    // TODO update only on real need (needs to query quality filter enabled state)
+        this.queue_buffers_update()    // TODO update only on real need (needs to query quality filter enabled state)
         HexaLab.UI.on_set_quality_measure(measure)
     },
 
@@ -1345,7 +1372,7 @@ Object.assign(HexaLab.App.prototype, {
         else if (mode == 'Cracked')     this.backend.set_geometry_mode(Module.GeometryMode.Cracked)
         else if (mode == 'Smooth')      this.backend.set_geometry_mode(Module.GeometryMode.Smooth)
         this.geometry_mode = mode
-        this.queue_geometry_update()
+        this.queue_buffers_update()
         HexaLab.UI.on_set_geometry_mode(mode)
     },
 
@@ -1409,11 +1436,11 @@ Object.assign(HexaLab.App.prototype, {
         if (this.singularity_mode < 3 && mode >= 3) {
             this.backend.show_boundary_singularity(true)
             this.backend.show_boundary_creases(true)
-            this.queue_geometry_update()
+            this.queue_buffers_update()
         } else if (this.singularity_mode >= 3 && mode < 3) {
             this.backend.show_boundary_singularity(false)
             this.backend.show_boundary_creases(false)
-            this.queue_geometry_update()
+            this.queue_buffers_update()
         }
         this.singularity_mode = mode
         HexaLab.UI.on_set_singularity_mode(mode)
@@ -1485,14 +1512,10 @@ Object.assign(HexaLab.App.prototype, {
         HexaLab.UI.on_import_mesh(path)
     },
 
-    update_camera: function () {
-        this.controls.update()
-    },
-
     // The application main loop. Call this after instancing an App object to start rendering.
     animate: function () {
-        this.update_camera()
-        this.viewer.render()
+        this.controls.update()
+        this.viewer.update()
         // queue next frame
         requestAnimationFrame(this.animate.bind(this))
     }

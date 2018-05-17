@@ -175,9 +175,9 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
     },
 
     on_plane_normal_set: function (normal) {
-        HexaLab.UI.plane_nx.val(normal.x.toFixed(3))
-        HexaLab.UI.plane_ny.val(normal.y.toFixed(3))
-        HexaLab.UI.plane_nz.val(normal.z.toFixed(3))
+        HexaLab.UI.plane_nx.val(normal.x.toFixed(2))
+        HexaLab.UI.plane_ny.val(normal.y.toFixed(2))
+        HexaLab.UI.plane_nz.val(normal.z.toFixed(2))
     },
 
     on_plane_offset_set: function (offset) {
@@ -191,7 +191,7 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
         this.backend.enabled = enabled
         this.update_visibility()
         this.on_enabled_set(enabled)
-        HexaLab.app.queue_geometry_update()
+        HexaLab.app.queue_buffers_update()
     },
 
     set_plane_normal: function (nx, ny, nz) {
@@ -199,7 +199,7 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
         const normal = new THREE.Vector3(nx, ny, nz)
         this.on_plane_normal_set(normal)
         this.update_mesh()
-        HexaLab.app.queue_geometry_update()
+        HexaLab.app.queue_buffers_update()
     },
 
     set_plane_offset: function (offset) {
@@ -207,15 +207,17 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
         this.plane.world_offset = this.backend.get_plane_world_offset()
         this.on_plane_offset_set(offset)
         this.update_mesh()
-        HexaLab.app.queue_geometry_update()
+        HexaLab.app.queue_buffers_update()
     },
 
     set_plane_opacity: function (opacity) {
         this.plane.material.opacity = opacity
+        HexaLab.app.queue_canvas_update()
     },
 
     set_plane_color: function (color) {
         this.plane.material.color.set(color)
+        HexaLab.app.queue_canvas_update()
     },
 
     update_visibility: function () {
@@ -234,6 +236,7 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
             if (this.plane.mesh) this.plane.mesh.visible = false
             if (this.plane.edges) this.plane.edges.visible = false
         }
+        HexaLab.app.queue_canvas_update()
     },
 
     update_mesh: function () {

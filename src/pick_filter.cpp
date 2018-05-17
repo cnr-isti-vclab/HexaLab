@@ -15,12 +15,16 @@ namespace HexaLab {
         for (size_t i = 0; i < this->filtered_hexas.size(); ++i) {
             mesh.mark(mesh.hexas[this->filtered_hexas[i]]);
         }
+        for (size_t i = 0; i < this->filled_hexas.size(); ++i) {
+            mesh.counter_mark(mesh.hexas[this->filled_hexas[i]]);
+        }
     }
 
     void PickFilter::on_mesh_set(Mesh& mesh) {
         this->enabled = HL_PICK_FILTER_DEFAULT_ENABLED;
         this->mesh = &mesh;
         this->filtered_hexas.clear();
+        this->filled_hexas.clear();
     }
 
     Index PickFilter::filter_hexa(Vector3f origin, Vector3f direction) {
@@ -38,8 +42,15 @@ namespace HexaLab {
         }
         if (min_i != SIZE_MAX) {
             HL_LOG("[Pick Filter]: Closest raycast intersection with hexa %d\n", min_i);
-            this->filtered_hexas.push_back(min_i);
-            std::sort(this->filtered_hexas.begin(), this->filtered_hexas.end());
+
+            auto it = std::find(this->filled_hexas.begin(), this->filled_hexas.end(), min_i);
+            if (it != this->filled_hexas.end()) {
+                this->filled_hexas.erase(it);
+            } else {
+                this->filtered_hexas.push_back(min_i);
+                std::sort(this->filtered_hexas.begin(), this->filtered_hexas.end());
+            }
+            
             return min_i;
         } else {
             HL_LOG("[Pick Filter] Miss\n");
@@ -50,6 +61,11 @@ namespace HexaLab {
     void PickFilter::filter_hexa_idx(Index idx) {
         this->filtered_hexas.push_back(idx);
         std::sort(this->filtered_hexas.begin(), this->filtered_hexas.end());
+    }
+
+    void PickFilter::fill_hexa_idx(Index idx) {
+        this->filled_hexas.push_back(idx);
+        std::sort(this->filled_hexas.begin(), this->filled_hexas.end());
     }
 
     Index PickFilter::unfilter_hexa(Vector3f origin, Vector3f direction) {
@@ -66,8 +82,25 @@ namespace HexaLab {
             }
         }
         if (max_i != SIZE_MAX) {
-            HL_LOG("[Pick Filter]: Farthest raycast intersection with hexa %d\n", max_i);
-            this->filtered_hexas.erase(std::find(this->filtered_hexas.begin(), this->filtered_hexas.end(), max_i));
+            HL_LOG("[Pick Filter] Farthest raycast intersection with hexa %zu\n", max_i);
+            
+            HL_LOG("[Pick Filter] Filter list: ");
+            for (size_t i = 0; i < this->filtered_hexas.size(); ++i) {
+                HL_LOG(" %d ", this->filtered_hexas[i]);
+            }
+            HL_LOG("\n");
+
+            auto it = std::find(this->filtered_hexas.begin(), this->filtered_hexas.end(), max_i);
+            if (it != this->filtered_hexas.end()) {
+                size_t idx = it - this->filtered_hexas.begin();
+                HL_LOG("[Pick Filter] Removing %zu\n", idx);
+                this->filtered_hexas.erase(it);
+            } else {
+                HL_LOG("[Pick Filter] Counter marking %zu\n", max_i);
+                this->filled_hexas.push_back(max_i);
+                std::sort(this->filled_hexas.begin(), this->filled_hexas.end());
+            }
+            
             return max_i;
         } else {
             HL_LOG("[Pick Filter] Miss\n");

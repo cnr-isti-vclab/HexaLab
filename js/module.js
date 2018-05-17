@@ -3,6 +3,7 @@
 var g_logger = document.getElementById("logger");
 
 function log(string) {
+    console.log(string)
     if (g_logger) {
         g_logger.value += string + "\n";
         g_logger.scrollTop = g_logger.scrollHeight;
