@@ -7,6 +7,9 @@ HexaLab.UI.pick_enabled        = $('#pick_enabled')
 HexaLab.UI.pick_button         = $('#pick_button')
 HexaLab.UI.fill_button         = $('#fill_button')
 HexaLab.UI.pick_clear_button   = $('#pick_clear_button')
+HexaLab.UI.pick_menu_content   = $('#pick_menu *')
+
+HexaLab.UI.pick_menu_content.prop('disabled', true)
 
 // --------------------------------------------------------------------------------
 // Filter class
@@ -65,6 +68,7 @@ HexaLab.PickFilter.prototype = Object.assign(Object.create(HexaLab.Filter.protot
     on_mesh_change: function (mesh) {
         this.clear()
         this.on_enabled_set(this.backend.enabled)
+        HexaLab.UI.pick_menu_content.prop('disabled', false)
     },
 
     // UI

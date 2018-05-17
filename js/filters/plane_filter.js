@@ -15,6 +15,10 @@ HexaLab.UI.plane_snap_ny        = $('#plane_snap_ny')
 HexaLab.UI.plane_snap_nz        = $('#plane_snap_nz')
 HexaLab.UI.plane_swap           = $('#plane_swap_sign')
 HexaLab.UI.plane_snap_camera    = $('#plane_snap_camera')
+HexaLab.UI.plane_menu_content   = $('#plane_menu *')
+
+HexaLab.UI.plane_menu_content.prop('disabled', true)
+HexaLab.UI.plane_offset_slider.slider('disable')
 
 // --------------------------------------------------------------------------------
 // Filter class
@@ -159,6 +163,9 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
         this.on_plane_offset_set(this.backend.get_plane_offset())
 
         this.update_mesh();
+
+        HexaLab.UI.plane_menu_content.prop('disabled', false)
+        HexaLab.UI.plane_offset_slider.slider('enable')
     },
 
     // misc
@@ -184,7 +191,7 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
 
     on_plane_offset_set: function (offset) {
         HexaLab.UI.plane_offset_slider.slider('value', offset * 1000)
-        HexaLab.UI.plane_offset_number.val(offset)
+        HexaLab.UI.plane_offset_number.val(offset.toFixed(3))
     },
 
     // State

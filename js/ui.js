@@ -130,6 +130,12 @@ HexaLab.UI = {
             this.load_settings.prop("disabled", false)
             this.save_settings.prop("disabled", false)
             this.snapshot.prop("disabled", false)
+            HexaLab.UI.settings.rendering_menu_content.prop('disabled', false)
+            HexaLab.UI.settings.silhouette.slider('enable')    
+            HexaLab.UI.settings.wireframe.slider('enable')
+            HexaLab.UI.settings.singularity_mode.slider('enable')
+            HexaLab.UI.settings.color.default.outside.spectrum('enable')
+            HexaLab.UI.settings.color.default.inside.spectrum('enable')
         },
         on_mesh_import_fail: function () {
             this.reset_camera.prop("disabled", true)
@@ -153,10 +159,11 @@ HexaLab.UI = {
         },
         silhouette:         $('#filtered_slider'),
         wireframe:          $('#wireframe_slider'),
-        occlusion:          $("#show_occlusion"),
         singularity_mode:   $('#singularity_slider'),
+        occlusion:          $("#show_occlusion"),
         geometry_mode:      $('#geometry_mode'),
         ao_mode:            $("#ao_mode"),
+        rendering_menu_content: $('#rendering_menu *'),
     },
     
     // Mesh sources
@@ -1051,3 +1058,10 @@ HexaLab.UI.topbar.snapshot.on('click', function () {
         saveAs(blob, "HLsnapshot.png");
     }, "image/png");
 }).prop("disabled", true);
+
+HexaLab.UI.settings.rendering_menu_content.prop('disabled', true)
+HexaLab.UI.settings.silhouette.slider('disable')    
+HexaLab.UI.settings.wireframe.slider('disable')
+HexaLab.UI.settings.singularity_mode.slider('disable')
+HexaLab.UI.settings.color.default.outside.spectrum('disable')
+HexaLab.UI.settings.color.default.inside.spectrum('disable')
