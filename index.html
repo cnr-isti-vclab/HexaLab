@@ -22,7 +22,6 @@
     <script src="js/external/spectrum.js"></script>
     <script src="js/external/three.js"></script>
     <script src="js/external/plotly.js"></script>
-    <script src="js/external/TrackballControls.js"></script>
     <script src="js/external/FileSaver.js"></script>
     <script src="js/external/Stats.js"></script>
     <script src="js/external/object_hash.js"></script>
@@ -35,31 +34,36 @@
             <div id="sidenav">
                 <div id="menu">
                     <div id="toolbar_wrapper">
-                        <div id="toolbar">
-                            <button id="load_mesh" title="Open File">
-                                <i class="fa fa-folder-open"></i>
-                            </button>
-                            <button id="home" title="Reset Camera">
-                                <i class="fa fa-home"></i>
-                            </button>
-                            <button id="plot" title="Quality Histogram">
-                                <i class="fa fa-bar-chart"></i>
-                            </button>
-                            <button id="load_settings" title="Open settings">
-                                <i class="fa fa-gear"></i>
-                            </button>
-                            <button id="save_settings" title="Save settings">
-                                <i class="fa fa-floppy-o"></i>
-                            </button>
-                            <button id="snapshot" title="Snapshot">
-                                <i class="fa fa-camera"></i>
-                            </button>
-                            <button id="github" title="GitHub">
-                                <i class="fa fa-github"></i>
-                            </button>
-                            <!--button id="about" title="About">
-                                <i class="fa fa-question"></i>
-                            </button-->
+                        <div id="toolbar" style="display:flex;justify-content:space-between;">
+                            <div id="toolbar_title">
+                                <span style="font-weight:bold; font-size:130%;">HexaLab</span>
+                            </div>
+                            <div id="toolbar_buttons">
+                                <button id="load_mesh" title="Open File">
+                                    <i class="fa fa-folder-open"></i>
+                                </button>
+                                <button id="home" title="Reset Camera">
+                                    <i class="fa fa-home"></i>
+                                </button>
+                                <!-- button id="plot" title="Quality Histogram">
+                                    <i class="fa fa-bar-chart"></i>
+                                </button -->
+                                <button id="load_settings" title="Open settings">
+                                    <i class="fa fa-gear"></i>
+                                </button>
+                                <button id="save_settings" title="Save settings">
+                                    <i class="fa fa-floppy-o"></i>
+                                </button>
+                                <button id="snapshot" title="Snapshot">
+                                    <i class="fa fa-camera"></i>
+                                </button>
+                                <button id="github" title="GitHub">
+                                    <i class="fa fa-github"></i>
+                                </button>
+                                <!--button id="about" title="About">
+                                    <i class="fa fa-question"></i>
+                                </button-->
+                            </div>
                         </div>
                     </div>
 
@@ -120,22 +124,14 @@
                                         <input class="normal_value" type="number" id="plane_ny" style="width:30px;">
                                         <input class="normal_value" type="number" id="plane_nz" style="width:30px;">
                                     </div>
-                                </div>
-                            </div>
-                            <div class="menu_row">
-                                <div class="menu_row_label">Offset</div>
-                                <div class="menu_row_input">
                                     <div class="menu_row_input_block">
-                                        <input type="number" id="plane_offset_number">
-                                    </div>
-                                    <div class="menu_row_input_block">
-                                        <button id="plane_snap_nx" title="Align normal vector with the X axis">X</button>
-                                        <button id="plane_snap_ny" title="Align normal vector with the Y axis">Y</button>
-                                        <button id="plane_snap_nz" title="Align normal vector with the Z axis">Z</button>
-                                        <button id="plane_swap_sign" title="Swap clipping side">
+                                        <button id="plane_snap_nx" title="Align normal vector with the X axis">X</button><!-- 
+                                        --><button id="plane_snap_ny" title="Align normal vector with the Y axis">Y</button><!-- 
+                                        --><button id="plane_snap_nz" title="Align normal vector with the Z axis">Z</button><!-- 
+                                        --><button id="plane_swap_sign" title="Swap clipping side">
                                             <i class="fa fa-exchange"></i>
-                                        </button>
-                                        <button id="plane_snap_camera" title="Align normal vector with camera">
+                                        </button><!-- 
+                                        --><button id="plane_snap_camera" title="Align normal vector with camera">
                                             <i class="fa fa-eye"></i>
                                         </button>
                                     </div>
@@ -144,6 +140,9 @@
                             <div class="menu_row">
                                 <div class="menu_row_input">
                                     <div class="slider" id="plane_offset_slider"></div>
+                                    <div class="menu_row_input_block">
+                                        <input type="number" id="plane_offset_number">
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -253,7 +252,7 @@
                                 </div>
                             </div>
                             <div class="menu_row">
-                                <div class="menu_row_label">Singularity</div>
+                                <div class="menu_row_label">Irregularity Graph</div>
                                 <div class="menu_row_input">
                                     <div class="slider" id="singularity_slider"></div>
                                 </div>
@@ -283,7 +282,7 @@
                         </div>
                     </div>
 
-                    <div id="log_menu" class="menu_area">
+                    <div id="log_menu" class="menu_area" style="display: none;">
                         <div class="menu_title_wrapper">
                             <div class="menu_title">Log</div>
                         </div>
@@ -337,6 +336,7 @@
     <script src="js/filters/quality_filter.js"></script>
     <script src="js/filters/peeling_filter.js"></script>
     <script src="js/filters/pick_filter.js"></script>
+    <script src="js/external/TrackballControls.js"></script>
 
     <script type="text/javascript">
         window.onload = function () {

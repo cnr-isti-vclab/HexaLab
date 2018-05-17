@@ -64,7 +64,8 @@ namespace HexaLab {
 
     struct Hexa {
         Index dart      = -1;
-        uint32_t mark   =  0;
+        uint32_t mark   =  0;       // mark == mesh.mark -> hexa is filtered
+        uint32_t counter_mark = 0;  // counter_mark == mesh.mark -> hexa is not filtered. wins over the mark field.
 
         Hexa() {}
         Hexa ( Index dart ) { this->dart = dart; }
@@ -130,12 +131,16 @@ namespace HexaLab {
 
         void unmark_all() { ++this->current_mark; }
 
-        bool is_marked ( const Hexa& hexa ) const { return hexa.mark == this->current_mark; }
+        //bool mark_is_current ( const Hexa& hexa ) const { return hexa.mark == this->current_mark; }
+        bool is_marked ( const Hexa& hexa ) const { return hexa.mark == this->current_mark && hexa.counter_mark != this->current_mark; }
         bool is_marked ( const Vert& vert ) const { return vert.visible_mark == this->current_mark; }
+        bool is_counter_marked(const Hexa& hexa) const { return hexa.counter_mark == this->current_mark; }
         void unmark ( Hexa& hexa ) const { hexa.mark = this->current_mark - 1; }
         void unmark ( Vert& vert ) const { vert.visible_mark = this->current_mark - 1; }
         void mark ( Hexa& hexa ) const { hexa.mark = this->current_mark; }
         void mark ( Vert& vert ) const { vert.visible_mark = this->current_mark; }
+        void counter_mark ( Hexa& hexa ) const { hexa.counter_mark = this->current_mark; }
+        void counter_unmark ( Hexa& hexa ) const { hexa.counter_mark = this->current_mark - 1; }
 
         // Methods to spawn a mesh navigator off of a mesh element
         MeshNavigator navigate ( Dart& dart ) { return MeshNavigator ( dart, *this ); }

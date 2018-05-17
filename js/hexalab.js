@@ -18,23 +18,23 @@ HexaLab.BufferGeometry = function (backend) {
 
 Object.assign(HexaLab.BufferGeometry.prototype, {
     update: function () {
-        this.surface.removeAttribute('position');
+        this.surface.removeAttribute('position')
         const x = this.backend.surface_pos().size()
         if (this.backend.surface_pos().size() != 0) {
-            const buffer = new Float32Array(Module.HEAPU8.buffer, this.backend.surface_pos().data(), this.backend.surface_pos().size() * 3);
-            this.surface.addAttribute('position', new THREE.BufferAttribute(buffer, 3));
+            const buffer = new Float32Array(Module.HEAPU8.buffer, this.backend.surface_pos().data(), this.backend.surface_pos().size() * 3)
+            this.surface.addAttribute('position', new THREE.BufferAttribute(buffer, 3))
         }
-        this.surface.removeAttribute('normal');
+        this.surface.removeAttribute('normal')
         if (this.backend.surface_norm().size() != 0) {
-            const buffer = new Float32Array(Module.HEAPU8.buffer, this.backend.surface_norm().data(), this.backend.surface_norm().size() * 3);
-            this.surface.addAttribute('normal', new THREE.BufferAttribute(buffer, 3));
+            const buffer = new Float32Array(Module.HEAPU8.buffer, this.backend.surface_norm().data(), this.backend.surface_norm().size() * 3)
+            this.surface.addAttribute('normal', new THREE.BufferAttribute(buffer, 3))
         } else {
             this.surface.computeVertexNormals()
         }
-        this.surface.removeAttribute('color');
+        this.surface.removeAttribute('color')
         if (this.backend.surface_color().size() != 0) {
-            const buffer = new Float32Array(Module.HEAPU8.buffer, this.backend.surface_color().data(), this.backend.surface_color().size() * 3);
-            this.surface.addAttribute('color', new THREE.BufferAttribute(buffer, 3));
+            const buffer = new Float32Array(Module.HEAPU8.buffer, this.backend.surface_color().data(), this.backend.surface_color().size() * 3)
+            this.surface.addAttribute('color', new THREE.BufferAttribute(buffer, 3))
         }
         this.surface.setIndex(null)     // TODO ?
         if (this.backend.surface_ibuffer().size() != 0) {
@@ -43,20 +43,20 @@ Object.assign(HexaLab.BufferGeometry.prototype, {
             const size = this.backend.surface_ibuffer().size()
             const t = new Int32Array(Module.HEAPU8.buffer, data, size)
             for (let i = 0; i < size; ++i) {  // TODO no copy
-                buffer[i] = t[i];
+                buffer[i] = t[i]
             } 
             this.surface.setIndex(buffer)
         }
 
-        this.wireframe.removeAttribute('position');
+        this.wireframe.removeAttribute('position')
         if (this.backend.wireframe_pos().size() != 0) {
-            const buffer = new Float32Array(Module.HEAPU8.buffer, this.backend.wireframe_pos().data(), this.backend.wireframe_pos().size() * 3);
-            this.wireframe.addAttribute('position', new THREE.BufferAttribute(buffer, 3));
+            const buffer = new Float32Array(Module.HEAPU8.buffer, this.backend.wireframe_pos().data(), this.backend.wireframe_pos().size() * 3)
+            this.wireframe.addAttribute('position', new THREE.BufferAttribute(buffer, 3))
         }
-        this.wireframe.removeAttribute('color');
+        this.wireframe.removeAttribute('color')
         if (this.backend.wireframe_color().size() != 0) {
-            const buffer = new Float32Array(Module.HEAPU8.buffer, this.backend.wireframe_color().data(), this.backend.wireframe_color().size() * 3);
-            this.wireframe.addAttribute('color', new THREE.BufferAttribute(buffer, 3));
+            const buffer = new Float32Array(Module.HEAPU8.buffer, this.backend.wireframe_color().data(), this.backend.wireframe_color().size() * 3)
+            this.wireframe.addAttribute('color', new THREE.BufferAttribute(buffer, 3))
         }
     },
 })
@@ -66,17 +66,17 @@ Object.assign(HexaLab.BufferGeometry.prototype, {
 // --------------------------------------------------------------------------------
 
 HexaLab.Filter = function (filter_backend, name) {
-    this.backend = filter_backend;
+    this.backend = filter_backend
     this.name = name;
     this.scene = {
         objects: [],
         add: function (obj) {
-            this.objects.push(obj);
+            this.objects.push(obj)
         },
         remove: function (obj) {
-            var i = this.objects.indexOf(obj);
+            var i = this.objects.indexOf(obj)
             if (i != -1) {
-                this.objects.splice(i, 1);
+                this.objects.splice(i, 1)
             }
         }
     };
@@ -86,15 +86,15 @@ Object.assign(HexaLab.Filter.prototype, {
     // Implementation Api
 
     on_mesh_change: function (mesh) {   // cpp MeshStats data structure
-        console.warn('Function "on_mesh_change" not implemented for filter ' + this.name + '.');
+        console.warn('Function "on_mesh_change" not implemented for filter ' + this.name + '.')
     },
 
     set_settings: function (settings) { // whatever was read from the settings json
-        console.warn('Function "set_settings" not implemented for filter ' + this.name + '.');
+        console.warn('Function "set_settings" not implemented for filter ' + this.name + '.')
     },
 
     get_settings: function () {         // whatever the filter wants to write to the settings json
-        console.warn('Function "get_settings" not implemented for filter ' + this.name + '.');
+        console.warn('Function "get_settings" not implemented for filter ' + this.name + '.')
     }
 });
 
@@ -108,7 +108,7 @@ HexaLab.Viewer = function (canvas_width, canvas_height) {
         ao: 'object space',
         aa: 'msaa',
         background: 0xffffff,
-    };
+    }
 
     this.width = canvas_width
     this.height = canvas_height
@@ -250,9 +250,9 @@ HexaLab.Viewer = function (canvas_width, canvas_height) {
     */
     var num_samples = 16
     var kernel = new Float32Array(num_samples * 3)
-    var n = new THREE.Vector3(0, 0, 1);
+    var n = new THREE.Vector3(0, 0, 1)
     for (var i = 0; i < num_samples * 3; i += 3) {
-        var v;
+        var v
         do {
             v = new THREE.Vector3(
                 Math.random() * 2.0 - 1.0,
@@ -266,17 +266,17 @@ HexaLab.Viewer = function (canvas_width, canvas_height) {
         kernel[i + 1] = v.y * scale
         kernel[i + 2] = v.z * scale
     }
-    var noise_size = 4;
-    var noise = new Float32Array(noise_size * noise_size * 3);
+    var noise_size = 4
+    var noise = new Float32Array(noise_size * noise_size * 3)
     for (var i = 0; i < noise_size * noise_size * 3; i += 3) {
         var v = new THREE.Vector3(
             Math.random() * 2.0 - 1.0,
             Math.random() * 2.0 - 1.0,
             0
-        ).normalize();
-        noise[i + 0] = v.x;
-        noise[i + 1] = v.y;
-        noise[i + 2] = v.z;
+        ).normalize()
+        noise[i + 0] = v.x
+        noise[i + 1] = v.y
+        noise[i + 2] = v.z
     }
     var noise_tex = new THREE.DataTexture(noise, noise_size, noise_size, THREE.RGBFormat, THREE.FloatType,
         THREE.UVMapping, THREE.RepeatWrapping, THREE.RepeatWrapping, THREE.NearestFilter, THREE.NearestFilter)
@@ -301,8 +301,8 @@ HexaLab.Viewer = function (canvas_width, canvas_height) {
     }
     // TODO remove?
     //this.normal_pass.target.texture.generateMipmaps = false;
-    this.normal_pass.target.depthTexture = new THREE.DepthTexture();
-    this.normal_pass.target.depthTexture.type = THREE.UnsignedShortType;
+    this.normal_pass.target.depthTexture = new THREE.DepthTexture()
+    this.normal_pass.target.depthTexture.type = THREE.UnsignedShortType
 
     this.depth_pass = {
         material: new THREE.MeshDepthMaterial({
@@ -430,7 +430,7 @@ Object.assign(HexaLab.Viewer.prototype, {
             antialias: this.settings.aa == 'msaa',
             preserveDrawingBuffer: true,    // disable hidden/automatic clear of the rendertarget
             alpha: true,                    // to have an alpha on the rendertarget? (needed for setClearAlpha to work)
-        });
+        })
         this.renderer.context.getExtension("EXT_frag_depth")
         this.renderer.setSize(this.width, this.height)
         this.renderer.autoClear = false
@@ -451,23 +451,15 @@ Object.assign(HexaLab.Viewer.prototype, {
     get_ao_mode:            function () { return this.settings.ao },
     get_aa_mode:            function () { return this.settings.aa },
 
-    on_geometry_buffers_update: function () { this.dirty_geometry = true; HexaLab.app.backend.flag_models_as_dirty() },
-    on_color_buffers_update:    function () { this.dirty_color = true },
+    on_buffers_change:      function () { this.dirty_buffers = true; HexaLab.app.backend.flag_models_as_dirty() },
+    on_scene_change:        function () { this.dirty_canvas = true },
 
     add_mesh:               function (mesh) { this.meshes.add(mesh) },
     remove_mesh:            function (mesh) { this.meshes.remove(mesh) },
 
-    set_ao_mode: function (value) {
-        if (this.settings.ao == 'object space' && value != 'object space') {
-            Module.print("[AO] Disabled")
-            this.buffers.visible.surface.removeAttribute('color')
-            this.buffers.visible.surface.addAttribute('color', this.ao_pass.original_color)
-        } 
-        this.settings.ao = value
-        if (value == 'object space') {
-            this.dirty_osao = true
-        }
-    },
+    show_axes:              function (do_show) { this.do_show_axes = do_show },
+
+    set_ao_mode:            function (value) { this.settings.ao = value; this.update_osao_buffers(); this.dirty_canvas = true },
 
     reset_osao: function () {
         // determine ao textures size
@@ -617,71 +609,33 @@ Object.assign(HexaLab.Viewer.prototype, {
                 sum:        0,
                 target:     tTarget,
                 view_i:     0,
+                done:       false,
             }
             cached = false
         }
         this.ao_pass.progress = this.ao_cache[hash]
-        if (cached) {
+        if (cached && this.ao_pass.progress.view_i > 32) {
             const progress = this.ao_pass.progress.view_i / this.ao_pass.samples * 100
             Module.print("[AO] Cached at " + progress.toFixed(0) + "%")
-            this.apply_ao()
+            this.update_osao_buffers()
         } else {
             Module.print("[AO] Starting...")
         }
     },
 
-    apply_ao: function () {
-        if (this.ao_pass.progress.readback_i != this.ao_pass.progress.view_i) {
-            this.renderer.readRenderTargetPixels(this.ao_pass.progress.target, 0, 0,
-                this.ao_pass.progress.target.width, this.ao_pass.progress.target.height, 
-                this.ao_pass.progress.result)
-            this.ao_pass.progress.readback_i = this.ao_pass.progress.view_i
-        }
-        const gpu_data  = this.ao_pass.progress.result
-        const scale     = this.ao_pass.progress.sum
-        const color     = this.ao_pass.original_color
-        let new_color   = new Float32Array(color.count * 3)
+    // delayed_osao_reset: function (delay) {
+    //     clearTimeout(this.ao_pass.timer)
+    //     const self = this
+    //     this.ao_pass.timer = setTimeout(function () {
+    //         if (self.settings.ao == 'object space') {
+    //             self.reset_osao()
+    //         }
+    //     }, delay)
+    //     this.ao_pass.paused = true
+    // },
 
-        for (var i = 0; i < color.count * 3; ++i) {
-            new_color[i * 3 + 0] = color.array[i * 3 + 0] * (gpu_data[i * 4 + 0] - 1) / scale
-            new_color[i * 3 + 1] = color.array[i * 3 + 1] * (gpu_data[i * 4 + 1] - 1) / scale
-            new_color[i * 3 + 2] = color.array[i * 3 + 2] * (gpu_data[i * 4 + 2] - 1) / scale
-        }
-        
-        this.buffers.visible.surface.removeAttribute('color')
-        this.buffers.visible.surface.addAttribute('color', new THREE.BufferAttribute(new_color, 3))
-    },
-
-    delayed_osao_reset: function (delay) {
-        clearTimeout(this.ao_pass.timer)
-        const self = this
-        this.ao_pass.timer = setTimeout(function () {
-            if (self.settings.ao == 'object space') {
-                self.reset_osao()
-            }
-        }, delay)
-        this.ao_pass.paused = true
-    },
-
-    on_mesh_change: function (mesh) {
-        // flush ao cache
-        this.ao_cache = {}
-
-        this.buffers.update()
-        this.dirty_osao     = true
-        this.dirty_geometry = false
-        this.dirty_color    = false
-
-        const _aabb_center = mesh.get_aabb_center()
-        const aabb_center = new THREE.Vector3(_aabb_center.x(), _aabb_center.y(), _aabb_center.z())
-        //this.renderables_node.position.set(-aabb_center.x, -aabb_center.y, -aabb_center.z)
-        this.mesh_offset = new THREE.Vector3(-aabb_center.x, -aabb_center.y, -aabb_center.z)
-            //new THREE.Matrix4().makeTranslation(-aabb_center.x, -aabb_center.y, -aabb_center.z)
-        //this.scene.position.set(-aabb_center.x, -aabb_center.y, -aabb_center.z)
-        this.mesh = mesh
-
-        // generate ao sampling dirs
-        const aabb_diagonal = mesh.get_aabb_diagonal()
+    generate_osao_povs: function () {
+        const aabb_diagonal = this.mesh.get_aabb_diagonal()
         let views = []
         let cones = []  // 3d objects to indicate position and direction of sample points
         function sample_sphere_surface () {
@@ -722,7 +676,7 @@ Object.assign(HexaLab.Viewer.prototype, {
             // sample unit sphere 
             let dir = samples[i]
             // create light camera
-            const cam_pos = dir.multiplyScalar(mesh.get_aabb_diagonal())
+            const cam_pos = dir.multiplyScalar(this.mesh.get_aabb_diagonal())
             views[i] = new THREE.OrthographicCamera(
                 -aabb_diagonal * 0.5,
                 aabb_diagonal * 0.5,
@@ -742,12 +696,28 @@ Object.assign(HexaLab.Viewer.prototype, {
             // cones[i].position.set(cam_pos.x, cam_pos.y, cam_pos.z)
             // cones[i].lookAt(new THREE.Vector3(0, 0, 0))
         }
+        this.ao_pass.views = views
+        // this.ao_pass.cones = cones
+    },
+
+    on_mesh_change: function (mesh) {
+        // empty ao cache
+        this.ao_cache = {}
+
+        this.buffers.update()
+        this.dirty_buffers = false
+        this.dirty_canvas  = true
+
+        const _aabb_center  = mesh.get_aabb_center()
+        const aabb_center   = new THREE.Vector3(_aabb_center.x(), _aabb_center.y(), _aabb_center.z())
+        this.mesh_offset    = new THREE.Vector3(-aabb_center.x, -aabb_center.y, -aabb_center.z)
+        this.mesh           = mesh
 
         // ao pass
-        this.ao_pass.views = views
-        this.ao_pass.cones = cones
+        this.generate_osao_povs()
         this.ao_pass.material.uniforms.uDepthBias = { value: 0.01 * mesh.get_aabb_diagonal() }
         // this.ao_pass.material.uniforms.uDepthBias = { value: 0.0025 }
+        this.reset_osao()
 
         // ssao pass
         this.ssao_pass.material.uniforms.uRadius.value = 5 * mesh.avg_edge_len;
@@ -834,146 +804,129 @@ Object.assign(HexaLab.Viewer.prototype, {
 
     on_surface_color_change: function () {
         this.ao_pass.original_color = this.buffers.visible.surface.attributes.color
-        this.apply_ao()
+        this.update_osao_buffers()
     },
 
-    render: function () {
-        // -- utility --
-        const self = this
-        function clear_scene () {
-            while (self.scene.children.length > 0) {
-                self.scene.remove(self.scene.children[0])
-            }
+    clear_scene: function () {
+        while (this.scene.children.length > 0) {
+            this.scene.remove(this.scene.children[0])
         }
-        function clear_rt () {
-            self.renderer.setRenderTarget()
-            self.renderer.clear()
-        }
+        this.scene.overrideMaterial = null
+        this.scene.position.set(0, 0, 0)
+    },
 
-        if (!this.mesh) return
+    clear_canvas: function () {
+        this.renderer.setRenderTarget()
+        this.renderer.clear()
+    },
 
-        // Update buffers
-        if (this.dirty_geometry) {
-            this.buffers.update()
-            // this.models.boundary_creases.update()
-            // this.models.boundary_singularity.update()
-            this.delayed_osao_reset(400)
-        } else {
-            if (this.dirty_osao) {
-                this.reset_osao()
-            }
-            if (this.dirty_color) {
-                this.buffers.update()
-                this.on_surface_color_change()
-            }
-        }
-        this.dirty_geometry = false
-        this.dirty_color    = false
-        this.dirty_osao     = false
-
-        // -- main render sequence --
-
-        // render visible surface
-        clear_rt()
-        clear_scene()
+    draw_occluded: function () {
+        // mesh
+        this.clear_scene()
         this.scene.add(this.renderables.visible.surface)
-        // The whole scene is translated so that the center of the mesh lies on the origin.
-        // As long as the camera is not added to the scene, this offset does not affect the camera.
         this.scene.position.set(this.mesh_offset.x, this.mesh_offset.y, this.mesh_offset.z)
-        // this.scene_light.position.set(this.scene_camera.position.x - this.scene.position.x, 
-        //     this.scene_camera.position.y - this.scene.position.y, 
-        //     this.scene_camera.position.z - this.scene.position.z)
-        // this.scene.add(this.scene_light)
+
+        // draw
         this.renderer.render(this.scene, this.scene_camera)
+    },
 
-        // AO
-        if (this.settings.ao == 'screen space') {
-            // view norm/depth prepass
-            this.scene.overrideMaterial = this.depth_pass.material
-            this.renderer.render(this.scene, this.scene_camera, this.depth_pass.target, true)
-            this.scene.overrideMaterial = this.normal_pass.material
-            this.renderer.render(this.scene, this.scene_camera, this.normal_pass.target, true)
-            this.scene.overrideMaterial = null
+    prepare_ssao: function () {
+        // mesh view norm/depth
+        this.clear_scene()
+        this.scene.add(this.renderables.visible.surface)
+        this.scene.position.set(this.mesh_offset.x, this.mesh_offset.y, this.mesh_offset.z)
 
-            clear_scene()
+        // bind material, draw
+        this.scene.overrideMaterial = this.depth_pass.material
+        this.renderer.render(this.scene, this.scene_camera, this.depth_pass.target, true)
+        
+        // bind material, draw
+        this.scene.overrideMaterial = this.normal_pass.material
+        this.renderer.render(this.scene, this.scene_camera, this.normal_pass.target, true)
+    },
 
-            // ssao
-            this.ssao_pass.material.uniforms.uProj    = { value: this.scene_camera.projectionMatrix }
-            this.ssao_pass.material.uniforms.uInvProj = { value: new THREE.Matrix4().getInverse(this.scene_camera.projectionMatrix) }
-            this.blur_pass.material.uniforms.uInvProj = { value: new THREE.Matrix4().getInverse(this.scene_camera.projectionMatrix) }
-            this.scene.add(this.fullscreen_quad)
-            this.scene.position.set(0, 0, 0)
+    compute_ssao: function () {
+        // quad
+        this.clear_scene()
+        this.scene.add(this.fullscreen_quad)
+        this.scene.position.set(0, 0, 0)
 
-            this.fullscreen_quad.material = this.ssao_pass.material
-            this.renderer.render(this.scene, this.fullscreen_camera, this.ssao_pass.target, true)
-            this.fullscreen_quad.material = this.blur_pass.material
-            this.renderer.render(this.scene, this.fullscreen_camera)
+        // update uniforms, bind material
+        this.ssao_pass.material.uniforms.uProj    = { value: this.scene_camera.projectionMatrix }
+        this.ssao_pass.material.uniforms.uInvProj = { value: new THREE.Matrix4().getInverse(this.scene_camera.projectionMatrix) }
+        this.blur_pass.material.uniforms.uInvProj = { value: new THREE.Matrix4().getInverse(this.scene_camera.projectionMatrix) }
+        this.fullscreen_quad.material             = this.ssao_pass.material
+        
+        // draw
+        this.renderer.render(this.scene, this.fullscreen_camera, this.ssao_pass.target, true)
+    },
 
-        } else if (this.settings.ao == 'object space') {
+    blend_in_ssao: function () {
+        // quad
+        this.clear_scene()
+        this.scene.add(this.fullscreen_quad)
+        this.scene.position.set(0, 0, 0)
 
-            if (this.ao_pass.progress.view_i < this.ao_pass.views.length && !this.ao_pass.paused) {
-                // create camera
-                const light_cam = this.ao_pass.views[this.ao_pass.progress.view_i]
+        this.fullscreen_quad.material = this.blur_pass.material
+        this.renderer.render(this.scene, this.fullscreen_camera)
+    },
 
-                // depth (view pos) pass
-                const prev_clear_color = this.renderer.getClearColor().clone()
-                const prev_clear_alpha = this.renderer.getClearAlpha()
-                this.renderer.setClearColor(new THREE.Color(0, 0, -100000), 1.0)
-                this.renderer.clearTarget(this.viewpos_pass.target, true, true, true)     // TODO this is not working ?
-                this.renderer.setClearColor(prev_clear_color, prev_clear_alpha)
+    prepare_osao_step: function () {
+        // depth (view pos) pass
+        // TODO share this between SSAO and OSAO
+        this.clear_scene()
+        this.scene.add(this.renderables.visible.surface)
+        this.scene.position.set(this.mesh_offset.x, this.mesh_offset.y, this.mesh_offset.z)
 
-                this.scene.overrideMaterial = this.viewpos_pass.material
-                this.renderer.render(this.scene, light_cam, this.viewpos_pass.target, false)
-                this.scene.overrideMaterial = null
-                clear_scene()
-                // Module.print("[AO] ShadowMap done!")
+        // clear target to max depth
+        const prev_clear_color = this.renderer.getClearColor().clone()
+        const prev_clear_alpha = this.renderer.getClearAlpha()
+        this.renderer.setClearColor(new THREE.Color(0, 0, -100000), 1.0)
+        this.renderer.clearTarget(this.viewpos_pass.target, true, true, true)
+        this.renderer.setClearColor(prev_clear_color, prev_clear_alpha)
 
-                // ao accumulation pass
-                this.fullscreen_quad.material = this.ao_pass.material
-                this.ao_pass.material.uniforms.uModel.value = new THREE.Matrix4().makeTranslation(
-                    this.mesh_offset.x, 
-                    this.mesh_offset.y, 
-                    this.mesh_offset.z
-                )
-                // this.ao_pass.material.uniforms.uModel.value = this.mesh_xform
-                this.ao_pass.material.uniforms.uView.value = light_cam.matrixWorldInverse
-                this.ao_pass.material.uniforms.uCamPos.value = light_cam.position
-                this.ao_pass.material.uniforms.uProj.value = light_cam.projectionMatrix
-                this.ao_pass.material.uniforms.tDepth = { value: this.viewpos_pass.target.texture }
-                this.ao_pass.material.uniforms.uInvProj =  { value: new THREE.Matrix4().getInverse(light_cam.projectionMatrix) }
+        // bind material, fetch camera, draw
+        this.scene.overrideMaterial = this.viewpos_pass.material
+        const light_cam             = this.ao_pass.views[this.ao_pass.progress.view_i]
+        this.renderer.render(this.scene, light_cam, this.viewpos_pass.target, false)
+    },
 
-                this.scene.add(this.fullscreen_quad)
-                this.scene.position.set(0, 0, 0)
-                this.fullscreen_quad.material = this.ao_pass.material
-                this.renderer.render(this.scene, this.fullscreen_camera, this.ao_pass.progress.target, this.ao_pass.progress.view_i == 0)
-                this.fullscreen_quad.material = null
+    compute_osao_step: function () {
+        // quad
+        this.clear_scene()
+        this.scene.add(this.fullscreen_quad)
+        this.scene.position.set(0, 0, 0)
+        
+        // fetch cam
+        const light_cam = this.ao_pass.views[this.ao_pass.progress.view_i]
+        
+        // update uniforms, bind material
+        this.ao_pass.material.uniforms.uView.value      = light_cam.matrixWorldInverse
+        this.ao_pass.material.uniforms.uCamPos.value    = light_cam.position
+        this.ao_pass.material.uniforms.uProj.value      = light_cam.projectionMatrix
+        this.ao_pass.material.uniforms.tDepth           = { value: this.viewpos_pass.target.texture }
+        this.ao_pass.material.uniforms.uInvProj         =  { value: new THREE.Matrix4().getInverse(light_cam.projectionMatrix) }
+        this.ao_pass.material.uniforms.uModel.value     = new THREE.Matrix4().makeTranslation(
+            this.mesh_offset.x, 
+            this.mesh_offset.y, 
+            this.mesh_offset.z
+        )
+        this.fullscreen_quad.material = this.ao_pass.material
 
-                this.ao_pass.progress.view_i += 1
+        // draw
+        this.renderer.render(this.scene, this.fullscreen_camera, this.ao_pass.progress.target, this.ao_pass.progress.view_i == 0)
 
-                const light = new THREE.Vector3().add(light_cam.position).normalize()
-                const first_light = this.ao_pass.views[0].position.clone().normalize()
-                this.ao_pass.progress.sum += Math.max(0, first_light.dot(light))
-                // this.ao_pass.progress.sum += Math.max(0, new THREE.Vector3(0, 1, 0).dot(light))
-                if (this.ao_pass.progress.view_i == 128 || 
-                    this.ao_pass.progress.view_i == 512 || 
-                    this.ao_pass.progress.view_i == this.ao_pass.samples) {
-                    // if (this.ao_pass.view_i ==   1 || 
-                    //     this.ao_pass.view_i ==  32 || 
-                    //     this.ao_pass.view_i == 128 || 
-                    //     this.ao_pass.view_i == 512 || 
-                    //     this.ao_pass.view_i == this.ao_pass.samples) {
-                        const progress = this.ao_pass.progress.view_i / this.ao_pass.samples * 100
-                        const postfix = progress == 100 ? "" : "..."
-                        Module.print("[AO] " + progress.toFixed(0) + "%" + postfix)
-                    // }
-                    this.apply_ao()
-                }
-            }
-        }
+        // progress
+        this.ao_pass.progress.view_i += 1
 
-        clear_scene()
+        const light = new THREE.Vector3().add(light_cam.position).normalize()
+        const first_light = this.ao_pass.views[0].position.clone().normalize()
+        this.ao_pass.progress.sum += Math.max(0, first_light.dot(light))
+    },
 
-        // render every else geometry
+    draw_non_occluded: function() {
+        // wireframe, silhouette, singularity
+        this.clear_scene()
         this.scene.add(this.meshes)
         this.scene_light.position.set(this.scene_camera.position.x - this.scene.position.x, 
             this.scene_camera.position.y - this.scene.position.y, 
@@ -985,19 +938,112 @@ Object.assign(HexaLab.Viewer.prototype, {
         this.scene.add(this.renderables.singularity.surface)
         this.scene.add(this.renderables.singularity.wireframe)
         this.scene.position.set(this.mesh_offset.x, this.mesh_offset.y, this.mesh_offset.z)
+        
+        // draw
         this.renderer.render(this.scene, this.scene_camera)
-        this.scene.position.set(0, 0, 0)
-        clear_scene()
+    },
 
-        // finally render the gizmo hud
-        this.scene.add(this.gizmo)
-        this.renderer.setViewport(this.width - 150, 10, 100, 100)
-        this.hud_camera.setRotationFromMatrix(this.scene_camera.matrixWorld)
-        this.renderer.render(this.scene, this.hud_camera)
-        this.scene.remove(this.gizmo)
-        this.renderer.setViewport(0, 0, this.width, this.height)
-        clear_scene()
-    }
+    draw_hud: function () {
+        this.clear_scene()
+    
+        // axes gizmo        
+        if (this.do_show_axes) {
+            this.scene.add(this.gizmo)
+            this.renderer.setViewport(this.width - 110, 10, 100, 100)
+            this.hud_camera.setRotationFromMatrix(this.scene_camera.matrixWorld)
+            this.renderer.render(this.scene, this.hud_camera)
+            this.scene.remove(this.gizmo)
+            this.renderer.setViewport(0, 0, this.width, this.height)
+        }
+    },
+
+    update_geometry_buffers: function () {
+        if (!this.dirty_buffers) return
+
+        this.buffers.update()
+        this.reset_osao()
+
+        this.dirty_canvas  = true
+        this.dirty_buffers = false
+    },
+
+    update_osao_buffers: function () {
+        if (!this.mesh) return
+
+        if (this.settings.ao == 'object space') {
+            if (this.ao_pass.progress.readback_i != this.ao_pass.progress.view_i) {
+                this.renderer.readRenderTargetPixels(this.ao_pass.progress.target, 0, 0,
+                    this.ao_pass.progress.target.width, this.ao_pass.progress.target.height, 
+                    this.ao_pass.progress.result)
+                this.ao_pass.progress.readback_i = this.ao_pass.progress.view_i
+            }
+            const gpu_data  = this.ao_pass.progress.result
+            const scale     = this.ao_pass.progress.sum
+            const color     = this.ao_pass.original_color
+            let new_color   = new Float32Array(color.count * 3)
+
+            for (var i = 0; i < color.count * 3; ++i) {
+                new_color[i * 3 + 0] = color.array[i * 3 + 0] * (gpu_data[i * 4 + 0] - 1) / scale
+                new_color[i * 3 + 1] = color.array[i * 3 + 1] * (gpu_data[i * 4 + 1] - 1) / scale
+                new_color[i * 3 + 2] = color.array[i * 3 + 2] * (gpu_data[i * 4 + 2] - 1) / scale
+            }
+            
+            this.buffers.visible.surface.removeAttribute('color')
+            this.buffers.visible.surface.addAttribute('color', new THREE.BufferAttribute(new_color, 3))
+        } else {
+            this.buffers.visible.surface.removeAttribute('color')
+            this.buffers.visible.surface.addAttribute('color', this.ao_pass.original_color)
+        }
+    },
+
+    step_osao: function () {
+        if (this.ao_pass.progress.view_i < this.ao_pass.views.length) {
+            this.prepare_osao_step()
+            this.compute_osao_step()   
+        }
+
+         if (
+            this.ao_pass.progress.view_i == 32  ||
+            this.ao_pass.progress.view_i == 64  ||
+            this.ao_pass.progress.view_i == 128 ||
+            this.ao_pass.progress.view_i == 512 ||
+            this.ao_pass.progress.view_i == this.ao_pass.views.length && !this.ao_pass.progress.done
+        ) {
+            if (this.ao_pass.progress.view_i == this.ao_pass.views.length && !this.ao_pass.progress.done) {
+                this.ao_pass.progress.done = true
+            }
+
+            this.update_osao_buffers()
+            this.dirty_canvas = true
+        }
+    },
+
+    update_canvas: function () {
+        if (!this.dirty_canvas) return
+
+        this.clear_canvas()
+
+        this.draw_occluded()
+
+        if (this.settings.ao == 'screen space' || this.settings.ao == 'object space' && this.ao_pass.progress.view_i < 32) {
+            this.prepare_ssao()
+            this.compute_ssao()
+            this.blend_in_ssao()
+        }
+
+        this.draw_non_occluded()        
+        this.draw_hud()
+
+        this.dirty_canvas = false
+    },
+
+    update: function () {
+        if (!this.mesh) return
+
+        this.update_geometry_buffers()
+        this.step_osao()
+        this.update_canvas()
+    },
 })
 
 // --------------------------------------------------------------------------------
@@ -1014,7 +1060,7 @@ Object.assign(HexaLab.Viewer.prototype, {
 */
 
 HexaLab.App = function (dom_element) {
-
+    const self = this
     this.backend = new Module.App()
     HexaLab.app = this
 
@@ -1030,7 +1076,24 @@ HexaLab.App = function (dom_element) {
     }
     this.canvas.container.appendChild(this.canvas.element)
 
+    this.dirty_canvas = true
     this.controls = new THREE.TrackballControls(this.viewer.get_scene_camera(), dom_element)
+    HexaLab.controls.on_mouse_down = function () {
+        self.mouse_is_down = true
+    }
+    HexaLab.controls.on_mouse_move = function () {
+        if (self.mouse_is_down) {
+            self.viewer.show_axes(true)
+            self.queue_canvas_update()
+        }
+    }
+    HexaLab.controls.on_mouse_wheel = function () {
+        self.queue_canvas_update()
+    }
+    HexaLab.controls.on_mouse_up = function () {
+        self.mouse_is_down = false
+        self.viewer.show_axes(false)
+    }
 
     // App
     this.default_app_settings = {
@@ -1092,8 +1155,8 @@ Object.assign(HexaLab.App.prototype, {
     // Wrappers
     camera:     function () { return this.viewer.scene_camera },
     materials:  function () { return this.viewer.materials },
-    queue_geometry_update:  function () { this.viewer.on_geometry_buffers_update() },
-    queue_color_update:     function () { this.viewer.on_color_buffers_update() },
+    queue_buffers_update:   function () { this.viewer.on_buffers_change() },
+    queue_canvas_update:    function () { this.viewer.on_scene_change() },
 
     // Settings
     get_camera_settings: function () {
@@ -1255,12 +1318,12 @@ Object.assign(HexaLab.App.prototype, {
         if      (map == 'Jet')      this.backend.enable_quality_color_mapping(Module.ColorMap.Jet)
         else if (map == 'Parula')   this.backend.enable_quality_color_mapping(Module.ColorMap.Parula)
         else if (map == 'RedBlue') this.backend.enable_quality_color_mapping(Module.ColorMap.RedBlue)
-        this.viewer.on_color_buffers_update()
+        this.queue_buffers_update()
     },
 
     disable_quality_color_mapping: function () {
         this.backend.disable_quality_color_mapping()
-        this.viewer.on_color_buffers_update()
+        this.queue_buffers_update()
     },
 
     set_color_map: function (map) {
@@ -1274,13 +1337,13 @@ Object.assign(HexaLab.App.prototype, {
     set_visible_surface_default_inside_color: function (color) {
         var c = new THREE.Color(color)
         this.backend.set_default_inside_color(c.r, c.g, c.b)
-        this.viewer.on_color_buffers_update()
+        this.queue_buffers_update()
         HexaLab.UI.on_set_visible_surface_default_inside_color(color)
     },
     set_visible_surface_default_outside_color: function (color) {
         var c = new THREE.Color(color)
         this.backend.set_default_outside_color(c.r, c.g, c.b)
-        this.viewer.on_color_buffers_update()
+        this.queue_buffers_update()
         HexaLab.UI.on_set_visible_surface_default_outside_color(color)
     },
 
@@ -1305,7 +1368,7 @@ Object.assign(HexaLab.App.prototype, {
         else if (measure == "Taper")                    this.backend.set_quality_measure(Module.QualityMeasure.Taper)
         else if (measure == "Volume")                   this.backend.set_quality_measure(Module.QualityMeasure.Volume)
         this.quality_measure = measure
-        this.queue_geometry_update()    // TODO update only on real need (needs to query quality filter enabled state)
+        this.queue_buffers_update()    // TODO update only on real need (needs to query quality filter enabled state)
         HexaLab.UI.on_set_quality_measure(measure)
     },
 
@@ -1314,7 +1377,7 @@ Object.assign(HexaLab.App.prototype, {
         else if (mode == 'Cracked')     this.backend.set_geometry_mode(Module.GeometryMode.Cracked)
         else if (mode == 'Smooth')      this.backend.set_geometry_mode(Module.GeometryMode.Smooth)
         this.geometry_mode = mode
-        this.queue_geometry_update()
+        this.queue_buffers_update()
         HexaLab.UI.on_set_geometry_mode(mode)
     },
 
@@ -1333,27 +1396,18 @@ Object.assign(HexaLab.App.prototype, {
         if (mode == 0) {
             this.set_singularity_surface_opacity(0.0)
             this.set_singularity_wireframe_opacity(0.0)
-            this.set_singularity_wireframe_linewidth(1)
             this.set_singularity_wireframe_depthtest(true)
         } else if (mode == 1) {
             this.set_singularity_surface_opacity(0.0)
             this.set_singularity_wireframe_opacity(1.0)
-            this.set_singularity_wireframe_linewidth(1)
             this.set_singularity_wireframe_depthtest(true)
         } else if (mode == 2) {
-            this.set_singularity_surface_opacity(0.0)
+            this.set_singularity_surface_opacity(1.0)
             this.set_singularity_wireframe_opacity(1.0)
-            this.set_singularity_wireframe_linewidth(3)
             this.set_singularity_wireframe_depthtest(true)
         } else if (mode == 3) {
             this.set_singularity_surface_opacity(1.0)
             this.set_singularity_wireframe_opacity(1.0)
-            this.set_singularity_wireframe_linewidth(1)
-            this.set_singularity_wireframe_depthtest(true)
-        } else if (mode == 4) {
-            this.set_singularity_surface_opacity(1.0)
-            this.set_singularity_wireframe_opacity(1.0)
-            this.set_singularity_wireframe_linewidth(1)
             this.set_singularity_wireframe_depthtest(false)
         }
         if (this.singularity_mode == 0 && mode > 0) {
@@ -1375,17 +1429,18 @@ Object.assign(HexaLab.App.prototype, {
                 this.set_visible_wireframe_opacity(this.prev_visible_wireframe_opacity)
             }
         }
-        if (this.singularity_mode < 3 && mode >= 3) {
+        if (this.singularity_mode < 2 && mode >= 2) {
             this.backend.show_boundary_singularity(true)
             this.backend.show_boundary_creases(true)
-            this.queue_geometry_update()
-        } else if (this.singularity_mode >= 3 && mode < 3) {
+            this.queue_buffers_update()
+        } else if (this.singularity_mode >= 2 && mode < 2) {
             this.backend.show_boundary_singularity(false)
             this.backend.show_boundary_creases(false)
-            this.queue_geometry_update()
+            this.queue_buffers_update()
         }
         this.singularity_mode = mode
         HexaLab.UI.on_set_singularity_mode(mode)
+        this.queue_canvas_update()
     },
 
     set_visible_wireframe_opacity:      function (opacity) {
@@ -1393,37 +1448,41 @@ Object.assign(HexaLab.App.prototype, {
         this.materials().visible_wireframe.visible = opacity != 0
         this.prev_visible_wireframe_opacity = null
         HexaLab.UI.on_set_wireframe_opacity(opacity)
+        this.queue_canvas_update()
     },
     set_filtered_surface_opacity:       function (opacity) {
         this.materials().filtered_surface.opacity = opacity
         this.materials().filtered_surface.visible = opacity != 0
         this.prev_filtered_surface_opacity = null
         HexaLab.UI.on_set_filtered_surface_opacity(opacity)
+        this.queue_canvas_update()
     },
     set_filtered_wireframe_opacity:     function (opacity) {
         this.materials().filtered_wireframe.opacity = opacity
         this.materials().filtered_wireframe.visible = opacity != 0
+        this.queue_canvas_update()
     },
     set_singularity_surface_opacity:    function (opacity) {
         this.materials().singularity_surface.opacity = opacity
         this.materials().singularity_surface.visible = opacity != 0
+        this.queue_canvas_update()
     },
     set_singularity_wireframe_opacity:  function (opacity) { 
         this.materials().singularity_wireframe.opacity = opacity
         this.materials().singularity_wireframe.visible = opacity != 0
+        this.queue_canvas_update()
     },
 
     // set_visible_wireframe_color:            function (color)        { this.materials().visible_wireframe.color.set(color) },
-    set_filtered_surface_color:             function (color)        { this.materials().filtered_surface.color.set(color) },
-    set_filtered_wireframe_color:           function (color)        { this.materials().filtered_wireframe.color.set(color) },
+    set_filtered_surface_color:             function (color)        { this.materials().filtered_surface.color.set(color); this.queue_canvas_update() },
+    set_filtered_wireframe_color:           function (color)        { this.materials().filtered_wireframe.color.set(color); this.queue_canvas_update() },
     
-    set_singularity_wireframe_linewidth:    function (linewidth)    { this.materials().singularity_wireframe.linewidth = linewidth },
-    set_singularity_wireframe_depthtest:    function (enabled)      { this.materials().singularity_wireframe.depthTest = enabled },
+    set_singularity_wireframe_depthtest:    function (enabled)      { this.materials().singularity_wireframe.depthTest = enabled; this.queue_canvas_update() },
 
     set_occlusion:                          function (value)        { this.viewer.set_ao_mode(value); HexaLab.UI.on_set_occlusion(value) },
     set_antialiasing:                       function (value)        { this.viewer.set_aa_mode(value) },
-    set_background_color:                   function (color)        { this.viewer.set_background_color(color) },
-    set_light_intensity:                    function (intensity)    { this.viewer.set_light_intensity(intensity) },
+    set_background_color:                   function (color)        { this.viewer.set_background_color(color); this.queue_canvas_update() },
+    set_light_intensity:                    function (intensity)    { this.viewer.set_light_intensity(intensity); this.queue_canvas_update() },
 
     // Import a new mesh. First invoke the backend for the parser and builder.
     // If everything goes well, reset settings to default and propagate the
@@ -1437,31 +1496,27 @@ Object.assign(HexaLab.App.prototype, {
             return
         }
         this.mesh = this.backend.get_mesh()
+        // update UI
+        HexaLab.UI.on_import_mesh(path)
         // reset settings
         this.set_settings({
             app:        this.default_app_settings,
             camera:     this.default_camera_settings,
             rendering:  this.default_rendering_settings,
             materials:  this.default_material_settings
-        });
+        })
         // notify filters
         for (var k in this.filters) {
             this.filters[k].on_mesh_change(this.mesh)
         }
         // notify viewer
         this.viewer.on_mesh_change(this.mesh)
-        // update UI
-        HexaLab.UI.on_import_mesh(path)
-    },
-
-    update_camera: function () {
-        this.controls.update()
     },
 
     // The application main loop. Call this after instancing an App object to start rendering.
     animate: function () {
-        this.update_camera()
-        this.viewer.render()
+        this.controls.update()
+        this.viewer.update()
         // queue next frame
         requestAnimationFrame(this.animate.bind(this))
     }

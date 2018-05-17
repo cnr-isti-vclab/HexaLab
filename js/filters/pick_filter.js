@@ -7,6 +7,9 @@ HexaLab.UI.pick_enabled        = $('#pick_enabled')
 HexaLab.UI.pick_button         = $('#pick_button')
 HexaLab.UI.fill_button         = $('#fill_button')
 HexaLab.UI.pick_clear_button   = $('#pick_clear_button')
+HexaLab.UI.pick_menu_content   = $('#pick_menu *')
+
+HexaLab.UI.pick_menu_content.prop('disabled', true)
 
 // --------------------------------------------------------------------------------
 // Filter class
@@ -32,6 +35,7 @@ HexaLab.PickFilter = function () {
 
     // State
     this.filtered_hexas = []
+    this.filled_hexas   = []
     this.picking = false
     this.filling = false
 
@@ -51,7 +55,8 @@ HexaLab.PickFilter.prototype = Object.assign(Object.create(HexaLab.Filter.protot
     get_settings: function () {
         return {
             enabled: this.backend.enabled,
-            filtered_hexas: this.filtered_hexas
+            filtered_hexas: this.filtered_hexas,
+            filled_hexas: this.filled_hexas
         }
     },
 
@@ -63,6 +68,7 @@ HexaLab.PickFilter.prototype = Object.assign(Object.create(HexaLab.Filter.protot
     on_mesh_change: function (mesh) {
         this.clear()
         this.on_enabled_set(this.backend.enabled)
+        HexaLab.UI.pick_menu_content.prop('disabled', false)
     },
 
     // UI
@@ -102,7 +108,7 @@ HexaLab.PickFilter.prototype = Object.assign(Object.create(HexaLab.Filter.protot
     enable: function (enabled) {
         this.backend.enabled = enabled
         this.on_enabled_set(enabled)
-        HexaLab.app.queue_geometry_update()
+        HexaLab.app.queue_buffers_update()
     },
 
     set_filtered_hexas: function (list) {
@@ -111,7 +117,16 @@ HexaLab.PickFilter.prototype = Object.assign(Object.create(HexaLab.Filter.protot
         for (let i = 0; i < list.length; ++i) {
             this.backend.filter_hexa_idx(list[i])
         }
-        HexaLab.app.queue_geometry_update()
+        HexaLab.app.queue_buffers_update()
+    },
+
+    set_filled_hexas: function (list) {
+        this.filled_hexas = list
+        this.backend.clear_filled_hexas()
+        for (let i = 0; i < list.length; ++i) {
+            this.backend.fill_hexa_idx(list[i])
+        }
+        HexaLab.app.queue_buffers_update()
     },
 
     toggle_pick: function () {
@@ -144,12 +159,14 @@ HexaLab.PickFilter.prototype = Object.assign(Object.create(HexaLab.Filter.protot
 
     clear: function () {
         this.backend.clear_filtered_hexas()
+        this.backend.clear_filled_hexas()
         this.filtered_hexas = []
+        this.filled_hexas   = []
         document.removeEventListener('pointerdown', this.mousedown_listener)
         document.removeEventListener('pointerup',   this.mouseup_listener)
         this.picking = false
         this.filling = false
-        HexaLab.app.queue_geometry_update()
+        HexaLab.app.queue_buffers_update()
         this.on_clear()
     },
 
@@ -197,9 +214,14 @@ HexaLab.PickFilter.prototype = Object.assign(Object.create(HexaLab.Filter.protot
         // HexaLab.app.viewer.add_mesh( sphere )
         const i = this.backend.filter_hexa(p_origin, p_direction)
         if (i != -1) {
-            this.filtered_hexas.push(i)
-            this.filtered_hexas.sort()
-            HexaLab.app.queue_geometry_update()
+            const idx = this.filled_hexas.indexOf(i)
+            if (idx != -1) {
+                this.filled_hexas.splice(idx, 1)
+            } else {
+                this.filtered_hexas.push(i)
+                this.filtered_hexas.sort()   
+            }
+            HexaLab.app.queue_buffers_update()
         }
     },
 
@@ -219,8 +241,11 @@ HexaLab.PickFilter.prototype = Object.assign(Object.create(HexaLab.Filter.protot
             let idx = this.filtered_hexas.indexOf(i);
             if (idx != -1) {
                 this.filtered_hexas.splice(idx, 1);
+            } else {
+                this.filled_hexas.push(i)
+                this.filled_hexas.sort()
             }
-            HexaLab.app.queue_geometry_update()
+            HexaLab.app.queue_buffers_update()
         }
     },
 

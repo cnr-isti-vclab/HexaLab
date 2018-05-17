@@ -11,6 +11,10 @@ HexaLab.UI.peeling_depth_slider = $('#peeling_depth_slider').slider({
     max: 10,
     step: 1
 })
+HexaLab.UI.peeling_menu_content   = $('#peeling_menu *')
+
+HexaLab.UI.peeling_menu_content.prop('disabled', true)
+HexaLab.UI.peeling_depth_slider.slider('disable')
 
 // --------------------------------------------------------------------------------
 // Logic
@@ -25,7 +29,7 @@ HexaLab.PeelingFilter = function () {
     var self = this;
     HexaLab.UI.peeling_enabled.on('click', function() {
         self.enable($(this).is(':checked'))
-        HexaLab.app.queue_geometry_update()
+        HexaLab.app.queue_buffers_update()
     })
     HexaLab.UI.peeling_depth_number.change(function () {
         var value = parseFloat($(this).val())
@@ -34,11 +38,11 @@ HexaLab.PeelingFilter = function () {
         if (value >  max) value = max
         if (value <  min) value = min
         self.set_peeling_depth(value)
-        HexaLab.app.queue_geometry_update()
+        HexaLab.app.queue_buffers_update()
     })
     HexaLab.UI.peeling_depth_slider.on('slide', function (e, ui) {
         self.set_peeling_depth(ui.value)
-        HexaLab.app.queue_geometry_update()
+        HexaLab.app.queue_buffers_update()
     })
 
     // State
@@ -67,6 +71,9 @@ HexaLab.PeelingFilter.prototype = Object.assign(Object.create(HexaLab.Filter.pro
         this.on_peeling_depth_set(this.backend.peeling_depth)
         this.on_max_depth_set(this.backend.max_depth)
         this.on_enabled_set(this.backend.enabled)
+
+        HexaLab.UI.peeling_menu_content.prop('disabled', false)
+        HexaLab.UI.peeling_depth_slider.slider('enable')
     },
 
     // callback events: system -> UI
@@ -88,13 +95,13 @@ HexaLab.PeelingFilter.prototype = Object.assign(Object.create(HexaLab.Filter.pro
 
     enable: function (enabled) {
         this.backend.enabled = enabled
-        HexaLab.app.queue_geometry_update()
+        HexaLab.app.queue_buffers_update()
         this.on_enabled_set(enabled)
     },
 
     set_peeling_depth: function (depth) {
         this.backend.peeling_depth = depth
-        HexaLab.app.queue_geometry_update()
+        HexaLab.app.queue_buffers_update()
         this.on_peeling_depth_set(depth)
     },
 });

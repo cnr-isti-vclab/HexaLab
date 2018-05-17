@@ -202,7 +202,9 @@ EMSCRIPTEN_BINDINGS(HexaLab) {
         .function("filter_hexa",            &PickFilter::filter_hexa)
         .function("unfilter_hexa",          &PickFilter::unfilter_hexa)
         .function("clear_filtered_hexas",   &PickFilter::clear_filtered_hexas)
+        .function("clear_filled_hexas",     &PickFilter::clear_filled_hexas)
         .function("filter_hexa_idx",        &PickFilter::filter_hexa_idx)
+        .function("fill_hexa_idx",          &PickFilter::fill_hexa_idx)
         ;
 
     // MISC
