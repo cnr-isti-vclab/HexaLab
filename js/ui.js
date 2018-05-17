@@ -232,7 +232,7 @@ HexaLab.UI.settings.wireframe.slider().addClass('mini-slider').on('slide', funct
 HexaLab.UI.settings.singularity_mode.slider({
     value: 0,
     min: 0,
-    max: 4,
+    max: 3,
     step: 1
 }).addClass('mini-slider').on('slide', function (e, ui) {
     HexaLab.app.set_singularity_mode(ui.value)

@@ -1396,27 +1396,18 @@ Object.assign(HexaLab.App.prototype, {
         if (mode == 0) {
             this.set_singularity_surface_opacity(0.0)
             this.set_singularity_wireframe_opacity(0.0)
-            this.set_singularity_wireframe_linewidth(1)
             this.set_singularity_wireframe_depthtest(true)
         } else if (mode == 1) {
             this.set_singularity_surface_opacity(0.0)
             this.set_singularity_wireframe_opacity(1.0)
-            this.set_singularity_wireframe_linewidth(1)
             this.set_singularity_wireframe_depthtest(true)
         } else if (mode == 2) {
-            this.set_singularity_surface_opacity(0.0)
+            this.set_singularity_surface_opacity(1.0)
             this.set_singularity_wireframe_opacity(1.0)
-            this.set_singularity_wireframe_linewidth(3)
             this.set_singularity_wireframe_depthtest(true)
         } else if (mode == 3) {
             this.set_singularity_surface_opacity(1.0)
             this.set_singularity_wireframe_opacity(1.0)
-            this.set_singularity_wireframe_linewidth(1)
-            this.set_singularity_wireframe_depthtest(true)
-        } else if (mode == 4) {
-            this.set_singularity_surface_opacity(1.0)
-            this.set_singularity_wireframe_opacity(1.0)
-            this.set_singularity_wireframe_linewidth(1)
             this.set_singularity_wireframe_depthtest(false)
         }
         if (this.singularity_mode == 0 && mode > 0) {
@@ -1438,17 +1429,18 @@ Object.assign(HexaLab.App.prototype, {
                 this.set_visible_wireframe_opacity(this.prev_visible_wireframe_opacity)
             }
         }
-        if (this.singularity_mode < 3 && mode >= 3) {
+        if (this.singularity_mode < 2 && mode >= 2) {
             this.backend.show_boundary_singularity(true)
             this.backend.show_boundary_creases(true)
             this.queue_buffers_update()
-        } else if (this.singularity_mode >= 3 && mode < 3) {
+        } else if (this.singularity_mode >= 2 && mode < 2) {
             this.backend.show_boundary_singularity(false)
             this.backend.show_boundary_creases(false)
             this.queue_buffers_update()
         }
         this.singularity_mode = mode
         HexaLab.UI.on_set_singularity_mode(mode)
+        this.queue_canvas_update()
     },
 
     set_visible_wireframe_opacity:      function (opacity) {
@@ -1456,37 +1448,41 @@ Object.assign(HexaLab.App.prototype, {
         this.materials().visible_wireframe.visible = opacity != 0
         this.prev_visible_wireframe_opacity = null
         HexaLab.UI.on_set_wireframe_opacity(opacity)
+        this.queue_canvas_update()
     },
     set_filtered_surface_opacity:       function (opacity) {
         this.materials().filtered_surface.opacity = opacity
         this.materials().filtered_surface.visible = opacity != 0
         this.prev_filtered_surface_opacity = null
         HexaLab.UI.on_set_filtered_surface_opacity(opacity)
+        this.queue_canvas_update()
     },
     set_filtered_wireframe_opacity:     function (opacity) {
         this.materials().filtered_wireframe.opacity = opacity
         this.materials().filtered_wireframe.visible = opacity != 0
+        this.queue_canvas_update()
     },
     set_singularity_surface_opacity:    function (opacity) {
         this.materials().singularity_surface.opacity = opacity
         this.materials().singularity_surface.visible = opacity != 0
+        this.queue_canvas_update()
     },
     set_singularity_wireframe_opacity:  function (opacity) { 
         this.materials().singularity_wireframe.opacity = opacity
         this.materials().singularity_wireframe.visible = opacity != 0
+        this.queue_canvas_update()
     },
 
     // set_visible_wireframe_color:            function (color)        { this.materials().visible_wireframe.color.set(color) },
-    set_filtered_surface_color:             function (color)        { this.materials().filtered_surface.color.set(color) },
-    set_filtered_wireframe_color:           function (color)        { this.materials().filtered_wireframe.color.set(color) },
+    set_filtered_surface_color:             function (color)        { this.materials().filtered_surface.color.set(color); this.queue_canvas_update() },
+    set_filtered_wireframe_color:           function (color)        { this.materials().filtered_wireframe.color.set(color); this.queue_canvas_update() },
     
-    set_singularity_wireframe_linewidth:    function (linewidth)    { this.materials().singularity_wireframe.linewidth = linewidth },
-    set_singularity_wireframe_depthtest:    function (enabled)      { this.materials().singularity_wireframe.depthTest = enabled },
+    set_singularity_wireframe_depthtest:    function (enabled)      { this.materials().singularity_wireframe.depthTest = enabled; this.queue_canvas_update() },
 
     set_occlusion:                          function (value)        { this.viewer.set_ao_mode(value); HexaLab.UI.on_set_occlusion(value) },
     set_antialiasing:                       function (value)        { this.viewer.set_aa_mode(value) },
-    set_background_color:                   function (color)        { this.viewer.set_background_color(color) },
-    set_light_intensity:                    function (intensity)    { this.viewer.set_light_intensity(intensity) },
+    set_background_color:                   function (color)        { this.viewer.set_background_color(color); this.queue_canvas_update() },
+    set_light_intensity:                    function (intensity)    { this.viewer.set_light_intensity(intensity); this.queue_canvas_update() },
 
     // Import a new mesh. First invoke the backend for the parser and builder.
     // If everything goes well, reset settings to default and propagate the

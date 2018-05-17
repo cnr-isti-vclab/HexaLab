@@ -65,9 +65,11 @@ HexaLab.PlaneFilter = function () {
         self.set_plane_normal(0, 0, 1)
     })
     HexaLab.UI.plane_swap.on('click', function () {
-        var n = self.plane.normal.clone().negate();
-        self.set_plane_offset(1 - self.plane.offset)
+        const normal = self.backend.get_plane_normal()
+        var n = new THREE.Vector3(normal.x(), normal.y(), normal.z()).negate()
+        self.set_plane_offset(1 - self.backend.get_plane_offset())
         self.set_plane_normal(n.x, n.y, n.z)
+        normal.delete()
     })
     HexaLab.UI.plane_snap_camera.on('click', function () {
         var camera_dir = HexaLab.app.camera().getWorldDirection()
