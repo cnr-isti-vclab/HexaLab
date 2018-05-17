@@ -176,7 +176,7 @@
             "web": "http://people.unica.it/gianmarcocherchi/polycube-simplification-for-coarse-layouts-of-surfaces-and-volumes/",
             "DOI": "10.1111/cgf.12959 "
         },
-        "path": "Polycube Simplification for Coarse Layouts of Surfaces and Volumes",
+        "path": "Polycube simplification for coarse layouts of surfaces and volumes",
         "label": "2016 - Polycube Simplification for Coarse Layouts of Surfaces and Volumes",
         "data": [
 "asm/model_in.mesh",
