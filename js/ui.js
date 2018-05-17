@@ -191,8 +191,17 @@ HexaLab.UI.settings.color.source.on("change", function () {
     var value = this.options[this.selectedIndex].value
     if (value == "Default") {
         HexaLab.app.show_visible_quality(false)
+        if (HexaLab.UI.plot_overlay) {
+            HexaLab.UI.plot_overlay.remove()
+            delete HexaLab.UI.plot_overlay
+        }
     } else if (value == "ColorMap") {
         HexaLab.app.show_visible_quality(true)
+        if (HexaLab.UI.plot_overlay) {
+            HexaLab.UI.quality_plot_update()
+        } else {
+            HexaLab.UI.create_plot_panel()
+        }
     }
 })
 

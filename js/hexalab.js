@@ -609,6 +609,7 @@ Object.assign(HexaLab.Viewer.prototype, {
                 sum:        0,
                 target:     tTarget,
                 view_i:     0,
+                done:       false,
             }
             cached = false
         }
@@ -1006,8 +1007,12 @@ Object.assign(HexaLab.Viewer.prototype, {
             this.ao_pass.progress.view_i == 64  ||
             this.ao_pass.progress.view_i == 128 ||
             this.ao_pass.progress.view_i == 512 ||
-            this.ao_pass.progress.view_i == this.ao_pass.views.length
+            this.ao_pass.progress.view_i == this.ao_pass.views.length && !this.ao_pass.progress.done
         ) {
+            if (this.ao_pass.progress.view_i == this.ao_pass.views.length && !this.ao_pass.progress.done) {
+                this.ao_pass.progress.done = true
+            }
+
             this.update_osao_buffers()
             this.dirty_canvas = true
         }
