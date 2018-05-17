@@ -240,9 +240,31 @@
                                 </div>
                             </div>
                             <div class="menu_row">
-                                <div class="menu_row_label">Wireframe</div>
+                                <div class="menu_row_label">Display mode</div>
+                                <div class="menu_row_input">
+                                    <select id="geometry_mode">
+                                        <option value="Default" selected="selected">Wireframe</option>
+                                        <option value="Cracked">Cracks</option>
+                                        <option value="Smooth">Rounded</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="menu_row">
+                                <div class="menu_row_label">Wireframe color</div>
                                 <div class="menu_row_input">
                                     <div class="slider" id="wireframe_slider"></div>
+                                </div>
+                            </div>
+                            <div class="menu_row">
+                                <div class="menu_row_label">Crack size</div>
+                                <div class="menu_row_input">
+                                    <div class="slider" id="crack_size"></div>
+                                </div>
+                            </div>
+                            <div class="menu_row">
+                                <div class="menu_row_label">Rounding radius</div>
+                                <div class="menu_row_input">
+                                    <div class="slider" id="rounding_radius"></div>
                                 </div>
                             </div>
                             <div class="menu_row">
@@ -267,16 +289,6 @@
                                 </div>
                                 <div class="menu_row_input">
                                     <input type="checkbox" id="show_occlusion">
-                                </div>
-                            </div>
-                            <div class="menu_row">
-                                <div class="menu_row_label">Geometry</div>
-                                <div class="menu_row_input">
-                                    <select id="geometry_mode">
-                                        <option value="Default" selected="selected">Default</option>
-                                        <option value="Cracked">Cracked</option>
-                                        <option value="Smooth">Smooth</option>
-                                    </select>
                                 </div>
                             </div>
                         </div>

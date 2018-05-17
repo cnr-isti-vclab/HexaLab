@@ -1102,6 +1102,8 @@ HexaLab.App = function (dom_element) {
         color_map:          'Parula',
         quality_measure:    'Scaled Jacobian',
         geometry_mode:      'Default',
+        crack_size:         0.5,
+        rounding_radius:    0.5
     }
 
     // Materials
@@ -1213,6 +1215,8 @@ Object.assign(HexaLab.App.prototype, {
             apply_color_map:                        this.apply_color_map,
             color_map:                              this.color_map,
             geometry_mode:                          this.geometry_mode,
+            crack_size:                             this.crack_size,
+            rounding_radius:                        this.rounding_radius,
         }
         return x
     },
@@ -1269,6 +1273,8 @@ Object.assign(HexaLab.App.prototype, {
         this.set_singularity_mode(settings.singularity_mode)
         this.set_quality_measure(settings.quality_measure)
         this.set_geometry_mode(settings.geometry_mode)
+        this.set_crack_size(settings.crack_size)
+        this.set_rounding_radius(settings.rounding_radius)
     },
 
     get_settings: function () {
@@ -1441,6 +1447,20 @@ Object.assign(HexaLab.App.prototype, {
         this.singularity_mode = mode
         HexaLab.UI.on_set_singularity_mode(mode)
         this.queue_canvas_update()
+    },
+
+    set_crack_size: function (size) {
+        this.backend.set_crack_size(size)
+        this.crack_size = size
+        this.queue_buffers_update()
+        HexaLab.UI.on_set_crack_size(size)
+    },
+
+    set_rounding_radius: function (rad) {
+        this.backend.set_rounding_radius(rad)
+        this.rounding_radius = rad
+        this.queue_buffers_update()
+        HexaLab.UI.on_set_rounding_radius(rad)
     },
 
     set_visible_wireframe_opacity:      function (opacity) {

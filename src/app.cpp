@@ -165,6 +165,14 @@ namespace HexaLab {
         this->flag_models_as_dirty();
     }
 
+    void App::set_crack_size(float size) { 
+        this->crack_size = size; 
+        this->flag_models_as_dirty(); 
+    }
+    void App::set_rounding_radius(float rad) { 
+        this->rounding_radius = rad; 
+        this->flag_models_as_dirty(); 
+    }
 
     // PRIVATE
 
@@ -542,12 +550,12 @@ namespace HexaLab {
         }
     }
 
-    float gap = 0.3;
-
     void App::build_gap_hexa ( const Vector3f pp[8], const Vector3f nn[6], const bool vv[8], const Vector3f ww[6] ) {
         if ( !vv[0] && !vv[1] && !vv[2] && !vv[3] && !vv[4] && !vv[5] && !vv[6] && !vv[7] ) {
             return;
         }
+
+        float gap = this->max_crack_size * crack_size;
 
         Vector3f bari ( 0, 0, 0 );
 
@@ -591,8 +599,6 @@ namespace HexaLab {
         //{ 6, 7, 3, 2 },   // Bottom
         //{ 4, 5, 1, 0 },   // Top
     }
-
-    float smooth = 0.15;
 
     /*
     float len(vec3 p){
@@ -669,6 +675,8 @@ namespace HexaLab {
                 }
             }
         }
+
+        float smooth = this->max_rounding_radius * this->rounding_radius;
 
         for ( int z = 0; z < 4; z += 3 ) {
             for ( int y = 0; y < 4; y += 3 ) {
