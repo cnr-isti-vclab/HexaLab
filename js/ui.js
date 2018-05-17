@@ -885,7 +885,25 @@ HexaLab.UI.quality_plot = function(container, axis) {
 HexaLab.UI.menu.resizable({
     handles: 'e',
     minWidth: 300,
-    maxWidth: 600
+    maxWidth: 600,
+    // https://stackoverflow.com/questions/27233822/how-to-force-jquery-resizable-to-use-percentage
+    start: function(event, ui){
+        ui.total_width = ui.originalSize.width + ui.originalElement.next().outerWidth();
+    },
+    stop: function(event, ui){     
+        var cellPercentWidth=100 * ui.originalElement.outerWidth()/ HexaLab.UI.display.innerWidth();
+        ui.originalElement.css('width', cellPercentWidth + '%');  
+        var nextCell = ui.originalElement.next();
+        var nextPercentWidth=100 * nextCell.outerWidth()/HexaLab.UI.display.innerWidth();
+        nextCell.css('width', nextPercentWidth + '%');
+    },
+    resize: function(event, ui){ 
+        ui.originalElement.next().width(ui.total_width - ui.size.width); 
+    }
+})
+
+$('.mini-slider').each(function () {
+    $(this).width(HexaLab.UI.menu.width() * 0.4)
 })
 
 HexaLab.UI.menu.on('resize', function () {
@@ -909,10 +927,16 @@ HexaLab.UI.menu.on('resize', function () {
         setTimeout(on_resize_end, delta)
     }
 
-    var width = HexaLab.UI.display.width() - HexaLab.UI.menu.width()
-    HexaLab.UI.canvas_container.css('margin-left', HexaLab.UI.menu.width())
-    HexaLab.UI.canvas_container.width(width)
+    var canvas_width = HexaLab.UI.display.width() - HexaLab.UI.menu.width()
+    var perc_canvas_width = canvas_width / HexaLab.UI.display.width() * 100
+    var perc_menu_width = HexaLab.UI.menu.width() / HexaLab.UI.display.width() * 100
+    HexaLab.UI.canvas_container.css('margin-left', perc_menu_width + '%')
+    HexaLab.UI.canvas_container.width(perc_canvas_width + '%')
     HexaLab.app.resize()
+
+    $('.mini-slider').each(function () {
+        $(this).width(HexaLab.UI.menu.width() * 0.4)
+    })
 
     $('#mesh_info_2').css('left', (HexaLab.UI.menu.width() + 10).toString().concat('px'))
 })
