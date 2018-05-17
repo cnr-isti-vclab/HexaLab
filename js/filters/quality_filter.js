@@ -56,6 +56,10 @@ HexaLab.QualityFilter = function () {
         max: 1,
         op: 'inside'
     }
+
+    HexaLab.UI.mesh.quality_type.listeners.push(function () {
+        self.on_quality_threshold_max_set((100 - HexaLab.UI.quality_range_slider.slider('value')) / 100)
+    })
 }
 
 HexaLab.QualityFilter.prototype = Object.assign(Object.create(HexaLab.Filter.prototype), {

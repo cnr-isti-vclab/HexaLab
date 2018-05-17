@@ -1496,21 +1496,21 @@ Object.assign(HexaLab.App.prototype, {
             return
         }
         this.mesh = this.backend.get_mesh()
+        // update UI
+        HexaLab.UI.on_import_mesh(path)
         // reset settings
         this.set_settings({
             app:        this.default_app_settings,
             camera:     this.default_camera_settings,
             rendering:  this.default_rendering_settings,
             materials:  this.default_material_settings
-        });
+        })
         // notify filters
         for (var k in this.filters) {
             this.filters[k].on_mesh_change(this.mesh)
         }
         // notify viewer
         this.viewer.on_mesh_change(this.mesh)
-        // update UI
-        HexaLab.UI.on_import_mesh(path)
     },
 
     // The application main loop. Call this after instancing an App object to start rendering.

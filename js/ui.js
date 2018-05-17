@@ -110,7 +110,11 @@ HexaLab.UI = {
         infobox_2: {
             element:        $('#mesh_info_2'),
             text:           $('#mesh_info_2 .box_text'),
-        }
+        },
+        quality_type: {
+            element:        null,
+            listeners:      [],
+        },
     },
     
     // Toolbar
@@ -371,6 +375,28 @@ HexaLab.UI.import_remote_mesh = function (source, name) {
     HexaLab.UI.mesh.infobox_2.element.show().css('display', 'flex');
 }
 
+HexaLab.UI.mesh.quality_type.element = $('<select id="quality_type" title="Choose Hex Quality measure">\
+        <option value="Scaled Jacobian">Scaled Jacobian</option>\
+        <option value="Edge Ratio">Edge Ratio</option>\
+        <option value="Diagonal">Diagonal</option>\
+        <option value="Dimension">Dimension</option>\
+        <option value="Distortion">Distortion</option>\
+        <option value="Jacobian">Jacobian</option>\
+        <option value="Max Edge Ratio">Max Edge Ratio</option>\
+        <option value="Max Aspect Frobenius">Max Aspect Frobenius</option>\
+        <option value="Mean Aspect Frobenius">Mean Aspect Frobenius</option>\
+        <option value="Oddy">Oddy</option>\
+        <option value="Relative Size Squared">Relative Size Squared</option>\
+        <option value="Shape">Shape</option>\
+        <option value="Shape and Size">Shape and Size</option>\
+        <option value="Shear">Shear</option>\
+        <option value="Shear and Size">Shear and Size</option>\
+        <option value="Skew">Skew</option>\
+        <option value="Stretch">Stretch</option>\
+        <option value="Taper">Taper</option>\
+        <option value="Volume">Volume</option>\
+    </select>')
+
 HexaLab.UI.setup_mesh_stats = function(name) {
     var mesh = HexaLab.app.backend.get_mesh()
     HexaLab.UI.mesh.infobox_2.element.show()
@@ -386,33 +412,15 @@ HexaLab.UI.setup_mesh_stats = function(name) {
     //     '<div><span class="mesh_stat">hexas:    </span><span class="simple-font">' + mesh.hexa_count + '</span></div>' +
     //     '</div>'
     // )
+
     HexaLab.UI.mesh.infobox_2.text.append('<div class="menu_row"><div class="menu_row_label">Quality</div>\
     <div class="menu_row_input">\
         <div class="menu_row_input_block">\
-            <select id="quality_type" title="Choose Hex Quality measure">\
-                <option value="Scaled Jacobian">Scaled Jacobian</option>\
-                <option value="Edge Ratio">Edge Ratio</option>\
-                <option value="Diagonal">Diagonal</option>\
-                <option value="Dimension">Dimension</option>\
-                <option value="Distortion">Distortion</option>\
-                <option value="Jacobian">Jacobian</option>\
-                <option value="Max Edge Ratio">Max Edge Ratio</option>\
-                <option value="Max Aspect Frobenius">Max Aspect Frobenius</option>\
-                <option value="Mean Aspect Frobenius">Mean Aspect Frobenius</option>\
-                <option value="Oddy">Oddy</option>\
-                <option value="Relative Size Squared">Relative Size Squared</option>\
-                <option value="Shape">Shape</option>\
-                <option value="Shape and Size">Shape and Size</option>\
-                <option value="Shear">Shear</option>\
-                <option value="Shear and Size">Shear and Size</option>\
-                <option value="Skew">Skew</option>\
-                <option value="Stretch">Stretch</option>\
-                <option value="Taper">Taper</option>\
-                <option value="Volume">Volume</option>\
-            </select>\
         </div>\
     </div></div>')
-    if (HexaLab.UI.view_quality_measure) $('#quality_type').val(HexaLab.UI.view_quality_measure)
+    HexaLab.UI.mesh.infobox_2.element.find('.menu_row_input_block').append(HexaLab.UI.mesh.quality_type.element)
+
+    if (HexaLab.UI.view_quality_measure) HexaLab.UI.mesh.quality_type.element.val(HexaLab.UI.view_quality_measure)
     let min = mesh.quality_min.toFixed(3)
     let max = mesh.quality_max.toFixed(3)
     let avg = mesh.quality_avg.toFixed(3)
@@ -436,9 +444,13 @@ HexaLab.UI.setup_mesh_stats = function(name) {
     //     '<div><span class="mesh_stat">var: </span>' + vri + '</div>' +
     //     '</div>'
     // )
-    $('#quality_type').on('change', function () {
-        var v = this.options[this.selectedIndex].value
+    // TODO
+    HexaLab.UI.mesh.quality_type.element.on('change', function () {
+        const v = this.options[this.selectedIndex].value
         HexaLab.app.set_quality_measure(v);
+        for (let x in HexaLab.UI.mesh.quality_type.listeners) {
+            HexaLab.UI.mesh.quality_type.listeners[x]()
+        }
     })
 }
 
@@ -457,6 +469,7 @@ HexaLab.UI.on_import_mesh = function (name) {
     // if (HexaLab.UI.view_source == 1) HexaLab.UI.show_mesh_name(name)
     if (HexaLab.UI.view_source == 2) HexaLab.UI.setup_dataset_content()
     HexaLab.UI.setup_mesh_stats(name)
+    
     HexaLab.UI.quality_plot_update()
 }
 
