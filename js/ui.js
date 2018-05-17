@@ -110,7 +110,11 @@ HexaLab.UI = {
         infobox_2: {
             element:        $('#mesh_info_2'),
             text:           $('#mesh_info_2 .box_text'),
-        }
+        },
+        quality_type: {
+            element:        null,
+            listeners:      [],
+        },
     },
     
     // Toolbar
@@ -130,6 +134,14 @@ HexaLab.UI = {
             this.load_settings.prop("disabled", false)
             this.save_settings.prop("disabled", false)
             this.snapshot.prop("disabled", false)
+            HexaLab.UI.settings.rendering_menu_content.prop('disabled', false)
+            HexaLab.UI.settings.silhouette.slider('enable')    
+            HexaLab.UI.settings.singularity_mode.slider('enable')
+            HexaLab.UI.settings.wireframe.slider('enable')
+            HexaLab.UI.settings.crack_size.slider('enable')
+            HexaLab.UI.settings.rounding_radius.slider('enable')
+            HexaLab.UI.settings.color.default.outside.spectrum('enable')
+            HexaLab.UI.settings.color.default.inside.spectrum('enable')
         },
         on_mesh_import_fail: function () {
             this.reset_camera.prop("disabled", true)
@@ -152,11 +164,17 @@ HexaLab.UI = {
             }
         },
         silhouette:         $('#filtered_slider'),
-        wireframe:          $('#wireframe_slider'),
-        occlusion:          $("#show_occlusion"),
         singularity_mode:   $('#singularity_slider'),
+        occlusion:          $("#show_occlusion"),
         geometry_mode:      $('#geometry_mode'),
         ao_mode:            $("#ao_mode"),
+        rendering_menu_content: $('#rendering_menu *'),
+        wireframe:          $('#wireframe_slider'),
+        rounding_radius:    $('#rounding_radius'),
+        crack_size:         $('#crack_size'),
+        wireframe_row:      $('#wireframe_slider').closest('.menu_row'),
+        rounding_radius_row: $('#rounding_radius').closest('.menu_row'),
+        crack_size_row:     $('#crack_size').closest('.menu_row'),
     },
     
     // Mesh sources
@@ -191,8 +209,17 @@ HexaLab.UI.settings.color.source.on("change", function () {
     var value = this.options[this.selectedIndex].value
     if (value == "Default") {
         HexaLab.app.show_visible_quality(false)
+        if (HexaLab.UI.plot_overlay) {
+            HexaLab.UI.plot_overlay.remove()
+            delete HexaLab.UI.plot_overlay
+        }
     } else if (value == "ColorMap") {
         HexaLab.app.show_visible_quality(true)
+        if (HexaLab.UI.plot_overlay) {
+            HexaLab.UI.quality_plot_update()
+        } else {
+            HexaLab.UI.create_plot_panel()
+        }
     }
 })
 
@@ -220,10 +247,18 @@ HexaLab.UI.settings.wireframe.slider().addClass('mini-slider').on('slide', funct
     HexaLab.app.set_visible_wireframe_opacity(ui.value / 100)
 })
 
+HexaLab.UI.settings.crack_size.slider().addClass('mini-slider').on('slide', function (e, ui) {
+    HexaLab.app.set_crack_size(ui.value / 100)
+})
+
+HexaLab.UI.settings.rounding_radius.slider().addClass('mini-slider').on('slide', function (e, ui) {
+    HexaLab.app.set_rounding_radius(ui.value / 100)
+})
+
 HexaLab.UI.settings.singularity_mode.slider({
     value: 0,
     min: 0,
-    max: 4,
+    max: 3,
     step: 1
 }).addClass('mini-slider').on('slide', function (e, ui) {
     HexaLab.app.set_singularity_mode(ui.value)
@@ -260,6 +295,14 @@ HexaLab.UI.on_show_visible_quality = function (do_show) {
         HexaLab.UI.settings.color.default.wrapper.css('display', 'flex');
         HexaLab.UI.settings.color.source.val("Default")
     }
+}
+
+HexaLab.UI.on_set_crack_size = function (size) {
+    HexaLab.UI.settings.crack_size.slider('value', size * 100)
+}
+
+HexaLab.UI.on_set_rounding_radius = function (rad) {
+    HexaLab.UI.settings.rounding_radius.slider('value', rad * 100)
 }
 
 HexaLab.UI.on_set_wireframe_opacity = function (value) {
@@ -355,6 +398,28 @@ HexaLab.UI.import_remote_mesh = function (source, name) {
     HexaLab.UI.mesh.infobox_2.element.show().css('display', 'flex');
 }
 
+HexaLab.UI.mesh.quality_type.element = $('<select id="quality_type" title="Choose Hex Quality measure">\
+        <option value="Scaled Jacobian">Scaled Jacobian</option>\
+        <option value="Edge Ratio">Edge Ratio</option>\
+        <option value="Diagonal">Diagonal</option>\
+        <option value="Dimension">Dimension</option>\
+        <option value="Distortion">Distortion</option>\
+        <option value="Jacobian">Jacobian</option>\
+        <option value="Max Edge Ratio">Max Edge Ratio</option>\
+        <option value="Max Aspect Frobenius">Max Aspect Frobenius</option>\
+        <option value="Mean Aspect Frobenius">Mean Aspect Frobenius</option>\
+        <option value="Oddy">Oddy</option>\
+        <option value="Relative Size Squared">Relative Size Squared</option>\
+        <option value="Shape">Shape</option>\
+        <option value="Shape and Size">Shape and Size</option>\
+        <option value="Shear">Shear</option>\
+        <option value="Shear and Size">Shear and Size</option>\
+        <option value="Skew">Skew</option>\
+        <option value="Stretch">Stretch</option>\
+        <option value="Taper">Taper</option>\
+        <option value="Volume">Volume</option>\
+    </select>')
+
 HexaLab.UI.setup_mesh_stats = function(name) {
     var mesh = HexaLab.app.backend.get_mesh()
     HexaLab.UI.mesh.infobox_2.element.show()
@@ -370,33 +435,15 @@ HexaLab.UI.setup_mesh_stats = function(name) {
     //     '<div><span class="mesh_stat">hexas:    </span><span class="simple-font">' + mesh.hexa_count + '</span></div>' +
     //     '</div>'
     // )
+
     HexaLab.UI.mesh.infobox_2.text.append('<div class="menu_row"><div class="menu_row_label">Quality</div>\
     <div class="menu_row_input">\
         <div class="menu_row_input_block">\
-            <select id="quality_type" title="Choose Hex Quality measure">\
-                <option value="Scaled Jacobian">Scaled Jacobian</option>\
-                <option value="Edge Ratio">Edge Ratio</option>\
-                <option value="Diagonal">Diagonal</option>\
-                <option value="Dimension">Dimension</option>\
-                <option value="Distortion">Distortion</option>\
-                <option value="Jacobian">Jacobian</option>\
-                <option value="Max Edge Ratio">Max Edge Ratio</option>\
-                <option value="Max Aspect Frobenius">Max Aspect Frobenius</option>\
-                <option value="Mean Aspect Frobenius">Mean Aspect Frobenius</option>\
-                <option value="Oddy">Oddy</option>\
-                <option value="Relative Size Squared">Relative Size Squared</option>\
-                <option value="Shape">Shape</option>\
-                <option value="Shape and Size">Shape and Size</option>\
-                <option value="Shear">Shear</option>\
-                <option value="Shear and Size">Shear and Size</option>\
-                <option value="Skew">Skew</option>\
-                <option value="Stretch">Stretch</option>\
-                <option value="Taper">Taper</option>\
-                <option value="Volume">Volume</option>\
-            </select>\
         </div>\
     </div></div>')
-    if (HexaLab.UI.view_quality_measure) $('#quality_type').val(HexaLab.UI.view_quality_measure)
+    HexaLab.UI.mesh.infobox_2.element.find('.menu_row_input_block').append(HexaLab.UI.mesh.quality_type.element)
+
+    if (HexaLab.UI.view_quality_measure) HexaLab.UI.mesh.quality_type.element.val(HexaLab.UI.view_quality_measure)
     let min = mesh.quality_min.toFixed(3)
     let max = mesh.quality_max.toFixed(3)
     let avg = mesh.quality_avg.toFixed(3)
@@ -420,9 +467,13 @@ HexaLab.UI.setup_mesh_stats = function(name) {
     //     '<div><span class="mesh_stat">var: </span>' + vri + '</div>' +
     //     '</div>'
     // )
-    $('#quality_type').on('change', function () {
-        var v = this.options[this.selectedIndex].value
+    // TODO
+    HexaLab.UI.mesh.quality_type.element.on('change', function () {
+        const v = this.options[this.selectedIndex].value
         HexaLab.app.set_quality_measure(v);
+        for (let x in HexaLab.UI.mesh.quality_type.listeners) {
+            HexaLab.UI.mesh.quality_type.listeners[x]()
+        }
     })
 }
 
@@ -432,8 +483,18 @@ HexaLab.UI.on_set_quality_measure = function (measure) {
     HexaLab.UI.quality_plot_update()
 }
 
-HexaLab.UI.on_set_geometry_mode = function (mode) {
-    HexaLab.UI.settings.geometry_mode.val(mode)
+HexaLab.UI.on_set_geometry_mode = function (v) {
+    HexaLab.UI.settings.geometry_mode.val(v)
+    HexaLab.UI.settings.wireframe_row.hide()
+    HexaLab.UI.settings.crack_size_row.hide()
+    HexaLab.UI.settings.rounding_radius_row.hide()
+    if (v == 'Default') {
+        HexaLab.UI.settings.wireframe_row.show()
+    } else if (v == 'Cracked') {
+        HexaLab.UI.settings.crack_size_row.show()
+    } else if (v == 'Smooth') {
+        HexaLab.UI.settings.rounding_radius_row.show()
+    }
 }
 
 HexaLab.UI.on_import_mesh = function (name) {
@@ -441,6 +502,7 @@ HexaLab.UI.on_import_mesh = function (name) {
     // if (HexaLab.UI.view_source == 1) HexaLab.UI.show_mesh_name(name)
     if (HexaLab.UI.view_source == 2) HexaLab.UI.setup_dataset_content()
     HexaLab.UI.setup_mesh_stats(name)
+    
     HexaLab.UI.quality_plot_update()
 }
 
@@ -475,7 +537,7 @@ $.ajax({
 })
 
 HexaLab.UI.setup_dataset_content = function () {
-    var v = HexaLab.UI.mesh.source[0].options[HexaLab.UI.mesh.source[0].selectedIndex].value
+    var v = HexaLab.UI.mesh.selected_source
     var i = parseInt(v)
     var source = HexaLab.UI.datasets_index.sources[i]
 
@@ -546,6 +608,7 @@ HexaLab.UI.mesh.source.on("change", function () {
     HexaLab.UI.mesh.source.select_click_flag = 1
 
     var v = this.options[this.selectedIndex].value
+    HexaLab.UI.mesh.selected_source = v
     if (v == "-1") {
         // HexaLab.UI.mesh.source.select_focus_file_flag = 1
         HexaLab.UI.clear_mesh_info()
@@ -569,7 +632,7 @@ HexaLab.UI.mesh.dataset_content.on("change", function () {
     HexaLab.UI.mesh.dataset_content.select_click_flag = 1
     var v = this.options[this.selectedIndex].value
     var i = parseInt(v)
-    var j = parseInt(HexaLab.UI.mesh.source[0].options[HexaLab.UI.mesh.source[0].selectedIndex].value)
+    var j = parseInt(HexaLab.UI.mesh.selected_source)
     var source = HexaLab.UI.datasets_index.sources[j]
     var mesh = source.data[i]
 
@@ -875,7 +938,25 @@ HexaLab.UI.quality_plot = function(container, axis) {
 HexaLab.UI.menu.resizable({
     handles: 'e',
     minWidth: 300,
-    maxWidth: 600
+    maxWidth: 600,
+    // https://stackoverflow.com/questions/27233822/how-to-force-jquery-resizable-to-use-percentage
+    start: function(event, ui){
+        ui.total_width = ui.originalSize.width + ui.originalElement.next().outerWidth();
+    },
+    stop: function(event, ui){     
+        var cellPercentWidth=100 * ui.originalElement.outerWidth()/ HexaLab.UI.display.innerWidth();
+        ui.originalElement.css('width', cellPercentWidth + '%');  
+        var nextCell = ui.originalElement.next();
+        var nextPercentWidth=100 * nextCell.outerWidth()/HexaLab.UI.display.innerWidth();
+        nextCell.css('width', nextPercentWidth + '%');
+    },
+    resize: function(event, ui){ 
+        ui.originalElement.next().width(ui.total_width - ui.size.width); 
+    }
+})
+
+$('.mini-slider').each(function () {
+    $(this).width(HexaLab.UI.menu.width() * 0.4)
 })
 
 HexaLab.UI.menu.on('resize', function () {
@@ -899,10 +980,16 @@ HexaLab.UI.menu.on('resize', function () {
         setTimeout(on_resize_end, delta)
     }
 
-    var width = HexaLab.UI.display.width() - HexaLab.UI.menu.width()
-    HexaLab.UI.canvas_container.css('margin-left', HexaLab.UI.menu.width())
-    HexaLab.UI.canvas_container.width(width)
+    var canvas_width = HexaLab.UI.display.width() - HexaLab.UI.menu.width()
+    var perc_canvas_width = canvas_width / HexaLab.UI.display.width() * 100
+    var perc_menu_width = HexaLab.UI.menu.width() / HexaLab.UI.display.width() * 100
+    HexaLab.UI.canvas_container.css('margin-left', perc_menu_width + '%')
+    HexaLab.UI.canvas_container.width(perc_canvas_width + '%')
     HexaLab.app.resize()
+
+    $('.mini-slider').each(function () {
+        $(this).width(HexaLab.UI.menu.width() * 0.4)
+    })
 
     $('#mesh_info_2').css('left', (HexaLab.UI.menu.width() + 10).toString().concat('px'))
 })
@@ -1017,3 +1104,12 @@ HexaLab.UI.topbar.snapshot.on('click', function () {
         saveAs(blob, "HLsnapshot.png");
     }, "image/png");
 }).prop("disabled", true);
+
+HexaLab.UI.settings.rendering_menu_content.prop('disabled', true)
+HexaLab.UI.settings.silhouette.slider('disable')    
+HexaLab.UI.settings.singularity_mode.slider('disable')
+HexaLab.UI.settings.wireframe_row.hide()
+HexaLab.UI.settings.crack_size_row.hide()
+HexaLab.UI.settings.rounding_radius_row.hide()
+HexaLab.UI.settings.color.default.outside.spectrum('disable')
+HexaLab.UI.settings.color.default.inside.spectrum('disable')

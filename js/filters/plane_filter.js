@@ -15,6 +15,10 @@ HexaLab.UI.plane_snap_ny        = $('#plane_snap_ny')
 HexaLab.UI.plane_snap_nz        = $('#plane_snap_nz')
 HexaLab.UI.plane_swap           = $('#plane_swap_sign')
 HexaLab.UI.plane_snap_camera    = $('#plane_snap_camera')
+HexaLab.UI.plane_menu_content   = $('#plane_menu *')
+
+HexaLab.UI.plane_menu_content.prop('disabled', true)
+HexaLab.UI.plane_offset_slider.slider('disable')
 
 // --------------------------------------------------------------------------------
 // Filter class
@@ -65,9 +69,11 @@ HexaLab.PlaneFilter = function () {
         self.set_plane_normal(0, 0, 1)
     })
     HexaLab.UI.plane_swap.on('click', function () {
-        var n = self.plane.normal.clone().negate();
-        self.set_plane_offset(1 - self.plane.offset)
+        const normal = self.backend.get_plane_normal()
+        var n = new THREE.Vector3(normal.x(), normal.y(), normal.z()).negate()
+        self.set_plane_offset(1 - self.backend.get_plane_offset())
         self.set_plane_normal(n.x, n.y, n.z)
+        normal.delete()
     })
     HexaLab.UI.plane_snap_camera.on('click', function () {
         var camera_dir = HexaLab.app.camera().getWorldDirection()
@@ -157,6 +163,9 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
         this.on_plane_offset_set(this.backend.get_plane_offset())
 
         this.update_mesh();
+
+        HexaLab.UI.plane_menu_content.prop('disabled', false)
+        HexaLab.UI.plane_offset_slider.slider('enable')
     },
 
     // misc
@@ -175,14 +184,14 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
     },
 
     on_plane_normal_set: function (normal) {
-        HexaLab.UI.plane_nx.val(normal.x.toFixed(3))
-        HexaLab.UI.plane_ny.val(normal.y.toFixed(3))
-        HexaLab.UI.plane_nz.val(normal.z.toFixed(3))
+        HexaLab.UI.plane_nx.val(normal.x.toFixed(2))
+        HexaLab.UI.plane_ny.val(normal.y.toFixed(2))
+        HexaLab.UI.plane_nz.val(normal.z.toFixed(2))
     },
 
     on_plane_offset_set: function (offset) {
         HexaLab.UI.plane_offset_slider.slider('value', offset * 1000)
-        HexaLab.UI.plane_offset_number.val(offset)
+        HexaLab.UI.plane_offset_number.val(offset.toFixed(3))
     },
 
     // State
@@ -191,7 +200,7 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
         this.backend.enabled = enabled
         this.update_visibility()
         this.on_enabled_set(enabled)
-        HexaLab.app.queue_geometry_update()
+        HexaLab.app.queue_buffers_update()
     },
 
     set_plane_normal: function (nx, ny, nz) {
@@ -199,7 +208,7 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
         const normal = new THREE.Vector3(nx, ny, nz)
         this.on_plane_normal_set(normal)
         this.update_mesh()
-        HexaLab.app.queue_geometry_update()
+        HexaLab.app.queue_buffers_update()
     },
 
     set_plane_offset: function (offset) {
@@ -207,15 +216,17 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
         this.plane.world_offset = this.backend.get_plane_world_offset()
         this.on_plane_offset_set(offset)
         this.update_mesh()
-        HexaLab.app.queue_geometry_update()
+        HexaLab.app.queue_buffers_update()
     },
 
     set_plane_opacity: function (opacity) {
         this.plane.material.opacity = opacity
+        HexaLab.app.queue_canvas_update()
     },
 
     set_plane_color: function (color) {
         this.plane.material.color.set(color)
+        HexaLab.app.queue_canvas_update()
     },
 
     update_visibility: function () {
@@ -234,6 +245,7 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
             if (this.plane.mesh) this.plane.mesh.visible = false
             if (this.plane.edges) this.plane.edges.visible = false
         }
+        HexaLab.app.queue_canvas_update()
     },
 
     update_mesh: function () {

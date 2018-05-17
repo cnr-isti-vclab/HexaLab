@@ -77,6 +77,8 @@ EMSCRIPTEN_BINDINGS(HexaLab) {
         .function("show_boundary_singularity",          &App::show_boundary_singularity)
         .function("show_boundary_creases",              &App::show_boundary_creases)
         .function("set_geometry_mode",                  &App::set_geometry_mode)
+        .function("set_crack_size",                     &App::set_crack_size)
+        .function("set_rounding_radius",                &App::set_rounding_radius)
 
         .function("get_visible_model",                  &App::get_visible_model, allow_raw_pointers())
         .function("get_filtered_model",                 &App::get_filtered_model, allow_raw_pointers())
@@ -202,7 +204,9 @@ EMSCRIPTEN_BINDINGS(HexaLab) {
         .function("filter_hexa",            &PickFilter::filter_hexa)
         .function("unfilter_hexa",          &PickFilter::unfilter_hexa)
         .function("clear_filtered_hexas",   &PickFilter::clear_filtered_hexas)
+        .function("clear_filled_hexas",     &PickFilter::clear_filled_hexas)
         .function("filter_hexa_idx",        &PickFilter::filter_hexa_idx)
+        .function("fill_hexa_idx",          &PickFilter::fill_hexa_idx)
         ;
 
     // MISC

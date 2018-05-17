@@ -74,6 +74,14 @@ namespace HexaLab {
 
         GeometryMode geometry_mode = GeometryMode::Default;
 
+        // default values are half these
+        const float max_crack_size = 0.6f;
+        const float max_rounding_radius = 0.3f;
+
+        // these are scalars 0->1 that multiply the max
+        float crack_size;
+        float rounding_radius;
+
       public:
         // Loads and imports a new mesh file into the system. Call the Loader, the Builder, updates mesh stats and
         // evaluated quality measures, builds singularity models, notifies filters of the new mesh.
@@ -107,6 +115,9 @@ namespace HexaLab {
 
         void show_boundary_singularity ( bool do_show );
         void show_boundary_creases ( bool do_show );
+
+        void set_crack_size ( float size );
+        void set_rounding_radius ( float rad );
 
 
         // Getters
