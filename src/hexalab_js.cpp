@@ -82,7 +82,9 @@ EMSCRIPTEN_BINDINGS(HexaLab) {
 
         .function("get_visible_model",                  &App::get_visible_model, allow_raw_pointers())
         .function("get_filtered_model",                 &App::get_filtered_model, allow_raw_pointers())
-        .function("get_singularity_model",              &App::get_singularity_model, allow_raw_pointers())
+        .function("get_line_singularity_model",         &App::get_line_singularity_model, allow_raw_pointers())
+        .function("get_full_singularity_model",         &App::get_full_singularity_model, allow_raw_pointers())
+        .function("get_full_model",                     &App::get_full_model, allow_raw_pointers())
         .function("get_hexa_quality",                   &App::get_hexa_quality, allow_raw_pointers())
         .function("get_normalized_hexa_quality",        &App::get_normalized_hexa_quality, allow_raw_pointers())
         .function("get_mesh",                           &App::get_mesh_stats, allow_raw_pointers())

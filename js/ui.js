@@ -236,7 +236,7 @@ HexaLab.UI.settings.color.default.inside.spectrum({
 })
 
 HexaLab.UI.settings.silhouette.slider().addClass('mini-slider').on('slide', function (e, ui) {
-    HexaLab.app.set_filtered_surface_opacity(ui.value / 100)
+    HexaLab.app.set_silhouette_intensity(ui.value / 100)
 })
 
 HexaLab.UI.settings.color.quality_map.on('change', function () {
@@ -258,7 +258,7 @@ HexaLab.UI.settings.rounding_radius.slider().addClass('mini-slider').on('slide',
 HexaLab.UI.settings.singularity_mode.slider({
     value: 0,
     min: 0,
-    max: 3,
+    max: 5,
     step: 1
 }).addClass('mini-slider').on('slide', function (e, ui) {
     HexaLab.app.set_singularity_mode(ui.value)

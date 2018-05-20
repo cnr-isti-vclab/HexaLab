@@ -24,8 +24,8 @@ namespace HexaLab {
         HL_LOG ( "Building...\n" );
         Builder::build ( *mesh, verts, indices );
         // Validate
-         HL_LOG ( "Validating...\n" );
-         Builder::validate ( *mesh );
+        HL_LOG ( "Validating...\n" );
+        Builder::validate ( *mesh );
         // Update stats
         float max = std::numeric_limits<float>::lowest();
         float min = std::numeric_limits<float>::max();
@@ -96,6 +96,7 @@ namespace HexaLab {
         this->flag_models_as_dirty();
         //this->update_models();
         this->build_singularity_models();
+        this->build_full_model();
         return true;
     }
 
@@ -165,13 +166,13 @@ namespace HexaLab {
         this->flag_models_as_dirty();
     }
 
-    void App::set_crack_size(float size) { 
-        this->crack_size = size; 
-        this->flag_models_as_dirty(); 
+    void App::set_crack_size ( float size ) {
+        this->crack_size = size;
+        this->flag_models_as_dirty();
     }
-    void App::set_rounding_radius(float rad) { 
-        this->rounding_radius = rad; 
-        this->flag_models_as_dirty(); 
+    void App::set_rounding_radius ( float rad ) {
+        this->rounding_radius = rad;
+        this->flag_models_as_dirty();
     }
 
     // PRIVATE
@@ -258,8 +259,10 @@ namespace HexaLab {
     }
 
     void App::build_singularity_models() {
-        singularity_model.clear();
-
+        line_singularity_model.clear();
+        spined_singularity_model.clear();
+        full_singularity_model.clear();
+        
         // boundary_singularity_model.clear();
         // boundary_creases_model.clear();
         for ( size_t i = 0; i < mesh->edges.size(); ++i ) {
@@ -310,12 +313,13 @@ namespace HexaLab {
                 continue;
             }
 
-            // add edge
+            // add line edge
             for ( int j = 0; j < 2; ++j ) {
-                singularity_model.wireframe_vert_pos.push_back ( mesh->verts[nav.dart().vert].position );
+                line_singularity_model.wireframe_vert_pos.push_back ( mesh->verts[nav.dart().vert].position );
+                spined_singularity_model.wireframe_vert_pos.push_back ( mesh->verts[nav.dart().vert].position );
+                full_singularity_model.wireframe_vert_pos.push_back ( mesh->verts[nav.dart().vert].position );
                 nav = nav.flip_vert();
             }
-
             Vector3f color;
 
             switch ( face_count ) {
@@ -331,32 +335,44 @@ namespace HexaLab {
                     color = Vector3f ( 0, 0, 1 );
             }
 
-            singularity_model.wireframe_vert_color.push_back ( color );
-            singularity_model.wireframe_vert_color.push_back ( color );
-            // add adjacent faces
+            // add color
+            line_singularity_model.wireframe_vert_color.push_back ( color );
+            line_singularity_model.wireframe_vert_color.push_back ( color );
+            spined_singularity_model.wireframe_vert_color.push_back ( color );
+            spined_singularity_model.wireframe_vert_color.push_back ( color );
+            full_singularity_model.wireframe_vert_color.push_back ( color );
+            full_singularity_model.wireframe_vert_color.push_back ( color );
+
+            // add adjacent faces/edges
             Face& begin = nav.face();
 
             do {                                          // foreach face adjacent tot he singularity edge
                 for ( int k = 0; k < 2; ++k ) {           // for both triangles making up the face
                     for ( int j = 0; j < 2; ++j ) {       // 2 + 1 face vertices add
-                        singularity_model.surface_vert_pos.push_back ( mesh->verts[nav.dart().vert].position );
-                        singularity_model.surface_vert_color.push_back ( color );
-
+                        spined_singularity_model.surface_vert_pos.push_back ( mesh->verts[nav.dart().vert].position );
+                        spined_singularity_model.surface_vert_color.push_back ( color );
+                        full_singularity_model.surface_vert_pos.push_back ( mesh->verts[nav.dart().vert].position );
+                        full_singularity_model.surface_vert_color.push_back ( color );
+                        
                         for ( int n = 0; n < 2; ++n ) {   // 2 verts that make the edge
                             if ( j == 0 && k == 1 ) {
                                 continue;
                             }
 
-                            singularity_model.wireframe_vert_pos.push_back ( mesh->verts[nav.dart().vert].position );
-                            singularity_model.wireframe_vert_color.push_back ( Vector3f ( 0, 0, 0 ) );
+                            spined_singularity_model.wireframe_vert_pos.push_back ( mesh->verts[nav.dart().vert].position );
+                            spined_singularity_model.wireframe_vert_color.push_back ( color );
+                            full_singularity_model.wireframe_vert_pos.push_back ( mesh->verts[nav.dart().vert].position );
+                            full_singularity_model.wireframe_vert_color.push_back ( color );
                             nav = nav.flip_vert();
                         }
 
                         nav = nav.rotate_on_face();
                     }
 
-                    singularity_model.surface_vert_pos.push_back ( mesh->verts[nav.dart().vert].position );
-                    singularity_model.surface_vert_color.push_back ( color );
+                    spined_singularity_model.surface_vert_pos.push_back ( mesh->verts[nav.dart().vert].position );
+                    spined_singularity_model.surface_vert_color.push_back ( color );
+                    full_singularity_model.surface_vert_pos.push_back ( mesh->verts[nav.dart().vert].position );
+                    full_singularity_model.surface_vert_color.push_back ( color );
                 }
 
                 nav = nav.rotate_on_edge();
@@ -383,10 +399,24 @@ namespace HexaLab {
         return i;
     }
 
+    size_t App::add_full_vertex(Vector3f pos, Vector3f norm, Vector3f color) {
+        size_t i = full_model.surface_vert_pos.size();
+        full_model.surface_vert_pos.push_back(pos);
+        full_model.surface_vert_norm.push_back(norm);
+        full_model.surface_vert_color.push_back(color);
+        return i;
+    }
+
     void App::add_triangle ( size_t i1, size_t i2, size_t i3 ) {
         visible_model.surface_ibuffer.push_back ( i1 );
         visible_model.surface_ibuffer.push_back ( i2 );
         visible_model.surface_ibuffer.push_back ( i3 );
+    }
+
+    void App::add_full_triangle(size_t i1, size_t i2, size_t i3) {
+        full_model.surface_ibuffer.push_back(i1);
+        full_model.surface_ibuffer.push_back(i2);
+        full_model.surface_ibuffer.push_back(i3);
     }
 
     void App::add_quad ( size_t i1, size_t i2, size_t i3, size_t i4 ) {
@@ -532,6 +562,21 @@ namespace HexaLab {
         //}
     }
 
+    void App::add_full_face ( Dart& dart ) {
+        MeshNavigator nav = mesh->navigate ( dart );
+        Vert& vert = nav.vert();
+        Index idx = full_model.surface_vert_pos.size();
+        Vector3f color{ 1, 1, 1 };
+
+        do {
+            add_full_vertex ( nav.vert().position, nav.face().normal, color );
+            nav = nav.rotate_on_face();
+        } while ( nav.vert() != vert );
+
+        add_full_triangle ( idx + 2, idx + 1, idx + 0 );
+        add_full_triangle ( idx + 0, idx + 3, idx + 2 );
+    }
+
     void App::prepare_geometry() {
         for ( size_t i = 0; i < mesh->faces.size(); ++i ) {
             MeshNavigator nav = mesh->navigate ( mesh->faces[i] );
@@ -539,24 +584,22 @@ namespace HexaLab {
             // hexa a visible, hexa b not existing or not visible
             if ( !mesh->is_marked ( nav.hexa() ) && ( nav.dart().hexa_neighbor == -1 || mesh->is_marked ( nav.flip_hexa().hexa() ) ) ) {
                 this->add_visible_face ( nav.dart(), 1 );
-            // hexa a invisible, hexa b existing and visible
+                // hexa a invisible, hexa b existing and visible
             } else if ( mesh->is_marked ( nav.hexa() ) && nav.dart().hexa_neighbor != -1 && !mesh->is_marked ( nav.flip_hexa().hexa() ) ) {
                 this->add_visible_face ( nav.dart(), -1 );
                 // add_filtered_face(nav.dart());
-            // face was culled by the plane, is surface
+                // face was culled by the plane, is surface
             } else if ( mesh->is_marked ( nav.hexa() ) && nav.dart().hexa_neighbor == -1 ) {
                 this->add_filtered_face ( nav.flip_edge().dart() );
             }
         }
     }
-
     void App::build_gap_hexa ( const Vector3f pp[8], const Vector3f nn[6], const bool vv[8], const Vector3f ww[6] ) {
         if ( !vv[0] && !vv[1] && !vv[2] && !vv[3] && !vv[4] && !vv[5] && !vv[6] && !vv[7] ) {
             return;
         }
 
         float gap = this->max_crack_size * crack_size;
-
         Vector3f bari ( 0, 0, 0 );
 
         for ( int i = 0; i < 8; i++ ) {
@@ -580,12 +623,12 @@ namespace HexaLab {
         //  | /     | /
         //  P0------P1
         //
-        addSide(0 + 0, 2 + 0, 6 + 0, 4 + 0, 0);
-        addSide(2 + 1, 0 + 1, 4 + 1, 6 + 1, 1);
-        addSide(0 + 0, 1 + 0, 3 + 0, 2 + 0, 4);
-        addSide(1 + 4, 0 + 4, 2 + 4, 3 + 4, 5);
-        addSide(0 + 0, 4 + 0, 5 + 0, 1 + 0, 2);
-        addSide(4 + 2, 0 + 2, 1 + 2, 5 + 2, 3);
+        addSide ( 0 + 0, 2 + 0, 6 + 0, 4 + 0, 0 );
+        addSide ( 2 + 1, 0 + 1, 4 + 1, 6 + 1, 1 );
+        addSide ( 0 + 0, 1 + 0, 3 + 0, 2 + 0, 4 );
+        addSide ( 1 + 4, 0 + 4, 2 + 4, 3 + 4, 5 );
+        addSide ( 0 + 0, 4 + 0, 5 + 0, 1 + 0, 2 );
+        addSide ( 4 + 2, 0 + 2, 1 + 2, 5 + 2, 3 );
         //addSide ( 0 + 0, 2 + 0, 6 + 0, 4 + 0, 1 );
         //addSide ( 2 + 1, 0 + 1, 4 + 1, 6 + 1, 0 );
         //addSide ( 0 + 0, 1 + 0, 3 + 0, 2 + 0, 5 );
@@ -599,12 +642,10 @@ namespace HexaLab {
         //{ 6, 7, 3, 2 },   // Bottom
         //{ 4, 5, 1, 0 },   // Top
     }
-
     /*
     float len(vec3 p){
     return p[0]*p[0]+p[1]*p[1]+p[2]*p[2];
     }*/
-
     // 8 [pp]ositions, 6 [nn]ormals, 8 [vv]isible 6 [ww]hite_or_not
     void App::build_smooth_hexa ( const Vector3f pp[8], const Vector3f nn[6], const bool vv[8], const bool ww[6], Index hexa_idx ) {
         if ( !vv[0] && !vv[1] && !vv[2] && !vv[3] && !vv[4] && !vv[5] && !vv[6] && !vv[7] ) {
@@ -772,11 +813,13 @@ namespace HexaLab {
                     }
 
                     Vector3f c;
-                    if (is_quality_color_mapping_enabled()) {
-                        c = color_map.get(mesh->normalized_hexa_quality[hexa_idx]);
+
+                    if ( is_quality_color_mapping_enabled() ) {
+                        c = color_map.get ( mesh->normalized_hexa_quality[hexa_idx] );
                     } else {
                         c = w[x][y][z] ? this->default_outside_color : this->default_inside_color;
                     }
+
                     iv[x][y][z] = add_vertex ( p[x][y][z], n[x][y][z], c );
                     //std::cout<<"Range = "<<len(p[x][y][z]-vec3(1,1,1))<<"\n"; // test: smooth = 0.5 --> perfect sphere
                 }
@@ -806,7 +849,6 @@ namespace HexaLab {
             }
         }
     }
-
     void App::prepare_cracked_geometry() {
         auto mark_face_as_visible = [] ( Mesh * mesh, Dart & dart ) {
             MeshNavigator nav = mesh->navigate ( dart );
@@ -828,10 +870,11 @@ namespace HexaLab {
             }
         }
 
-        for (size_t i = 0; i < mesh->faces.size(); ++i) {
-            MeshNavigator nav = mesh->navigate(mesh->faces[i]);
-            if (mesh->is_marked(nav.hexa()) && nav.dart().hexa_neighbor == -1) {
-                this->add_filtered_face(nav.flip_edge().dart());
+        for ( size_t i = 0; i < mesh->faces.size(); ++i ) {
+            MeshNavigator nav = mesh->navigate ( mesh->faces[i] );
+
+            if ( mesh->is_marked ( nav.hexa() ) && nav.dart().hexa_neighbor == -1 ) {
+                this->add_filtered_face ( nav.flip_edge().dart() );
             }
         }
 
@@ -871,14 +914,17 @@ namespace HexaLab {
                 }
 
                 norms_buffer[f] = n2.face().normal * normal_sign;
+
                 // color
-                if (is_quality_color_mapping_enabled()) {
-                    colors_buffer[f] = color_map.get(mesh->normalized_hexa_quality[nav.hexa_index()]);
+                if ( is_quality_color_mapping_enabled() ) {
+                    colors_buffer[f] = color_map.get ( mesh->normalized_hexa_quality[nav.hexa_index()] );
                 } else {
                     colors_buffer[f] = nav.is_face_boundary() ? this->default_outside_color : this->default_inside_color;
                 }
+
                 nav = nav.next_hexa_face();
             }
+
             faces_norms[0] = norms_buffer[4];
             faces_norms[1] = norms_buffer[1];
             faces_norms[2] = norms_buffer[5];
@@ -916,7 +962,6 @@ namespace HexaLab {
             build_gap_hexa ( verts_pos, faces_norms, verts_vis, faces_colors );
         }
     }
-
     void App::prepare_smooth_geometry() {
         auto mark_face_as_visible = [] ( Mesh * mesh, Dart & dart ) {
             MeshNavigator nav = mesh->navigate ( dart );
@@ -938,10 +983,11 @@ namespace HexaLab {
             }
         }
 
-        for (size_t i = 0; i < mesh->faces.size(); ++i) {
-            MeshNavigator nav = mesh->navigate(mesh->faces[i]);
-            if (mesh->is_marked(nav.hexa()) && nav.dart().hexa_neighbor == -1) {
-                this->add_filtered_face(nav.flip_edge().dart());
+        for ( size_t i = 0; i < mesh->faces.size(); ++i ) {
+            MeshNavigator nav = mesh->navigate ( mesh->faces[i] );
+
+            if ( mesh->is_marked ( nav.hexa() ) && nav.dart().hexa_neighbor == -1 ) {
+                this->add_filtered_face ( nav.flip_edge().dart() );
             }
         }
 
@@ -1022,13 +1068,11 @@ namespace HexaLab {
             build_smooth_hexa ( verts_pos, faces_norms, verts_vis, faces_vis, nav.hexa_index() );
         }
     }
-
     void App::build_surface_models() {
         if ( mesh == nullptr ) {
             return;
         }
 
-        auto t_start = sample_time();
         mesh->unmark_all();
         visible_model.clear();
         filtered_model.clear();
@@ -1050,5 +1094,30 @@ namespace HexaLab {
                 this->prepare_smooth_geometry();
                 break;
         }
+    }
+
+    void App::build_full_model() {
+        if ( mesh == nullptr ) {
+            return;
+        }
+
+        this->full_model.clear();
+
+        for ( size_t i = 0; i < mesh->faces.size(); ++i ) {
+            MeshNavigator nav = mesh->navigate ( mesh->faces[i] );
+
+            // hexa a visible, hexa b not existing or not visible
+            if ( nav.dart().hexa_neighbor == -1 ) {
+                this->add_full_face ( nav.dart() );
+            }
+        }
+    }
+
+    void App::erode() {
+
+    }
+
+    void App::dilate() {
+
     }
 }
