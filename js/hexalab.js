@@ -152,59 +152,70 @@ HexaLab.Viewer = function (canvas_width, canvas_height) {
         polygonOffsetFactor:            0.5,
     })
     this.materials.visible_wireframe    = new THREE.LineBasicMaterial({
+        vertexColors:                   THREE.VertexColors,
         transparent:                    true,
         depthWrite:                     false,
-        polygonOffset:                  true,
-        polygonOffsetFactor:            0.5,
-        vertexColors:                   THREE.VertexColors,
+        // polygonOffset:                  true,
+        // polygonOffsetFactor:            -1.5,
     })
     this.materials.filtered_surface     = new THREE.MeshBasicMaterial({
         transparent:                    true,
         depthWrite:                     false,
-        depthTest:                      true,
     })
     this.materials.filtered_wireframe   = new THREE.LineBasicMaterial({
         transparent:                    true,
         depthWrite:                     false,
     })
     this.materials.singularity_surface  = new THREE.MeshBasicMaterial({
-        transparent:                    true,
-        depthWrite:                     true,
-        polygonOffset:                  true,
-        polygonOffsetFactor:            -1.0,
         vertexColors:                   THREE.VertexColors,
+        // transparent:                    true,
+        polygonOffset:                  true,
+        polygonOffsetFactor:            1.5,
         side:                           THREE.DoubleSide,
     })
     this.materials.singularity_wireframe = new THREE.LineBasicMaterial({
+        // vertexColors:                   THREE.VertexColors,
+        color: '#000000',
         transparent:                    true,
         depthWrite:                     false,
-        vertexColors:                   THREE.VertexColors,
+        // polygonOffset:                  true,
+        // polygonOffsetFactor:            -1.5,
     })
     this.materials.singularity_line_wireframe = new THREE.LineBasicMaterial({
+        vertexColors:                   THREE.VertexColors,
         transparent:                    true,
         depthWrite:                     false,
+    })
+    this.materials.singularity_spined_wireframe = new THREE.LineBasicMaterial({
         vertexColors:                   THREE.VertexColors,
+        transparent:                    true,
+        depthWrite:                     false,
     })
     this.materials.singularity_hidden_surface  = new THREE.MeshBasicMaterial({
-        transparent:                    true,
-        depthWrite:                     true,
-        polygonOffset:                  true,
-        polygonOffsetFactor:            -1.0,
         vertexColors:                   THREE.VertexColors,
+        transparent:                    true,
+        // polygonOffset:                  true,
+        // polygonOffsetFactor:            -1.0,
         side:                           THREE.DoubleSide,
         depthTest:                      false,
     })
     this.materials.singularity_hidden_wireframe = new THREE.LineBasicMaterial({
+        vertexColors:                   THREE.VertexColors,
         transparent:                    true,
         depthWrite:                     false,
         depthTest:                      false,
-        vertexColors:                   THREE.VertexColors,
     })
     this.materials.singularity_hidden_line_wireframe = new THREE.LineBasicMaterial({
+        vertexColors:                   THREE.VertexColors,
         transparent:                    true,
         depthWrite:                     false,
         depthTest:                      false,
+    })
+    this.materials.singularity_hidden_spined_wireframe = new THREE.LineBasicMaterial({
         vertexColors:                   THREE.VertexColors,
+        transparent:                    true,
+        depthWrite:                     false,
+        depthTest:                      false,
     })
     this.materials.full                 = new THREE.MeshBasicMaterial() 
 
@@ -213,6 +224,7 @@ HexaLab.Viewer = function (canvas_width, canvas_height) {
     this.buffers.visible                = new HexaLab.BufferGeometry(HexaLab.app.backend.get_visible_model())
     this.buffers.filtered               = new HexaLab.BufferGeometry(HexaLab.app.backend.get_filtered_model())
     this.buffers.line_singularity       = new HexaLab.BufferGeometry(HexaLab.app.backend.get_line_singularity_model())
+    this.buffers.spined_singularity     = new HexaLab.BufferGeometry(HexaLab.app.backend.get_spined_singularity_model())
     this.buffers.full_singularity       = new HexaLab.BufferGeometry(HexaLab.app.backend.get_full_singularity_model())
     this.buffers.full                   = new HexaLab.BufferGeometry(HexaLab.app.backend.get_full_model())
     // this.buffers.boundary_singularity   = new HexaLab.BufferGeometry(HexaLab.app.backend.get_boundary_singularity_model())
@@ -223,6 +235,7 @@ HexaLab.Viewer = function (canvas_width, canvas_height) {
         this.filtered.update()
         // TODO don't always update these
         this.line_singularity.update()
+        this.spined_singularity.update()
         this.full_singularity.update()
         this.full.update()
     }
@@ -244,7 +257,7 @@ HexaLab.Viewer = function (canvas_width, canvas_height) {
 
     make_renderable_surface     (this.materials.visible_surface,                    'visible')
     make_renderable_surface     (this.materials.filtered_surface,                   'filtered')
-    make_renderable_surface     (this.materials.singularity_surface,                'full_singularity', 'full_singularity')
+    make_renderable_surface     (this.materials.singularity_surface,                'full_singularity')
     make_renderable_surface     (this.materials.singularity_hidden_surface,         'hidden_full_singularity', 'full_singularity')
     make_renderable_surface     (this.materials.full,                               'full')
     
@@ -252,6 +265,8 @@ HexaLab.Viewer = function (canvas_width, canvas_height) {
     make_renderable_wireframe   (this.materials.filtered_wireframe,                 'filtered')
     make_renderable_wireframe   (this.materials.singularity_line_wireframe,         'line_singularity')
     make_renderable_wireframe   (this.materials.singularity_hidden_line_wireframe,  'hidden_line_singularity', 'line_singularity')
+    make_renderable_wireframe   (this.materials.singularity_spined_wireframe,       'spined_singularity')
+    make_renderable_wireframe   (this.materials.singularity_hidden_spined_wireframe,'hidden_spined_singularity', 'spined_singularity')
     make_renderable_wireframe   (this.materials.singularity_wireframe,              'full_singularity')
     make_renderable_wireframe   (this.materials.singularity_hidden_wireframe,       'hidden_full_singularity', 'full_singularity')
     // make_wireframe_renderable('boundary_singularity', this.visible_wireframe_material)
@@ -479,8 +494,11 @@ HexaLab.Viewer = function (canvas_width, canvas_height) {
             fragmentShader: THREE.FresnelTransparency.fragmentShader,
             uniforms: {
                 uColor: { value: new THREE.Vector3(0.85, 0.85, 0.95) },
-                uAlpha: { value: 0 }
+                uAlpha: { value: 1 }
             },
+            transparent: true,
+            depthWrite: false,
+            side: THREE.DoubleSide,
         })
     }
 }
@@ -1003,6 +1021,10 @@ Object.assign(HexaLab.Viewer.prototype, {
         this.scene.add(this.renderables.filtered.surface)
         this.scene.position.set(this.mesh_offset.x, this.mesh_offset.y, this.mesh_offset.z)
 
+        const c = this.renderables.filtered.surface.material.color
+        // this.fresnel_transparency_pass.material.uniforms.uColor = { value: new THREE.Vector3(c.x, c.y, c.z) }
+        this.scene.overrideMaterial = this.fresnel_transparency_pass.material
+
         this.renderer.render(this.scene, this.scene_camera)
     },
 
@@ -1019,10 +1041,12 @@ Object.assign(HexaLab.Viewer.prototype, {
         this.scene.position.set(this.mesh_offset.x, this.mesh_offset.y, this.mesh_offset.z)
         
         this.scene.add(this.renderables.hidden_line_singularity.wireframe)
+        this.scene.add(this.renderables.hidden_spined_singularity.wireframe)
         this.scene.add(this.renderables.hidden_full_singularity.wireframe)
         this.scene.add(this.renderables.hidden_full_singularity.surface)
 
         this.scene.add(this.renderables.line_singularity.wireframe)
+        this.scene.add(this.renderables.spined_singularity.wireframe)
         this.scene.add(this.renderables.full_singularity.wireframe)
         this.scene.add(this.renderables.full_singularity.surface)
 
@@ -1527,51 +1551,56 @@ Object.assign(HexaLab.App.prototype, {
     set_singularity_mode: function (mode) {
         if (mode == 0) {
             this.set_singularity_line_wireframe_opacity(0)
+            this.set_singularity_spined_wireframe_opacity(0)
             this.set_singularity_wireframe_opacity(0)
             this.set_singularity_surface_opacity(0)
             this.set_singularity_hidden_line_wireframe_opacity(0)
+            this.set_singularity_hidden_spined_wireframe_opacity(0)
             this.set_singularity_hidden_wireframe_opacity(0)
             this.set_singularity_hidden_surface_opacity(0)
         } else if (mode == 1) {
             this.set_singularity_line_wireframe_opacity(1)
+            this.set_singularity_spined_wireframe_opacity(0)
             this.set_singularity_wireframe_opacity(0)
             this.set_singularity_surface_opacity(0)
             this.set_singularity_hidden_line_wireframe_opacity(0)
+            this.set_singularity_hidden_spined_wireframe_opacity(0)
             this.set_singularity_hidden_wireframe_opacity(0)
             this.set_singularity_hidden_surface_opacity(0)
         } else if (mode == 2) {
             this.set_singularity_line_wireframe_opacity(1)
+            this.set_singularity_spined_wireframe_opacity(0)
             this.set_singularity_wireframe_opacity(0)
             this.set_singularity_surface_opacity(0)
             this.set_singularity_hidden_line_wireframe_opacity(0.5)
+            this.set_singularity_hidden_spined_wireframe_opacity(0)
             this.set_singularity_hidden_wireframe_opacity(0)
             this.set_singularity_hidden_surface_opacity(0)
         } else if (mode == 3) {
             this.set_singularity_line_wireframe_opacity(0)
-            this.set_singularity_wireframe_opacity(1)
+            this.set_singularity_spined_wireframe_opacity(1)
+            this.set_singularity_wireframe_opacity(0)
             this.set_singularity_surface_opacity(0)
             this.set_singularity_hidden_line_wireframe_opacity(0)
+            this.set_singularity_hidden_spined_wireframe_opacity(0)
             this.set_singularity_hidden_wireframe_opacity(0)
             this.set_singularity_hidden_surface_opacity(0)
         } else if (mode == 4) {
             this.set_singularity_line_wireframe_opacity(0)
-            this.set_singularity_wireframe_opacity(1)
+            this.set_singularity_spined_wireframe_opacity(1)
+            this.set_singularity_wireframe_opacity(0)
             this.set_singularity_surface_opacity(0)
             this.set_singularity_hidden_line_wireframe_opacity(0)
-            this.set_singularity_hidden_wireframe_opacity(0.5)
+            this.set_singularity_hidden_spined_wireframe_opacity(0.5)
+            this.set_singularity_hidden_wireframe_opacity(0)
             this.set_singularity_hidden_surface_opacity(0)
         } else if (mode == 5) {
             this.set_singularity_line_wireframe_opacity(0)
-            this.set_singularity_wireframe_opacity(0)
+            this.set_singularity_spined_wireframe_opacity(0)
+            this.set_singularity_wireframe_opacity(1)
             this.set_singularity_surface_opacity(1)
             this.set_singularity_hidden_line_wireframe_opacity(0)
-            this.set_singularity_hidden_wireframe_opacity(0)
-            this.set_singularity_hidden_surface_opacity(0)
-        } else if (mode == 6) {
-            this.set_singularity_line_wireframe_opacity(0)
-            this.set_singularity_wireframe_opacity(0)
-            this.set_singularity_surface_opacity(1)
-            this.set_singularity_hidden_line_wireframe_opacity(0.5)
+            this.set_singularity_hidden_spined_wireframe_opacity(0)
             this.set_singularity_hidden_wireframe_opacity(0)
             this.set_singularity_hidden_surface_opacity(0)
         }
@@ -1611,7 +1640,9 @@ Object.assign(HexaLab.App.prototype, {
     set_silhouette_intensity: function (value) {
         if (value < 0.5) {
             this.viewer.set_silhouette_opacity(value * 2)
+            this.set_filtered_surface_opacity(0)
         } else {
+            this.viewer.set_silhouette_opacity(2 - (value * 2))
             this.set_filtered_surface_opacity((value - 0.5) * 2)
         }
     },
@@ -1638,6 +1669,7 @@ Object.assign(HexaLab.App.prototype, {
     },
     
     set_filtered_surface_opacity:       function (opacity) {
+        this.viewer.fresnel_transparency_pass.material.uniforms.uAlpha = { value: opacity }
         this.materials().filtered_surface.opacity = opacity
         this.materials().filtered_surface.visible = opacity != 0
         this.prev_filtered_surface_opacity = null
@@ -1673,6 +1705,11 @@ Object.assign(HexaLab.App.prototype, {
         this.materials().singularity_line_wireframe.visible = opacity != 0
         this.queue_canvas_update()
     },
+    set_singularity_spined_wireframe_opacity:  function (opacity) { 
+        this.materials().singularity_spined_wireframe.opacity = opacity
+        this.materials().singularity_spined_wireframe.visible = opacity != 0
+        this.queue_canvas_update()
+    },
     set_singularity_hidden_surface_opacity: function (opacity) {
         this.materials().singularity_hidden_surface.opacity = opacity
         this.materials().singularity_hidden_surface.visible = opacity != 0
@@ -1686,6 +1723,11 @@ Object.assign(HexaLab.App.prototype, {
     set_singularity_hidden_line_wireframe_opacity: function (opacity) {
         this.materials().singularity_hidden_line_wireframe.opacity = opacity
         this.materials().singularity_hidden_line_wireframe.visible = opacity != 0
+        this.queue_canvas_update()
+    },
+    set_singularity_hidden_spined_wireframe_opacity: function (opacity) {
+        this.materials().singularity_hidden_spined_wireframe.opacity = opacity
+        this.materials().singularity_hidden_spined_wireframe.visible = opacity != 0
         this.queue_canvas_update()
     },
 

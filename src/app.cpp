@@ -262,7 +262,7 @@ namespace HexaLab {
         line_singularity_model.clear();
         spined_singularity_model.clear();
         full_singularity_model.clear();
-        
+
         // boundary_singularity_model.clear();
         // boundary_creases_model.clear();
         for ( size_t i = 0; i < mesh->edges.size(); ++i ) {
@@ -313,14 +313,9 @@ namespace HexaLab {
                 continue;
             }
 
-            // add line edge
-            for ( int j = 0; j < 2; ++j ) {
-                line_singularity_model.wireframe_vert_pos.push_back ( mesh->verts[nav.dart().vert].position );
-                spined_singularity_model.wireframe_vert_pos.push_back ( mesh->verts[nav.dart().vert].position );
-                full_singularity_model.wireframe_vert_pos.push_back ( mesh->verts[nav.dart().vert].position );
-                nav = nav.flip_vert();
-            }
+            // choose color
             Vector3f color;
+            Vector3f color2;
 
             switch ( face_count ) {
                 case  3:
@@ -335,34 +330,41 @@ namespace HexaLab {
                     color = Vector3f ( 0, 0, 1 );
             }
 
-            // add color
-            line_singularity_model.wireframe_vert_color.push_back ( color );
-            line_singularity_model.wireframe_vert_color.push_back ( color );
-            spined_singularity_model.wireframe_vert_color.push_back ( color );
-            spined_singularity_model.wireframe_vert_color.push_back ( color );
-            full_singularity_model.wireframe_vert_color.push_back ( color );
-            full_singularity_model.wireframe_vert_color.push_back ( color );
+            // add singularity line edge and color
+            for ( int j = 0; j < 2; ++j ) {
+                line_singularity_model.wireframe_vert_pos.push_back ( mesh->verts[nav.dart().vert].position );
+                spined_singularity_model.wireframe_vert_pos.push_back ( mesh->verts[nav.dart().vert].position );
+                full_singularity_model.wireframe_vert_pos.push_back ( mesh->verts[nav.dart().vert].position );
+                nav = nav.flip_vert();
+            }
 
+            const float color_k = 0.3;
+            line_singularity_model.wireframe_vert_color.push_back ( color );
+            line_singularity_model.wireframe_vert_color.push_back ( color );
+            spined_singularity_model.wireframe_vert_color.push_back ( color );
+            spined_singularity_model.wireframe_vert_color.push_back ( color );
+            full_singularity_model.wireframe_vert_color.push_back ( color * color_k );
+            full_singularity_model.wireframe_vert_color.push_back ( color * color_k );
             // add adjacent faces/edges
             Face& begin = nav.face();
 
-            do {                                          // foreach face adjacent tot he singularity edge
+            do {                                          // foreach face adjacent to the singularity edge
                 for ( int k = 0; k < 2; ++k ) {           // for both triangles making up the face
-                    for ( int j = 0; j < 2; ++j ) {       // 2 + 1 face vertices add
+                    for ( int j = 0; j < 2; ++j ) {       // 2 + 1 triangle vertices add
                         spined_singularity_model.surface_vert_pos.push_back ( mesh->verts[nav.dart().vert].position );
                         spined_singularity_model.surface_vert_color.push_back ( color );
                         full_singularity_model.surface_vert_pos.push_back ( mesh->verts[nav.dart().vert].position );
                         full_singularity_model.surface_vert_color.push_back ( color );
-                        
+
                         for ( int n = 0; n < 2; ++n ) {   // 2 verts that make the edge
                             if ( j == 0 && k == 1 ) {
-                                continue;
+                                full_singularity_model.wireframe_vert_pos.push_back ( mesh->verts[nav.dart().vert].position );
+                                full_singularity_model.wireframe_vert_color.push_back ( color * color_k );
+                            } else {
+                                spined_singularity_model.wireframe_vert_pos.push_back ( mesh->verts[nav.dart().vert].position );
+                                spined_singularity_model.wireframe_vert_color.push_back ( color );
                             }
 
-                            spined_singularity_model.wireframe_vert_pos.push_back ( mesh->verts[nav.dart().vert].position );
-                            spined_singularity_model.wireframe_vert_color.push_back ( color );
-                            full_singularity_model.wireframe_vert_pos.push_back ( mesh->verts[nav.dart().vert].position );
-                            full_singularity_model.wireframe_vert_color.push_back ( color );
                             nav = nav.flip_vert();
                         }
 
@@ -399,11 +401,11 @@ namespace HexaLab {
         return i;
     }
 
-    size_t App::add_full_vertex(Vector3f pos, Vector3f norm, Vector3f color) {
+    size_t App::add_full_vertex ( Vector3f pos, Vector3f norm, Vector3f color ) {
         size_t i = full_model.surface_vert_pos.size();
-        full_model.surface_vert_pos.push_back(pos);
-        full_model.surface_vert_norm.push_back(norm);
-        full_model.surface_vert_color.push_back(color);
+        full_model.surface_vert_pos.push_back ( pos );
+        full_model.surface_vert_norm.push_back ( norm );
+        full_model.surface_vert_color.push_back ( color );
         return i;
     }
 
@@ -413,10 +415,10 @@ namespace HexaLab {
         visible_model.surface_ibuffer.push_back ( i3 );
     }
 
-    void App::add_full_triangle(size_t i1, size_t i2, size_t i3) {
-        full_model.surface_ibuffer.push_back(i1);
-        full_model.surface_ibuffer.push_back(i2);
-        full_model.surface_ibuffer.push_back(i3);
+    void App::add_full_triangle ( size_t i1, size_t i2, size_t i3 ) {
+        full_model.surface_ibuffer.push_back ( i1 );
+        full_model.surface_ibuffer.push_back ( i2 );
+        full_model.surface_ibuffer.push_back ( i3 );
     }
 
     void App::add_quad ( size_t i1, size_t i2, size_t i3, size_t i4 ) {
@@ -1114,10 +1116,8 @@ namespace HexaLab {
     }
 
     void App::erode() {
-
     }
 
     void App::dilate() {
-
     }
 }

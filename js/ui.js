@@ -258,7 +258,7 @@ HexaLab.UI.settings.rounding_radius.slider().addClass('mini-slider').on('slide',
 HexaLab.UI.settings.singularity_mode.slider({
     value: 0,
     min: 0,
-    max: 5,
+    max: 4,
     step: 1
 }).addClass('mini-slider').on('slide', function (e, ui) {
     HexaLab.app.set_singularity_mode(ui.value)
@@ -795,7 +795,7 @@ HexaLab.UI.quality_plot = function(container, axis) {
     var plot_data = [{
         type:       'histogram',
         histfunc:   'count',
-        histnorm:   'probability',
+        histnorm:   '',
         cauto:      false,
         autobinx:   false,
         //nbinsx: 100,
