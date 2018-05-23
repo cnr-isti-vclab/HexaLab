@@ -175,6 +175,11 @@ namespace HexaLab {
         this->flag_models_as_dirty();
     }
 
+    void App::set_filter_level ( size_t level ) {
+        this->filter_level = level;
+        this->flag_models_as_dirty();
+    }
+
     // PRIVATE
 
     void App::compute_hexa_quality() {
@@ -1083,6 +1088,14 @@ namespace HexaLab {
             filters[i]->filter ( *mesh );
         }
 
+        for ( size_t i = 0; i < this->filter_level; ++i ) {
+            this->erode();
+        }
+
+        for ( size_t i = 0; i < this->filter_level; ++i ) {
+            this->dilate();
+        }
+
         switch ( this->geometry_mode ) {
             case GeometryMode::Default:
                 this->prepare_geometry();
@@ -1115,9 +1128,136 @@ namespace HexaLab {
         }
     }
 
+    // filter -> mark vertices -> inc mark -> manual mark update -> re-mark vertices -> ...
     void App::erode() {
+        for ( size_t i = 0; i < this->mesh->verts.size(); ++i ) {
+            this->mesh->unmark ( this->mesh->verts[i] );
+        }
+
+        auto mark_face_as_visible = [] ( Mesh * mesh, Dart & dart ) {
+            MeshNavigator nav = mesh->navigate ( dart );
+            Vert& vert = nav.vert();
+
+            do {
+                mesh->mark ( nav.vert() );
+                nav = nav.rotate_on_face();
+            } while ( nav.vert() != vert );
+        };
+
+        for ( size_t i = 0; i < mesh->faces.size(); ++i ) {
+            MeshNavigator nav = mesh->navigate ( mesh->faces[i] );
+
+            if ( !mesh->is_marked ( nav.hexa() ) && ( nav.dart().hexa_neighbor == -1 || mesh->is_marked ( nav.flip_hexa().hexa() ) ) ) {
+                mark_face_as_visible ( this->mesh, nav.dart() );
+            } else if ( mesh->is_marked ( nav.hexa() ) && nav.dart().hexa_neighbor != -1 && !mesh->is_marked ( nav.flip_hexa().hexa() ) ) {
+                mark_face_as_visible ( this->mesh, nav.dart() );
+            }
+        }
+
+        int c = 0;
+
+        for ( size_t i = 0; i < mesh->hexas.size(); ++i ) {
+            if ( mesh->is_marked ( mesh->hexas[i] ) ) {
+                continue;
+            }
+
+            MeshNavigator nav = mesh->navigate ( mesh->hexas[i] );
+            bool exit = false;
+
+            for ( size_t j = 0; j < 4; ++j ) {
+                if ( mesh->is_marked ( nav.vert() ) && !nav.vert().is_surface ) {
+                    mesh->mark ( nav.hexa() );
+                    exit = true;
+                    ++c;
+                    break;
+                }
+
+                nav = nav.rotate_on_face();
+            }
+
+            if ( exit ) {
+                continue;
+            }
+
+            nav = nav.rotate_on_hexa().rotate_on_hexa();
+
+            for ( size_t j = 0; j < 4; ++j ) {
+                if ( mesh->is_marked ( nav.vert() ) && !nav.vert().is_surface ) {
+                    mesh->mark ( nav.hexa() );
+                    ++c;
+                    break;
+                }
+
+                nav = nav.rotate_on_face();
+            }
+        }
+
+        HL_LOG ( "erode: %d\n", c );
     }
 
     void App::dilate() {
+        for ( size_t i = 0; i < this->mesh->verts.size(); ++i ) {
+            this->mesh->unmark ( this->mesh->verts[i] );
+        }
+
+        auto mark_face_as_visible = [] ( Mesh * mesh, Dart & dart ) {
+            MeshNavigator nav = mesh->navigate ( dart );
+            Vert& vert = nav.vert();
+
+            do {
+                mesh->mark ( nav.vert() );
+                nav = nav.rotate_on_face();
+            } while ( nav.vert() != vert );
+        };
+
+        for ( size_t i = 0; i < mesh->faces.size(); ++i ) {
+            MeshNavigator nav = mesh->navigate ( mesh->faces[i] );
+
+            if ( !mesh->is_marked ( nav.hexa() ) && ( nav.dart().hexa_neighbor == -1 || mesh->is_marked ( nav.flip_hexa().hexa() ) ) ) {
+                mark_face_as_visible ( this->mesh, nav.dart() );
+            } else if ( mesh->is_marked ( nav.hexa() ) && nav.dart().hexa_neighbor != -1 && !mesh->is_marked ( nav.flip_hexa().hexa() ) ) {
+                mark_face_as_visible ( this->mesh, nav.dart() );
+            }
+        }
+
+        int c = 0;
+
+        for ( size_t i = 0; i < mesh->hexas.size(); ++i ) {
+            if ( !mesh->is_marked ( mesh->hexas[i] ) ) {
+                continue;
+            }
+
+            MeshNavigator nav = mesh->navigate ( mesh->hexas[i] );
+            bool exit = false;
+
+            for ( size_t j = 0; j < 4; ++j ) {
+                if ( mesh->is_marked ( nav.vert() ) && !nav.vert().is_surface ) {
+                    mesh->unmark ( nav.hexa() );
+                    exit = true;
+                    ++c;
+                    break;
+                }
+
+                nav = nav.rotate_on_face();
+            }
+
+            if ( exit ) {
+                continue;
+            }
+
+            nav = nav.rotate_on_hexa().rotate_on_hexa();
+
+            for ( size_t j = 0; j < 4; ++j ) {
+                if ( mesh->is_marked ( nav.vert() ) && !nav.vert().is_surface ) {
+                    mesh->unmark ( nav.hexa() );
+                    ++c;
+                    break;
+                }
+
+                nav = nav.rotate_on_face();
+            }
+        }
+
+        HL_LOG ( "dilate: %d\n", c );
     }
 }

@@ -102,6 +102,7 @@ namespace HexaLab {
         Index dart          = -1;
         Vector3f position;
         uint32_t visible_mark = 0;
+        bool is_surface     = false;
 
         Vert() {}
         Vert ( Vector3f position ) { this->position = position; }
@@ -117,7 +118,7 @@ namespace HexaLab {
 
       private:
         // Marks are used to flag the visibility of elements. If an element's mark field equals to the mesh mark field,
-        // that element is currently visible. Otherwise, it means that is has been filtered and should not be displayed.
+        // that element is currently invisible. Otherwise, it means that is has not been filtered and should be displayed.
         uint32_t current_mark = 0;
 
       public:

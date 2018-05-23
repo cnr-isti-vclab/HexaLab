@@ -85,6 +85,8 @@ namespace HexaLab {
         float crack_size;
         float rounding_radius;
 
+        size_t filter_level = 0;
+
       public:
         // Loads and imports a new mesh file into the system. Call the Loader, the Builder, updates mesh stats and
         // evaluated quality measures, builds singularity models, notifies filters of the new mesh.
@@ -121,6 +123,8 @@ namespace HexaLab {
 
         void set_crack_size ( float size );
         void set_rounding_radius ( float rad );
+
+        void set_filter_level ( size_t level );
 
         // Getters
         Vector3f            get_default_outside_color()         { return this->default_outside_color; }

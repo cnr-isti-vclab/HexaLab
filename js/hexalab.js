@@ -1227,7 +1227,8 @@ HexaLab.App = function (dom_element) {
         quality_measure:    'Scaled Jacobian',
         geometry_mode:      'Default',
         crack_size:         0.5,
-        rounding_radius:    0.5
+        rounding_radius:    0.5,
+        erode_dilate_level: 0
     }
 
     // Materials
@@ -1359,6 +1360,7 @@ Object.assign(HexaLab.App.prototype, {
             geometry_mode:                          this.geometry_mode,
             crack_size:                             this.crack_size,
             rounding_radius:                        this.rounding_radius,
+            erode_dilate_level:                     this.erode_dilate_level
         }
         return x
     },
@@ -1425,6 +1427,7 @@ Object.assign(HexaLab.App.prototype, {
         this.set_geometry_mode(settings.geometry_mode)
         this.set_crack_size(settings.crack_size)
         this.set_rounding_radius(settings.rounding_radius)
+        this.set_erode_dilate_level(settings.erode_dilate_level)
     },
 
     get_settings: function () {
@@ -1732,6 +1735,13 @@ Object.assign(HexaLab.App.prototype, {
     },
 
     // set_visible_wireframe_color:            function (color)        { this.materials().visible_wireframe.color.set(color) },
+
+    set_erode_dilate_level: function (value) {
+        this.erode_dilate_level = value
+        this.backend.set_filter_level(value)
+        HexaLab.UI.on_set_erode_dilate(value)
+        this.queue_buffers_update()
+    },
 
     set_occlusion:                      function (value) { 
         this.viewer.set_ao_mode(value)
