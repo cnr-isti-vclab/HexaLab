@@ -136,6 +136,7 @@ HexaLab.UI = {
             this.snapshot.prop("disabled", false)
             HexaLab.UI.settings.rendering_menu_content.prop('disabled', false)
             HexaLab.UI.settings.silhouette.slider('enable')    
+            HexaLab.UI.settings.erode_dilate.slider('enable')    
             HexaLab.UI.settings.singularity_mode.slider('enable')
             HexaLab.UI.settings.wireframe.slider('enable')
             HexaLab.UI.settings.crack_size.slider('enable')
@@ -175,6 +176,7 @@ HexaLab.UI = {
         wireframe_row:      $('#wireframe_slider').closest('.menu_row'),
         rounding_radius_row: $('#rounding_radius').closest('.menu_row'),
         crack_size_row:     $('#crack_size').closest('.menu_row'),
+        erode_dilate:       $('#erode_dilate_slider')
     },
     
     // Mesh sources
@@ -236,7 +238,7 @@ HexaLab.UI.settings.color.default.inside.spectrum({
 })
 
 HexaLab.UI.settings.silhouette.slider().addClass('mini-slider').on('slide', function (e, ui) {
-    HexaLab.app.set_filtered_surface_opacity(ui.value / 100)
+    HexaLab.app.set_silhouette_intensity(ui.value / 100)
 })
 
 HexaLab.UI.settings.color.quality_map.on('change', function () {
@@ -255,10 +257,19 @@ HexaLab.UI.settings.rounding_radius.slider().addClass('mini-slider').on('slide',
     HexaLab.app.set_rounding_radius(ui.value / 100)
 })
 
+HexaLab.UI.settings.erode_dilate.slider({
+    value: 0,
+    min: 0,
+    max: 5,
+    step: 1
+}).addClass('mini-slider').on('slide', function (e, ui) {
+    HexaLab.app.set_erode_dilate_level(ui.value)
+})
+
 HexaLab.UI.settings.singularity_mode.slider({
     value: 0,
     min: 0,
-    max: 3,
+    max: 4,
     step: 1
 }).addClass('mini-slider').on('slide', function (e, ui) {
     HexaLab.app.set_singularity_mode(ui.value)
@@ -325,6 +336,10 @@ HexaLab.UI.on_set_color_map = function (value) {
     HexaLab.UI.settings.color.quality_map_name = value
     HexaLab.UI.settings.color.quality_map.val(value)
     HexaLab.UI.quality_plot_update()
+}
+
+HexaLab.UI.on_set_erode_dilate = function (value) {
+    HexaLab.UI.settings.erode_dilate.slider('value', value)
 }
 
 // --------------------------------------------------------------------------------
@@ -795,7 +810,7 @@ HexaLab.UI.quality_plot = function(container, axis) {
     var plot_data = [{
         type:       'histogram',
         histfunc:   'count',
-        histnorm:   'probability',
+        histnorm:   '',
         cauto:      false,
         autobinx:   false,
         //nbinsx: 100,
@@ -1107,6 +1122,7 @@ HexaLab.UI.topbar.snapshot.on('click', function () {
 
 HexaLab.UI.settings.rendering_menu_content.prop('disabled', true)
 HexaLab.UI.settings.silhouette.slider('disable')    
+HexaLab.UI.settings.erode_dilate.slider('disable')    
 HexaLab.UI.settings.singularity_mode.slider('disable')
 HexaLab.UI.settings.wireframe_row.hide()
 HexaLab.UI.settings.crack_size_row.hide()
