@@ -136,8 +136,11 @@ HexaLab.UI = {
             this.snapshot.prop("disabled", false)
             HexaLab.UI.settings.rendering_menu_content.prop('disabled', false)
             HexaLab.UI.settings.silhouette.slider('enable')    
-            HexaLab.UI.settings.wireframe.slider('enable')
+            HexaLab.UI.settings.erode_dilate.slider('enable')    
             HexaLab.UI.settings.singularity_mode.slider('enable')
+            HexaLab.UI.settings.wireframe.slider('enable')
+            HexaLab.UI.settings.crack_size.slider('enable')
+            HexaLab.UI.settings.rounding_radius.slider('enable')
             HexaLab.UI.settings.color.default.outside.spectrum('enable')
             HexaLab.UI.settings.color.default.inside.spectrum('enable')
         },
@@ -162,12 +165,18 @@ HexaLab.UI = {
             }
         },
         silhouette:         $('#filtered_slider'),
-        wireframe:          $('#wireframe_slider'),
         singularity_mode:   $('#singularity_slider'),
         occlusion:          $("#show_occlusion"),
         geometry_mode:      $('#geometry_mode'),
         ao_mode:            $("#ao_mode"),
         rendering_menu_content: $('#rendering_menu *'),
+        wireframe:          $('#wireframe_slider'),
+        rounding_radius:    $('#rounding_radius'),
+        crack_size:         $('#crack_size'),
+        wireframe_row:      $('#wireframe_slider').closest('.menu_row'),
+        rounding_radius_row: $('#rounding_radius').closest('.menu_row'),
+        crack_size_row:     $('#crack_size').closest('.menu_row'),
+        erode_dilate:       $('#erode_dilate_slider')
     },
     
     // Mesh sources
@@ -229,7 +238,7 @@ HexaLab.UI.settings.color.default.inside.spectrum({
 })
 
 HexaLab.UI.settings.silhouette.slider().addClass('mini-slider').on('slide', function (e, ui) {
-    HexaLab.app.set_filtered_surface_opacity(ui.value / 100)
+    HexaLab.app.set_silhouette_intensity(ui.value / 100)
 })
 
 HexaLab.UI.settings.color.quality_map.on('change', function () {
@@ -240,10 +249,27 @@ HexaLab.UI.settings.wireframe.slider().addClass('mini-slider').on('slide', funct
     HexaLab.app.set_visible_wireframe_opacity(ui.value / 100)
 })
 
+HexaLab.UI.settings.crack_size.slider().addClass('mini-slider').on('slide', function (e, ui) {
+    HexaLab.app.set_crack_size(ui.value / 100)
+})
+
+HexaLab.UI.settings.rounding_radius.slider().addClass('mini-slider').on('slide', function (e, ui) {
+    HexaLab.app.set_rounding_radius(ui.value / 100)
+})
+
+HexaLab.UI.settings.erode_dilate.slider({
+    value: 0,
+    min: 0,
+    max: 5,
+    step: 1
+}).addClass('mini-slider').on('slide', function (e, ui) {
+    HexaLab.app.set_erode_dilate_level(ui.value)
+})
+
 HexaLab.UI.settings.singularity_mode.slider({
     value: 0,
     min: 0,
-    max: 3,
+    max: 4,
     step: 1
 }).addClass('mini-slider').on('slide', function (e, ui) {
     HexaLab.app.set_singularity_mode(ui.value)
@@ -282,6 +308,14 @@ HexaLab.UI.on_show_visible_quality = function (do_show) {
     }
 }
 
+HexaLab.UI.on_set_crack_size = function (size) {
+    HexaLab.UI.settings.crack_size.slider('value', size * 100)
+}
+
+HexaLab.UI.on_set_rounding_radius = function (rad) {
+    HexaLab.UI.settings.rounding_radius.slider('value', rad * 100)
+}
+
 HexaLab.UI.on_set_wireframe_opacity = function (value) {
     HexaLab.UI.settings.wireframe.slider('value', value * 100)
 }
@@ -302,6 +336,10 @@ HexaLab.UI.on_set_color_map = function (value) {
     HexaLab.UI.settings.color.quality_map_name = value
     HexaLab.UI.settings.color.quality_map.val(value)
     HexaLab.UI.quality_plot_update()
+}
+
+HexaLab.UI.on_set_erode_dilate = function (value) {
+    HexaLab.UI.settings.erode_dilate.slider('value', value)
 }
 
 // --------------------------------------------------------------------------------
@@ -460,8 +498,18 @@ HexaLab.UI.on_set_quality_measure = function (measure) {
     HexaLab.UI.quality_plot_update()
 }
 
-HexaLab.UI.on_set_geometry_mode = function (mode) {
-    HexaLab.UI.settings.geometry_mode.val(mode)
+HexaLab.UI.on_set_geometry_mode = function (v) {
+    HexaLab.UI.settings.geometry_mode.val(v)
+    HexaLab.UI.settings.wireframe_row.hide()
+    HexaLab.UI.settings.crack_size_row.hide()
+    HexaLab.UI.settings.rounding_radius_row.hide()
+    if (v == 'Default') {
+        HexaLab.UI.settings.wireframe_row.show()
+    } else if (v == 'Cracked') {
+        HexaLab.UI.settings.crack_size_row.show()
+    } else if (v == 'Smooth') {
+        HexaLab.UI.settings.rounding_radius_row.show()
+    }
 }
 
 HexaLab.UI.on_import_mesh = function (name) {
@@ -762,7 +810,7 @@ HexaLab.UI.quality_plot = function(container, axis) {
     var plot_data = [{
         type:       'histogram',
         histfunc:   'count',
-        histnorm:   'probability',
+        histnorm:   '',
         cauto:      false,
         autobinx:   false,
         //nbinsx: 100,
@@ -1074,7 +1122,10 @@ HexaLab.UI.topbar.snapshot.on('click', function () {
 
 HexaLab.UI.settings.rendering_menu_content.prop('disabled', true)
 HexaLab.UI.settings.silhouette.slider('disable')    
-HexaLab.UI.settings.wireframe.slider('disable')
+HexaLab.UI.settings.erode_dilate.slider('disable')    
 HexaLab.UI.settings.singularity_mode.slider('disable')
+HexaLab.UI.settings.wireframe_row.hide()
+HexaLab.UI.settings.crack_size_row.hide()
+HexaLab.UI.settings.rounding_radius_row.hide()
 HexaLab.UI.settings.color.default.outside.spectrum('disable')
 HexaLab.UI.settings.color.default.inside.spectrum('disable')

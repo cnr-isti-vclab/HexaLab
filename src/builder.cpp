@@ -301,8 +301,8 @@ namespace HexaLab {
             do {
                 if ( nav.dart().hexa_neighbor == -1 ) {
                     nav.edge().is_surface = true;
-                    // nav.vert().is_surface = true;
-                    // nav.flip_vert().vert().is_surface = true;
+                    nav.vert().is_surface = true;
+                    nav.flip_vert().vert().is_surface = true;
                 }
 
                 nav = nav.rotate_on_edge();
@@ -336,17 +336,18 @@ namespace HexaLab {
 
         for ( size_t i = 0; i < mesh.verts.size(); ++i ) {
             Vert& v = mesh.verts[i];
-            if(v.dart != -1) // perform test only for referenced vertices.
-            { HL_ASSERT ( v.dart != -1 );
-              auto nav = mesh.navigate ( v );
-              HL_ASSERT ( nav.vert() == v );
-              Dart& d1 = nav.dart();
-              nav = nav.flip_vert();
-              HL_ASSERT ( nav.dart().hexa == d1.hexa
-                          && nav.dart().face == d1.face
-                          && nav.dart().edge == d1.edge );
-              nav = nav.flip_vert();
-              HL_ASSERT ( nav.vert() == v );
+
+            if ( v.dart != -1 ) { // perform test only for referenced vertices.
+                HL_ASSERT ( v.dart != -1 );
+                auto nav = mesh.navigate ( v );
+                HL_ASSERT ( nav.vert() == v );
+                Dart& d1 = nav.dart();
+                nav = nav.flip_vert();
+                HL_ASSERT ( nav.dart().hexa == d1.hexa
+                            && nav.dart().face == d1.face
+                            && nav.dart().edge == d1.edge );
+                nav = nav.flip_vert();
+                HL_ASSERT ( nav.vert() == v );
             }
         }
 
@@ -416,7 +417,7 @@ namespace HexaLab {
             } while ( nav.vert() != b );
 
             float q = QualityMeasureFun::volume ( v[0], v[1], v[2], v[3], v[4], v[5], v[6], v[7], nullptr );
-//            HL_ASSERT ( q > 0 );
+            //            HL_ASSERT ( q > 0 );
         }
 
         auto dt = milli_from_sample ( t0 );

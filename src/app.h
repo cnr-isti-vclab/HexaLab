@@ -53,7 +53,10 @@ namespace HexaLab {
         // visible_model and filtered_model together make up the entire mesh and are updated on request.
         Model visible_model;
         Model filtered_model;
-        Model singularity_model;
+        Model line_singularity_model;
+        Model spined_singularity_model;
+        Model full_singularity_model;
+        Model full_model;
 
         bool do_show_boundary_singularity = false;
         bool do_show_boundary_creases = false;
@@ -73,6 +76,16 @@ namespace HexaLab {
         bool models_dirty_flag = false;
 
         GeometryMode geometry_mode = GeometryMode::Default;
+
+        // default values are half these
+        const float max_crack_size = 0.6f;
+        const float max_rounding_radius = 0.3f;
+
+        // these are scalars 0->1 that multiply the max
+        float crack_size;
+        float rounding_radius;
+
+        size_t filter_level = 0;
 
       public:
         // Loads and imports a new mesh file into the system. Call the Loader, the Builder, updates mesh stats and
@@ -108,13 +121,20 @@ namespace HexaLab {
         void show_boundary_singularity ( bool do_show );
         void show_boundary_creases ( bool do_show );
 
+        void set_crack_size ( float size );
+        void set_rounding_radius ( float rad );
+
+        void set_filter_level ( size_t level );
 
         // Getters
         Vector3f            get_default_outside_color()         { return this->default_outside_color; }
         Vector3f            get_default_inside_color()          { return this->default_inside_color; }
         Model*              get_visible_model()                 { return &this->visible_model; }
         Model*              get_filtered_model()                { return &this->filtered_model; }
-        Model*              get_singularity_model()             { return &this->singularity_model; }
+        Model*              get_line_singularity_model()        { return &this->line_singularity_model; }
+        Model*              get_spined_singularity_model()      { return &this->spined_singularity_model; }
+        Model*              get_full_singularity_model()        { return &this->full_singularity_model; }
+        Model*              get_full_model()                    { return &this->full_model; }
         Mesh*               get_mesh()                          { return this->mesh; }
         MeshStats*          get_mesh_stats()                    { return this->mesh ? &this->mesh_stats : nullptr; }
         vector<float>*      get_hexa_quality()                  { return this->mesh ? &this->mesh->hexa_quality : nullptr; }
@@ -129,14 +149,22 @@ namespace HexaLab {
         void add_visible_wireframe ( Dart& dart );
         void add_filtered_face ( Dart& dart );
         void add_filtered_wireframe ( Dart& dart );
+        void add_full_face ( Dart& dart );
 
         size_t add_vertex ( Vector3f pos, Vector3f norm, Vector3f color );
+        size_t add_full_vertex ( Vector3f pos, Vector3f norm, Vector3f color );
         void add_triangle ( size_t i1, size_t i2, size_t i3 );
+        void add_full_triangle ( size_t i1, size_t i2, size_t i3 );
         void add_quad ( size_t i1, size_t i2, size_t i3, size_t i4 );
 
         void prepare_geometry();
         void prepare_cracked_geometry();
         void prepare_smooth_geometry();
+
+        void erode();
+        void dilate();
+
+        void build_full_model();
 
         void build_gap_hexa ( const Vector3f pp[8], const Vector3f nn[6], const bool vv[8], const Vector3f ww[6] );
         void build_smooth_hexa ( const Vector3f pp[8], const Vector3f nn[6], const bool vv[8], const bool ww[6], Index hexa_idx );
