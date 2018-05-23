@@ -857,6 +857,10 @@ namespace HexaLab {
         }
     }
     void App::prepare_cracked_geometry() {
+        for ( size_t i = 0; i < this->mesh->verts.size(); ++i ) {
+            this->mesh->unmark ( this->mesh->verts[i] );
+        }
+
         auto mark_face_as_visible = [] ( Mesh * mesh, Dart & dart ) {
             MeshNavigator nav = mesh->navigate ( dart );
             Vert& vert = nav.vert();
@@ -970,6 +974,10 @@ namespace HexaLab {
         }
     }
     void App::prepare_smooth_geometry() {
+        for ( size_t i = 0; i < this->mesh->verts.size(); ++i ) {
+            this->mesh->unmark ( this->mesh->verts[i] );
+        }
+
         auto mark_face_as_visible = [] ( Mesh * mesh, Dart & dart ) {
             MeshNavigator nav = mesh->navigate ( dart );
             Vert& vert = nav.vert();
@@ -1154,8 +1162,6 @@ namespace HexaLab {
             }
         }
 
-        int c = 0;
-
         for ( size_t i = 0; i < mesh->hexas.size(); ++i ) {
             if ( mesh->is_marked ( mesh->hexas[i] ) ) {
                 continue;
@@ -1168,7 +1174,6 @@ namespace HexaLab {
                 if ( mesh->is_marked ( nav.vert() ) && !nav.vert().is_surface ) {
                     mesh->mark ( nav.hexa() );
                     exit = true;
-                    ++c;
                     break;
                 }
 
@@ -1184,15 +1189,12 @@ namespace HexaLab {
             for ( size_t j = 0; j < 4; ++j ) {
                 if ( mesh->is_marked ( nav.vert() ) && !nav.vert().is_surface ) {
                     mesh->mark ( nav.hexa() );
-                    ++c;
                     break;
                 }
 
                 nav = nav.rotate_on_face();
             }
         }
-
-        HL_LOG ( "erode: %d\n", c );
     }
 
     void App::dilate() {
@@ -1220,8 +1222,6 @@ namespace HexaLab {
             }
         }
 
-        int c = 0;
-
         for ( size_t i = 0; i < mesh->hexas.size(); ++i ) {
             if ( !mesh->is_marked ( mesh->hexas[i] ) ) {
                 continue;
@@ -1234,7 +1234,6 @@ namespace HexaLab {
                 if ( mesh->is_marked ( nav.vert() ) && !nav.vert().is_surface ) {
                     mesh->unmark ( nav.hexa() );
                     exit = true;
-                    ++c;
                     break;
                 }
 
@@ -1250,14 +1249,11 @@ namespace HexaLab {
             for ( size_t j = 0; j < 4; ++j ) {
                 if ( mesh->is_marked ( nav.vert() ) && !nav.vert().is_surface ) {
                     mesh->unmark ( nav.hexa() );
-                    ++c;
                     break;
                 }
 
                 nav = nav.rotate_on_face();
             }
         }
-
-        HL_LOG ( "dilate: %d\n", c );
     }
 }
