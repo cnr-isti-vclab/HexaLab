@@ -25,13 +25,13 @@ HexaLab.PickFilter = function () {
     })
     HexaLab.UI.pick_button.click(function () {
         self.toggle_pick()
-    }).width('50px')
+    })
     HexaLab.UI.fill_button.click(function () {
         self.toggle_fill()
-    }).width('50px')
+    })
     HexaLab.UI.pick_clear_button.click(function () {
         self.clear()
-    }).width('50px')
+    })
 
     // State
     this.filtered_hexas = []
@@ -50,6 +50,11 @@ HexaLab.PickFilter = function () {
 }
 
 HexaLab.PickFilter.prototype = Object.assign(Object.create(HexaLab.Filter.prototype), {
+	
+	unactiveCol : HexaLab.UI.pick_button.css('background'),
+	
+	activeCol : 'rgb(200,200,255)',
+	
 
     // Api
     get_settings: function () {
@@ -78,30 +83,30 @@ HexaLab.PickFilter.prototype = Object.assign(Object.create(HexaLab.Filter.protot
 
     on_toggle_pick: function () {
         if (this.picking) {
-            document.body.style.cursor = "crosshair"
-            HexaLab.UI.pick_button.css('background', 'rgb(255, 0, 0)')
+            HexaLab.UI.canvas_container.css('cursor', "crosshair")
+            HexaLab.UI.pick_button.css('background', this.activeCol)
         } else {
-            document.body.style.cursor = "default"
-            HexaLab.UI.pick_button.css('background', 'rgb(207, 226, 243)')
+            HexaLab.UI.canvas_container.css('cursor', "default")
+            HexaLab.UI.pick_button.css('background', this.unactiveCol)
         }
-        HexaLab.UI.fill_button.css('background', 'rgb(207, 226, 243)')
+        HexaLab.UI.fill_button.css('background', this.unactiveCol )
     },
 
     on_toggle_fill: function () {
         if (this.filling) {
-            document.body.style.cursor = "crosshair"
-            HexaLab.UI.fill_button.css('background', 'rgb(255, 0, 0)')
+            HexaLab.UI.canvas_container.css('cursor',"crosshair")
+            HexaLab.UI.fill_button.css('background', this.activeCol)
         } else {
-            document.body.style.cursor = "default"
-            HexaLab.UI.fill_button.css('background', 'rgb(207, 226, 243)')
+            HexaLab.UI.canvas_container.css('cursor',"default")
+            HexaLab.UI.fill_button.css('background', this.unactiveCol)
         }
-        HexaLab.UI.pick_button.css('background', 'rgb(207, 226, 243)')
+        HexaLab.UI.pick_button.css('background', this.unactiveCol)
     },
 
     on_clear: function () {
-        document.body.style.cursor = "default"
-        HexaLab.UI.pick_button.css('background', 'rgb(207, 226, 243)')
-        HexaLab.UI.fill_button.css('background', 'rgb(207, 226, 243)')
+        HexaLab.UI.canvas_container.css('cursor', "default");
+        HexaLab.UI.pick_button.css('background', this.unactiveCol)
+        HexaLab.UI.fill_button.css('background', this.unactiveCol)
     },
 
     // State
@@ -170,6 +175,7 @@ HexaLab.PickFilter.prototype = Object.assign(Object.create(HexaLab.Filter.protot
         this.on_clear()
     },
 
+	
     // pick/fill click callbacks
     on_mouse_down: function (e) {
         this.clientX = e.clientX
@@ -179,7 +185,8 @@ HexaLab.PickFilter.prototype = Object.assign(Object.create(HexaLab.Filter.protot
 
     on_mouse_up: function (e) {
         document.removeEventListener('pointermove', this.mousemove_listener)
-        document.body.style.cursor = "crosshair"
+        //document.body.style.cursor = "crosshair"
+		HexaLab.UI.canvas_container.css('cursor', "crosshair")
 
         if (this.clientX != e.clientX || this.clientY != e.clientY) return
 

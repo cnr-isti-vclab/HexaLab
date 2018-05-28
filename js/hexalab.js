@@ -1217,6 +1217,7 @@ HexaLab.App = function (dom_element) {
     HexaLab.controls.on_mouse_up = function () {
         self.mouse_is_down = false
         self.viewer.show_axes(false)
+		self.queue_canvas_update()
     }
 
     // App
@@ -1226,8 +1227,8 @@ HexaLab.App = function (dom_element) {
         color_map:          'Parula',
         quality_measure:    'Scaled Jacobian',
         geometry_mode:      'Default',
-        crack_size:         0.5,
-        rounding_radius:    0.5,
+        crack_size:         0.25,
+        rounding_radius:    0.25,
         erode_dilate_level: 0
     }
 

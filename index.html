@@ -28,314 +28,225 @@
 </head>
 
 <body>
-    <!-- HTML presentation stuff -->
-    <div id="display">
-        <div id="GUI">
-            <div id="sidenav">
-                <div id="menu">
-                    <div id="toolbar_wrapper">
-                        <div id="toolbar" style="display:flex;justify-content:space-between;">
-                            <div id="toolbar_title">
-                                <span style="font-weight:bold; font-size:130%;">HexaLab</span>
-                            </div>
-                            <div id="toolbar_buttons">
-                                <button id="load_mesh" title="Open File">
-                                    <i class="fa fa-folder-open"></i>
-                                </button>
-                                <button id="home" title="Reset Camera">
-                                    <i class="fa fa-home"></i>
-                                </button>
-                                <!-- button id="plot" title="Quality Histogram">
-                                    <i class="fa fa-bar-chart"></i>
-                                </button -->
-                                <button id="load_settings" title="Open settings">
-                                    <i class="fa fa-gear"></i>
-                                </button>
-                                <button id="save_settings" title="Save settings">
-                                    <i class="fa fa-floppy-o"></i>
-                                </button>
-                                <button id="snapshot" title="Snapshot">
-                                    <i class="fa fa-camera"></i>
-                                </button>
-                                <button id="github" title="GitHub">
-                                    <i class="fa fa-github"></i>
-                                </button>
-                                <!--button id="about" title="About">
-                                    <i class="fa fa-question"></i>
-                                </button-->
-                            </div>
-                        </div>
-                    </div>
+	<div id="GUI">
+		<div id="toolbar"  >
+			<h1>HexaLab</h1>
+			<div id="toolbar_buttons">
+				<button id="load_mesh" title="Open File">
+					<i class="fa fa-folder-open"></i>
+				</button>
+				<button id="home" title="Reset Camera">
+					<i class="fa fa-home"></i>
+				</button>
+				<!-- button id="plot" title="Quality Histogram">
+					<i class="fa fa-bar-chart"></i>
+				</button -->
+				<button id="load_settings" title="Open settings">
+					<i class="fa fa-gear"></i>
+				</button>
+				<button id="save_settings" title="Save settings">
+					<i class="fa fa-floppy-o"></i>
+				</button>
+				<button id="snapshot" title="Snapshot">
+					<i class="fa fa-camera"></i>
+				</button>
+				<button id="github" title="GitHub">
+					<i class="fa fa-github"></i>
+				</button>
+				<!--button id="about" title="About">
+					<i class="fa fa-question"></i>
+				</button-->
+			</div>
+		</div>
 
-                    <div id="model_menu" class="menu_area">
-                        <div class="menu_title_wrapper">
-                            <div class="menu_title">Mesh</div>
-                        </div>
-                        <div class="menu_content">
-                            <div class="menu_row">
-                                <div class="menu_row_label">Source</div>
-                                <div class="menu_row_input">
-                                    <select id="mesh_source">
-                                        <option value="-2" selected="selected" style="display: none;">Select a mesh source&hellip;</option>
-                                        <option value="-1">Open File</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="menu_row">
-                                <div id="mesh_info_1" class="menu_row_infobox">
-                                    <div class="box_text">
-                                    </div>
-                                    <div class="box_buttons">
-                                        <button id="source_pdf">PDF</button>
-                                        <button id="source_web">Web</button>
-                                        <button id="source_doi">DOI</button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="menu_row">
-                                <div class="menu_row_input">
-                                    <select id="paper_mesh_picker">
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="menu_row">
-                                <div id="mesh_info_2" class="menu_row_infobox">
-                                    <div class="box_text">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+		<div id="model_menu" class="menubox">
+			<h2>Mesh</h2>
+			<div class="menu_content">
+				<div class="menu_row">
+					<label>Source:</label>
+					<div class="menu_row_input">
+						<select id="mesh_source" style="width:100%;">
+							<option value="-2" selected="selected" style="display: none;">Select a mesh source&hellip;</option>
+							<option value="-1">Open File</option>
+						</select>
+					</div>
+				</div>
+				<div class="menu_row">
+					<div id="mesh_info_1" class="menu_row_infobox">
+						<div class="box_text">
+						</div>
+						<div class="box_buttons">
+							<button id="source_pdf">PDF</button>
+							<button id="source_web">Web</button>
+							<button id="source_doi">DOI</button>
+						</div>
+					</div>
+				</div>
+				<div class="menu_row">
+					<div class="menu_row_input">
+						<select id="paper_mesh_picker">
+						</select>
+					</div>
+				</div>
+				<div class="menu_row">
+					<div id="mesh_info_2" class="menu_row_infobox">
+						<div class="box_text">
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
 
-                    <div id="plane_menu" class="menu_area">
-                        <div class="menu_title_wrapper">
-                            <div class="menu_title">Plane Filter</div>
-                            <label class="switch menu_switch" title="Enable/disable plane filtering">
-                                <input type="checkbox" id="plane_enabled">
-                                <span class="switch-slider"></span>
-                            </label>
-                        </div>
-                        <div class="menu_content">
-                            <div class="menu_row">
-                                <div class="menu_row_label">Normal</div>
-                                <div class="menu_row_input">
-                                    <div class="menu_row_input_block" style="font-size:0;">
-                                        <input class="normal_value" type="number" id="plane_nx" style="width:30px;">
-                                        <input class="normal_value" type="number" id="plane_ny" style="width:30px;">
-                                        <input class="normal_value" type="number" id="plane_nz" style="width:30px;">
-                                    </div>
-                                    <div class="menu_row_input_block">
-                                        <button id="plane_snap_nx" title="Align normal vector with the X axis">X</button><!-- 
-                                        --><button id="plane_snap_ny" title="Align normal vector with the Y axis">Y</button><!-- 
-                                        --><button id="plane_snap_nz" title="Align normal vector with the Z axis">Z</button><!-- 
-                                        --><button id="plane_swap_sign" title="Swap clipping side">
-                                            <i class="fa fa-exchange"></i>
-                                        </button><!-- 
-                                        --><button id="plane_snap_camera" title="Align normal vector with camera">
-                                            <i class="fa fa-eye"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="menu_row">
-                                <div class="menu_row_input">
-                                    <div class="slider" id="plane_offset_slider"></div>
-                                    <div class="menu_row_input_block">
-                                        <input type="number" id="plane_offset_number">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+		<div id="plane_menu" class="menubox">
+			<h2>Filters</h2>
 
-                    <div id="quality_menu" class="menu_area">
-                        <div class="menu_title_wrapper">
-                            <div class="menu_title">Quality Filter</div>
-                            <label class="switch menu_switch" title="Enable/disable quality filtering">
-                                <input type="checkbox" id="quality_enabled">
-                                <span class="switch-slider"></span>
-                            </label>
-                        </div>
-                        <div class="menu_content">
-                            <div class="menu_row">
-                                <!--div class="menu_row_label">Upper limit</div-->
-                                <div class="menu_row_input">
-                                    <div class="slider" id="quality_range_slider"></div>
-                                    <div class="menu_row_input_block">
-                                        <!--input type="number" id="quality_min_number"-->
-                                        <input type="number" id="quality_max_number">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div id="peeling_menu" class="menu_area">
-                        <div class="menu_title_wrapper">
-                            <div class="menu_title">Peeling Filter</div>
-                            <label class="switch menu_switch" title="Enable/disable depth filtering">
-                                <input type="checkbox" id="peeling_enabled">
-                                <span class="switch-slider"></span>
-                            </label>
-                        </div>
-                        <div class="menu_content">
-                            <div class="menu_row">
-                                <!--div class="menu_row_label">Depth</div-->
-                                <div class="menu_row_input">
-                                    <div class="slider" id="peeling_depth_slider"></div>
-                                    <div class="menu_row_input_block">
-                                        <input type="number" id="peeling_depth_number">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div id="pick_menu" class="menu_area">
-                        <div class="menu_title_wrapper">
-                            <div class="menu_title">Pick Filter</div>
-                            <label class="switch menu_switch" title="Enable/disable manual pick filtering">
-                                <input type="checkbox" id="pick_enabled">
-                                <span class="switch-slider"></span>
-                            </label>
-                        </div>
-                        <div class="menu_content">
-                            <div class="menu_row">
-                                <div class="menu_row_input">
-                                    <div class="menu_row_input_block">
-                                        <div class="menu_row_label"></div>
-                                        <div class="menu_row_input">
-                                            <div class="menu_row_input_block">
-                                                <button id="pick_clear_button" title="Unfilter all previously picked hexas">Clear</button>
-                                                <button id="fill_button" title="Manually pick hexas to unfilter">Fill</button>
-                                                <button id="pick_button" title="Manually pick hexas to filter">Pick</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div id="rendering_menu" class="menu_area">
-                        <div class="menu_title_wrapper">
-                            <div class="menu_title">Rendering</div>
-                        </div>
-                        <div class="menu_content">
-                            <div class="menu_row">
-                                <div class="menu_row_label">Color</div>
-                                <div class="menu_row_input">
-                                    <select id="surface_color_source">
-                                        <option value="Default" selected="selected">Default</option>
-                                        <option value="ColorMap">Quality</option>
-                                    </select>
-                                </div>
-                                <div class="menu_row_input" id="visible_color_wrapper">
-                                    <input type="text" id="visible_outside_color">
-                                    <input type="text" id="visible_inside_color">
-                                </div>
-                                <div class="menu_row_input" id="surface_colormap_input">
-                                    <select id="color_map">
-                                        <option value="Parula" selected="selected">Parula-like</option>
-                                        <option value="Jet">Jet</option>
-                                        <option value="RedBlue">Red Blue</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="menu_row">
-                                <div class="menu_row_label">Display mode</div>
-                                <div class="menu_row_input">
-                                    <select id="geometry_mode">
-                                        <option value="Default" selected="selected">Wireframe</option>
-                                        <option value="Cracked">Cracks</option>
-                                        <option value="Smooth">Rounded</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="menu_row">
-                                <div class="menu_row_label">Wireframe color</div>
-                                <div class="menu_row_input">
-                                    <div class="slider" id="wireframe_slider"></div>
-                                </div>
-                            </div>
-                            <div class="menu_row">
-                                <div class="menu_row_label">Crack size</div>
-                                <div class="menu_row_input">
-                                    <div class="slider" id="crack_size"></div>
-                                </div>
-                            </div>
-                            <div class="menu_row">
-                                <div class="menu_row_label">Rounding radius</div>
-                                <div class="menu_row_input">
-                                    <div class="slider" id="rounding_radius"></div>
-                                </div>
-                            </div>
-                            <div class="menu_row">
-                                <div class="menu_row_label">Silhouette</div>
-                                <div class="menu_row_input">
-                                    <div class="slider" id="filtered_slider"></div>
-                                </div>
-                            </div>
-                            <div class="menu_row">
-                                <div class="menu_row_label">Irregularity Graph</div>
-                                <div class="menu_row_input">
-                                    <div class="slider" id="singularity_slider"></div>
-                                </div>
-                            </div>
-                            <div class="menu_row">
-                                <div class="menu_row_label">Occlusion</div>
-                                <div class="menu_row_input">
-                                    <select id="ao_mode">
-                                        <option value="object space" selected="selected">OSAO</option>
-                                        <option value="screen space">SSAO</option>
-                                    </select>
-                                </div>
-                                <div class="menu_row_input">
-                                    <input type="checkbox" id="show_occlusion">
-                                </div>
-                            </div>
-                            <div class="menu_row">
-                                <div class="menu_row_label">Erode Dilate</div>
-                                <div class="menu_row_input">
-                                    <div class="slider" id="erode_dilate_slider"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+			<div class="menu_row">
+				<label>Slice:</label>
+				<div class="menu_row_input">
+					<div class="slider" id="plane_offset_slider"></div>
+					<input type="number" class="scalar_value" id="plane_offset_number">
+				</div>
+			</div>
+			
+			<div class="menu_subrow" style="displayss:none">
+					<label class="minilabel">direction:</label>
+					<button id="plane_snap_camera" title="Slice in current view direction">
+						<i class="fa fa-eye"></i>
+					</button>
+					<button id="plane_snap_nx" class="minibutton" title="Slice along the X axis">X</button><!-- 
+					--><button id="plane_snap_ny" class="minibutton"title="Slice along the Y axis">Y</button><!-- 
+					--><button id="plane_snap_nz" class="minibutton" title="Slice along the Z axis">Z</button>
+					<button id="plane_swap_sign" class="minibutton" title="Swap slicing plane">
+						<i class="fa fa-exchange"></i>
+					</button>
+					<input class="scalar_value" type="number" id="plane_nx" style="width:30px;"><!--
+					--><input class="scalar_value" type="number" id="plane_ny" style="width:30px;"><!--
+					--><input class="scalar_value" type="number" id="plane_nz" style="width:30px;">
+			</div>
+			
 
-                    <div id="log_menu" class="menu_area" style="display: none;">
-                        <div class="menu_title_wrapper">
-                            <div class="menu_title">Log</div>
-                        </div>
-                        <div class="menu_content">
-                            <textarea id="logger" readonly></textarea>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div id="frame">
-            <div id="drag_drop_overlay" class="first_drag_drop">
-                <div>
-                    <span id="drag_drop_header">Drop a mesh file in the box below<br/> or use the menu to the side</span>
-                </div>
-                <div id="mesh_drag_drop_area">
-                    <div id="mesh_drag_drop_quad" class="drag_drop_quad_off">
-                        <div id="mesh_drag_drop_content" class="drag_drop_content">
-                            <h1>Mesh</h1>
-                            <i class="fa fa-upload" aria-hidden="true"></i>
-                        </div>
-                    </div>
-                </div>
-                <div id="settings_drag_drop_area">
-                    <div id="settings_drag_drop_quad" class="drag_drop_quad_off">
-                        <div id="settings_drag_drop_content" class="drag_drop_content">
-                            <h1>Settings</h1>
-                            <i class="fa fa-upload" aria-hidden="true"></i>
-                        </div>
-                    </div>
-                </div>
-                <div style="clear:both"></div>
-            </div>
-        </div>
-    </div>
+			<div class="menu_row">
+				<label>Peel:</label>
+				<div class="menu_row_input">
+					<div class="slider" id="peeling_depth_slider">
+					</div><input class="scalar_value" type="number" id="peeling_depth_number">
+				</div>
+			</div>
+			
+			<div class="menu_row">
+				<label id="quality_label">Quality &ge;</label>
+				<div class="menu_row_input">
+					<div class="slider" id="quality_range_slider">
+					</div><input class="scalar_value" type="number" id="quality_max_number">
+				</div>
+			</div>
+			
+			<div class="menu_row">
+			    <label>Handpick:</label>
+				<button id="pick_button" class="pickbutton" title="Handpick hexas to filter">dig</button>
+				<button id="fill_button" class="pickbutton" title="Handpick hexas to unfilter">undig</button>
+				<button id="pick_clear_button" class="pickbutton" title="Clear all handpixs hexas">clear</button>
+			</div>
+			
+			<hr/>
+
+			<div class="menu_row" style="text-align:right;">
+				<label>Regularize:</label>
+				<div class="menu_subrow_input">
+					<div class="slider" id="erode_dilate_slider"></div>
+				</div>
+			</div>
+
+		</div>
+		<div id="rendering_menu" class="menubox">
+			<h2>Rendering</h2>
+			<div class="menu_row">
+				<label>Colors:</label>
+				<select id="surface_color_source" class="miniselect">
+					<option value="Default" selected="selected">Default</option>
+					<option value="ColorMap">By Quality</option>
+				</select>
+				<div class="menu_row_input" id="visible_color_wrapper">
+					<input type="text" id="visible_outside_color">
+					<input type="text" id="visible_inside_color">
+				</div>
+				<div class="menu_row_input" id="surface_colormap_input">
+					<label class="minilabel">color-map:</label>
+					<select id="color_map" class="miniselect">
+						<option value="Parula" selected="selected">Parula-like</option>
+						<option value="Jet">Jet</option>
+						<option value="RedBlue">Red-Blue</option>
+					</select>
+				</div>
+			</div>
+			<div class="menu_row">
+				<label>Separations:</label>
+				
+				<select id="geometry_mode" class="miniselect">
+					<option value="Default" selected="selected">Lines</option>
+					<option value="Cracked">Fissures</option>
+					<option value="Smooth">Roundings</option>
+				</select>
+				<div class="menu_row_input">	
+					<div class="slider" id="crack_size" style="display:none;"></div>
+					<div class="slider" id="wireframe_slider" ></div>
+					<div class="slider" id="rounding_radius" style="display:none;"> </div>					
+				</div>
+			</div>
+			<div class="menu_row">
+				<label>Silhouette:</label>
+				
+				<div class="menu_row_input" style="width100%">
+					<div class="slider" id="filtered_slider"></div>
+				</div>
+			</div>
+			<div class="menu_row">
+				<label>Irregulars:</label>
+				<div class="menu_row_input">
+					<div class="slider" id="singularity_slider"></div>
+				</div>
+			</div>
+			<div class="menu_row">
+				<label>Lighting:</label>
+				<select id="ao_mode" class="miniselect">
+					<option value="object space" selected="selected">best (AO)</option>
+					<option value="screen space">fast (SSAO)</option>
+					<option value="none">none</option>
+				</select>
+			</div>
+		</div>
+
+		<div id="log_menu" class="menubox" style="display: none;">
+			<h2>Log</h2>
+			<div class="menu_content">
+				<textarea id="logger" readonly></textarea>
+			</div>
+		</div>
+	</div>
+	<div id="frame">
+		<div id="drag_drop_overlay" class="first_drag_drop">
+			<div>
+				<span id="drag_drop_header">Drop a mesh file in the box below<br/> or use the menu to the side</span>
+			</div>
+			<div id="mesh_drag_drop_area">
+				<div id="mesh_drag_drop_quad" class="drag_drop_quad_off">
+					<div id="mesh_drag_drop_content" class="drag_drop_content">
+						<div class="large">Mesh</div>
+						<i class="fa fa-upload" aria-hidden="true"></i>
+					</div>
+				</div>
+			</div>
+			<div id="settings_drag_drop_area">
+				<div id="settings_drag_drop_quad" class="drag_drop_quad_off">
+					<div id="settings_drag_drop_content" class="drag_drop_content">
+						<div class="large">Settings</div>
+						<i class="fa fa-upload" aria-hidden="true"></i>
+					</div>
+				</div>
+			</div>
+			<div style="clear:both"></div>
+		</div>
+	</div>
 
     <!-- Emscripten module -->
     <script src="js/module.js"></script>
