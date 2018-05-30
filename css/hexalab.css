@@ -271,11 +271,11 @@ label {
 }
 
 #plane_snap_camera {
-	width: 22px;
-	height: 22px;
+	width: 32px;
+	height: 20px;
 	padding: 2px;
-	background: url("../img/eyearrow_but.png");
-	background-size: 16px 16px;
+	background: url("../img/eye256x128.png");
+	background-size: 28px 14px;
 	background-repeat: no-repeat;
 	background-position: 2px 2px;
 }
