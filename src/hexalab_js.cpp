@@ -19,6 +19,7 @@ vector<Vector3f>* get_surface_vert_color ( Model& model )   { return &model.surf
 vector<HexaLab::Index>*    get_surface_ibuffer ( Model& model )      { return &model.surface_ibuffer; }
 vector<Vector3f>* get_wireframe_vert_pos ( Model& model )   { return &model.wireframe_vert_pos; }
 vector<Vector3f>* get_wireframe_vert_color ( Model& model ) { return &model.wireframe_vert_color; }
+vector<float>*    get_wireframe_vert_alpha ( Model& model ) { return &model.wireframe_vert_alpha; }
 
 // std::vector
 template<typename T> js_ptr buffer_data ( std::vector<T>& v ) { return ( js_ptr ) v.data(); }
@@ -78,6 +79,8 @@ EMSCRIPTEN_BINDINGS ( HexaLab ) {
     .function ( "set_crack_size",                     &App::set_crack_size )
     .function ( "set_rounding_radius",                &App::set_rounding_radius )
     .function ( "set_filter_level",                   &App::set_filter_level )
+    .function ( "set_visible_wireframe_alpha",        &App::set_visible_wireframe_alpha )
+    .function ( "show_visible_wireframe_singularity", &App::show_visible_wireframe_singularity )
     .function ( "get_visible_model",                  &App::get_visible_model, allow_raw_pointers() )
     .function ( "get_filtered_model",                 &App::get_filtered_model, allow_raw_pointers() )
     .function ( "get_line_singularity_model",         &App::get_line_singularity_model, allow_raw_pointers() )
@@ -129,6 +132,7 @@ EMSCRIPTEN_BINDINGS ( HexaLab ) {
     .function ( "surface_ibuffer",        &get_surface_ibuffer, allow_raw_pointers() )
     .function ( "wireframe_pos",          &get_wireframe_vert_pos, allow_raw_pointers() )
     .function ( "wireframe_color",        &get_wireframe_vert_color, allow_raw_pointers() )
+    .function ( "wireframe_alpha",        &get_wireframe_vert_alpha, allow_raw_pointers() )
     ;
     class_<MeshStats> ( "Mesh" )
     .property ( "vert_count",             &MeshStats::vert_count )
