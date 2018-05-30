@@ -58,6 +58,11 @@ Object.assign(HexaLab.BufferGeometry.prototype, {
             const buffer = new Float32Array(Module.HEAPU8.buffer, this.backend.wireframe_color().data(), this.backend.wireframe_color().size() * 3)
             this.wireframe.addAttribute('color', new THREE.BufferAttribute(buffer, 3))
         }
+        this.wireframe.removeAttribute('alpha')
+        if (this.backend.wireframe_alpha().size() != 0) {
+            const buffer = new Float32Array(Module.HEAPU8.buffer, this.backend.wireframe_alpha().data(), this.backend.wireframe_alpha().size())
+            this.wireframe.addAttribute('alpha', new THREE.BufferAttribute(buffer, 1))
+        }
     },
 })
 
@@ -151,7 +156,9 @@ HexaLab.Viewer = function (canvas_width, canvas_height) {
         polygonOffset:                  true,
         polygonOffsetFactor:            0.5,
     })
-    this.materials.visible_wireframe    = new THREE.LineBasicMaterial({
+    this.materials.visible_wireframe    = new THREE.ShaderMaterial({
+        vertexShader:                   THREE.AlphaWireframeMaterial.vertexShader,
+        fragmentShader:                 THREE.AlphaWireframeMaterial.fragmentShader,
         vertexColors:                   THREE.VertexColors,
         transparent:                    true,
         depthWrite:                     false,
@@ -1669,7 +1676,8 @@ Object.assign(HexaLab.App.prototype, {
         this.materials().visible_wireframe.visible = opacity != 0
         this.prev_visible_wireframe_opacity = null
         HexaLab.UI.on_set_wireframe_opacity(opacity)
-        this.queue_canvas_update()
+        this.backend.set_visible_wireframe_alpha(opacity)
+        this.queue_buffers_update()
     },
     
     set_filtered_surface_opacity:       function (opacity) {

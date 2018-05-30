@@ -147,7 +147,7 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
         this.plane.edges = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({
             color: this.plane.material.color,
             transparent: true,
-            opacity: 1.0 // TODO differentiate between filter scene objects meshes and wireframe, draw meshes pre-ssao, wireframe post-ssao
+            opacity: 0.0 // TODO differentiate between filter scene objects meshes and wireframe, draw meshes pre-ssao, wireframe post-ssao
         }))
         
         HexaLab.app.viewer.add_mesh(this.plane.mesh)

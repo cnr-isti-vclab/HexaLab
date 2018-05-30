@@ -117,8 +117,9 @@ namespace HexaLab {
         friend class Builder;
 
       private:
-        // Marks are used to flag the visibility of elements. If an element's mark field equals to the mesh mark field,
-        // that element is currently invisible. Otherwise, it means that is has not been filtered and should be displayed.
+        // Marks are used to flag the visibility of elements. 
+        // If an element's mark field equals to the mesh mark field, that element is currently invisible. 
+        // Otherwise, it means that is has not been filtered and should be displayed.
         uint32_t current_mark = 0;
 
       public:

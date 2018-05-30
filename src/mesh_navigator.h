@@ -25,7 +25,7 @@ namespace HexaLab {
         MeshNavigator flip_vert();
 
         // -- Composite operaions --
-        // 'Rotates' aound the current edge, changing face and hexa
+        // 'Rotates' aound the current edge, changing face and possibly hexa (if there are more than one)
         MeshNavigator rotate_on_edge();
         // 'Rotates' on the current face, changing vert and edge
         MeshNavigator rotate_on_face();
