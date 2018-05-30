@@ -1241,7 +1241,7 @@ HexaLab.App = function (dom_element) {
 
         // filtered_surface_color:                  '#d2de0c',
         filtered_surface_color:                     '#a8c2ea',
-        filtered_surface_opacity:                   0,
+        filtered_surface_opacity:                   1,
         filtered_wireframe_color:                   '#000000',
         filtered_wireframe_opacity:                 0,
 
@@ -1250,7 +1250,7 @@ HexaLab.App = function (dom_element) {
 
         // keep these coherent with default app singularity mode
         singularity_faces_opacity:                  0,
-        singularity_simple_lines_opacity:           0,
+        singularity_simple_lines_opacity:           1,
         singularity_full_lines_opacity:             0,
         singularity_hidden_faces_opacity:           0,
         singularity_hidden_simple_lines_opacity:    0,
