@@ -105,7 +105,7 @@ HexaLab.PlaneFilter = function () {
         enabled: false,
         normal: new THREE.Vector3(1, 0, 0),
         offset: 0,
-        opacity: 0.3,
+        opacity: 0.05,
         color: "#56bbbb"
     }
 };
