@@ -20,24 +20,25 @@ HexaLab.PickFilter = function () {
 
     // Listener
     var self = this;
-    HexaLab.UI.pick_enabled.change(function () {
-        self.enable($(this).is(':checked'))
-    })
+
     HexaLab.UI.pick_button.click(function () {
-        self.toggle_pick()
+		self.brush = ((self.brush == 1) ? 0 : 1);
+        self.updateBrush()
     })
     HexaLab.UI.fill_button.click(function () {
-        self.toggle_fill()
+		self.brush = ((self.brush == 2) ? 0 : 2);
+        self.updateBrush()
     })
     HexaLab.UI.pick_clear_button.click(function () {
         self.clear()
+		self.brush = 0
+		self.updateBrush()
     })
 
     // State
     this.filtered_hexas = []
     this.filled_hexas   = []
-    this.picking = false
-    this.filling = false
+    this.brush = 0
 
     this.default_settings = {
         enabled: false,
@@ -46,7 +47,6 @@ HexaLab.PickFilter = function () {
 
     this.mousedown_listener = this.on_mouse_down.bind(this)
     this.mouseup_listener   = this.on_mouse_up.bind(this)
-    this.mousemove_listener = this.on_mouse_move.bind(this)
 }
 
 HexaLab.PickFilter.prototype = Object.assign(Object.create(HexaLab.Filter.prototype), {
@@ -72,48 +72,11 @@ HexaLab.PickFilter.prototype = Object.assign(Object.create(HexaLab.Filter.protot
 
     on_mesh_change: function (mesh) {
         this.clear()
-        this.on_enabled_set(this.backend.enabled)
         HexaLab.UI.pick_menu_content.prop('disabled', false)
-    },
-
-    // UI
-    on_enabled_set: function (bool) {
-        HexaLab.UI.pick_enabled.prop('checked', bool)
-    },
-
-    on_toggle_pick: function () {
-        if (this.picking) {
-            HexaLab.UI.canvas_container.css('cursor', "crosshair")
-            HexaLab.UI.pick_button.css('background', this.activeCol)
-        } else {
-            HexaLab.UI.canvas_container.css('cursor', "default")
-            HexaLab.UI.pick_button.css('background', this.unactiveCol)
-        }
-        HexaLab.UI.fill_button.css('background', this.unactiveCol )
-    },
-
-    on_toggle_fill: function () {
-        if (this.filling) {
-            HexaLab.UI.canvas_container.css('cursor',"crosshair")
-            HexaLab.UI.fill_button.css('background', this.activeCol)
-        } else {
-            HexaLab.UI.canvas_container.css('cursor',"default")
-            HexaLab.UI.fill_button.css('background', this.unactiveCol)
-        }
-        HexaLab.UI.pick_button.css('background', this.unactiveCol)
     },
 
     on_clear: function () {
         HexaLab.UI.canvas_container.css('cursor', "default");
-        HexaLab.UI.pick_button.css('background', this.unactiveCol)
-        HexaLab.UI.fill_button.css('background', this.unactiveCol)
-    },
-
-    // State
-    enable: function (enabled) {
-        this.backend.enabled = enabled
-        this.on_enabled_set(enabled)
-        HexaLab.app.queue_buffers_update()
     },
 
     set_filtered_hexas: function (list) {
@@ -134,45 +97,46 @@ HexaLab.PickFilter.prototype = Object.assign(Object.create(HexaLab.Filter.protot
         HexaLab.app.queue_buffers_update()
     },
 
-    toggle_pick: function () {
-        document.removeEventListener('pointerdown', this.mousedown_listener)
-        document.removeEventListener('pointerup',   this.mouseup_listener)
-        this.filling = false
-        if (!this.picking) {
-            this.picking = true
-            document.addEventListener('pointerdown', this.mousedown_listener)
-            document.addEventListener('pointerup',   this.mouseup_listener)
-        } else {
-            this.picking = false
-        }
-        this.on_toggle_pick()
-    },
-
-    toggle_fill: function () {
-        document.removeEventListener('pointerdown', this.mousedown_listener)
-        document.removeEventListener('pointerup',   this.mouseup_listener)
-        this.picking = false
-        if (!this.filling) {
-            this.filling = true
-            document.addEventListener('pointerdown', this.mousedown_listener)
-            document.addEventListener('pointerup',   this.mouseup_listener)
-        } else {
-            this.filling = false
-        }
-        this.on_toggle_fill()
-    },
+	updateBrush : function (){
+		switch (this.brush) {
+			case 0:
+				document.removeEventListener('pointerdown', this.mousedown_listener)
+				document.removeEventListener('pointerup',   this.mouseup_listener)		
+				HexaLab.UI.pick_button.css('background', this.unactiveCol)
+				HexaLab.UI.fill_button.css('background', this.unactiveCol)
+				HexaLab.UI.canvas_container.css('cursor', "auto")
+				break;
+			case 1:
+				document.addEventListener('pointerdown', this.mousedown_listener)
+				document.addEventListener('pointerup',   this.mouseup_listener)	
+				HexaLab.UI.pick_button.css('background', this.activeCol)
+				HexaLab.UI.fill_button.css('background', this.unactiveCol)
+				HexaLab.UI.canvas_container.css('cursor', "url('img/pointer24_minus.png') 9 2,alias")
+				break;
+			case 2:
+				document.addEventListener('pointerdown', this.mousedown_listener)
+				document.addEventListener('pointerup',   this.mouseup_listener)	
+				HexaLab.UI.pick_button.css('background', this.unactiveCol)
+				HexaLab.UI.fill_button.css('background', this.activeCol)
+				HexaLab.UI.canvas_container.css('cursor', "url('img/pointer24_plus.png') 9 2,copy")
+				break;
+		}
+	},
+	
+	setBrush: function (b){
+		if (this.brush!=b)  {
+			this.brush = b;
+			this.updateBrush();
+		}
+	},
+	
 
     clear: function () {
         this.backend.clear_filtered_hexas()
         this.backend.clear_filled_hexas()
         this.filtered_hexas = []
         this.filled_hexas   = []
-        document.removeEventListener('pointerdown', this.mousedown_listener)
-        document.removeEventListener('pointerup',   this.mouseup_listener)
-        this.picking = false
-        this.filling = false
         HexaLab.app.queue_buffers_update()
-        this.on_clear()
     },
 
 	
@@ -180,26 +144,17 @@ HexaLab.PickFilter.prototype = Object.assign(Object.create(HexaLab.Filter.protot
     on_mouse_down: function (e) {
         this.clientX = e.clientX
         this.clientY = e.clientY
-        document.addEventListener('pointermove', this.mousemove_listener)
     },
 
     on_mouse_up: function (e) {
-        document.removeEventListener('pointermove', this.mousemove_listener)
-        //document.body.style.cursor = "crosshair"
-		HexaLab.UI.canvas_container.css('cursor', "crosshair")
 
         if (this.clientX != e.clientX || this.clientY != e.clientY) return
 
-        if (this.picking) {
+        if (this.brush == 1) {
             this.on_pick(e.clientX, e.clientY)
-        } else if (this.filling) {
+        } else if (this.brush == 2) {
             this.on_fill(e.clientX, e.clientY)
         }
-    },
-
-    on_mouse_move: function (e) {
-        // TODO why is this not working? ...
-        //document.body.style.cursor = "default"
     },
 
     on_pick: function (x, y) {
@@ -293,4 +248,19 @@ HexaLab.PickFilter.prototype = Object.assign(Object.create(HexaLab.Filter.protot
     },
 })
 
+var _nf = HexaLab.filters.length;
 HexaLab.filters.push(new HexaLab.PickFilter())
+
+$(document).keydown(function (e) {
+	console.log("KeyDonw '"+e.keyCode+"'");
+    if (e.keyCode == 16) { HexaLab.filters[_nf].setBrush( 2 ); } // shift  16
+    if (e.keyCode == 17) { HexaLab.filters[_nf].setBrush( 1 ); } // ctrl 17
+	//if (e.keyCode == 18)  // alt  18
+});
+
+$(document).keyup(function (e) {
+	//console.log("KeyDonw '"+e.keyCode+"'");
+    if (e.keyCode == 16) HexaLab.filters[_nf].setBrush( 0 ); // shift  16
+    if (e.keyCode == 17) HexaLab.filters[_nf].setBrush( 0 ); // ctrl  17
+	//if (e.keyCode == 18) toggle_pick() // alt  18
+});
