@@ -145,13 +145,17 @@ HexaLab.Viewer = function (canvas_width, canvas_height) {
 
     this.scene_camera = new THREE.PerspectiveCamera(30, this.aspect, 0.1, 1000)
     this.scene_light = new THREE.PointLight()
-    // this.scene_light = new THREE.AmbientLight()
-
+    this.scene_light = new THREE.DirectionalLight()
     //this.scene_world = new THREE.Matrix4()
 
     // Materials
     this.materials = []
     this.materials.visible_surface      = new THREE.MeshBasicMaterial({
+        vertexColors:                   THREE.VertexColors,
+        polygonOffset:                  true,
+        polygonOffsetFactor:            0.5,
+    })
+    this.materials.visible_surface_diffuse      = new THREE.MeshLambertMaterial({
         vertexColors:                   THREE.VertexColors,
         polygonOffset:                  true,
         polygonOffsetFactor:            0.5,
@@ -162,6 +166,10 @@ HexaLab.Viewer = function (canvas_width, canvas_height) {
         vertexColors:                   THREE.VertexColors,
         transparent:                    true,
         depthWrite:                     false,
+        uniforms: {
+            uAlpha:     null,
+            uMixAlpha:  null
+        }
         // polygonOffset:                  true,
         // polygonOffsetFactor:            -1.5,
     })
@@ -263,6 +271,7 @@ HexaLab.Viewer = function (canvas_width, canvas_height) {
     }
 
     make_renderable_surface     (this.materials.visible_surface,                    'visible')
+    make_renderable_surface     (this.materials.visible_surface_diffuse,            'visible_diffuse', 'visible')
     make_renderable_surface     (this.materials.filtered_surface,                   'filtered')
     make_renderable_surface     (this.materials.singularity_surface,                'full_singularity')
     make_renderable_surface     (this.materials.singularity_hidden_surface,         'hidden_full_singularity', 'full_singularity')
@@ -533,10 +542,12 @@ Object.assign(HexaLab.Viewer.prototype, {
     set_background_color:   function (color) { this.settings.background = color },
     set_light_intensity:    function (intensity) { this.scene_light.intensity = intensity },
     set_aa_mode:            function (value) { this.settings.aa = value; /*this.init_backend()*/ },
+    set_lighting_mode:      function (value) { this.settings.lighting = value; this.update_osao_buffers(); this.dirty_canvas = true },
     get_background_color:   function () { return this.settings.background },
     get_light_intensity:    function () { return this.scene_light.intensity },
-    get_ao_mode:            function () { return this.settings.ao },
     get_aa_mode:            function () { return this.settings.aa },
+    get_lighting_mode:      function () { return this.settings.lighting },
+
 
     on_buffers_change:      function () { this.dirty_buffers = true; HexaLab.app.backend.flag_models_as_dirty() },
     on_scene_change:        function () { this.dirty_canvas = true },
@@ -546,11 +557,10 @@ Object.assign(HexaLab.Viewer.prototype, {
 
     show_axes:              function (do_show) { this.do_show_axes = do_show },
 
-    set_ao_mode:            function (value) { this.settings.ao = value; this.update_osao_buffers(); this.dirty_canvas = true },
 
     set_silhouette_opacity: function (opacity) { this.settings.silhouette_alpha = opacity; this.dirty_canvas = true },
     get_silhouette_opacity: function () { return this.settings.silhouette_alpha },
-    set_silhouette_color: function (color_string) { 
+    set_silhouette_color:   function (color_string) { 
         const c = new THREE.Color(color_string)
         this.silhouette_alpha_pass.material.uniforms.uColor = { value: new THREE.Vector3(c.r, c.g, c.b) }
         this.dirty_canvas = true
@@ -922,11 +932,23 @@ Object.assign(HexaLab.Viewer.prototype, {
     draw_main_model: function () {
         // mesh
         this.clear_scene()
-        this.scene.add(this.renderables.visible.surface)
         this.scene.position.set(this.mesh_offset.x, this.mesh_offset.y, this.mesh_offset.z)
+        if (this.settings.lighting == 'Direct') {
+            this.scene.add(this.renderables.visible_diffuse.surface)
+            const light_pos = new THREE.Vector3().subVectors(this.scene_camera.position, this.scene.position)
+            this.scene_light.position.set(light_pos.x, light_pos.y, light_pos.z)
+            //this.scene_light.position.copy(this.scene_camera.position)
+            this.scene.add(this.scene_light)
+        } else {
+            this.scene.add(this.renderables.visible.surface)
+        }
 
         // draw
         this.renderer.render(this.scene, this.scene_camera)
+
+        if (this.settings.lighting == 'Direct') {
+            this.scene_camera.remove(this.scene_light)
+        }
     },
 
     prepare_ssao: function () {
@@ -1095,7 +1117,7 @@ Object.assign(HexaLab.Viewer.prototype, {
     update_osao_buffers: function () {
         if (!this.mesh) return
 
-        if (this.settings.ao == 'object space') {
+        if (this.settings.lighting == 'AO') {
             if (this.ao_pass.progress.readback_i != this.ao_pass.progress.view_i) {
                 this.renderer.readRenderTargetPixels(this.ao_pass.progress.target, 0, 0,
                     this.ao_pass.progress.target.width, this.ao_pass.progress.target.height, 
@@ -1153,7 +1175,7 @@ Object.assign(HexaLab.Viewer.prototype, {
         this.draw_silhouette()
         this.draw_main_model()
 
-        if (this.settings.ao == 'screen space' || this.settings.ao == 'object space' && this.ao_pass.progress.view_i < 32) {
+        if (this.settings.lighting == 'SSAO' || this.settings.lighting == 'AO' && this.ao_pass.progress.view_i < 32) {
             this.prepare_ssao()
             this.compute_ssao()
             this.blend_in_ssao()
@@ -1233,7 +1255,7 @@ HexaLab.App = function (dom_element) {
         singularity_mode:   0,
         color_map:          'Parula',
         quality_measure:    'Scaled Jacobian',
-        geometry_mode:      'Default',
+        geometry_mode:      'DynamicLines',
         crack_size:         0.25,
         rounding_radius:    0.25,
         erode_dilate_level: 0
@@ -1275,7 +1297,7 @@ HexaLab.App = function (dom_element) {
     // Renderer
     this.default_rendering_settings = {
         background:      '#ffffff',
-        occlusion:       'object space',
+        lighting:        'AO',
         antialiasing:    'msaa',
         light_intensity: 1,
     }
@@ -1322,7 +1344,7 @@ Object.assign(HexaLab.App.prototype, {
         return {
             background:      this.viewer.get_background_color(),
             light_intensity: this.viewer.get_light_intensity(),
-            occlusion:       this.viewer.get_ao_mode(),
+            lighting:        this.viewer.get_lighting_mode(),
             antialiasing:    this.viewer.get_aa_mode(),
         }
     },
@@ -1342,7 +1364,7 @@ Object.assign(HexaLab.App.prototype, {
             visible_surface_default_inside_color:       get_default_inside_color(),
             visible_surface_default_outside_color:      get_default_outside_color(),
             is_quality_color_mapping_enabled:           this.backend.is_quality_color_mapping_enabled(),
-            visible_wireframe_opacity:                  this.materials().visible_wireframe.opacity,
+            visible_wireframe_opacity:                  this.materials().visible_wireframe.uniforms.uAlpha.value,
             filtered_surface_opacity:                   this.materials().filtered_surface.opacity,
             filtered_wireframe_opacity:                 this.materials().filtered_wireframe.opacity,
             filtered_surface_color:                     '#' + this.materials().filtered_surface.color.getHexString(),
@@ -1404,7 +1426,7 @@ Object.assign(HexaLab.App.prototype, {
     set_rendering_settings: function (settings) {
         this.set_background_color(settings.background)
         this.set_light_intensity(settings.light_intensity)
-        this.set_occlusion(settings.occlusion)
+        this.set_lighting_mode(settings.lighting)
         this.set_antialiasing(settings.antialiasing)
     },
 
@@ -1540,9 +1562,15 @@ Object.assign(HexaLab.App.prototype, {
     },
 
     set_geometry_mode: function (mode) {
-        if      (mode == 'Default')     this.backend.set_geometry_mode(Module.GeometryMode.Default)
-        else if (mode == 'Cracked')     this.backend.set_geometry_mode(Module.GeometryMode.Cracked)
-        else if (mode == 'Smooth')      this.backend.set_geometry_mode(Module.GeometryMode.Smooth)
+        if      (mode == 'Lines')           this.backend.set_geometry_mode(Module.GeometryMode.Default)
+        else if (mode == 'DynamicLines')    this.backend.set_geometry_mode(Module.GeometryMode.Default)
+        else if (mode == 'Cracked')         this.backend.set_geometry_mode(Module.GeometryMode.Cracked)
+        else if (mode == 'Smooth')          this.backend.set_geometry_mode(Module.GeometryMode.Smooth)
+        if (mode == 'DynamicLines') {
+            this.materials().visible_wireframe.uniforms.uMixAlpha = { value: true }
+        } else {
+            this.materials().visible_wireframe.uniforms.uMixAlpha = { value: false }
+        }
         this.geometry_mode = mode
         this.queue_buffers_update()
         HexaLab.UI.on_set_geometry_mode(mode)
@@ -1672,12 +1700,11 @@ Object.assign(HexaLab.App.prototype, {
     },
 
     set_visible_wireframe_opacity:      function (opacity) {
-        this.materials().visible_wireframe.opacity = opacity
+        this.materials().visible_wireframe.uniforms.uAlpha = { value: opacity }
         this.materials().visible_wireframe.visible = opacity != 0
         this.prev_visible_wireframe_opacity = null
         HexaLab.UI.on_set_wireframe_opacity(opacity)
-        this.backend.set_visible_wireframe_alpha(opacity)
-        this.queue_buffers_update()
+        this.queue_canvas_update()
     },
     
     set_filtered_surface_opacity:       function (opacity) {
@@ -1752,18 +1779,18 @@ Object.assign(HexaLab.App.prototype, {
         this.queue_buffers_update()
     },
 
-    set_occlusion:                      function (value) { 
-        this.viewer.set_ao_mode(value)
-        HexaLab.UI.on_set_occlusion(value) 
+    set_lighting_mode: function (value) { 
+        this.viewer.set_lighting_mode(value)
+        HexaLab.UI.on_set_lighting_mode(value) 
     },
-    set_antialiasing:                   function (value) { 
+    set_antialiasing: function (value) { 
         this.viewer.set_aa_mode(value) 
     },
-    set_background_color:               function (color) { 
+    set_background_color: function (color) { 
         this.viewer.set_background_color(color)
         this.queue_canvas_update() 
     },
-    set_light_intensity:                function (intensity) { 
+    set_light_intensity: function (intensity) { 
         this.viewer.set_light_intensity(intensity)
         this.queue_canvas_update() 
     },

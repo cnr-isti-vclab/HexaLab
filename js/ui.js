@@ -169,7 +169,7 @@ HexaLab.UI = {
         singularity_mode:   $('#singularity_slider'),
         occlusion:          $("#show_occlusion"),
         geometry_mode:      $('#geometry_mode'),
-        ao_mode:            $("#ao_mode"),
+        lighting_mode:      $("#lighting_mode"),
         rendering_menu_content: $('#rendering_menu *'),
         wireframe:          $('#wireframe_slider'),
         rounding_radius:    $('#rounding_radius'),
@@ -287,8 +287,8 @@ HexaLab.UI.settings.singularity_mode.slider({
     HexaLab.app.set_singularity_mode(ui.value)
 })
 
-HexaLab.UI.settings.ao_mode.on('change', function () {
-    HexaLab.app.set_occlusion(this.options[this.selectedIndex].value)
+HexaLab.UI.settings.lighting_mode.on('change', function () {
+    HexaLab.app.set_lighting_mode(this.options[this.selectedIndex].value)
 })
 
 HexaLab.UI.settings.occlusion.on('click', function () {
@@ -340,8 +340,9 @@ HexaLab.UI.on_set_singularity_mode = function (mode) {
     HexaLab.UI.settings.singularity_mode.slider('value', mode)
 }
 
-HexaLab.UI.on_set_occlusion = function (ao) {
-    HexaLab.UI.settings.occlusion.prop('checked', ao == 'object space')
+HexaLab.UI.on_set_lighting_mode = function (v) {
+    HexaLab.UI.settings.lighting_mode.val(v)
+    //HexaLab.UI.settings.occlusion.prop('checked', ao == 'object space')
 }
 
 HexaLab.UI.on_set_color_map = function (value) {
@@ -519,13 +520,12 @@ HexaLab.UI.update_quality_sign = function(){
 	HexaLab.UI.quality_label.html(  (min<max)?"A":"B" );
 }
 
-
 HexaLab.UI.on_set_geometry_mode = function (v) {
     HexaLab.UI.settings.geometry_mode.val(v)
     HexaLab.UI.settings.wireframe.hide()
     HexaLab.UI.settings.crack_size.hide()
     HexaLab.UI.settings.rounding_radius.hide()
-    if (v == 'Default') {
+    if (v == 'Lines' || v == 'DynamicLines') {
         HexaLab.UI.settings.wireframe.show()
     } else if (v == 'Cracked') {
         HexaLab.UI.settings.crack_size.show()
