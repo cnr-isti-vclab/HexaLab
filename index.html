@@ -121,7 +121,7 @@
 					<button id="plane_snap_nx" class="minibutton" title="Slice along the X axis">X</button><!-- 
 					--><button id="plane_snap_ny" class="minibutton"title="Slice along the Y axis">Y</button><!-- 
 					--><button id="plane_snap_nz" class="minibutton" title="Slice along the Z axis">Z</button>
-					<button id="plane_swap_sign" class="minibutton" title="Swap slicing plane">
+					<button id="plane_swap_sign" class="minibutton" title="Flip slicing plane">
 						<i class="fa fa-exchange"></i>
 					</button>
 					<input class="scalar_value" type="number" id="plane_nx" style="width:30px;"><!--
@@ -150,7 +150,7 @@
 			    <label>Handpick</label>
 				<button id="pick_button" class="pickbutton" title="Handpick hexas to filter [ctrl]">dig</button>
 				<button id="fill_button" class="pickbutton" title="Handpick hexas to unfilter [shift]">undig</button>
-				<button id="pick_clear_button" class="pickbutton" title="Clear all handpixs hexas">clear</button>
+				<button id="pick_clear_button" class="pickbutton" title="Clear all handpicks">clear</button>
 			</div>
 			
 			<hr/>
@@ -274,6 +274,7 @@
     <script src="js/filters/peeling_filter.js"></script>
     <script src="js/filters/pick_filter.js"></script>
     <script src="js/external/TrackballControls.js"></script>
+    <script src="js/external/pngitxt-browser.js"></script>
 
     <script type="text/javascript">
         window.onload = function () {

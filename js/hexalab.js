@@ -1493,6 +1493,7 @@ Object.assign(HexaLab.App.prototype, {
         var height  = this.canvas.container.offsetHeight
         this.viewer.resize(width, height)
         log('Frame resized to ' + width + 'x' + height)
+		this.queue_canvas_update()
     },
 
     get_canvas_size: function () {

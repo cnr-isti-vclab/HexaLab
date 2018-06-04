@@ -12,4 +12,7 @@ src/*.user
 src/test/*
 src/.qmake.stash
 build-*/
+emcc.bat
+
+js/generated/hexalab_asm.js
 /nbproject

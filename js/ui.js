@@ -1136,9 +1136,129 @@ Copyright (C) 2017  <br>\
     }*/
 })
 
+function str2ab(str) {
+  var buf = new ArrayBuffer(str.length*2); // 2 bytes for each char
+  var bufView = new Uint16Array(buf);
+  for (var i=0, strLen=str.length; i < strLen; i++) {
+    bufView[i] = str.charCodeAt(i);
+  }
+  return buf;
+}
+
+/* START https://stackoverflow.com/questions/16363419/how-to-get-binary-string-from-arraybuffer */
+function ArrayBufferToString(buffer) {
+    return BinaryToString(String.fromCharCode.apply(null, Array.prototype.slice.apply(new Uint8Array(buffer))));
+}
+
+function StringToArrayBuffer(string) {
+    return StringToUint8Array(string).buffer;
+}
+
+function BinaryToString(binary) {
+    var error;
+
+    try {
+        return decodeURIComponent(escape(binary));
+    } catch (_error) {
+        error = _error;
+        if (error instanceof URIError) {
+            return binary;
+        } else {
+            throw error;
+        }
+    }
+}
+
+function StringToBinary(string) {
+    var chars, code, i, isUCS2, len, _i;
+
+    len = string.length;
+    chars = [];
+    isUCS2 = false;
+    for (i = _i = 0; 0 <= len ? _i < len : _i > len; i = 0 <= len ? ++_i : --_i) {
+        code = String.prototype.charCodeAt.call(string, i);
+        if (code > 255) {
+            isUCS2 = true;
+            chars = null;
+            break;
+        } else {
+            chars.push(code);
+        }
+    }
+    if (isUCS2 === true) {
+        return unescape(encodeURIComponent(string));
+    } else {
+        return String.fromCharCode.apply(null, Array.prototype.slice.apply(chars));
+    }
+}
+
+function StringToUint8Array(string) {
+    var binary, binLen, buffer, chars, i, _i;
+    binary = StringToBinary(string);
+    binLen = binary.length;
+    buffer = new ArrayBuffer(binLen);
+    chars  = new Uint8Array(buffer);
+    for (i = _i = 0; 0 <= binLen ? _i < binLen : _i > binLen; i = 0 <= binLen ? ++_i : --_i) {
+        chars[i] = String.prototype.charCodeAt.call(binary, i);
+    }
+    return chars;
+}
+
+/* END https://stackoverflow.com/questions/16363419/how-to-get-binary-string-from-arraybuffer */
+
+
+var tmpA;
+var tmpB;
 HexaLab.UI.topbar.snapshot.on('click', function () {
     HexaLab.app.canvas.element.toBlob(function (blob) {
-        saveAs(blob, "HLsnapshot.png");
+        	
+			var reader = new FileReader();
+			
+			
+			reader.onloadend = function (e) {
+				tmpA = reader.result;
+				pngitxt.set(
+					ArrayBufferToString(tmpA), 
+					{  
+						keyword: "hexalab", 
+						value: //null
+						"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"  
+					},
+					function (res) {
+						tmpB = StringToArrayBuffer( res );
+						blob = new Blob( [tmpB] )
+						saveAs(blob, "HexaLabNEW.png")
+					}
+				)
+				
+			}
+
+			//reader.readAsBinaryString( blob );
+			
+			reader.readAsArrayBuffer( blob )
+			
+			//blob = new Blob( [result] , {type:'image/png'} )
+			//fileReader.readAsArrayBuffer( blob )
+			/*
+			var fileReader = new FileReader()
+			fileReader.onload = function (e) {
+				var bs = readAsBinaryString()
+				var buf = fileReader.result
+				pngitxt.set(
+					buf, 
+					{  keyword: "hexalab", value: ""  },
+					function (result) {
+						//var img = document.createElement('img');
+						//img.src = "data:image/png;base64," + btoa(result);
+						//document.body.appendChild(img)
+						blob = new Blob( [result] , {type:'image/png'} )
+						saveAs(blob, "HexaLab.png")
+					}
+				)
+				//blob = new Blob( [buf] )
+				//saveAs(blob, "HexaLab.png");
+			};  
+			fileReader.readAsArrayBuffer( blob )*/
     }, "image/png");
 }).prop("disabled", true);
 
