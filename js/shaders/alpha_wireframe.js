@@ -18,8 +18,12 @@ THREE.AlphaWireframeMaterial = {
         "varying float vAlpha;",
         "varying vec3 vColor;",
 
+        "uniform bool uMixAlpha;",
+        "uniform float uAlpha;",
+
         "void main() {",
-            "gl_FragColor = vec4(vColor, vAlpha);",
+            "float alpha = uMixAlpha ? vAlpha * uAlpha : uAlpha;",
+            "gl_FragColor = vec4(vColor, alpha);",
         "}"
 
     ].join( "\n" )

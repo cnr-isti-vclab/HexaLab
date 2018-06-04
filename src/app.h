@@ -87,7 +87,6 @@ namespace HexaLab {
 
         size_t filter_level = 0;
 
-        float visible_wireframe_alpha = 1;
         bool do_show_visible_wireframe_singularity = true;
 
       public:
@@ -129,7 +128,6 @@ namespace HexaLab {
 
         void set_filter_level ( size_t level );
 
-        void set_visible_wireframe_alpha ( float alpha );
         void show_visible_wireframe_singularity ( bool show );
 
         // Getters

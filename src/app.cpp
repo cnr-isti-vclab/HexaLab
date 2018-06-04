@@ -180,11 +180,6 @@ namespace HexaLab {
         this->flag_models_as_dirty();
     }
 
-    void App::set_visible_wireframe_alpha ( float alpha ) {
-        this->visible_wireframe_alpha = alpha;
-        this->flag_models_as_dirty();
-    }
-
     void App::show_visible_wireframe_singularity ( bool show ) {
         this->do_show_visible_wireframe_singularity = show;
         this->flag_models_as_dirty();
@@ -527,30 +522,33 @@ namespace HexaLab {
         //     } while (nav.face() != begin);
         // }
 
-        size_t unfiltered_hexas = 0;
-        Hexa& h = edge_nav.hexa();
-        do {
-            if ( !mesh->is_marked( edge_nav.hexa() ) ) {
-                ++unfiltered_hexas;
-            }
-            edge_nav = edge_nav.rotate_on_edge();
-        } while ( edge_nav.hexa() != h );
-
         float alpha;
-        switch ( unfiltered_hexas ) {
-        case 0:             // should never hit
-            alpha = 0;
-        case 1:
-            alpha = 0.1;
-            break;
-        case 2:
-            alpha = 0.5;
-        case 3:
-            alpha = 0.7;
-        default:
-            alpha = 0.9;
+        if (this->do_show_visible_wireframe_singularity) {
+            size_t unfiltered_hexas = 0;
+            Hexa& h = edge_nav.hexa();
+            do {
+                if ( !mesh->is_marked( edge_nav.hexa() ) ) {
+                    ++unfiltered_hexas;
+                }
+                edge_nav = edge_nav.rotate_on_edge();
+            } while ( edge_nav.hexa() != h );
+
+            switch ( unfiltered_hexas ) {
+            case 0:             // should never hit
+                alpha = 0;
+            case 1:
+                alpha = 0.1;
+                break;
+            case 2:
+                alpha = 0.5;
+            case 3:
+                alpha = 0.7;
+            default:
+                alpha = 0.9;
+            }
+        } else {
+            alpha = 1;
         }
-        //alpha = 1;
 
         for ( int v = 0; v < 2; ++v ) {
             visible_model.wireframe_vert_pos.push_back ( edge_nav.vert().position );
@@ -566,7 +564,7 @@ namespace HexaLab {
                 // visible_model.wireframe_vert_color.push_back(Vector3f(0, 1, 0));
             } else {
                 visible_model.wireframe_vert_color.push_back ( Vector3f ( 0, 0, 0 ) );
-                visible_model.wireframe_vert_alpha.push_back ( alpha * this->visible_wireframe_alpha );
+                visible_model.wireframe_vert_alpha.push_back ( alpha );
             }
 
             edge_nav = edge_nav.flip_vert();

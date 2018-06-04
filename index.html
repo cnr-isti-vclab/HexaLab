@@ -188,19 +188,19 @@
 				<label>Separation</label>
 				
 				<select id="geometry_mode" class="miniselect">
-					<option value="Default" selected="selected">Lines</option>
+                    <option value="Lines" selected="selected">Lines</option>
+					<option value="DynamicLines">Dynamic lines</option>
 					<option value="Cracked">Fissures</option>
 					<option value="Smooth">Roundings</option>
 				</select>
 				<div class="menu_row_input">	
+                    <div class="slider" id="wireframe_slider" ></div>
 					<div class="slider" id="crack_size" style="display:none;"></div>
-					<div class="slider" id="wireframe_slider" ></div>
 					<div class="slider" id="rounding_radius" style="display:none;"> </div>					
 				</div>
 			</div>
 			<div class="menu_row">
 				<label>Silhouette</label>
-				
 				<div class="menu_row_input" style="width100%">
 					<div class="slider" id="filtered_slider"></div>
 				</div>
@@ -213,9 +213,10 @@
 			</div>
 			<div class="menu_row">
 				<label>Lighting</label>
-				<select id="ao_mode" class="miniselect">
-					<option value="object space" selected="selected">best (AO)</option>
-					<option value="screen space">fast (SSAO)</option>
+				<select id="lighting_mode" class="miniselect">
+					<option value="AO" selected="selected">best (AO)</option>
+					<option value="SSAO">fast (SSAO)</option>
+                    <option value="Direct">fastest (Direct)</option>
 					<option value="none">none</option>
 				</select>
 			</div>
