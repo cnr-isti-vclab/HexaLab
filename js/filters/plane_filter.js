@@ -70,11 +70,7 @@ HexaLab.PlaneFilter = function () {
         self.set_plane_normal(0, 0, 1)
     })
     HexaLab.UI.plane_swap.on('click', function () {
-        const normal = self.backend.get_plane_normal()
-        var n = new THREE.Vector3(normal.x(), normal.y(), normal.z()).negate()
-        self.set_plane_offset(1 - self.backend.get_plane_offset())
-        self.set_plane_normal(n.x, n.y, n.z)
-        normal.delete()
+		self.flip_plane();
     })
 
 	HexaLab.UI.plane_snap_camera.on('dblclick', function (e) {
@@ -82,7 +78,7 @@ HexaLab.PlaneFilter = function () {
     })
 	
 	HexaLab.UI.plane_snap_camera.on('click', function (e) {
-		self.set_plane_normal_as_view(  e.ctrlKey || e.shiftKey || e.altKey  )
+		self.set_plane_normal_as_view(  e.ctrlKey || e.shiftKey || e.altKey , true  )
     })
 
     /*HexaLab.UI.plane_color.change(function () {
@@ -234,8 +230,18 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
 			HexaLab.UI.plane_snap_camera.removeClass("checked");
 	},
 	
-	set_plane_normal_as_view: function( snap_to_axis ){
+	flip_plane: function(){
+		this.set_plane_normal(-this.nx,-this.ny,-this.nz)
+		this.set_plane_offset( 1.0 - this.offset );
+		//this.set_plane_offset(1 - this.backend.get_plane_offset())
+	},
+	set_plane_normal_as_view: function( snap_to_axis , maybe_flip){
 		var camera_dir = HexaLab.app.camera().getWorldDirection()
+		if (!closest_axis && (maybe_flip===true)) {
+			var dot = camera_dir.x*this.nx+camera_dir.y*this.ny+camera_dir.z*this.nz;
+			if (dot<-0.9) {this.flip_plane(); return;}
+		}
+		
 		var closest_axis = function( dir ){
 			var m = Math.max( Math.abs(dir.x), Math.max( Math.abs(dir.y), Math.abs(dir.z) ) );
 			if ( dir.x == m )  return  {x:1,y:0,z:0}
