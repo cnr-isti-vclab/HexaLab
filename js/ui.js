@@ -235,8 +235,8 @@ HexaLab.UI.settings.color.default.inside.spectrum({
     HexaLab.app.set_visible_surface_default_inside_color($(this).spectrum('get').toHexString())
 })
 
-HexaLab.UI.settings.silhouette.slider().addClass('mini-slider').on('slide', function (e, ui) {
-    HexaLab.app.set_silhouette_intensity(ui.value / 100)
+HexaLab.UI.settings.silhouette.slider({min:0, max:20, step:1}).addClass('mini-slider').on('slide', function (e, ui) {
+    HexaLab.app.set_silhouette_intensity(ui.value / 20)
 })
 
 HexaLab.UI.settings.color.quality_map.on('change', function () {
@@ -321,19 +321,19 @@ HexaLab.UI.on_show_visible_quality = function (do_show) {
 }
 
 HexaLab.UI.on_set_crack_size = function (size) {
-    HexaLab.UI.settings.crack_size.slider('value', size * 100)
+    HexaLab.UI.settings.crack_size.slider('value', size * 30)
 }
 
 HexaLab.UI.on_set_rounding_radius = function (rad) {
-    HexaLab.UI.settings.rounding_radius.slider('value', rad * 100)
+    HexaLab.UI.settings.rounding_radius.slider('value', rad * 15)
 }
 
 HexaLab.UI.on_set_wireframe_opacity = function (value) {
-    HexaLab.UI.settings.wireframe.slider('value', value * 100)
+    HexaLab.UI.settings.wireframe.slider('value', value * 10)
 }
 
 HexaLab.UI.on_set_filtered_surface_opacity = function (value) {
-    HexaLab.UI.settings.silhouette.slider('value', value * 100)
+    HexaLab.UI.settings.silhouette.slider('value', value * 20)
 }
 
 HexaLab.UI.on_set_singularity_mode = function (mode) {
@@ -1036,9 +1036,11 @@ HexaLab.UI.menu.resizable({
     }
 })
 
+/*
 $('.mini-slider').each(function () {
     $(this).width(HexaLab.UI.menu.width() * 0.4)
 })
+*/
 
 HexaLab.UI.menu.on('resize', function () {
     HexaLab.UI.menu_resize_time = new Date()
@@ -1068,9 +1070,10 @@ HexaLab.UI.menu.on('resize', function () {
     HexaLab.UI.canvas_container.width(perc_canvas_width + '%')
     HexaLab.app.resize()
 
+	/*
     $('.mini-slider').each(function () {
         $(this).width(HexaLab.UI.menu.width() * 0.4)
-    })
+    })*/
 
     $('#mesh_info_2').css('left', (HexaLab.UI.menu.width() + 10).toString().concat('px'))
 })
