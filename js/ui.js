@@ -550,7 +550,7 @@ HexaLab.UI.on_import_mesh_fail = function (name) {
     HexaLab.UI.view_mesh = null
 }
 
-HexaLab.UI.import_settings = function (file) {
+HexaLab.UI.import_settings_from_txt = function (file) {
     HexaLab.FS.read_json_file(file, function (file, json) {
         HexaLab.app.set_settings(json)
     })
@@ -726,26 +726,44 @@ HexaLab.UI.dragdrop.mesh.on('dragbetterleave', function (event) {
     $(this).removeClass('drag_drop_quad_on').addClass('drag_drop_quad_off');
 })
 
+
 HexaLab.UI.dragdrop.settings.on('dragbetterenter', function (event) {
     $(this).removeClass('drag_drop_quad_off').addClass('drag_drop_quad_on');
 })
+
 HexaLab.UI.dragdrop.settings.on('dragover', function (event) {
     event.preventDefault()
 })
-var xxx;
+
+
 HexaLab.UI.dragdrop.settings.on('drop', function (event) {
     event.preventDefault()
     var files = event.originalEvent.target.files || event.originalEvent.dataTransfer.files
 	var fn = files[0];
-	xxx = fn;
-	if (fn.name.toLowerCase().endsWith(".txt")) {
-		HexaLab.UI.import_settings(fn)
-	} else if (fn.name.toLowerCase().endsWith(".png")) {
+	if (fn.name.toLowerCase().endsWith(".png")) {
 		HexaLab.UI.import_settings_from_png(fn)
+	} else {
+		HexaLab.UI.import_settings_from_txt(fn)
 	}
 })
 HexaLab.UI.dragdrop.settings.on('dragbetterleave', function (event) {
     $(this).removeClass('drag_drop_quad_on').addClass('drag_drop_quad_off');
+})
+
+/* drop on canvas: guess based on file name */
+HexaLab.UI.display.on('drop', function (event) {
+    event.preventDefault()
+    var files = event.originalEvent.target.files || event.originalEvent.dataTransfer.files
+    
+	var fn = files[0];
+	var st = fn.name.toLowerCase();
+	if (st.endsWith(".png")) {
+		HexaLab.UI.import_settings_from_png(fn)
+	} else if (st.endsWith(".txt"))  {
+		HexaLab.UI.import_settings_from_txt(fn)
+	} else if (st.endsWith(".mesh"))  {
+		HexaLab.UI.import_local_mesh(fn)
+	}
 })
 
 // --------------------------------------------------------------------------------
