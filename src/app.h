@@ -87,6 +87,9 @@ namespace HexaLab {
 
         size_t filter_level = 0;
 
+        float visible_wireframe_alpha = 1;
+        bool do_show_visible_wireframe_singularity = true;
+
       public:
         // Loads and imports a new mesh file into the system. Call the Loader, the Builder, updates mesh stats and
         // evaluated quality measures, builds singularity models, notifies filters of the new mesh.
@@ -125,6 +128,9 @@ namespace HexaLab {
         void set_rounding_radius ( float rad );
 
         void set_filter_level ( size_t level );
+
+        void set_visible_wireframe_alpha ( float alpha );
+        void show_visible_wireframe_singularity ( bool show );
 
         // Getters
         Vector3f            get_default_outside_color()         { return this->default_outside_color; }

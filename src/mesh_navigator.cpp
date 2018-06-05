@@ -7,16 +7,18 @@ namespace HexaLab {
     MeshNavigator MeshNavigator::flip_vert() { return MeshNavigator(_mesh->darts[_dart->vert_neighbor], *_mesh); }
 
     MeshNavigator MeshNavigator::rotate_on_edge() {
-        MeshNavigator nav = *this;
-        if (nav.dart().hexa_neighbor != -1) {
+        Hexa& h = hexa();
+        MeshNavigator nav = flip_face();
+        if ( nav.hexa() == h && nav.dart().hexa_neighbor != -1 ) {
             nav = nav.flip_hexa();
         }
-        return nav.flip_face();
+        return nav;
     }
     MeshNavigator MeshNavigator::rotate_on_face() { return flip_vert().flip_edge(); }
     MeshNavigator MeshNavigator::rotate_on_hexa() { return flip_vert().flip_edge().flip_face().flip_edge(); }
     MeshNavigator MeshNavigator::next_hexa_face() { return flip_vert().flip_edge().flip_face(); }
     MeshNavigator MeshNavigator::flip_side() { return flip_face().flip_edge().flip_vert().flip_edge().flip_face(); }
+
 
     /**
      * @brief MeshNavigator::incident_face_on_edge_num

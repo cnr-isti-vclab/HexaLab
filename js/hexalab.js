@@ -58,6 +58,11 @@ Object.assign(HexaLab.BufferGeometry.prototype, {
             const buffer = new Float32Array(Module.HEAPU8.buffer, this.backend.wireframe_color().data(), this.backend.wireframe_color().size() * 3)
             this.wireframe.addAttribute('color', new THREE.BufferAttribute(buffer, 3))
         }
+        this.wireframe.removeAttribute('alpha')
+        if (this.backend.wireframe_alpha().size() != 0) {
+            const buffer = new Float32Array(Module.HEAPU8.buffer, this.backend.wireframe_alpha().data(), this.backend.wireframe_alpha().size())
+            this.wireframe.addAttribute('alpha', new THREE.BufferAttribute(buffer, 1))
+        }
     },
 })
 
@@ -151,7 +156,9 @@ HexaLab.Viewer = function (canvas_width, canvas_height) {
         polygonOffset:                  true,
         polygonOffsetFactor:            0.5,
     })
-    this.materials.visible_wireframe    = new THREE.LineBasicMaterial({
+    this.materials.visible_wireframe    = new THREE.ShaderMaterial({
+        vertexShader:                   THREE.AlphaWireframeMaterial.vertexShader,
+        fragmentShader:                 THREE.AlphaWireframeMaterial.fragmentShader,
         vertexColors:                   THREE.VertexColors,
         transparent:                    true,
         depthWrite:                     false,
@@ -1217,6 +1224,7 @@ HexaLab.App = function (dom_element) {
     HexaLab.controls.on_mouse_up = function () {
         self.mouse_is_down = false
         self.viewer.show_axes(false)
+		self.queue_canvas_update()
     }
 
     // App
@@ -1226,8 +1234,8 @@ HexaLab.App = function (dom_element) {
         color_map:          'Parula',
         quality_measure:    'Scaled Jacobian',
         geometry_mode:      'Default',
-        crack_size:         0.5,
-        rounding_radius:    0.5,
+        crack_size:         0.25,
+        rounding_radius:    0.25,
         erode_dilate_level: 0
     }
 
@@ -1240,7 +1248,7 @@ HexaLab.App = function (dom_element) {
 
         // filtered_surface_color:                  '#d2de0c',
         filtered_surface_color:                     '#a8c2ea',
-        filtered_surface_opacity:                   0,
+        filtered_surface_opacity:                   1,
         filtered_wireframe_color:                   '#000000',
         filtered_wireframe_opacity:                 0,
 
@@ -1249,7 +1257,7 @@ HexaLab.App = function (dom_element) {
 
         // keep these coherent with default app singularity mode
         singularity_faces_opacity:                  0,
-        singularity_simple_lines_opacity:           0,
+        singularity_simple_lines_opacity:           1,
         singularity_full_lines_opacity:             0,
         singularity_hidden_faces_opacity:           0,
         singularity_hidden_simple_lines_opacity:    0,
@@ -1668,7 +1676,8 @@ Object.assign(HexaLab.App.prototype, {
         this.materials().visible_wireframe.visible = opacity != 0
         this.prev_visible_wireframe_opacity = null
         HexaLab.UI.on_set_wireframe_opacity(opacity)
-        this.queue_canvas_update()
+        this.backend.set_visible_wireframe_alpha(opacity)
+        this.queue_buffers_update()
     },
     
     set_filtered_surface_opacity:       function (opacity) {

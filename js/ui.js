@@ -79,11 +79,12 @@ HexaLab.UI = {
     first_mesh: true,
 
     // body content
-    display:                $('#display'),
+    display:                $('body'),
     // canvas container
     canvas_container:       $('#frame'),
     // side menu
     menu:                   $('#GUI'),
+	quality_label:          $('quality_label'),
 
     dragdrop: {
         overlay:            $('#drag_drop_overlay'),
@@ -173,9 +174,6 @@ HexaLab.UI = {
         wireframe:          $('#wireframe_slider'),
         rounding_radius:    $('#rounding_radius'),
         crack_size:         $('#crack_size'),
-        wireframe_row:      $('#wireframe_slider').closest('.menu_row'),
-        rounding_radius_row: $('#rounding_radius').closest('.menu_row'),
-        crack_size_row:     $('#crack_size').closest('.menu_row'),
         erode_dilate:       $('#erode_dilate_slider')
     },
     
@@ -245,16 +243,30 @@ HexaLab.UI.settings.color.quality_map.on('change', function () {
     HexaLab.app.set_color_map(this.options[this.selectedIndex].value)
 })
 
-HexaLab.UI.settings.wireframe.slider().addClass('mini-slider').on('slide', function (e, ui) {
-    HexaLab.app.set_visible_wireframe_opacity(ui.value / 100)
+HexaLab.UI.settings.wireframe.slider({
+    min: 0,
+    max: 10,
+    step: 1
+}).addClass('mini-slider').on('slide', function (e, ui) {
+    HexaLab.app.set_visible_wireframe_opacity(ui.value / 10)
 })
 
-HexaLab.UI.settings.crack_size.slider().addClass('mini-slider').on('slide', function (e, ui) {
-    HexaLab.app.set_crack_size(ui.value / 100)
+HexaLab.UI.settings.crack_size.slider({
+    min: 2,
+	value: 6,
+    max: 10,
+    step: 1
+}).addClass('mini-slider').on('slide', function (e, ui) {
+    HexaLab.app.set_crack_size(ui.value / 30)
 })
 
-HexaLab.UI.settings.rounding_radius.slider().addClass('mini-slider').on('slide', function (e, ui) {
-    HexaLab.app.set_rounding_radius(ui.value / 100)
+HexaLab.UI.settings.rounding_radius.slider({
+    min: 2,
+	value: 5,
+    max: 10,
+    step: 1
+}).addClass('mini-slider').on('slide', function (e, ui) {
+    HexaLab.app.set_rounding_radius(ui.value / 15)
 })
 
 HexaLab.UI.settings.erode_dilate.slider({
@@ -486,6 +498,7 @@ HexaLab.UI.setup_mesh_stats = function(name) {
     HexaLab.UI.mesh.quality_type.element.on('change', function () {
         const v = this.options[this.selectedIndex].value
         HexaLab.app.set_quality_measure(v);
+		HexaLab.UI.update_quality_sign();
         for (let x in HexaLab.UI.mesh.quality_type.listeners) {
             HexaLab.UI.mesh.quality_type.listeners[x]()
         }
@@ -498,17 +511,26 @@ HexaLab.UI.on_set_quality_measure = function (measure) {
     HexaLab.UI.quality_plot_update()
 }
 
+HexaLab.UI.update_quality_sign = function(){
+	var mesh = HexaLab.app.backend.get_mesh();
+    let min = mesh.quality_min;
+    let max = mesh.quality_max;
+	console.log("CAZZO DI BUDDA MAIALE DIO PORCO MERDA "+min+" "+max+" "+((min<max)?"A":"B"))
+	HexaLab.UI.quality_label.html(  (min<max)?"A":"B" );
+}
+
+
 HexaLab.UI.on_set_geometry_mode = function (v) {
     HexaLab.UI.settings.geometry_mode.val(v)
-    HexaLab.UI.settings.wireframe_row.hide()
-    HexaLab.UI.settings.crack_size_row.hide()
-    HexaLab.UI.settings.rounding_radius_row.hide()
+    HexaLab.UI.settings.wireframe.hide()
+    HexaLab.UI.settings.crack_size.hide()
+    HexaLab.UI.settings.rounding_radius.hide()
     if (v == 'Default') {
-        HexaLab.UI.settings.wireframe_row.show()
+        HexaLab.UI.settings.wireframe.show()
     } else if (v == 'Cracked') {
-        HexaLab.UI.settings.crack_size_row.show()
+        HexaLab.UI.settings.crack_size.show()
     } else if (v == 'Smooth') {
-        HexaLab.UI.settings.rounding_radius_row.show()
+        HexaLab.UI.settings.rounding_radius.show()
     }
 }
 
@@ -966,7 +988,7 @@ HexaLab.UI.menu.resizable({
         nextCell.css('width', nextPercentWidth + '%');
     },
     resize: function(event, ui){ 
-        ui.originalElement.next().width(ui.total_width - ui.size.width); 
+        ui.originalElement.next().width(ui.total_width - ui.size.width);
     }
 })
 
@@ -1122,7 +1144,7 @@ HexaLab.UI.topbar.snapshot.on('click', function () {
 
 HexaLab.UI.settings.rendering_menu_content.prop('disabled', true)
 HexaLab.UI.settings.silhouette.slider('disable')    
-HexaLab.UI.settings.erode_dilate.slider('disable')    
+//HexaLab.UI.settings.erode_dilate.slider('disable')    
 HexaLab.UI.settings.singularity_mode.slider('disable')
 HexaLab.UI.settings.wireframe_row.hide()
 HexaLab.UI.settings.crack_size_row.hide()
