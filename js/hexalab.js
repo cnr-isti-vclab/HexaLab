@@ -159,6 +159,7 @@ HexaLab.Viewer = function (canvas_width, canvas_height) {
         vertexColors:                   THREE.VertexColors,
         polygonOffset:                  true,
         polygonOffsetFactor:            0.5,
+        emissive:                       new THREE.Color( 0x303030 ),
     })
     this.materials.visible_wireframe    = new THREE.ShaderMaterial({
         vertexShader:                   THREE.AlphaWireframeMaterial.vertexShader,
