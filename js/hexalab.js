@@ -1238,6 +1238,7 @@ HexaLab.App = function (dom_element) {
         if (self.mouse_is_down) {
             self.viewer.show_axes(true)
             self.queue_canvas_update()
+			self.filters[0].on_change_view();
         }
     }
     HexaLab.controls.on_mouse_wheel = function () {

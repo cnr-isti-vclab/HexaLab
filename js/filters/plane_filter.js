@@ -20,6 +20,7 @@ HexaLab.UI.plane_menu_content   = $('#plane_menu *')
 HexaLab.UI.plane_menu_content.prop('disabled', true)
 HexaLab.UI.plane_offset_slider.slider('disable')
 
+
 // --------------------------------------------------------------------------------
 // Filter class
 // --------------------------------------------------------------------------------
@@ -75,9 +76,9 @@ HexaLab.PlaneFilter = function () {
         self.set_plane_normal(n.x, n.y, n.z)
         normal.delete()
     })
-    HexaLab.UI.plane_snap_camera.on('click', function () {
-        var camera_dir = HexaLab.app.camera().getWorldDirection()
-        self.set_plane_normal(camera_dir.x, camera_dir.y, camera_dir.z)
+
+	HexaLab.UI.plane_snap_camera.on('click', function (e) {
+		self.set_plane_normal_as_view(  e.ctrlKey || e.shiftKey || e.altKey  )
     })
 
     /*HexaLab.UI.plane_color.change(function () {
@@ -135,6 +136,7 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
     },
 
     on_mesh_change: function (mesh) {
+		this.nx = undefined;
         this.object_mesh = mesh
 
         HexaLab.app.viewer.remove_mesh(this.plane.mesh)
@@ -196,6 +198,11 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
 
     // State
 
+	nx : undefined,
+	ny : undefined,
+	nz : undefined,
+	offset : 0,
+	
     enable: function (enabled) {
         this.backend.enabled = enabled
         this.update_visibility()
@@ -204,14 +211,42 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
     },
 
     set_plane_normal: function (nx, ny, nz) {
+		this.nx = nx;
+		this.ny = ny;
+		this.nz = nz;
         this.backend.set_plane_normal(nx, ny, nz)
         const normal = new THREE.Vector3(nx, ny, nz)
         this.on_plane_normal_set(normal)
         this.update_mesh()
         HexaLab.app.queue_buffers_update()
     },
+	
+	set_plane_normal_as_view: function( snap_to_axis ){
+		var camera_dir = HexaLab.app.camera().getWorldDirection()
+		var snap_to_axis = function( dir ){
+			var m = Math.max( Math.abs(dir.x), Math.max( Math.abs(dir.y), Math.abs(dir.z) ) );
+			if ( dir.x == m )  return  {x:1,y:0,z:0}
+			if ( dir.x == -m ) return {x:-1,y:0,z:0}
+			if ( dir.y == m )  return  {x:0,y:1,z:0}
+			if ( dir.y == -m ) return {x:0,y:-1,z:0}
+			if ( dir.z == m )  return  {x:0,y:0,z:1}
+			/*if ( dir.z == -m )*/ return {x:0,y:0,z:-1}
+		}
+		
+		if (snap_to_axis) {
+			camera_dir = snap_to_axis( camera_dir );
+		}
+        this.set_plane_normal(camera_dir.x, camera_dir.y, camera_dir.z)
+	},
 
+	on_change_view: function() {
+		if (this.offset==0) this.nx = undefined; // forget current cut plane
+		
+		
+	},
     set_plane_offset: function (offset) {
+		this.offset = offset
+		if (offset!=0 && this.nx == undefined) this.set_plane_normal_as_view( true )
         this.backend.set_plane_offset(offset)
         this.plane.world_offset = this.backend.get_plane_world_offset()
         this.on_plane_offset_set(offset)
