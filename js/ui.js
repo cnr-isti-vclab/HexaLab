@@ -556,6 +556,25 @@ HexaLab.UI.import_settings = function (file) {
     })
 }
 
+HexaLab.UI.import_settings_from_png = function (file) {
+	
+	var fr = new FileReader();
+	fr.onloadend = function( e ) {
+		
+		pngitxt.get( fr.result, "hexalab" , 
+			function(err,d) {
+				if (err != null) {
+					alert("No HexaLab settings found in \n\"" + file.name +"\"" );
+				}
+				const json = JSON.parse(d.value)
+				HexaLab.app.set_settings(json)
+			}	
+		)
+	}
+	fr.readAsBinaryString( file );
+	
+}
+
 // --------------------------------------------------------------------------------
 // Datasets
 // --------------------------------------------------------------------------------
@@ -713,10 +732,17 @@ HexaLab.UI.dragdrop.settings.on('dragbetterenter', function (event) {
 HexaLab.UI.dragdrop.settings.on('dragover', function (event) {
     event.preventDefault()
 })
+var xxx;
 HexaLab.UI.dragdrop.settings.on('drop', function (event) {
     event.preventDefault()
     var files = event.originalEvent.target.files || event.originalEvent.dataTransfer.files
-    HexaLab.UI.import_settings(files[0])
+	var fn = files[0];
+	xxx = fn;
+	if (fn.name.toLowerCase().endsWith(".txt")) {
+		HexaLab.UI.import_settings(fn)
+	} else if (fn.name.toLowerCase().endsWith(".png")) {
+		HexaLab.UI.import_settings_from_png(fn)
+	}
 })
 HexaLab.UI.dragdrop.settings.on('dragbetterleave', function (event) {
     $(this).removeClass('drag_drop_quad_on').addClass('drag_drop_quad_off');
@@ -1145,120 +1171,31 @@ function str2ab(str) {
   return buf;
 }
 
-/* START https://stackoverflow.com/questions/16363419/how-to-get-binary-string-from-arraybuffer */
-function ArrayBufferToString(buffer) {
-    return BinaryToString(String.fromCharCode.apply(null, Array.prototype.slice.apply(new Uint8Array(buffer))));
-}
-
-function StringToArrayBuffer(string) {
-    return StringToUint8Array(string).buffer;
-}
-
-function BinaryToString(binary) {
-    var error;
-
-    try {
-        return decodeURIComponent(escape(binary));
-    } catch (_error) {
-        error = _error;
-        if (error instanceof URIError) {
-            return binary;
-        } else {
-            throw error;
-        }
-    }
-}
-
-function StringToBinary(string) {
-    var chars, code, i, isUCS2, len, _i;
-
-    len = string.length;
-    chars = [];
-    isUCS2 = false;
-    for (i = _i = 0; 0 <= len ? _i < len : _i > len; i = 0 <= len ? ++_i : --_i) {
-        code = String.prototype.charCodeAt.call(string, i);
-        if (code > 255) {
-            isUCS2 = true;
-            chars = null;
-            break;
-        } else {
-            chars.push(code);
-        }
-    }
-    if (isUCS2 === true) {
-        return unescape(encodeURIComponent(string));
-    } else {
-        return String.fromCharCode.apply(null, Array.prototype.slice.apply(chars));
-    }
-}
-
-function StringToUint8Array(string) {
-    var binary, binLen, buffer, chars, i, _i;
-    binary = StringToBinary(string);
-    binLen = binary.length;
-    buffer = new ArrayBuffer(binLen);
-    chars  = new Uint8Array(buffer);
-    for (i = _i = 0; 0 <= binLen ? _i < binLen : _i > binLen; i = 0 <= binLen ? ++_i : --_i) {
-        chars[i] = String.prototype.charCodeAt.call(binary, i);
-    }
-    return chars;
-}
-
-/* END https://stackoverflow.com/questions/16363419/how-to-get-binary-string-from-arraybuffer */
-
-
-var tmpA;
-var tmpB;
 HexaLab.UI.topbar.snapshot.on('click', function () {
     HexaLab.app.canvas.element.toBlob(function (blob) {
         	
 			var reader = new FileReader();
 			
-			
 			reader.onloadend = function (e) {
-				tmpA = reader.result;
+				const settingsStr = JSON.stringify(HexaLab.app.get_settings(), null, 4)
 				pngitxt.set(
-					ArrayBufferToString(tmpA), 
+					reader.result, 
 					{  
 						keyword: "hexalab", 
-						value: //null
-						"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"  
+						value: settingsStr	
 					},
 					function (res) {
-						tmpB = StringToArrayBuffer( res );
-						blob = new Blob( [tmpB] )
-						saveAs(blob, "HexaLabNEW.png")
+						var by = new Uint8Array(res.length);
+						for (var i=0; i<res.length; i++) by[i]=res.charCodeAt(i);
+						blob = new Blob( [by.buffer] )
+						saveAs(blob, "hexalab.png")
 					}
 				)
 				
 			}
 
-			//reader.readAsBinaryString( blob );
-			
-			reader.readAsArrayBuffer( blob )
-			
-			//blob = new Blob( [result] , {type:'image/png'} )
-			//fileReader.readAsArrayBuffer( blob )
-			/*
-			var fileReader = new FileReader()
-			fileReader.onload = function (e) {
-				var bs = readAsBinaryString()
-				var buf = fileReader.result
-				pngitxt.set(
-					buf, 
-					{  keyword: "hexalab", value: ""  },
-					function (result) {
-						//var img = document.createElement('img');
-						//img.src = "data:image/png;base64," + btoa(result);
-						//document.body.appendChild(img)
-						blob = new Blob( [result] , {type:'image/png'} )
-						saveAs(blob, "HexaLab.png")
-					}
-				)
-				//blob = new Blob( [buf] )
-				//saveAs(blob, "HexaLab.png");
-			};  
-			fileReader.readAsArrayBuffer( blob )*/
+			reader.readAsBinaryString( blob );
+
     }, "image/png");
 }).prop("disabled", true);
 
