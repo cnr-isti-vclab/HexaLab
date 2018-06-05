@@ -1811,6 +1811,8 @@ Object.assign(HexaLab.App.prototype, {
         this.mesh = this.backend.get_mesh()
         // update UI
         HexaLab.UI.on_import_mesh(path)
+		
+		
         // reset settings
         this.set_settings({
             app:        this.default_app_settings,
@@ -1818,6 +1820,7 @@ Object.assign(HexaLab.App.prototype, {
             rendering:  this.default_rendering_settings,
             materials:  this.default_material_settings
         })
+
         // notify filters
         for (var k in this.filters) {
             this.filters[k].on_mesh_change(this.mesh)
