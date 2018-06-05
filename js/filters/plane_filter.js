@@ -79,6 +79,7 @@ HexaLab.PlaneFilter = function () {
 	
 	HexaLab.UI.plane_snap_camera.on('click', function (e) {
 		self.set_plane_normal_as_view(  e.ctrlKey || e.shiftKey || e.altKey , true  )
+		self.disable_auto_plane_normal_on_rotate()
     })
 
     /*HexaLab.UI.plane_color.change(function () {
@@ -229,6 +230,11 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
 		else 
 			HexaLab.UI.plane_snap_camera.removeClass("checked");
 	},
+	
+	disable_auto_plane_normal_on_rotate( ){
+		this.auto_set_normal = false;
+		HexaLab.UI.plane_snap_camera.removeClass("checked");
+	},	
 	
 	flip_plane: function(){
 		this.set_plane_normal(-this.nx,-this.ny,-this.nz)
