@@ -77,6 +77,10 @@ HexaLab.PlaneFilter = function () {
         normal.delete()
     })
 
+	HexaLab.UI.plane_snap_camera.on('dblclick', function (e) {
+		self.toggle_auto_plane_normal_on_rotate()
+    })
+	
 	HexaLab.UI.plane_snap_camera.on('click', function (e) {
 		self.set_plane_normal_as_view(  e.ctrlKey || e.shiftKey || e.altKey  )
     })
@@ -202,6 +206,7 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
 	ny : undefined,
 	nz : undefined,
 	offset : 0,
+	auto_set_normal : false,
 	
     enable: function (enabled) {
         this.backend.enabled = enabled
@@ -221,9 +226,17 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
         HexaLab.app.queue_buffers_update()
     },
 	
+	toggle_auto_plane_normal_on_rotate( ){
+		this.auto_set_normal = ! this.auto_set_normal;
+		if (this.auto_set_normal)
+			HexaLab.UI.plane_snap_camera.addClass("checked");
+		else 
+			HexaLab.UI.plane_snap_camera.removeClass("checked");
+	},
+	
 	set_plane_normal_as_view: function( snap_to_axis ){
 		var camera_dir = HexaLab.app.camera().getWorldDirection()
-		var snap_to_axis = function( dir ){
+		var closest_axis = function( dir ){
 			var m = Math.max( Math.abs(dir.x), Math.max( Math.abs(dir.y), Math.abs(dir.z) ) );
 			if ( dir.x == m )  return  {x:1,y:0,z:0}
 			if ( dir.x == -m ) return {x:-1,y:0,z:0}
@@ -234,14 +247,14 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
 		}
 		
 		if (snap_to_axis) {
-			camera_dir = snap_to_axis( camera_dir );
+			camera_dir = closest_axis( camera_dir );
 		}
         this.set_plane_normal(camera_dir.x, camera_dir.y, camera_dir.z)
 	},
 
 	on_change_view: function() {
 		if (this.offset==0) this.nx = undefined; // forget current cut plane
-		
+		else if (this.auto_set_normal) this.set_plane_normal_as_view(false);
 		
 	},
     set_plane_offset: function (offset) {
