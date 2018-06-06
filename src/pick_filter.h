@@ -26,9 +26,12 @@ namespace HexaLab {
 
         void on_mesh_set(Mesh& mesh);
 
+        void add_one_to_filtered( Index idx );
+        void add_one_to_filled( Index idx );
+
     private:
-        void dig_hexa(Index idx);
-        void undig_hexa(Index idx);
+        void dig_hexa_id(Index idx);
+        void undig_hexa_id(Index idx);
 
         void raycast( Vector3f origin, Vector3f direction, Index &in , Index &out );
 
