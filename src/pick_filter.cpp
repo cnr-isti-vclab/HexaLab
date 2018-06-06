@@ -38,7 +38,6 @@ void PickFilter::raycast( Vector3f origin, Vector3f direction, Index &in , Index
     float  maxd = FLT_MAX;
 
 
-    int tmp = 0, tmpb = 0, tmpnb= 0;
     for (Face &f: mesh->faces) {
 
         Index h0 , h1;
@@ -51,24 +50,18 @@ void PickFilter::raycast( Vector3f origin, Vector3f direction, Index &in , Index
         if (nav.dart().hexa_neighbor == -1) {
             h1 = -1;
             in1 = false;
-            tmpb++;
         } else {
             nav = nav.flip_hexa();
             h1 = nav.hexa_index();
             in1 = !mesh->is_marked( nav.hexa() );
-            tmpnb++;
         }
         if (in0==in1) continue; // not a current boundary face
 
-        tmp++;
         if (this->face_ray_test( f, origin, direction, maxd)) {
             if (in0) { in = h0; out = h1; }
             else {in = h1; out = h0; }
         }
     }
-    HL_LOG("[Pick Filter]: tested faces = %d\n", tmp);
-    HL_LOG("[Pick Filter]: boundary faces = %d\n", tmpb);
-    HL_LOG("[Pick Filter]: non boundary faces = %d\n", tmpnb);
 
 }
 
