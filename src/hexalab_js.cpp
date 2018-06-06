@@ -191,12 +191,11 @@ EMSCRIPTEN_BINDINGS ( HexaLab ) {
                                    .constructor<>()
                                    .function ( "filter",                 &PickFilter::filter )
                                    .function ( "on_mesh_set",            static_cast<void ( PickFilter::* ) ( Mesh& ) > ( &IFilter::on_mesh_set ) )
-                                   .function ( "filter_hexa",            &PickFilter::filter_hexa )
-                                   .function ( "unfilter_hexa",          &PickFilter::unfilter_hexa )
-                                   .function ( "clear_filtered_hexas",   &PickFilter::clear_filtered_hexas )
-                                   .function ( "clear_filled_hexas",     &PickFilter::clear_filled_hexas )
-                                   .function ( "filter_hexa_idx",        &PickFilter::filter_hexa_idx )
-                                   .function ( "fill_hexa_idx",          &PickFilter::fill_hexa_idx )
+                                   .function ( "dig_hexa",            	 &PickFilter::dig_hexa )
+                                   .function ( "undig_hexa",             &PickFilter::undig_hexa )
+                                   .function ( "clear",                  &PickFilter::clear )
+                                   .function ( "dig_hexa_idx",           &PickFilter::dig_hexa_idx )
+                                   .function ( "undig_hexa_idx",         &PickFilter::undig_hexa_idx )
                                    ;
     // MISC
     class_<Vector3f> ( "vec3" )
