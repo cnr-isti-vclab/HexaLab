@@ -9,6 +9,7 @@
 
 namespace HexaLab {
     void PeelingFilter::filter(Mesh& mesh) {       
+
         if (!this->enabled) 
             return;
         

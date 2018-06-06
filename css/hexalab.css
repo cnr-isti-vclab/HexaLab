@@ -228,7 +228,7 @@ label {
 
 .menu_row .menu_row_input .mini-slider {
     flex-grow: 0;
-    width: 60%;
+    width: 100%;
 }
 
 .menu_row .menu_row_input .normal_value {
@@ -271,11 +271,11 @@ label {
 }
 
 #plane_snap_camera {
-	width: 32px;
+	width: 26px;
 	height: 20px;
 	padding: 2px;
 	background: url("../img/eye256x128.png");
-	background-size: 28px 14px;
+	background-size: 20px 14px;
 	background-repeat: no-repeat;
 	background-position: 2px 2px;
 }
@@ -408,9 +408,12 @@ input {
 /* Side Menu */
 
 button {
-	background: rgb(247, 236, 243);
+	background-color: rgb(247, 236, 243);
 	border: 1px solid rgb(200,200,200);
 	border-radius: 3px;
+}
+button#plane_snap_camera.checked {
+	background-color: rgb(247, 186, 193);
 }
 .menu_subrow{
 	display: block;

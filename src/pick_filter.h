@@ -16,22 +16,26 @@ namespace HexaLab {
         Mesh* mesh = nullptr;
 
     public:
-        // Raycasts the mesh and adds/removes the closest/farthest intersecting hexa (if any) to/from the filtered array.
-        // Returns the index of the filtered/unfiltered element if any, -1 on miss, -2 on remove from the other array.
-        Index filter_hexa(Vector3f origin, Vector3f direction);
-        Index unfilter_hexa(Vector3f origin, Vector3f direction);
-        void clear_filtered_hexas () { this->filtered_hexas.clear(); }
-        void clear_filled_hexas () { this->filled_hexas.clear(); }
-        void filter_hexa_idx(Index idx);
-        void fill_hexa_idx(Index idx);
 
-        // Applies the filtered_hexas list to the mesh.
+        void clear ();
+
+        Index dig_hexa(Vector3f origin, Vector3f direction);
+        Index undig_hexa(Vector3f origin, Vector3f direction);
+
         void filter(Mesh& mesh);
-        // Simply clears the filtered hexas array.
+
         void on_mesh_set(Mesh& mesh);
 
+        void add_one_to_filtered( Index idx );
+        void add_one_to_filled( Index idx );
+
     private:
-        bool hexa_ray_test(Hexa& hexa, Vector3f origin, Vector3f direction, float* min_t, float* max_t);
+        void dig_hexa_id(Index idx);
+        void undig_hexa_id(Index idx);
+
+        void raycast( Vector3f origin, Vector3f direction, Index &in , Index &out );
+
+        bool face_ray_test(Face &face, Vector3f origin, Vector3f direction, float& max);
     };
 
 }

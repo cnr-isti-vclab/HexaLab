@@ -103,8 +103,7 @@
 
 			<div class="menu_row">
 				<label>Slice
-				<button id="plane_snap_camera" title="Slice in current view direction">
-				<!--img src="img/eye256x128.png" alt="eye" width=32 height=16--><!--i class="fa fa-eye"></i-->
+				<button id="plane_snap_camera" title="Slice in current view direction&#013;(shift: enforce axis-aligned)">
 				</button>
 				<button class="smallplus" id="bt0" title="Plane direction params" 
 				onclick="$('#planeDirPanel').toggle(); $('#bt0').toggleClass('checked')"
@@ -121,7 +120,7 @@
 					<button id="plane_snap_nx" class="minibutton" title="Slice along the X axis">X</button><!-- 
 					--><button id="plane_snap_ny" class="minibutton"title="Slice along the Y axis">Y</button><!-- 
 					--><button id="plane_snap_nz" class="minibutton" title="Slice along the Z axis">Z</button>
-					<button id="plane_swap_sign" class="minibutton" title="Swap slicing plane">
+					<button id="plane_swap_sign" class="minibutton" title="Flip slicing plane">
 						<i class="fa fa-exchange"></i>
 					</button>
 					<input class="scalar_value" type="number" id="plane_nx" style="width:30px;"><!--
@@ -148,17 +147,17 @@
 			
 			<div class="menu_row">
 			    <label>Handpick</label>
-				<button id="pick_button" class="pickbutton" title="Handpick hexas to filter">dig</button>
-				<button id="fill_button" class="pickbutton" title="Handpick hexas to unfilter">undig</button>
-				<button id="pick_clear_button" class="pickbutton" title="Clear all handpixs hexas">clear</button>
+				<button id="pick_button" class="pickbutton" title="Handpick hexas to filter [ctrl]">dig</button>
+				<button id="fill_button" class="pickbutton" title="Handpick hexas to unfilter [shift]">undig</button>
+				<button id="pick_clear_button" class="pickbutton" title="Clear all handpicks">clear</button>
 			</div>
 			
 			<hr/>
 
 			<div class="menu_row" style="text-align:right;">
 				<label>Regularize</label>
-				<div class="menu_subrow_input">
-					<div class="slider" id="erode_dilate_slider"></div>
+				<div class="menu_row_input">
+				<div class="slider" id="erode_dilate_slider"></div>
 				</div>
 			</div>
 
@@ -188,19 +187,19 @@
 				<label>Separation</label>
 				
 				<select id="geometry_mode" class="miniselect">
-					<option value="Default" selected="selected">Lines</option>
+                    <option value="Lines">Flat Lines</option>
+					<option value="DynamicLines" selected="selected">Lines</option>
 					<option value="Cracked">Fissures</option>
 					<option value="Smooth">Roundings</option>
 				</select>
 				<div class="menu_row_input">	
+                    <div class="slider" id="wireframe_slider" ></div>
 					<div class="slider" id="crack_size" style="display:none;"></div>
-					<div class="slider" id="wireframe_slider" ></div>
 					<div class="slider" id="rounding_radius" style="display:none;"> </div>					
 				</div>
 			</div>
 			<div class="menu_row">
 				<label>Silhouette</label>
-				
 				<div class="menu_row_input" style="width100%">
 					<div class="slider" id="filtered_slider"></div>
 				</div>
@@ -213,9 +212,10 @@
 			</div>
 			<div class="menu_row">
 				<label>Lighting</label>
-				<select id="ao_mode" class="miniselect">
-					<option value="object space" selected="selected">best (AO)</option>
-					<option value="screen space">fast (SSAO)</option>
+				<select id="lighting_mode" class="miniselect">
+					<option value="AO" selected="selected">best (AO)</option>
+					<option value="SSAO">fast (SSAO)</option>
+                    <option value="Direct">local only</option>
 					<option value="none">none</option>
 				</select>
 			</div>
@@ -273,6 +273,7 @@
     <script src="js/filters/peeling_filter.js"></script>
     <script src="js/filters/pick_filter.js"></script>
     <script src="js/external/TrackballControls.js"></script>
+    <script src="js/external/pngitxt-browser.min.js"></script>
 
     <script type="text/javascript">
         window.onload = function () {

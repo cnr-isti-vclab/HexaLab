@@ -169,7 +169,7 @@ HexaLab.UI = {
         singularity_mode:   $('#singularity_slider'),
         occlusion:          $("#show_occlusion"),
         geometry_mode:      $('#geometry_mode'),
-        ao_mode:            $("#ao_mode"),
+        lighting_mode:      $("#lighting_mode"),
         rendering_menu_content: $('#rendering_menu *'),
         wireframe:          $('#wireframe_slider'),
         rounding_radius:    $('#rounding_radius'),
@@ -235,8 +235,8 @@ HexaLab.UI.settings.color.default.inside.spectrum({
     HexaLab.app.set_visible_surface_default_inside_color($(this).spectrum('get').toHexString())
 })
 
-HexaLab.UI.settings.silhouette.slider().addClass('mini-slider').on('slide', function (e, ui) {
-    HexaLab.app.set_silhouette_intensity(ui.value / 100)
+HexaLab.UI.settings.silhouette.slider({min:0, max:20, step:1}).addClass('mini-slider').on('slide', function (e, ui) {
+    HexaLab.app.set_silhouette_intensity(ui.value / 20)
 })
 
 HexaLab.UI.settings.color.quality_map.on('change', function () {
@@ -287,8 +287,8 @@ HexaLab.UI.settings.singularity_mode.slider({
     HexaLab.app.set_singularity_mode(ui.value)
 })
 
-HexaLab.UI.settings.ao_mode.on('change', function () {
-    HexaLab.app.set_occlusion(this.options[this.selectedIndex].value)
+HexaLab.UI.settings.lighting_mode.on('change', function () {
+    HexaLab.app.set_lighting_mode(this.options[this.selectedIndex].value)
 })
 
 HexaLab.UI.settings.occlusion.on('click', function () {
@@ -321,27 +321,28 @@ HexaLab.UI.on_show_visible_quality = function (do_show) {
 }
 
 HexaLab.UI.on_set_crack_size = function (size) {
-    HexaLab.UI.settings.crack_size.slider('value', size * 100)
+    HexaLab.UI.settings.crack_size.slider('value', size * 30)
 }
 
 HexaLab.UI.on_set_rounding_radius = function (rad) {
-    HexaLab.UI.settings.rounding_radius.slider('value', rad * 100)
+    HexaLab.UI.settings.rounding_radius.slider('value', rad * 15)
 }
 
 HexaLab.UI.on_set_wireframe_opacity = function (value) {
-    HexaLab.UI.settings.wireframe.slider('value', value * 100)
+    HexaLab.UI.settings.wireframe.slider('value', value * 10)
 }
 
 HexaLab.UI.on_set_filtered_surface_opacity = function (value) {
-    HexaLab.UI.settings.silhouette.slider('value', value * 100)
+    HexaLab.UI.settings.silhouette.slider('value', value * 20)
 }
 
 HexaLab.UI.on_set_singularity_mode = function (mode) {
     HexaLab.UI.settings.singularity_mode.slider('value', mode)
 }
 
-HexaLab.UI.on_set_occlusion = function (ao) {
-    HexaLab.UI.settings.occlusion.prop('checked', ao == 'object space')
+HexaLab.UI.on_set_lighting_mode = function (v) {
+    HexaLab.UI.settings.lighting_mode.val(v)
+    //HexaLab.UI.settings.occlusion.prop('checked', ao == 'object space')
 }
 
 HexaLab.UI.on_set_color_map = function (value) {
@@ -519,13 +520,12 @@ HexaLab.UI.update_quality_sign = function(){
 	HexaLab.UI.quality_label.html(  (min<max)?"A":"B" );
 }
 
-
 HexaLab.UI.on_set_geometry_mode = function (v) {
     HexaLab.UI.settings.geometry_mode.val(v)
     HexaLab.UI.settings.wireframe.hide()
     HexaLab.UI.settings.crack_size.hide()
     HexaLab.UI.settings.rounding_radius.hide()
-    if (v == 'Default') {
+    if (v == 'Lines' || v == 'DynamicLines') {
         HexaLab.UI.settings.wireframe.show()
     } else if (v == 'Cracked') {
         HexaLab.UI.settings.crack_size.show()
@@ -550,10 +550,29 @@ HexaLab.UI.on_import_mesh_fail = function (name) {
     HexaLab.UI.view_mesh = null
 }
 
-HexaLab.UI.import_settings = function (file) {
+HexaLab.UI.import_settings_from_txt = function (file) {
     HexaLab.FS.read_json_file(file, function (file, json) {
         HexaLab.app.set_settings(json)
     })
+}
+
+HexaLab.UI.import_settings_from_png = function (file) {
+	
+	var fr = new FileReader();
+	fr.onloadend = function( e ) {
+		
+		pngitxt.get( fr.result, "hexalab" , 
+			function(err,d) {
+				if (err != null) {
+					alert("No HexaLab settings found in \n\"" + file.name +"\"" );
+				}
+				const json = JSON.parse(d.value)
+				HexaLab.app.set_settings(json)
+			}	
+		)
+	}
+	fr.readAsBinaryString( file );
+	
 }
 
 // --------------------------------------------------------------------------------
@@ -707,19 +726,44 @@ HexaLab.UI.dragdrop.mesh.on('dragbetterleave', function (event) {
     $(this).removeClass('drag_drop_quad_on').addClass('drag_drop_quad_off');
 })
 
+
 HexaLab.UI.dragdrop.settings.on('dragbetterenter', function (event) {
     $(this).removeClass('drag_drop_quad_off').addClass('drag_drop_quad_on');
 })
+
 HexaLab.UI.dragdrop.settings.on('dragover', function (event) {
     event.preventDefault()
 })
+
+
 HexaLab.UI.dragdrop.settings.on('drop', function (event) {
     event.preventDefault()
     var files = event.originalEvent.target.files || event.originalEvent.dataTransfer.files
-    HexaLab.UI.import_settings(files[0])
+	var fn = files[0];
+	if (fn.name.toLowerCase().endsWith(".png")) {
+		HexaLab.UI.import_settings_from_png(fn)
+	} else {
+		HexaLab.UI.import_settings_from_txt(fn)
+	}
 })
 HexaLab.UI.dragdrop.settings.on('dragbetterleave', function (event) {
     $(this).removeClass('drag_drop_quad_on').addClass('drag_drop_quad_off');
+})
+
+/* drop on canvas: guess based on file name */
+HexaLab.UI.display.on('drop', function (event) {
+    event.preventDefault()
+    var files = event.originalEvent.target.files || event.originalEvent.dataTransfer.files
+    
+	var fn = files[0];
+	var st = fn.name.toLowerCase();
+	if (st.endsWith(".png")) {
+		HexaLab.UI.import_settings_from_png(fn)
+	} else if (st.endsWith(".txt"))  {
+		HexaLab.UI.import_settings_from_txt(fn)
+	} else if (st.endsWith(".mesh"))  {
+		HexaLab.UI.import_local_mesh(fn)
+	}
 })
 
 // --------------------------------------------------------------------------------
@@ -992,9 +1036,11 @@ HexaLab.UI.menu.resizable({
     }
 })
 
+/*
 $('.mini-slider').each(function () {
     $(this).width(HexaLab.UI.menu.width() * 0.4)
 })
+*/
 
 HexaLab.UI.menu.on('resize', function () {
     HexaLab.UI.menu_resize_time = new Date()
@@ -1024,9 +1070,10 @@ HexaLab.UI.menu.on('resize', function () {
     HexaLab.UI.canvas_container.width(perc_canvas_width + '%')
     HexaLab.app.resize()
 
+	/*
     $('.mini-slider').each(function () {
         $(this).width(HexaLab.UI.menu.width() * 0.4)
-    })
+    })*/
 
     $('#mesh_info_2').css('left', (HexaLab.UI.menu.width() + 10).toString().concat('px'))
 })
@@ -1136,18 +1183,49 @@ Copyright (C) 2017  <br>\
     }*/
 })
 
+function str2ab(str) {
+  var buf = new ArrayBuffer(str.length*2); // 2 bytes for each char
+  var bufView = new Uint16Array(buf);
+  for (var i=0, strLen=str.length; i < strLen; i++) {
+    bufView[i] = str.charCodeAt(i);
+  }
+  return buf;
+}
+
 HexaLab.UI.topbar.snapshot.on('click', function () {
     HexaLab.app.canvas.element.toBlob(function (blob) {
-        saveAs(blob, "HLsnapshot.png");
+        	
+			var reader = new FileReader();
+			
+			reader.onloadend = function (e) {
+				const settingsStr = JSON.stringify(HexaLab.app.get_settings(), null, 4)
+				pngitxt.set(
+					reader.result, 
+					{  
+						keyword: "hexalab", 
+						value: settingsStr	
+					},
+					function (res) {
+						var by = new Uint8Array(res.length);
+						for (var i=0; i<res.length; i++) by[i]=res.charCodeAt(i);
+						blob = new Blob( [by.buffer] )
+						saveAs(blob, "hexalab.png")
+					}
+				)
+				
+			}
+
+			reader.readAsBinaryString( blob );
+
     }, "image/png");
 }).prop("disabled", true);
 
 HexaLab.UI.settings.rendering_menu_content.prop('disabled', true)
 HexaLab.UI.settings.silhouette.slider('disable')    
-//HexaLab.UI.settings.erode_dilate.slider('disable')    
+HexaLab.UI.settings.erode_dilate.slider('disable')    
 HexaLab.UI.settings.singularity_mode.slider('disable')
-HexaLab.UI.settings.wireframe_row.hide()
-HexaLab.UI.settings.crack_size_row.hide()
-HexaLab.UI.settings.rounding_radius_row.hide()
+//HexaLab.UI.settings.wireframe_row.hide()
+//HexaLab.UI.settings.crack_size_row.hide()
+//HexaLab.UI.settings.rounding_radius_row.hide()
 HexaLab.UI.settings.color.default.outside.spectrum('disable')
 HexaLab.UI.settings.color.default.inside.spectrum('disable')

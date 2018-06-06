@@ -20,7 +20,7 @@ THREE.FresnelTransparency = {
 
         "void main() {",
             "vec3 view = normalize(cameraPosition - vPos);",
-            "gl_FragColor = vec4 ( uColor, uAlpha * ( 1.0 - abs ( dot ( vNorm, view ) ) ) );",
+            "gl_FragColor = vec4 ( uColor, uAlpha * ( 1.0 - abs ( pow (dot ( vNorm, view ), 0.33) ) ) );",
         "}"
 
     ].join( "\n" )

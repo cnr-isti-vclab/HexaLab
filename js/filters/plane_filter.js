@@ -20,6 +20,7 @@ HexaLab.UI.plane_menu_content   = $('#plane_menu *')
 HexaLab.UI.plane_menu_content.prop('disabled', true)
 HexaLab.UI.plane_offset_slider.slider('disable')
 
+
 // --------------------------------------------------------------------------------
 // Filter class
 // --------------------------------------------------------------------------------
@@ -69,15 +70,16 @@ HexaLab.PlaneFilter = function () {
         self.set_plane_normal(0, 0, 1)
     })
     HexaLab.UI.plane_swap.on('click', function () {
-        const normal = self.backend.get_plane_normal()
-        var n = new THREE.Vector3(normal.x(), normal.y(), normal.z()).negate()
-        self.set_plane_offset(1 - self.backend.get_plane_offset())
-        self.set_plane_normal(n.x, n.y, n.z)
-        normal.delete()
+		self.flip_plane();
     })
-    HexaLab.UI.plane_snap_camera.on('click', function () {
-        var camera_dir = HexaLab.app.camera().getWorldDirection()
-        self.set_plane_normal(camera_dir.x, camera_dir.y, camera_dir.z)
+
+	HexaLab.UI.plane_snap_camera.on('dblclick', function (e) {
+		self.toggle_auto_plane_normal_on_rotate()
+    })
+	
+	HexaLab.UI.plane_snap_camera.on('click', function (e) {
+		self.set_plane_normal_as_view(  e.ctrlKey || e.shiftKey || e.altKey , true  )
+		self.disable_auto_plane_normal_on_rotate()
     })
 
     /*HexaLab.UI.plane_color.change(function () {
@@ -135,6 +137,7 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
     },
 
     on_mesh_change: function (mesh) {
+		this.nx = undefined;
         this.object_mesh = mesh
 
         HexaLab.app.viewer.remove_mesh(this.plane.mesh)
@@ -196,6 +199,12 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
 
     // State
 
+	nx : undefined,
+	ny : undefined,
+	nz : undefined,
+	offset : 0,
+	auto_set_normal : false,
+	
     enable: function (enabled) {
         this.backend.enabled = enabled
         this.update_visibility()
@@ -204,14 +213,65 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
     },
 
     set_plane_normal: function (nx, ny, nz) {
+		this.nx = nx;
+		this.ny = ny;
+		this.nz = nz;
         this.backend.set_plane_normal(nx, ny, nz)
         const normal = new THREE.Vector3(nx, ny, nz)
         this.on_plane_normal_set(normal)
         this.update_mesh()
         HexaLab.app.queue_buffers_update()
     },
+	
+	toggle_auto_plane_normal_on_rotate( ){
+		this.auto_set_normal = ! this.auto_set_normal;
+		if (this.auto_set_normal)
+			HexaLab.UI.plane_snap_camera.addClass("checked");
+		else 
+			HexaLab.UI.plane_snap_camera.removeClass("checked");
+	},
+	
+	disable_auto_plane_normal_on_rotate( ){
+		this.auto_set_normal = false;
+		HexaLab.UI.plane_snap_camera.removeClass("checked");
+	},	
+	
+	flip_plane: function(){
+		this.set_plane_normal(-this.nx,-this.ny,-this.nz)
+		this.set_plane_offset( 1.0 - this.offset );
+		//this.set_plane_offset(1 - this.backend.get_plane_offset())
+	},
+	set_plane_normal_as_view: function( snap_to_axis , maybe_flip){
+		var camera_dir = HexaLab.app.camera().getWorldDirection()
+		if (!closest_axis && (maybe_flip===true)) {
+			var dot = camera_dir.x*this.nx+camera_dir.y*this.ny+camera_dir.z*this.nz;
+			if (dot<-0.9) {this.flip_plane(); return;}
+		}
+		
+		var closest_axis = function( dir ){
+			var m = Math.max( Math.abs(dir.x), Math.max( Math.abs(dir.y), Math.abs(dir.z) ) );
+			if ( dir.x == m )  return  {x:1,y:0,z:0}
+			if ( dir.x == -m ) return {x:-1,y:0,z:0}
+			if ( dir.y == m )  return  {x:0,y:1,z:0}
+			if ( dir.y == -m ) return {x:0,y:-1,z:0}
+			if ( dir.z == m )  return  {x:0,y:0,z:1}
+			/*if ( dir.z == -m )*/ return {x:0,y:0,z:-1}
+		}
+		
+		if (snap_to_axis) {
+			camera_dir = closest_axis( camera_dir );
+		}
+        this.set_plane_normal(camera_dir.x, camera_dir.y, camera_dir.z)
+	},
 
+	on_change_view: function() {
+		if (this.offset==0) this.nx = undefined; // forget current cut plane
+		else if (this.auto_set_normal) this.set_plane_normal_as_view(false);
+		
+	},
     set_plane_offset: function (offset) {
+		this.offset = offset
+		if (offset!=0 && this.nx == undefined) this.set_plane_normal_as_view( true )
         this.backend.set_plane_offset(offset)
         this.plane.world_offset = this.backend.get_plane_world_offset()
         this.on_plane_offset_set(offset)
