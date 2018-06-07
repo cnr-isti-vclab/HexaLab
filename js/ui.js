@@ -62,7 +62,7 @@ HexaLab.FS = {
         this.reader.readAsText(file, "UTF-8")
     },
     read_data_file: function (file, callback) {
-        this.reader.onload = function () {
+        this.reader.onloadend = function () {
             const data = new Int8Array(this.result)
             callback(file.name, data)
         }
@@ -400,7 +400,7 @@ HexaLab.UI.import_local_mesh = function (file) {
     HexaLab.UI.view_mesh = null
     HexaLab.UI.clear_mesh_info()
     HexaLab.UI.mesh.infobox_2.element.show().css('display', 'flex');
-    HexaLab.UI.mesh.infobox_2.text.empty().append('<span>Loading...</span>').show()
+    HexaLab.UI.mesh.infobox_2.text.text('Loading...').show()
     HexaLab.FS.read_data_file(file, HexaLab.UI.import_mesh)
 }
 
@@ -408,12 +408,11 @@ HexaLab.UI.import_remote_mesh = function (source, name) {
     var request = new XMLHttpRequest();
     request.open('GET', 'datasets/' + source.path + '/' + name, true);
     request.responseType = 'arraybuffer';
-    request.onload = function(e) {
+    request.onloadend = function(e) {
         var data = new Uint8Array(this.response)
         HexaLab.UI.import_mesh(name, data)
         HexaLab.UI.setup_dataset_content()
     }
-    request.send();
 
     HexaLab.UI.clear_mesh_info_keep_source()
     $.each(HexaLab.UI.mesh.source[0].options, function() {
@@ -421,9 +420,11 @@ HexaLab.UI.import_remote_mesh = function (source, name) {
     })
     HexaLab.UI.view_source =  HexaLab.UI.mesh.source[0].selectedIndex
     HexaLab.UI.view_mesh = HexaLab.UI.mesh.dataset_content[0].selectedIndex
-    HexaLab.UI.mesh.infobox_2.text.text('Loading...')
+    HexaLab.UI.mesh.infobox_2.text.text('Downloading...').show()
     HexaLab.UI.mesh.dataset_content.css('font-style', 'normal').show()
     HexaLab.UI.mesh.infobox_2.element.show().css('display', 'flex');
+	
+	request.send();
 }
 
 HexaLab.UI.mesh.quality_type.element = $('<select id="quality_type" title="Choose Hex Quality measure">\
@@ -508,7 +509,7 @@ HexaLab.UI.setup_mesh_stats = function(name) {
 
 HexaLab.UI.on_set_quality_measure = function (measure) {
     HexaLab.UI.view_quality_measure = measure
-    HexaLab.UI.setup_mesh_stats()
+    HexaLab.UI.setup_mesh_stats( HexaLab.FS.short_path(HexaLab.UI.mesh_long_name) )
     HexaLab.UI.quality_plot_update()
 }
 
