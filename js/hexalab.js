@@ -498,6 +498,7 @@ HexaLab.Viewer = function (canvas_width, canvas_height) {
         samples: 1024,
         views: [],
         cones: [],
+		dirs: [],
         progress: null,
         timer: null,
         paused: false,
@@ -733,21 +734,12 @@ Object.assign(HexaLab.Viewer.prototype, {
         }
     },
 
-    // delayed_osao_reset: function (delay) {
-    //     clearTimeout(this.ao_pass.timer)
-    //     const self = this
-    //     this.ao_pass.timer = setTimeout(function () {
-    //         if (self.settings.ao == 'object space') {
-    //             self.reset_osao()
-    //         }
-    //     }, delay)
-    //     this.ao_pass.paused = true
-    // },
+	generate_osao_dirs: function(){
+		
 
-    generate_osao_povs: function () {
-        const aabb_diagonal = this.mesh.get_aabb_diagonal()
-        let views = []
-        let cones = []  // 3d objects to indicate position and direction of sample points
+		if(this.ao_pass.dirs && this.ao_pass.dirs.length) return; // don't recompuite light dirs!
+		console.log("computing AO dirs")
+		
         function sample_sphere_surface () {
             let dir = new THREE.Vector3()
             const theta = Math.random() * 2 * Math.PI
@@ -757,22 +749,26 @@ Object.assign(HexaLab.Viewer.prototype, {
             dir.z = Math.cos(phi)
             return dir
         }
-        let samples = []
+		
+        this.ao_pass.dirs = []
         // Mitchell's best candidate
-        samples[0] = new THREE.Vector3(10, 10, 1).normalize()
-        samples[0] = sample_sphere_surface()
+		
+        this.ao_pass.dirs[0] = new THREE.Vector3(10, 10, 1).normalize()
+		
+        //this.ao_pass.dirs[0] = sample_sphere_surface()
+		
         for (let i = 1; i < this.ao_pass.samples; ++i) {
             let p = sample_sphere_surface()
             let d = 9999
             for (let j = 0; j < i; ++j) {
-                const _d = p.distanceTo(samples[j])
+                const _d = p.distanceTo(this.ao_pass.dirs[j])
                 if (_d < d) d = _d
             }
             for (let j = 0; j < 49; ++j) {
                 let p2 = sample_sphere_surface()
                 let d2 = 9999
                 for (let j = 0; j < i; ++j) {
-                    const _d = p2.distanceTo(samples[j])
+                    const _d = p2.distanceTo(this.ao_pass.dirs[j])
                     if (_d < d2) d2 = _d
                 }
                 if (d2 > d) {
@@ -780,11 +776,29 @@ Object.assign(HexaLab.Viewer.prototype, {
                     d = d2
                 }
             }
-            samples[i] = p
+            this.ao_pass.dirs[i] = p
         }
+
+		// shift dirs from above
+		var bias = new THREE.Vector3(0, 0.1, 0)
+		for (let i = 0; i < this.ao_pass.samples; ++i) {
+			this.ao_pass.dirs[i] = this.ao_pass.dirs[i].add(bias).normalize()
+		}
+		
+	},
+	
+    generate_osao_povs: function () {
+		
+		console.log("computing AO povs")
+		this.generate_osao_dirs()
+		
+		let views = []
+		
+        const aabb_diagonal = this.mesh.get_aabb_diagonal()
+		
         for (let i = 0; i < this.ao_pass.samples; ++i) {
             // sample unit sphere 
-            let dir = samples[i]
+            var dir = this.ao_pass.dirs[i]
             // create light camera
             const cam_pos = dir.multiplyScalar(this.mesh.get_aabb_diagonal())
             views[i] = new THREE.OrthographicCamera(
@@ -797,18 +811,13 @@ Object.assign(HexaLab.Viewer.prototype, {
             views[i].position.set(cam_pos.x, cam_pos.y, cam_pos.z)
             views[i].up.set(0, 1, 0)
             views[i].lookAt(new THREE.Vector3())
-            // create visual 3d object
-            // const geometry = new THREE.CylinderGeometry(0, 0.01, 0.03);
-            // geometry.rotateX(Math.PI / 2);
-            // const material = new THREE.MeshBasicMaterial({color: 0xffff00})
-            // cones[i] = new THREE.Mesh(geometry, material)
-            // cones[i].up.set(0, 0, 1)
-            // cones[i].position.set(cam_pos.x, cam_pos.y, cam_pos.z)
-            // cones[i].lookAt(new THREE.Vector3(0, 0, 0))
+            
         }
-        this.ao_pass.views = views
-        // this.ao_pass.cones = cones
+   
+   		this.ao_pass.views = views
+
     },
+
 
     on_mesh_change: function (mesh) {
         // empty ao cache
