@@ -16,7 +16,6 @@ HexaLab.BufferGeometry = function (backend) {
     this.backend = backend
 }
 
-var lemmesee;
 Object.assign(HexaLab.BufferGeometry.prototype, {
     update: function () {
         this.surface.removeAttribute('position')
@@ -739,11 +738,8 @@ Object.assign(HexaLab.Viewer.prototype, {
 	generate_osao_dirs: function(){
 		
 
-		if(this.ao_pass.dirs && this.ao_pass.dirs.length) {
-			console.log("Not recmouputng dirs: I have "+this.ao_pass.dirs.length);
-			lemmesee = this.ao_pass.dirs;
-			return; // don't recompuite light dirs!
-		}
+		if(this.ao_pass.dirs && this.ao_pass.dirs.length) return; // don't recompuite light dirs!
+		
 		console.log("computing AO dirs")
 		
         function sample_sphere_surface () {
