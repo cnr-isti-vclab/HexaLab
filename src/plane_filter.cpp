@@ -62,7 +62,7 @@ namespace HexaLab {
         return offset01;
     }
     float PlaneFilter::get_plane_world_offset() {
-        return (max_offset+max_offset)/2.0;
+        return -offset;
     }
 
     void PlaneFilter::update_min_max_offset(){
