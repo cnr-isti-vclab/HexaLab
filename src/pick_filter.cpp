@@ -1,177 +1,179 @@
-#include <pick_filter.h>
-
 #include <float.h>
 #include <math.h>
+
+#include "pick_filter.h"
 
 #define HL_PICK_FILTER_DEFAULT_ENABLED true
 
 namespace HexaLab {
-    void PickFilter::filter(Mesh& mesh) {
-        if (!this->enabled)
-            return;
-        
-        HL_ASSERT(this->mesh == &mesh);
 
-        for (size_t i = 0; i < this->filtered_hexas.size(); ++i) {
-            mesh.mark(mesh.hexas[this->filtered_hexas[i]]);
-        }
-        for (size_t i = 0; i < this->filled_hexas.size(); ++i) {
-            mesh.counter_mark(mesh.hexas[this->filled_hexas[i]]);
-        }
+void PickFilter::filter(Mesh& mesh) {
+
+    if (!this->enabled) return;
+
+    HL_ASSERT(this->mesh == &mesh);
+
+    for (int i: this->filtered_hexas) {
+        mesh.mark( mesh.hexas[i] );
     }
-
-    void PickFilter::on_mesh_set(Mesh& mesh) {
-        this->enabled = HL_PICK_FILTER_DEFAULT_ENABLED;
-        this->mesh = &mesh;
-        this->filtered_hexas.clear();
-        this->filled_hexas.clear();
+    for (int i: this->filled_hexas) {
+        mesh.unmark( mesh.hexas[i] );
     }
+}
 
-    Index PickFilter::filter_hexa(Vector3f origin, Vector3f direction) {
-        float  min_t = FLT_MAX;
-        size_t min_i = SIZE_MAX;
-        for (size_t i = 0; i < this->mesh->hexas.size(); ++i) {
-            if (this->mesh->is_marked(this->mesh->hexas[i])) continue;
-            float _min_t, _max_t;
-            if (this->hexa_ray_test(this->mesh->hexas[i], origin, direction, &_min_t, &_max_t)) {
-                if (min_t > _min_t) {
-                    min_t = _min_t;
-                    min_i = i;
-                }
-            }
-        }
-        if (min_i != SIZE_MAX) {
-            HL_LOG("[Pick Filter]: Closest raycast intersection with hexa %d\n", min_i);
+void PickFilter::on_mesh_set(Mesh& mesh) {
+    this->enabled = HL_PICK_FILTER_DEFAULT_ENABLED;
+    this->mesh = &mesh;
+    this->clear();
+}
 
-            auto it = std::find(this->filled_hexas.begin(), this->filled_hexas.end(), min_i);
-            if (it != this->filled_hexas.end()) {
-                this->filled_hexas.erase(it);
-            } else {
-                this->filtered_hexas.push_back(min_i);
-                std::sort(this->filtered_hexas.begin(), this->filtered_hexas.end());
-            }
-            
-            return min_i;
+void PickFilter::clear(){
+    this->filtered_hexas.clear();
+    this->filled_hexas.clear();
+}
+
+void PickFilter::raycast( Vector3f origin, Vector3f direction, Index &in , Index &out ){
+
+    in = out = -1;
+    float  maxd = FLT_MAX;
+
+
+    for (Face &f: mesh->faces) {
+
+        Index h0 , h1;
+        bool in0, in1;
+
+        MeshNavigator nav = mesh->navigate(f);
+        h0 = nav.hexa_index();
+        in0 = !mesh->is_marked( nav.hexa() );
+
+        if (nav.dart().hexa_neighbor == -1) {
+            h1 = -1;
+            in1 = false;
         } else {
-            HL_LOG("[Pick Filter] Miss\n");
+            nav = nav.flip_hexa();
+            h1 = nav.hexa_index();
+            in1 = !mesh->is_marked( nav.hexa() );
         }
-        return -1;
+        if (in0==in1) continue; // not a current boundary face
+
+        if (this->face_ray_test( f, origin, direction, maxd)) {
+            if (in0) { in = h0; out = h1; }
+            else {in = h1; out = h0; }
+        }
     }
 
-    void PickFilter::filter_hexa_idx(Index idx) {
-        this->filtered_hexas.push_back(idx);
-        std::sort(this->filtered_hexas.begin(), this->filtered_hexas.end());
+}
+
+Index PickFilter::dig_hexa(Vector3f origin, Vector3f direction) {
+    Index in, out;
+    this->raycast( origin, direction , in, out) ;
+
+    if (in>-1) dig_hexa_id( in );
+
+    return in;
+}
+
+
+Index PickFilter::undig_hexa(Vector3f origin, Vector3f direction) {
+    Index in, out;
+    this->raycast( origin, direction , in, out) ;
+
+    if (out>-1) undig_hexa_id(out);
+    return out;
+
+}
+
+void PickFilter::add_one_to_filtered( Index idx ){
+    if (!this->mesh) return;
+    if (idx>=this->mesh->hexas.size()) return;
+    this->filtered_hexas.push_back(idx);
+    std::sort(this->filtered_hexas.begin(), this->filtered_hexas.end());
+}
+
+void PickFilter::add_one_to_filled( Index idx ){
+    if (!this->mesh) return;
+    if (idx>=this->mesh->hexas.size()) return;
+    this->filled_hexas.push_back(idx);
+    std::sort(this->filled_hexas.begin(), this->filled_hexas.end());
+
+}
+
+void PickFilter::dig_hexa_id(Index idx) {
+    auto it = std::find(this->filled_hexas.begin(), this->filled_hexas.end(), idx );
+
+    if (it != this->filled_hexas.end()) {
+        this->filled_hexas.erase(it);
+    } else {
+        add_one_to_filtered(idx);
     }
+}
 
-    void PickFilter::fill_hexa_idx(Index idx) {
-        this->filled_hexas.push_back(idx);
-        std::sort(this->filled_hexas.begin(), this->filled_hexas.end());
+void PickFilter::undig_hexa_id(Index idx) {
+    auto it = std::find(this->filtered_hexas.begin(), this->filtered_hexas.end(), idx);
+    if (it != this->filtered_hexas.end()) {
+        this->filtered_hexas.erase(it);
+    } else {
+        add_one_to_filled(idx);
     }
+}
 
-    Index PickFilter::unfilter_hexa(Vector3f origin, Vector3f direction) {
-        float  max_t = -FLT_MAX;
-        size_t max_i = SIZE_MAX;
-        for (size_t i = 0; i < this->mesh->hexas.size(); ++i) {
-            if (!this->mesh->is_marked(this->mesh->hexas[i])) continue;
-            float _min_t, _max_t;
-            if (this->hexa_ray_test(this->mesh->hexas[i], origin, direction, &_min_t, &_max_t)) {
-                if (max_t < _max_t) {
-                    max_t = _max_t;
-                    max_i = i;
-                }
-            }
-        }
-        if (max_i != SIZE_MAX) {
-            HL_LOG("[Pick Filter] Farthest raycast intersection with hexa %zu\n", max_i);
-            
-            HL_LOG("[Pick Filter] Filter list: ");
-            for (size_t i = 0; i < this->filtered_hexas.size(); ++i) {
-                HL_LOG(" %d ", this->filtered_hexas[i]);
-            }
-            HL_LOG("\n");
 
-            auto it = std::find(this->filtered_hexas.begin(), this->filtered_hexas.end(), max_i);
-            if (it != this->filtered_hexas.end()) {
-                size_t idx = it - this->filtered_hexas.begin();
-                HL_LOG("[Pick Filter] Removing %zu\n", idx);
-                this->filtered_hexas.erase(it);
-            } else {
-                HL_LOG("[Pick Filter] Counter marking %zu\n", max_i);
-                this->filled_hexas.push_back(max_i);
-                std::sort(this->filled_hexas.begin(), this->filled_hexas.end());
-            }
-            
-            return max_i;
-        } else {
-            HL_LOG("[Pick Filter] Miss\n");
-        }
-        return -1;
+// helper function:
+static bool tri_ray_test(Vector3f vert0, Vector3f vert1,Vector3f vert2,Vector3f ori, Vector3f dir, float& maxd) {
+
+#define EPSIL 0.000001
+
+    Vector3f edge1 = vert1 - vert0;
+    Vector3f edge2 = vert2 - vert0;
+    Vector3f tvec = ori - vert0;
+
+    Vector3f pvec =  dir.cross( edge2 );
+    double det =  edge1.dot(  pvec );
+
+    Vector3f qvec = tvec.cross( edge1 );
+    double u =  tvec.dot( pvec );
+    double v =  dir.dot(qvec);
+
+    if (det > EPSIL)
+    {
+        if ( u < 0.0 ||  u > det) return false;
+        if ( v < 0.0 ||  u + v > det) return false;
     }
-
-// floating point comparison that should account for floating point error
-#define CMP(x, y) (fabsf(x - y) <= FLT_EPSILON * fmaxf(1.0f, fmaxf(fabsf(x), fabsf(y))))
-
-    bool PickFilter::hexa_ray_test(Hexa& hexa, Vector3f origin, Vector3f direction, float* _min_t, float* _max_t) {
-        // Extract the face planes
-        struct {
-            Vector3f norm;
-            Dart* dart;
-        } planes[6];
-        MeshNavigator nav = this->mesh->navigate(hexa);
-        Face& face = nav.face();
-        for (size_t f = 0; f < 6; ++f) {
-            MeshNavigator n2 = this->mesh->navigate(nav.face());
-            float normal_sign;
-            if (n2.hexa() == nav.hexa()) {
-                normal_sign = 1;
-            } else {
-                normal_sign = -1;
-                n2 = n2.flip_hexa().flip_edge();
-            }
-            planes[f].norm = n2.face().normal * normal_sign;
-            planes[f].dart = &n2.dart();
-            nav = nav.next_hexa_face();
-        }
-
-        float min_t = FLT_MAX;
-        float max_t = -FLT_MAX;
-        bool miss = true;
-
-        for (size_t i = 0; i < 6; ++i) {
-            // Compute intersection point with the plane
-            float d = direction.dot(planes[i].norm);
-            if (CMP(d, 0.f)) continue;    // ray parallel to plane
-            MeshNavigator nav = this->mesh->navigate(*planes[i].dart);
-            Vector3f a = nav.vert().position - origin;
-            float b = a.dot(planes[i].norm);
-            float t = b / d;
-            if (t < 0) continue;    // the intersection happens behind the origin (with respect to direction)
-            Vector3f p = origin + direction * t;
-            // Inside-outside the face test
-            bool inside = true;
-            for (size_t j = 0; j < 4; ++j) {
-                Vector3f v0 = nav.vert().position;
-                nav = nav.rotate_on_face();
-                Vector3f v1 = nav.vert().position;
-                Vector3f e = v1 - v0;
-                Vector3f c = p - v0;
-                if ( planes[i].norm.dot( c.cross( e ) ) < 0 ) {
-                    inside = false;
-                    break;
-                }
-            }
-            if (!inside) continue;
-
-            miss = false;
-            if (min_t > t) min_t = t;
-            if (max_t < t) max_t = t;
-        }
-
-        if (miss) return false;
-
-        *_min_t = min_t;
-        *_max_t = max_t;
-
-        return true;
+    else if(det < -EPSIL)
+    {
+        if ( u > 0.0 ||  u < det) return false;
+        if ( v > 0.0 ||  u + v < det) return false;
     }
+    else return false;
+
+    double t = edge2.dot( qvec )  / det;
+    if (t<0) return false;
+    if (t>maxd) return false;
+    maxd = t;
+    return true;
+
+}
+
+
+bool PickFilter::face_ray_test( Face& face, Vector3f origin, Vector3f direction, float& maxd) {
+
+    MeshNavigator nav = this->mesh->navigate(face);
+
+    Vector3f v0 = nav.vert().position;
+    nav = nav.rotate_on_face();
+    Vector3f v1 = nav.vert().position;
+    nav = nav.rotate_on_face();
+    Vector3f v2 = nav.vert().position;
+    nav = nav.rotate_on_face();
+    Vector3f v3 = nav.vert().position;
+
+    if (tri_ray_test( v0,v1,v2 , origin, direction,  maxd)) return true;
+    if (tri_ray_test( v2,v3,v0 , origin, direction,  maxd)) return true;
+    return false;
+}
+
+
+
+
 }

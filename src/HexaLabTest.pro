@@ -15,7 +15,9 @@ SOURCES += app.cpp \
   test.cpp \
   color_map.cpp \
   hexalab_js.cpp \ 
-    peeling_filter.cpp
+  peeling_filter.cpp \
+  pick_filter.cpp
+
 
 HEADERS = app.h \
   builder.h\
@@ -28,4 +30,5 @@ HEADERS = app.h \
   quality_filter.h \ 
   peeling_filter.h \
   hex_quality.h \
+  pick_filter.h \
   hex_quality_color_maps.h

@@ -1134,7 +1134,7 @@ HexaLab.UI.topbar.save_settings.on('click', function () {
 }).prop("disabled", true);
 
 HexaLab.UI.topbar.github.on('click', function () {
-    window.open('https://github.com/cnr-isti-vclab/HexaLab', '_blank');
+    window.open('https://github.com/cnr-isti-vclab/HexaLab#hexalab', '_blank');
 })
 
 HexaLab.UI.overlay = function (x, y, width, height, content) {
@@ -1222,10 +1222,10 @@ HexaLab.UI.topbar.snapshot.on('click', function () {
 
 HexaLab.UI.settings.rendering_menu_content.prop('disabled', true)
 HexaLab.UI.settings.silhouette.slider('disable')    
-//HexaLab.UI.settings.erode_dilate.slider('disable')    
+HexaLab.UI.settings.erode_dilate.slider('disable')    
 HexaLab.UI.settings.singularity_mode.slider('disable')
-HexaLab.UI.settings.wireframe_row.hide()
-HexaLab.UI.settings.crack_size_row.hide()
-HexaLab.UI.settings.rounding_radius_row.hide()
+//HexaLab.UI.settings.wireframe_row.hide()
+//HexaLab.UI.settings.crack_size_row.hide()
+//HexaLab.UI.settings.rounding_radius_row.hide()
 HexaLab.UI.settings.color.default.outside.spectrum('disable')
 HexaLab.UI.settings.color.default.inside.spectrum('disable')

@@ -66,8 +66,9 @@ HexaLab.PickFilter.prototype = Object.assign(Object.create(HexaLab.Filter.protot
     },
 
     set_settings: function (settings) {
-        this.enable(settings.enabled)
-        this.set_filtered_hexas(settings.filtered_hexas)
+        //this.enable(settings.enabled)
+        this.set_lists(settings.filtered_hexas, settings.filled_hexas)
+        
     },
 
     on_mesh_change: function (mesh) {
@@ -79,20 +80,16 @@ HexaLab.PickFilter.prototype = Object.assign(Object.create(HexaLab.Filter.protot
         HexaLab.UI.canvas_container.css('cursor', "default");
     },
 
-    set_filtered_hexas: function (list) {
-        this.filtered_hexas = list
-        this.backend.clear_filtered_hexas()
-        for (let i = 0; i < list.length; ++i) {
-            this.backend.filter_hexa_idx(list[i])
-        }
-        HexaLab.app.queue_buffers_update()
-    },
+    set_lists: function (list_filtered, list_filled) {
+		this.backend.clear();
+        this.filtered_hexas = list_filtered
+		this.filled_hexas = list_filled
 
-    set_filled_hexas: function (list) {
-        this.filled_hexas = list
-        this.backend.clear_filled_hexas()
-        for (let i = 0; i < list.length; ++i) {
-            this.backend.fill_hexa_idx(list[i])
+        for (let i = 0; i < list_filtered.length; ++i) {
+            this.backend.add_one_to_filtered(list_filtered[i])
+        }
+        for (let i = 0; i < list_filled.length; ++i) {
+            this.backend.add_one_to_filled(list_filled[i])
         }
         HexaLab.app.queue_buffers_update()
     },
@@ -132,8 +129,7 @@ HexaLab.PickFilter.prototype = Object.assign(Object.create(HexaLab.Filter.protot
 	
 
     clear: function () {
-        this.backend.clear_filtered_hexas()
-        this.backend.clear_filled_hexas()
+        this.backend.clear()
         this.filtered_hexas = []
         this.filled_hexas   = []
         HexaLab.app.queue_buffers_update()
@@ -174,7 +170,8 @@ HexaLab.PickFilter.prototype = Object.assign(Object.create(HexaLab.Filter.protot
         // var sphere = new THREE.Mesh( geometry, material )
         // sphere.position.set(p.x, p.y, p.z)
         // HexaLab.app.viewer.add_mesh( sphere )
-        const i = this.backend.filter_hexa(p_origin, p_direction)
+        const i = this.backend.dig_hexa(p_origin, p_direction)
+		console.log("DIG ID: "+i)
         if (i != -1) {
             const idx = this.filled_hexas.indexOf(i)
             if (idx != -1) {
@@ -198,7 +195,8 @@ HexaLab.PickFilter.prototype = Object.assign(Object.create(HexaLab.Filter.protot
         p_direction.set_x(ray.direction.x)
         p_direction.set_y(ray.direction.y)
         p_direction.set_z(ray.direction.z)
-        const i = this.backend.unfilter_hexa(p_origin, p_direction)
+        const i = this.backend.undig_hexa(p_origin, p_direction)
+		console.log("UNDIG ID: "+i)
         if (i != -1) {
             let idx = this.filtered_hexas.indexOf(i);
             if (idx != -1) {
@@ -252,14 +250,12 @@ var _nf = HexaLab.filters.length;
 HexaLab.filters.push(new HexaLab.PickFilter())
 
 $(document).keydown(function (e) {
-	console.log("KeyDonw '"+e.keyCode+"'");
     if (e.keyCode == 16) { HexaLab.filters[_nf].setBrush( 2 ); } // shift  16
     if (e.keyCode == 17) { HexaLab.filters[_nf].setBrush( 1 ); } // ctrl 17
 	//if (e.keyCode == 18)  // alt  18
 });
 
 $(document).keyup(function (e) {
-	//console.log("KeyDonw '"+e.keyCode+"'");
     if (e.keyCode == 16) HexaLab.filters[_nf].setBrush( 0 ); // shift  16
     if (e.keyCode == 17) HexaLab.filters[_nf].setBrush( 0 ); // ctrl  17
 	//if (e.keyCode == 18) toggle_pick() // alt  18
