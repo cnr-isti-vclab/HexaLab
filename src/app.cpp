@@ -1128,17 +1128,20 @@ namespace HexaLab {
         visible_model.clear();
         filtered_model.clear();
 
-        for ( size_t i = 0; i < filters.size(); ++i ) {
+        for ( size_t i = 0; i < filters.size()-1; ++i ) {
             filters[i]->filter ( *mesh );
         }
 
-        for ( size_t i = 0; i < this->filter_level; ++i ) {
+        for ( int i = 0; i < this->filter_level; ++i ) {
             this->erode();
         }
 
-        for ( size_t i = 0; i < this->filter_level; ++i ) {
+        for ( int i = 0; i < this->filter_level; ++i ) {
             this->dilate();
         }
+
+        filters.back()->filter ( *mesh ); // hack: pick filter is done last
+
 
         switch ( this->geometry_mode ) {
             case GeometryMode::Default:
