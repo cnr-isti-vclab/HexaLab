@@ -175,8 +175,8 @@ namespace HexaLab {
         this->flag_models_as_dirty();
     }
 
-    void App::set_filter_level ( size_t level ) {
-        this->filter_level = level;
+    void App::set_regularize_str ( size_t  level ) {
+        this->regularize_str = level;
         this->flag_models_as_dirty();
     }
 
@@ -1128,17 +1128,13 @@ namespace HexaLab {
         visible_model.clear();
         filtered_model.clear();
 
-        for ( size_t i = 0; i < filters.size(); ++i ) {
-            filters[i]->filter ( *mesh );
-        }
+        HL_ASSERT(filters.size()==4);
+        filters[0]->filter( *mesh ); // slice
+        filters[1]->filter( *mesh ); // peel
+        erode_dilate( regularize_str );
+        filters[2]->filter( *mesh ); // quality
+        filters[3]->filter( *mesh ); // pick
 
-        for ( size_t i = 0; i < this->filter_level; ++i ) {
-            this->erode();
-        }
-
-        for ( size_t i = 0; i < this->filter_level; ++i ) {
-            this->dilate();
-        }
 
         switch ( this->geometry_mode ) {
             case GeometryMode::Default:
@@ -1171,6 +1167,12 @@ namespace HexaLab {
             }
         }
     }
+
+    void App::erode_dilate( int str ) {
+        for ( int i=0; i<str; i++ ) erode();
+        for ( int i=0; i<str; i++ ) dilate();
+    }
+
 
     // filter -> mark vertices -> inc mark -> manual mark update -> re-mark vertices -> ...
     void App::erode() {

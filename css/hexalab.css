@@ -188,6 +188,10 @@ label {
 
 .menu_row #mesh_info_2 {
 	display: none;
+	position: relative;
+	background-image: url("../img/bar.png");
+    background-repeat: no-repeat;
+    background-size: 0% 100%;
 }
 
 .menu_row #paper_mesh_picker {
@@ -513,6 +517,15 @@ button:focus {
 	height: 100%;
 	padding-left: 0px;
 	padding-right: 0px;
+}
+#plane_snap_nx{
+    color: rgb(255, 0, 0);
+}
+#plane_snap_ny{
+    color: rgb(0, 180, 0);
+}
+#plane_snap_nz{
+    color: rgb(0, 0, 255);
 }
 select {
 	height: 26px;

@@ -14,5 +14,5 @@ src/.qmake.stash
 build-*/
 emcc.bat
 
-js/generated/hexalab_asm.js
 /nbproject
+js/generated/hexalab_asm.js

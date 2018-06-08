@@ -54,6 +54,7 @@ HexaLab.FS = {
     },
 
     reader: new FileReader(),
+	
     read_json_file: function (file, callback) {
         this.reader.onload = function () {
             const json = JSON.parse(this.result)
@@ -61,11 +62,20 @@ HexaLab.FS = {
         }
         this.reader.readAsText(file, "UTF-8")
     },
+	
     read_data_file: function (file, callback) {
-        this.reader.onload = function () {
+        this.reader.onloadend = function () {
             const data = new Int8Array(this.result)
             callback(file.name, data)
+			HexaLab.UI.mesh.infobox_2.element.css('background-size', '0% 100%');
         }
+		this.reader.onprogress = function(event) {
+			if (event.lengthComputable) {
+				var ratio = (100 * event.loaded / event.total).toFixed(0);
+				HexaLab.UI.mesh.infobox_2.element.css('background-size', ratio + '% 100%');
+				console.log("Reader progress "+ratio)
+			}
+		}		
         this.reader.readAsArrayBuffer(file, "UTF-8")
     }
 }
@@ -279,7 +289,7 @@ HexaLab.UI.settings.erode_dilate.slider({
 })
 
 HexaLab.UI.settings.singularity_mode.slider({
-    value: 0,
+    value: 1,
     min: 0,
     max: 4,
     step: 1
@@ -380,12 +390,19 @@ HexaLab.UI.import_mesh = function (long_name, byte_array) {
     var name = HexaLab.FS.short_path(long_name)
     HexaLab.UI.mesh_long_name = long_name
     HexaLab.FS.make_file(byte_array, name);
+	
+	if (HexaLab.UI.first_mesh) {
+		HexaLab.app.set_default_rendering_settings()
+		console.log("FIRST MESH!!!!");
+	}
+	
     HexaLab.app.import_mesh(name);
     HexaLab.FS.delete_file(name);
 
     if (HexaLab.UI.first_mesh) {
         HexaLab.UI.on_first_mesh()
         HexaLab.UI.first_mesh = false
+		//HexaLab.app.set_default_rendering_settings()
     }
 }
 
@@ -400,7 +417,7 @@ HexaLab.UI.import_local_mesh = function (file) {
     HexaLab.UI.view_mesh = null
     HexaLab.UI.clear_mesh_info()
     HexaLab.UI.mesh.infobox_2.element.show().css('display', 'flex');
-    HexaLab.UI.mesh.infobox_2.text.empty().append('<span>Loading...</span>').show()
+    HexaLab.UI.mesh.infobox_2.text.text('Loading...').show()
     HexaLab.FS.read_data_file(file, HexaLab.UI.import_mesh)
 }
 
@@ -408,12 +425,20 @@ HexaLab.UI.import_remote_mesh = function (source, name) {
     var request = new XMLHttpRequest();
     request.open('GET', 'datasets/' + source.path + '/' + name, true);
     request.responseType = 'arraybuffer';
-    request.onload = function(e) {
+    request.onloadend = function(e) {
         var data = new Uint8Array(this.response)
         HexaLab.UI.import_mesh(name, data)
         HexaLab.UI.setup_dataset_content()
+		HexaLab.UI.mesh.infobox_2.element.css('background-size', '0% 100%');
     }
-    request.send();
+	
+	request.onprogress = function (event) {
+		var ratio = (100 * event.loaded / event.total).toFixed(0);
+		HexaLab.UI.mesh.infobox_2.element.css('background-size', ratio + '% 100%');
+		console.log("PROGRESS "+ratio)
+	};
+	
+	//request.addEventListener("progress", request.onprogress, false);
 
     HexaLab.UI.clear_mesh_info_keep_source()
     $.each(HexaLab.UI.mesh.source[0].options, function() {
@@ -421,9 +446,11 @@ HexaLab.UI.import_remote_mesh = function (source, name) {
     })
     HexaLab.UI.view_source =  HexaLab.UI.mesh.source[0].selectedIndex
     HexaLab.UI.view_mesh = HexaLab.UI.mesh.dataset_content[0].selectedIndex
-    HexaLab.UI.mesh.infobox_2.text.text('Loading...')
+    HexaLab.UI.mesh.infobox_2.text.text('Loading...').show()
     HexaLab.UI.mesh.dataset_content.css('font-style', 'normal').show()
     HexaLab.UI.mesh.infobox_2.element.show().css('display', 'flex');
+	
+	request.send();
 }
 
 HexaLab.UI.mesh.quality_type.element = $('<select id="quality_type" title="Choose Hex Quality measure">\
@@ -499,7 +526,6 @@ HexaLab.UI.setup_mesh_stats = function(name) {
     HexaLab.UI.mesh.quality_type.element.on('change', function () {
         const v = this.options[this.selectedIndex].value
         HexaLab.app.set_quality_measure(v);
-		HexaLab.UI.update_quality_sign();
         for (let x in HexaLab.UI.mesh.quality_type.listeners) {
             HexaLab.UI.mesh.quality_type.listeners[x]()
         }
@@ -508,16 +534,8 @@ HexaLab.UI.setup_mesh_stats = function(name) {
 
 HexaLab.UI.on_set_quality_measure = function (measure) {
     HexaLab.UI.view_quality_measure = measure
-    HexaLab.UI.setup_mesh_stats()
+    HexaLab.UI.setup_mesh_stats( HexaLab.FS.short_path(HexaLab.UI.mesh_long_name) )
     HexaLab.UI.quality_plot_update()
-}
-
-HexaLab.UI.update_quality_sign = function(){
-	var mesh = HexaLab.app.backend.get_mesh();
-    let min = mesh.quality_min;
-    let max = mesh.quality_max;
-	console.log("CAZZO DI BUDDA MAIALE DIO PORCO MERDA "+min+" "+max+" "+((min<max)?"A":"B"))
-	HexaLab.UI.quality_label.html(  (min<max)?"A":"B" );
 }
 
 HexaLab.UI.on_set_geometry_mode = function (v) {
