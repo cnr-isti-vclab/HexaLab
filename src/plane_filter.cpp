@@ -5,21 +5,19 @@
 #define HL_PLANE_FILTER_DEFAULT_ENABLED true
 
 namespace HexaLab {
-    void PlaneFilter::on_mesh_set(Mesh& mesh) {
-        this->mesh_aabb = &mesh.aabb;
-        this->enabled = HL_PLANE_FILTER_DEFAULT_ENABLED;
-        this->set_plane_normal(HL_PLANE_FILTER_DEFAULT_NORMAL);
-        this->set_plane_offset(HL_PLANE_FILTER_DEFAULT_OFFSET);
+    void PlaneFilter::on_mesh_set(Mesh& _mesh) {
+        this->mesh = &_mesh;
+        enabled = HL_PLANE_FILTER_DEFAULT_ENABLED;
+        set_plane_normal(HL_PLANE_FILTER_DEFAULT_NORMAL);
+        set_plane_offset(HL_PLANE_FILTER_DEFAULT_OFFSET);
+        update_min_max_offset();
     }
 
     // Returns true if any of the face vertices are culled (behind the plane)
     bool PlaneFilter::plane_cull_test(Mesh& mesh, Face& face) {
         MeshNavigator nav = mesh.navigate(face);
         for (int v = 0; v < 4; ++v) {
-            if (plane.signedDistance(nav.vert().position) < 0) {
-                return true;
-                break;
-            }
+            if (normal.dot( nav.vert().position) < offset) return true;
             nav = nav.rotate_on_face();
         }
         return false;
@@ -47,20 +45,41 @@ namespace HexaLab {
     }
 
     void PlaneFilter::set_plane_normal(float nx, float ny, float nz) {
-        Vector3f normal(nx, ny, nz);
+        normal = Vector3f(nx, ny, nz);
         normal.normalize();
-        plane = Hyperplane<float, 3>(normal, mesh_aabb->center() + normal * (mesh_aabb->diagonal().norm() * (get_plane_offset() - 0.5f)));
+        update_min_max_offset();
     }
-    void PlaneFilter::set_plane_offset(float offset) { // offset in [0,1]
-        plane = Hyperplane<float, 3>(plane.normal(), mesh_aabb->center() + plane.normal() * (mesh_aabb->diagonal().norm() * (offset - 0.5f)));
+
+    void PlaneFilter::set_plane_offset(float _offset) { // offset in [0,1]
+        offset01 = _offset;
+        offset = min_offset + (max_offset-min_offset)* offset01;
     }
+
     Vector3f PlaneFilter::get_plane_normal() {
-        return plane.normal();
+        return normal;
     }
     float PlaneFilter::get_plane_offset() {   // return the offset from the center expressed in [0,1] range (0.5 is the center)
-        return -plane.signedDistance(mesh_aabb->center()) / mesh_aabb->diagonal().norm() + 0.5f;
+        return offset01;
     }
     float PlaneFilter::get_plane_world_offset() {
-        return plane.signedDistance(mesh_aabb->center());
+        return -offset;
     }
+
+    void PlaneFilter::update_min_max_offset(){
+        min_offset = max_offset = 0.0;
+        if (!mesh) return;
+        if (mesh->verts.size()==0) return;
+        min_offset = max_offset = normal.dot( mesh->verts[0].position );
+
+        for (const Vert &v : mesh->verts) {
+            float k = normal.dot( v.position );
+            if (k<min_offset) min_offset = k;
+            if (k>max_offset) max_offset = k;
+        }
+        min_offset-=0.00001;
+        max_offset+=0.00001;
+
+        offset = min_offset + (max_offset-min_offset)* offset01;
+    }
+
 }

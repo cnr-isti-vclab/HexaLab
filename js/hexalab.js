@@ -519,6 +519,8 @@ HexaLab.Viewer = function (canvas_width, canvas_height) {
             side: THREE.DoubleSide,
         })
     }
+	
+
 }
 
 Object.assign(HexaLab.Viewer.prototype, {
@@ -734,10 +736,12 @@ Object.assign(HexaLab.Viewer.prototype, {
         }
     },
 
+	
 	generate_osao_dirs: function(){
 		
 
 		if(this.ao_pass.dirs && this.ao_pass.dirs.length) return; // don't recompuite light dirs!
+		
 		console.log("computing AO dirs")
 		
         function sample_sphere_surface () {
@@ -798,9 +802,10 @@ Object.assign(HexaLab.Viewer.prototype, {
 		
         for (let i = 0; i < this.ao_pass.samples; ++i) {
             // sample unit sphere 
-            var dir = this.ao_pass.dirs[i]
+            var cam_pos = new THREE.Vector3();
+			cam_pos.copy( this.ao_pass.dirs[i] );
             // create light camera
-            const cam_pos = dir.multiplyScalar(this.mesh.get_aabb_diagonal())
+            cam_pos.multiplyScalar(this.mesh.get_aabb_diagonal())
             views[i] = new THREE.OrthographicCamera(
                 -aabb_diagonal * 0.5,
                 aabb_diagonal * 0.5,
@@ -1263,7 +1268,7 @@ HexaLab.App = function (dom_element) {
     // App
     this.default_app_settings = {
         apply_color_map:    false,
-        singularity_mode:   0,
+        singularity_mode:   1,
         color_map:          'Parula',
         quality_measure:    'Scaled Jacobian',
         geometry_mode:      'DynamicLines',
@@ -1486,10 +1491,11 @@ Object.assign(HexaLab.App.prototype, {
     },
 
     set_settings: function (settings) {
-        this.set_app_settings(settings.app)
-        this.set_camera_settings(settings.camera)
-        this.set_rendering_settings(settings.rendering)
-        this.set_material_settings(settings.materials)
+        if (settings.app!=undefined) this.set_app_settings(settings.app)
+        if (settings.camera!=undefined) this.set_camera_settings(settings.camera)
+        if (settings.rendering!=undefined) this.set_rendering_settings(settings.rendering)
+		if (settings.materials!=undefined) this.set_material_settings(settings.materials)
+        
         for (var k in this.filters) {
             var filter = this.filters[k]
             if (settings.filters && settings.filters[filter.name]) {
@@ -1806,7 +1812,17 @@ Object.assign(HexaLab.App.prototype, {
         this.viewer.set_light_intensity(intensity)
         this.queue_canvas_update() 
     },
+	
 
+	set_default_rendering_settings: function(){
+		this.set_settings({
+			//app:        this.default_app_settings,
+            camera:     this.default_camera_settings,
+            rendering:  this.default_rendering_settings,
+            materials:  this.default_material_settings
+        })
+	},
+	
     // Import a new mesh. First invoke the backend for the parser and builder.
     // If everything goes well, reset settings to default and propagate the
     // fact that a new mesh is in use to the entire system. Finally sync
@@ -1824,12 +1840,14 @@ Object.assign(HexaLab.App.prototype, {
 		
 		
         // reset settings
+		
         this.set_settings({
             app:        this.default_app_settings,
-            camera:     this.default_camera_settings,
-            rendering:  this.default_rendering_settings,
-            materials:  this.default_material_settings
+            //camera:     this.default_camera_settings,
+            //rendering:  this.default_rendering_settings,
+            //materials:  this.default_material_settings
         })
+		
 
         // notify filters
         for (var k in this.filters) {
