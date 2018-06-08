@@ -9,24 +9,24 @@
             "web": "http://www.cs.ubc.ca/labs/imager/tr/2015/untangler/",
             "DOI": "10.1145/2366145.2366196"
         },
-        "path": "All-Hex Meshing using Singularity-Restricted Field",
+        "path": "2012 - All-Hex Meshing using Singularity-Restricted Field",
         "label": "2012 - All-Hex Meshing Using Singularity-Restricted Field",
         "data": [
-            "bone/bone.mesh",
-            "bunny/bunny.mesh",
-            "double torus/double torus.mesh",
-            "ellipsoid/ellipsoid-A.mesh",
-            "ellipsoid/ellipsoid-B.mesh",
-            "ellipsoid/ellipsoid-C.mesh",
-            "fandisk/fandisk.mesh",
-            "fertility/fertility.mesh",
-            "hanger/hanger.mesh",
-            "impeller/impeller.mesh",
-            "joint/joint.mesh",
-            "rockerarm/rockerarm.mesh",
-            "rod/rod.mesh",
-            "sculpture/sculpture-A.mesh",
-            "sculpture/sculpture-B.mesh"
+            "bone/bone.vtk",
+            "bunny/bunny.vtk",
+            "double torus/double torus.vtk",
+            "ellipsoid/ellipsoid-A.vtk",
+            "ellipsoid/ellipsoid-B.vtk",
+            "ellipsoid/ellipsoid-C.vtk",
+            "fandisk/fandisk.vtk",
+            "fertility/fertility.vtk",
+            "hanger/hanger.vtk",
+            "impeller/impeller.vtk",
+            "joint/joint.vtk",
+            "rockerarm/rockerarm.vtk",
+            "rod/rod.vtk",
+            "sculpture/sculpture-A.vtk",
+            "sculpture/sculpture-B.vtk"
         ]
     }, {
         "paper": {
@@ -38,7 +38,7 @@
             "web": "http://www.cs.ubc.ca/labs/imager/tr/2013/polycut/",
             "DOI": "10.1145/2508363.2508388"
         },
-        "path": "PolyCut - Monotone Graph-Cuts for PolyCube Base-Complex Construction",
+        "path": "2013 - PolyCut - Monotone Graph-Cuts for PolyCube Base-Complex Construction",
         "label": "2013 - Polycut: Monotone Graph-Cuts for PolyCube Base-Complex Construction",
         "data": [
             "BU_hex_opt.mesh",
@@ -57,28 +57,28 @@
           "web": "",
           "DOI": "10.1145/2602141"
         },
-        "path": "l1-Based Construction of Polycube Maps from Complex Shapes",
+        "path": "2014 - l1-Based Construction of Polycube Maps from Complex Shapes",
         "label": "2014 - ℓ1-Based Construction of Polycube Maps from Complex Shapes",
         "data": [
-          "anc101/hex.mesh",
-          "angel_1/hex.mesh",
-          "angel_2/hex.mesh",
-          "angel_3/hex.mesh",
-          "bumpy_torus/hex.mesh",
-          "bunny/hex.mesh",
-          "buste/hex.mesh",
-          "canewt/hex.mesh",
-          "cognit/hex.mesh",
-          "dancing-children-2/hex.mesh",
-          "dragon/hex.mesh",
-          "elephant/hex.mesh",
-          "fertility/hex.mesh",
-          "gargoyle/hex.mesh",
-          "kiss/hex.mesh",
-          "kitty/hex.mesh",
-          "rockerArm_1/hex.mesh",
-          "rockerArm_2/hex.mesh",
-          "rod/hex.mesh"
+          "anc101/hex.vtk",
+          "angel_1/hex.vtk",
+          "angel_2/hex.vtk",
+          "angel_3/hex.vtk",
+          "bumpy_torus/hex.vtk",
+          "bunny/hex.vtk",
+          "buste/hex.vtk",
+          "canewt/hex.vtk",
+          "cognit/hex.vtk",
+          "dancing-children-2/hex.vtk",
+          "dragon/hex.vtk",
+          "elephant/hex.vtk",
+          "fertility/hex.vtk",
+          "gargoyle/hex.vtk",
+          "kiss/hex.vtk",
+          "kitty/hex.vtk",
+          "rockerArm_1/hex.vtk",
+          "rockerArm_2/hex.vtk",
+          "rod/hex.vtk"
         ]
     }, {
         "paper": {
