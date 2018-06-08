@@ -73,7 +73,7 @@ HexaLab.FS = {
 			if (event.lengthComputable) {
 				var ratio = (100 * event.loaded / event.total).toFixed(0);
 				HexaLab.UI.mesh.infobox_2.element.css('background-size', ratio + '% 100%');
-				console.log("PROGRESS "+ratio)
+				console.log("Reader progress "+ratio)
 			}
 		}		
         this.reader.readAsArrayBuffer(file, "UTF-8")

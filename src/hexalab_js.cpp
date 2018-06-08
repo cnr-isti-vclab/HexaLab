@@ -78,7 +78,7 @@ EMSCRIPTEN_BINDINGS ( HexaLab ) {
     .function ( "set_geometry_mode",                  &App::set_geometry_mode )
     .function ( "set_crack_size",                     &App::set_crack_size )
     .function ( "set_rounding_radius",                &App::set_rounding_radius )
-    .function ( "set_filter_level",                   &App::set_filter_level )
+    .function ( "set_regularize_str",                 &App::set_regularize_str )
     .function ( "show_visible_wireframe_singularity", &App::show_visible_wireframe_singularity )
     .function ( "get_visible_model",                  &App::get_visible_model, allow_raw_pointers() )
     .function ( "get_filtered_model",                 &App::get_filtered_model, allow_raw_pointers() )
