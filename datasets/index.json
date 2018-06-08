@@ -90,7 +90,7 @@
             "web": "http://www.cs.ubc.ca/labs/imager/tr/2015/untangler/",
             "DOI": "10.1145/2766905"
         },
-        "path": "2015 -Practical Hex-Mesh Optimization via Edge-Cone Rectification",
+        "path": "2015 - Practical Hex-Mesh Optimization via Edge-Cone Rectification",
         "label": "2015 - Practical Hex-Mesh Optimization via Edge-Cone Rectification",
         "data": [
             "armadillo_out.mesh",

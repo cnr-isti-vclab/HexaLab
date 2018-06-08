@@ -46,7 +46,7 @@ int main() {
         printf ( "-- title %s\n", title.c_str() );
 
         for ( size_t j = 0; j < dataVec.size(); ++j ) {
-            printf ("Mesh %i/%i on dataset %i/%i\n",j+1,dataVec.size(),i+1,paperArrayJSON.size());
+            printf ("Mesh %lu/%lu on dataset %lu/%lu\n",j+1,dataVec.size(),i+1,paperArrayJSON.size());
             ++meshCnt;
             string filename = dataVec[j];
             const string basepath = "../datasets/";
