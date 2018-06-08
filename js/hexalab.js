@@ -1817,7 +1817,7 @@ Object.assign(HexaLab.App.prototype, {
 	set_default_rendering_settings: function(){
 		this.set_settings({
 			//app:        this.default_app_settings,
-            camera:     this.default_camera_settings,
+            //camera:     this.default_camera_settings,
             rendering:  this.default_rendering_settings,
             materials:  this.default_material_settings
         })
@@ -1843,7 +1843,7 @@ Object.assign(HexaLab.App.prototype, {
 		
         this.set_settings({
             app:        this.default_app_settings,
-            //camera:     this.default_camera_settings,
+            camera:     this.default_camera_settings,
             //rendering:  this.default_rendering_settings,
             //materials:  this.default_material_settings
         })

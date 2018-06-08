@@ -402,7 +402,7 @@ HexaLab.UI.import_mesh = function (long_name, byte_array) {
     if (HexaLab.UI.first_mesh) {
         HexaLab.UI.on_first_mesh()
         HexaLab.UI.first_mesh = false
-		HexaLab.app.set_default_rendering_settings()
+		//HexaLab.app.set_default_rendering_settings()
     }
 }
 
