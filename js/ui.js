@@ -446,7 +446,7 @@ HexaLab.UI.import_remote_mesh = function (source, name) {
     })
     HexaLab.UI.view_source =  HexaLab.UI.mesh.source[0].selectedIndex
     HexaLab.UI.view_mesh = HexaLab.UI.mesh.dataset_content[0].selectedIndex
-    HexaLab.UI.mesh.infobox_2.text.text('Downloading...').show()
+    HexaLab.UI.mesh.infobox_2.text.text('Loading...').show()
     HexaLab.UI.mesh.dataset_content.css('font-style', 'normal').show()
     HexaLab.UI.mesh.infobox_2.element.show().css('display', 'flex');
 	
