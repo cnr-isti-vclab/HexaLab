@@ -73,7 +73,7 @@ HexaLab.FS = {
 			if (event.lengthComputable) {
 				var ratio = (100 * event.loaded / event.total).toFixed(0);
 				HexaLab.UI.mesh.infobox_2.element.css('background-size', ratio + '% 100%');
-				console.log("PROGRESS "+ratio)
+				console.log("Reader progress "+ratio)
 			}
 		}		
         this.reader.readAsArrayBuffer(file, "UTF-8")
@@ -402,7 +402,7 @@ HexaLab.UI.import_mesh = function (long_name, byte_array) {
     if (HexaLab.UI.first_mesh) {
         HexaLab.UI.on_first_mesh()
         HexaLab.UI.first_mesh = false
-		HexaLab.app.set_default_rendering_settings()
+		//HexaLab.app.set_default_rendering_settings()
     }
 }
 
@@ -925,6 +925,10 @@ HexaLab.UI.quality_plot = function(container, axis) {
         paper_bgcolor: 'rgba(255, 255, 255, 0.2)',
         plot_bgcolor:  'rgba(255, 255, 255, 0.2)',
         autosize:       true,
+        font: {
+//                family: 'sans-serif',
+                size: 12,
+        },
         margin: {
             l:  60,
             r:  30,
@@ -962,8 +966,14 @@ HexaLab.UI.quality_plot = function(container, axis) {
                 name: 'Save',
                 icon: Plotly.Icons['camera'],
                 click: function() {
+                    let magFac=4
                     plot_layout.paper_bgcolor = 'rgba(255, 255, 255, 1)'
                     plot_layout.plot_bgcolor = 'rgba(255, 255, 255, 1)'
+                    plot_layout.font.size *= magFac
+                    plot_layout.margin.l *= magFac
+                    plot_layout.margin.r *= magFac
+                    plot_layout.margin.b *= magFac
+                    plot_layout.margin.t *= magFac
                     Plotly.newPlot($("<div></div>")[0], {
                         data: plot_data,
                         layout: plot_layout,
@@ -971,16 +981,17 @@ HexaLab.UI.quality_plot = function(container, axis) {
                     })
                     Plotly.toImage(container.find('#plot_div')[0], {
                         format: 'png', 
-                        width: container.find('#plot_div').width(), 
-                        height: container.find('#plot_div').height(),
+                        width: container.find('#plot_div').width()*magFac, 
+                        height: container.find('#plot_div').height()*magFac,
+                      
                     }).then(function(data) {
                         let canvas_width, canvas_height
                         if (axis == 'x') {
-                            canvas_width  = container.find('#plot_div').width()
-                            canvas_height = container.find('#plot_div').height() + 16 + 10
+                            canvas_width  = container.find('#plot_div').width()*magFac
+                            canvas_height = (container.find('#plot_div').height() + 16 + 10)*magFac
                         } else {
-                            canvas_width  = container.find('#plot_div').width()  + 16 + 10
-                            canvas_height = container.find('#plot_div').height()
+                            canvas_width  = (container.find('#plot_div').width()  + 16 + 10)*magFac
+                            canvas_height = container.find('#plot_div').height()*magFac
                         }
                         let c = $('<canvas width="' + canvas_width
                                      + '" height="' + canvas_height
@@ -998,10 +1009,10 @@ HexaLab.UI.quality_plot = function(container, axis) {
                             bar_img.onload = function() {
                                 if (axis == 'x') {
                                     ctx.drawImage(plot_img, 0, 0)
-                                    ctx.drawImage(bar_img, 60, canvas_height - 16 - 5, canvas_width - 60 - 30, 16)
+                                    ctx.drawImage(bar_img, 60, canvas_height - (16 + 5), canvas_width - (60 + 30), 16)
                                 } else {
-                                    ctx.drawImage(bar_img, 5, 30, 16, canvas_height - 30 - 50)
-                                    ctx.drawImage(plot_img, 5 + 16, 0)
+                                    ctx.drawImage(bar_img, 5*magFac, 30*magFac, 16*magFac, canvas_height - (30 + 50)*magFac)
+                                    ctx.drawImage(plot_img, (5 + 16)*magFac, 0)
                                 }
                                 let img = c.toDataURL("image/png")
                                 saveAs(dataURItoBlob(img), "HLplot.png")
@@ -1010,6 +1021,11 @@ HexaLab.UI.quality_plot = function(container, axis) {
                     })
                     plot_layout.paper_bgcolor = 'rgba(255, 255, 255, 0.2)'
                     plot_layout.plot_bgcolor = 'rgba(255, 255, 255, 0.2)'
+                    plot_layout.font.size /= magFac                    
+                    plot_layout.margin.l /= magFac
+                    plot_layout.margin.r /= magFac
+                    plot_layout.margin.b /= magFac
+                    plot_layout.margin.t /= magFac
                     Plotly.newPlot(container.find('#plot_div')[0], {
                         data: plot_data,
                         layout: plot_layout,

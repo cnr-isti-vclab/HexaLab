@@ -85,7 +85,7 @@ namespace HexaLab {
         float crack_size;
         float rounding_radius;
 
-        size_t filter_level = 0;
+        size_t regularize_str = 0;
 
         bool do_show_visible_wireframe_singularity = true;
 
@@ -126,7 +126,7 @@ namespace HexaLab {
         void set_crack_size ( float size );
         void set_rounding_radius ( float rad );
 
-        void set_filter_level ( size_t level );
+        void set_regularize_str ( size_t level );
 
         void show_visible_wireframe_singularity ( bool show );
 
@@ -165,6 +165,7 @@ namespace HexaLab {
         void prepare_cracked_geometry();
         void prepare_smooth_geometry();
 
+        void erode_dilate(int str);
         void erode();
         void dilate();
 

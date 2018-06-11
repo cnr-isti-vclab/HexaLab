@@ -1792,7 +1792,7 @@ Object.assign(HexaLab.App.prototype, {
 
     set_erode_dilate_level: function (value) {
         this.erode_dilate_level = value
-        this.backend.set_filter_level(value)
+        this.backend.set_regularize_str(value)
         HexaLab.UI.on_set_erode_dilate(value)
         this.queue_buffers_update()
     },
@@ -1814,10 +1814,11 @@ Object.assign(HexaLab.App.prototype, {
     },
 	
 
+	// reset settings: FIRST loaded mesh only
 	set_default_rendering_settings: function(){
 		this.set_settings({
 			//app:        this.default_app_settings,
-            camera:     this.default_camera_settings,
+            //camera:     this.default_camera_settings,
             rendering:  this.default_rendering_settings,
             materials:  this.default_material_settings
         })
@@ -1839,16 +1840,14 @@ Object.assign(HexaLab.App.prototype, {
         HexaLab.UI.on_import_mesh(path)
 		
 		
-        // reset settings
-		
+        // reset settings: every loaded mesh
         this.set_settings({
             app:        this.default_app_settings,
-            //camera:     this.default_camera_settings,
+            camera:     this.default_camera_settings,
             //rendering:  this.default_rendering_settings,
             //materials:  this.default_material_settings
         })
 		
-
         // notify filters
         for (var k in this.filters) {
             this.filters[k].on_mesh_change(this.mesh)

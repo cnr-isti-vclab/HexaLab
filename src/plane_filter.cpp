@@ -62,7 +62,7 @@ namespace HexaLab {
         return offset01;
     }
     float PlaneFilter::get_plane_world_offset() {
-        return -offset;
+        return -offset + ((mesh)?normal.dot(mesh->aabb.center()):0.0f);
     }
 
     void PlaneFilter::update_min_max_offset(){
