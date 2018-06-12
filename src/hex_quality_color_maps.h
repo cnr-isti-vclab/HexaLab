@@ -23,7 +23,7 @@ namespace HexaLab
 enum class QualityMeasureEnum
 {         // QUALITY METRIC NAME    | RANGE       | ACCEPTABLE RANGE
           // --------------------------------------------------------
-    DIA,  // Diagonal               | [0,inf)     | [0.65,1]
+    DIA,  // Diagonal               | [0,  1]     | [0.65,1]
     DIM,  // Dimension              | [0,inf)     |
     DIS,  // Distortion             | (-inf,inf)  | [0.5,1]
     ER,   // Edge Ratio             | [1,inf)     |
@@ -53,7 +53,7 @@ static float normalize_quality_measure(QualityMeasureEnum metric,
 {
     switch(metric)
     {
-        case QualityMeasureEnum::DIA : return q/q_max;
+        case QualityMeasureEnum::DIA : return q;
         case QualityMeasureEnum::DIM : return q/q_max;
         case QualityMeasureEnum::DIS : return (q-q_min)/(q_max-q_min);
         case QualityMeasureEnum::ER  : return (q_max-q)/(q_max-1.f);
@@ -85,7 +85,7 @@ static float denormalize_quality_measure(QualityMeasureEnum metric,
 {
     switch(metric)
     {
-        case QualityMeasureEnum::DIA : return q*q_max;
+        case QualityMeasureEnum::DIA : return q;
         case QualityMeasureEnum::DIM : return q*q_max;
         case QualityMeasureEnum::DIS : return q_min+q*(q_max-q_min);
         case QualityMeasureEnum::ER  : return 1.f+(1.f-q)*(q_max-1.f);
