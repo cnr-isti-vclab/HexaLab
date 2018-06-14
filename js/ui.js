@@ -232,15 +232,24 @@ HexaLab.UI.settings.color.source.on("change", function () {
         }
     }
 })
-
 HexaLab.UI.settings.color.default.outside.spectrum({
-    cancelText: ''
+    cancelText: 'reset',
+    showInput: true,
+    cancel: function () {
+        HexaLab.UI.settings.color.default.outside.spectrum("set", "#ffffff");
+        HexaLab.app.set_visible_surface_default_outside_color($(this).spectrum('get').toHexString())
+    }
 }).on('change.spectrum', function (color) {
     HexaLab.app.set_visible_surface_default_outside_color($(this).spectrum('get').toHexString())
 })
 
 HexaLab.UI.settings.color.default.inside.spectrum({
-    cancelText: ''
+    cancelText: 'reset',
+    showInput: true,
+    cancel: function () {
+        HexaLab.UI.settings.color.default.inside.spectrum("set", "#ffff00");
+        HexaLab.app.set_visible_surface_default_inside_color($(this).spectrum('get').toHexString())
+    },
 }).on('change.spectrum', function (color) {
     HexaLab.app.set_visible_surface_default_inside_color($(this).spectrum('get').toHexString())
 })
