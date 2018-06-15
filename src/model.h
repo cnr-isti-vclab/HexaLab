@@ -27,5 +27,16 @@ namespace HexaLab {
             wireframe_vert_color.clear();
             wireframe_vert_alpha.clear();
         }
+
+        void add_surf_vert(Vector3f pos, Vector3f col){
+            surface_vert_pos.push_back(pos);
+            surface_vert_color.push_back(col);
+        }
+        void add_wire_vert(Vector3f pos, Vector3f col){
+            wireframe_vert_pos.push_back(pos);
+            wireframe_vert_color.push_back(col);
+        }
+
+
     };
 }
