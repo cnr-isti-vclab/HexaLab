@@ -33,16 +33,20 @@ Vector3f mesh_stats_center ( MeshStats& stats )    { return stats.aabb.center();
 // ColorMap
 Vector3f map_value_to_color ( App& app, float value ) { return app.get_color_map().get ( value ); }
 
-// Quality measure
+// Quality measure standard ranges. 
+// The denormalized values of 0 and 1 are the expected range that we show on our histogram. 
+
+float denormalize_quality(App& app, float normalized_q)
+{
+    QualityMeasureEnum measureId = app.get_quality_measure();
+    MeshStats& curStats = *app.get_mesh_stats();
+    return denormalize_quality_measure ( measureId, normalized_q, curStats.quality_min, curStats.quality_max );
+}
 float get_lower_quality_range_bound ( App& app ) {
-    QualityMeasureEnum m = app.get_quality_measure();
-    MeshStats& s = *app.get_mesh_stats();
-    return denormalize_quality_measure ( m, 0, s.quality_min, s.quality_max );
+    return denormalize_quality(app, 0);
 }
 float get_upper_quality_range_bound ( App& app ) {
-    QualityMeasureEnum m = app.get_quality_measure();
-    MeshStats& s = *app.get_mesh_stats();
-    return denormalize_quality_measure ( m, 1, s.quality_min, s.quality_max );
+    return denormalize_quality(app, 1);
 }
 
 // Vector3f
@@ -96,6 +100,7 @@ EMSCRIPTEN_BINDINGS ( HexaLab ) {
     .function ( "map_value_to_color",                 &map_value_to_color )
     .function ( "get_lower_quality_range_bound",      &get_lower_quality_range_bound )
     .function ( "get_upper_quality_range_bound",      &get_upper_quality_range_bound )
+    .function ( "denormalize_quality",                &denormalize_quality )
     ;
     enum_<ColorMap::Palette> ( "ColorMap" )
     .value ( "Parula",                    ColorMap::Palette::Parula )

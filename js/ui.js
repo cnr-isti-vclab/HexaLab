@@ -913,14 +913,6 @@ HexaLab.UI.quality_plot = function(container, axis) {
             cmax:   bins - 1,
             color:  bins_colors,
             colorscale: colorscale,
-            // colorbar: {
-            //     thickness: 15,
-            //     showticklabels: false,
-            //     // xanchor: "right",
-            //     // x: -1.3,
-            //     len: 1,
-            //     //lenmode: "pixels",
-            // }
         },
     }]
     plot_data[0][axis] = data
@@ -935,7 +927,6 @@ HexaLab.UI.quality_plot = function(container, axis) {
         plot_bgcolor:  'rgba(255, 255, 255, 0.2)',
         autosize:       true,
         font: {
-//                family: 'sans-serif',
                 size: 12,
         },
         margin: {
@@ -952,7 +943,7 @@ HexaLab.UI.quality_plot = function(container, axis) {
         type:       'linear',
         ticks:      'outside',
         tick0:      0,
-        dtick:      (range_max - range_min) / 8, //0.25,
+        dtick:      (range_max - range_min) / 10, //0.25,
         ticklen:    2,
         tickwidth:  2,
         tickcolor:  '#444444'
