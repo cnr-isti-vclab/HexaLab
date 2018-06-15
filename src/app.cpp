@@ -188,7 +188,7 @@ namespace HexaLab {
     // PRIVATE
 
     void App::compute_hexa_quality() {
-        quality_measure_fun* fun = get_quality_measure_fun ( this->quality_measure );
+        quality_measure_fun* qualityFunctor = get_quality_measure_fun ( this->quality_measure );
         void* arg = nullptr;
 
         switch ( this->quality_measure ) {
@@ -202,8 +202,8 @@ namespace HexaLab {
                 break;
         }
 
-        float min = std::numeric_limits<float>::max();
-        float max = -std::numeric_limits<float>::max();
+        float minQ =  std::numeric_limits<float>::max();
+        float maxQ = -std::numeric_limits<float>::max();
         float sum = 0;
         float sum2 = 0;
         mesh->hexa_quality.resize ( mesh->hexas.size() );
@@ -228,44 +228,31 @@ namespace HexaLab {
                 nav = nav.rotate_on_face();
             } while ( nav.vert() != b );
 
-            float q = fun ( v[0], v[1], v[2], v[3], v[4], v[5], v[6], v[7], arg );
+            float q = qualityFunctor ( v[0], v[1], v[2], v[3], v[4], v[5], v[6], v[7], arg );
             mesh->hexa_quality[i] = q;
-
-            if ( min > q ) {
-                min = q;
-            }
-
-            if ( max < q ) {
-                max = q;
-            }
-
+            minQ = min(q,minQ);
+            maxQ = max(q,maxQ);
             sum += q;
             sum2 += q * q;
         }
 
-        this->mesh_stats.quality_min = min;
-        this->mesh_stats.quality_max = max;
+        this->mesh_stats.quality_min = minQ;
+        this->mesh_stats.quality_max = maxQ;
         this->mesh_stats.quality_avg = sum / mesh->hexas.size();
         this->mesh_stats.quality_var = sum2 / mesh->hexas.size() - this->mesh_stats.quality_avg * this->mesh_stats.quality_avg;
-        min = std::numeric_limits<float>::max();
-        max = -std::numeric_limits<float>::max();
+        minQ = std::numeric_limits<float>::max();
+        maxQ = -std::numeric_limits<float>::max();
 
         for ( size_t i = 0; i < mesh->hexas.size(); ++i ) {
             float q = normalize_quality_measure ( this->quality_measure, mesh->hexa_quality[i], this->mesh_stats.quality_min, this->mesh_stats.quality_max );
-
-            if ( min > q ) {
-                min = q;
-            }
-
-            if ( max < q ) {
-                max = q;
-            }
-
+            minQ = min(q,minQ);
+            maxQ = max(q,maxQ);
             mesh->normalized_hexa_quality[i] = q;
         }
 
-        this->mesh_stats.normalized_quality_min = min;
-        this->mesh_stats.normalized_quality_max = max;
+        this->mesh_stats.normalized_quality_min = minQ;
+        this->mesh_stats.normalized_quality_max = maxQ;
+        HL_LOG ( "[QUALITY] %f %f - norm %f %f.\n", mesh_stats.quality_min,mesh_stats.quality_max,mesh_stats.normalized_quality_min,mesh_stats.normalized_quality_max );
     }
 
     void App::build_singularity_models() {

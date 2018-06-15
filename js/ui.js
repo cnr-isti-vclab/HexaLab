@@ -232,15 +232,24 @@ HexaLab.UI.settings.color.source.on("change", function () {
         }
     }
 })
-
 HexaLab.UI.settings.color.default.outside.spectrum({
-    cancelText: ''
+    cancelText: 'reset',
+    showInput: true,
+    cancel: function () {
+        HexaLab.UI.settings.color.default.outside.spectrum("set", "#ffffff");
+        HexaLab.app.set_visible_surface_default_outside_color($(this).spectrum('get').toHexString())
+    }
 }).on('change.spectrum', function (color) {
     HexaLab.app.set_visible_surface_default_outside_color($(this).spectrum('get').toHexString())
 })
 
 HexaLab.UI.settings.color.default.inside.spectrum({
-    cancelText: ''
+    cancelText: 'reset',
+    showInput: true,
+    cancel: function () {
+        HexaLab.UI.settings.color.default.inside.spectrum("set", "#ffff00");
+        HexaLab.app.set_visible_surface_default_inside_color($(this).spectrum('get').toHexString())
+    },
 }).on('change.spectrum', function (color) {
     HexaLab.app.set_visible_surface_default_inside_color($(this).spectrum('get').toHexString())
 })
@@ -904,14 +913,6 @@ HexaLab.UI.quality_plot = function(container, axis) {
             cmax:   bins - 1,
             color:  bins_colors,
             colorscale: colorscale,
-            // colorbar: {
-            //     thickness: 15,
-            //     showticklabels: false,
-            //     // xanchor: "right",
-            //     // x: -1.3,
-            //     len: 1,
-            //     //lenmode: "pixels",
-            // }
         },
     }]
     plot_data[0][axis] = data
@@ -926,7 +927,6 @@ HexaLab.UI.quality_plot = function(container, axis) {
         plot_bgcolor:  'rgba(255, 255, 255, 0.2)',
         autosize:       true,
         font: {
-//                family: 'sans-serif',
                 size: 12,
         },
         margin: {
@@ -943,7 +943,7 @@ HexaLab.UI.quality_plot = function(container, axis) {
         type:       'linear',
         ticks:      'outside',
         tick0:      0,
-        dtick:      (range_max - range_min) / 8, //0.25,
+        dtick:      (range_max - range_min) / 10, //0.25,
         ticklen:    2,
         tickwidth:  2,
         tickcolor:  '#444444'
