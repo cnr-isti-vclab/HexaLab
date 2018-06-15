@@ -323,72 +323,85 @@ namespace HexaLab {
                 continue;
             }
 
-            // choose color
-            Vector3f color;
-            Vector3f color2;
+            Vector3f colWI; // wireframe Interior
+            Vector3f colWE; // wireframe Exterior
+            Vector3f colSI; // surface Interior
+            Vector3f colSE; // surface Exterior
 
             switch ( face_count ) {
                 case  3:
-                    color = Vector3f ( 1, 0, 0 );
+                    colWI = Vector3f( 0.8f, 0.30f, 0.30f );
+                    colWE = Vector3f( 1.0f, 0.80f, 0.80f );
+                    colSI = colWI * 0.4f;
+                    colSE = colWI;
                     break;
 
                 case  5:
-                    color = Vector3f ( 0, 1, 0 );
+                    colWI = Vector3f( 0.1f, 0.70f , 0.1f );
+                    colWE = Vector3f( 0.5f, 0.90f , 0.5f );
+                    colSI = colWI * 0.3f;
+                    colSE = colWI;
                     break;
 
                 default:
-                    color = Vector3f ( 0, 0, 1 );
+                    colWI  = Vector3f( 0.2f, 0.2f, 1 );
+                    colWE = Vector3f( 0.6f, 0.6f, 1 );
+                    colSI = colWI * 0.3f;
+                    colSE = colWI;
+                    break;
             }
 
-            // add singularity line edge and color
-            for ( int j = 0; j < 2; ++j ) {
-                line_singularity_model.wireframe_vert_pos.push_back ( mesh->verts[nav.dart().vert].position );
-                spined_singularity_model.wireframe_vert_pos.push_back ( mesh->verts[nav.dart().vert].position );
-                full_singularity_model.wireframe_vert_pos.push_back ( mesh->verts[nav.dart().vert].position );
-                nav = nav.flip_vert();
-            }
+            Vector3f black = Vector3f(0,0,0);
+            Vector3f white = Vector3f(1,1,1);
 
-            const float color_k = 0.3;
-            line_singularity_model.wireframe_vert_color.push_back ( color );
-            line_singularity_model.wireframe_vert_color.push_back ( color );
-            spined_singularity_model.wireframe_vert_color.push_back ( color );
-            spined_singularity_model.wireframe_vert_color.push_back ( color );
-            full_singularity_model.wireframe_vert_color.push_back ( color * color_k );
-            full_singularity_model.wireframe_vert_color.push_back ( color * color_k );
+            Vector3f v0, v1;
+
+            v0 = mesh->verts[nav.dart().vert].position;
+            v1 = mesh->verts[nav.flip_vert().dart().vert].position;
+
+
             // add adjacent faces/edges
             Face& begin = nav.face();
 
-            do {                                          // foreach face adjacent to the singularity edge
-                for ( int k = 0; k < 2; ++k ) {           // for both triangles making up the face
-                    for ( int j = 0; j < 2; ++j ) {       // 2 + 1 triangle vertices add
-                        spined_singularity_model.surface_vert_pos.push_back ( mesh->verts[nav.dart().vert].position );
-                        spined_singularity_model.surface_vert_color.push_back ( color );
-                        full_singularity_model.surface_vert_pos.push_back ( mesh->verts[nav.dart().vert].position );
-                        full_singularity_model.surface_vert_color.push_back ( color );
+            do {
+                Vector3f v2, v3;
+                v2 = mesh->verts[nav.rotate_on_face().flip_vert().dart().vert].position;
+                v3 = mesh->verts[nav.flip_vert().rotate_on_face().flip_vert().dart().vert].position;
+                v2 = v2*0.45 + v1 *0.55;
+                v3 = v3*0.45 + v0 *0.55;
 
-                        for ( int n = 0; n < 2; ++n ) {   // 2 verts that make the edge
-                            if ( j == 0 && k == 1 ) {
-                                full_singularity_model.wireframe_vert_pos.push_back ( mesh->verts[nav.dart().vert].position );
-                                full_singularity_model.wireframe_vert_color.push_back ( color * color_k );
-                            } else {
-                                spined_singularity_model.wireframe_vert_pos.push_back ( mesh->verts[nav.dart().vert].position );
-                                spined_singularity_model.wireframe_vert_color.push_back ( color );
-                            }
+                spined_singularity_model.add_wire_vert( v0, colWI );
+                spined_singularity_model.add_wire_vert( v3, colWE );
 
-                            nav = nav.flip_vert();
-                        }
+                spined_singularity_model.add_wire_vert( v1, colWI );
+                spined_singularity_model.add_wire_vert( v2, colWE );
 
-                        nav = nav.rotate_on_face();
-                    }
+                full_singularity_model.add_wire_vert( v0, black );
+                full_singularity_model.add_wire_vert( v3, colSE );
 
-                    spined_singularity_model.surface_vert_pos.push_back ( mesh->verts[nav.dart().vert].position );
-                    spined_singularity_model.surface_vert_color.push_back ( color );
-                    full_singularity_model.surface_vert_pos.push_back ( mesh->verts[nav.dart().vert].position );
-                    full_singularity_model.surface_vert_color.push_back ( color );
-                }
+                full_singularity_model.add_wire_vert( v1, black );
+                full_singularity_model.add_wire_vert( v2, colSE );
+
+                // add two tris
+                full_singularity_model.add_surf_vert( v0,colSI );
+                full_singularity_model.add_surf_vert( v1,colSI );
+                full_singularity_model.add_surf_vert( v2,colSE );
+                full_singularity_model.add_surf_vert( v2,colSE );
+                full_singularity_model.add_surf_vert( v3,colSE );
+                full_singularity_model.add_surf_vert( v0,colSI );
 
                 nav = nav.rotate_on_edge();
             } while ( nav.face() != begin );
+
+            line_singularity_model.add_wire_vert( v0 , colWI);
+            spined_singularity_model.add_wire_vert( v0 , colWI);
+            full_singularity_model.add_wire_vert( v0 , black);
+
+            line_singularity_model.add_wire_vert( v1 , colWI);
+            spined_singularity_model.add_wire_vert( v1 , colWI);
+            full_singularity_model.add_wire_vert( v1 , black);
+
+
         }
     }
 

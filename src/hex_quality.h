@@ -62,7 +62,7 @@ HL_QUALITY_MEASURE_DEF(diagonal)
       (p5 - p3).norm()
     };
 
-    return *std::max_element(diags, diags + 4) / *std::min_element(diags, diags + 4);
+    return *std::min_element(diags, diags + 4) / *std::max_element(diags, diags + 4);
 }
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
