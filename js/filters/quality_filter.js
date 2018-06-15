@@ -36,10 +36,13 @@ HexaLab.QualityFilter = function () {
         const q = parseFloat($(this).val())
         const t = (q - mesh.quality_min) / (mesh.quality_max - mesh.quality_min)
         self.set_quality_threshold_max(t)
+        //nsole.log("mesh.quality_max: "+ mesh.quality_max+" mesh.quality_min: "+mesh.quality_min )
+        //nsole.log("quality change " + q + " t " + t)
     })
     HexaLab.UI.quality_range_slider.on('slide', function (e, ui) {
         self.set_quality_threshold_min(0)
         self.set_quality_threshold_max(1 - (ui.value / 100))
+        //nsole.log("ui.value " + ui.value)
     })
     // HexaLab.UI.quality_swap_range.on('click', function () {
     //     if (self.op == 'inside') {
@@ -101,15 +104,18 @@ HexaLab.QualityFilter.prototype = Object.assign(Object.create(HexaLab.Filter.pro
         // HexaLab.UI.quality_min_number.val(min.toFixed(3))
         // HexaLab.UI.quality_range_slider.slider('option', 'values', [min * 100, this.backend.quality_threshold_max * 100])
     },
-
-    on_quality_threshold_max_set: function (t) {
+    // t is the normalized threshold always in the 0.1 range. 
+    on_quality_threshold_max_set: function (normalized_thr) {
         const mesh = HexaLab.app.backend.get_mesh()
         // const t = (q - mesh.quality_min) / (mesh.quality_max - mesh.quality_min)
-        const q = mesh.quality_min * (1 - t) + mesh.quality_max * t
+        //const q = mesh.quality_min * (1 - t) + mesh.quality_max * t        
 
-        HexaLab.UI.quality_max_number.val(q.toFixed(3))
+        const denormalized_quality = HexaLab.app.backend.denormalize_quality(normalized_thr)
+              //denormalize_quality_measure ( measureId, normalized_thr, curStats.quality_min, curStats.quality_max );
+    
+        HexaLab.UI.quality_max_number.val(denormalized_quality.toFixed(3))
         // HexaLab.UI.quality_range_slider.slider('option', 'values', [this.backend.quality_threshold_min * 100, max * 100])
-        HexaLab.UI.quality_range_slider.slider('value', (1 - t) * 100)
+        HexaLab.UI.quality_range_slider.slider('value', (1 - normalized_thr) * 100)
     },
 
     on_operator_set: function (op) {
@@ -136,12 +142,14 @@ HexaLab.QualityFilter.prototype = Object.assign(Object.create(HexaLab.Filter.pro
         this.backend.quality_threshold_min = threshold
         this.on_quality_threshold_min_set(threshold)
         HexaLab.app.queue_buffers_update()
+        //nsole.log("set_quality_threshold_min " + threshold)
     },
 
     set_quality_threshold_max: function (threshold) {
         this.backend.quality_threshold_max = threshold
         this.on_quality_threshold_max_set(threshold)
         HexaLab.app.queue_buffers_update()
+        //nsole.log("set_quality_threshold_max " + threshold)
     },
 
     set_operator: function (op) {

@@ -274,6 +274,7 @@ void Builder::build ( Mesh& mesh, const vector<Vector3f>& vertices, const vector
     add_hexas(mesh, indices , 75, 100);
 
     mesh.hexa_quality.resize ( mesh.hexas.size() );
+    HL_LOG ( "100%%\n" );
 
     auto dt = milli_from_sample ( t0 );
 

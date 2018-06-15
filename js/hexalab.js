@@ -1347,9 +1347,12 @@ Object.assign(HexaLab.App.prototype, {
     // Settings
     get_camera_settings: function () {
         if (this.mesh) {
+            let worldCameraDir = new THREE.Vector3()            
+            this.camera().getWorldDirection(worldCameraDir)
+            console.log("worldCameraDir"+worldCameraDir)
             return {
                 offset:     new THREE.Vector3().subVectors(this.controls.target, new THREE.Vector3(0, 0, 0)),
-                direction:  this.camera().getWorldDirection(),
+                direction:  worldCameraDir,
                 up:         this.camera().up.clone(),
                 distance:   this.camera().position.distanceTo(this.controls.target) / this.mesh.get_aabb_diagonal(),
             }

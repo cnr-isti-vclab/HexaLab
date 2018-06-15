@@ -26,6 +26,7 @@
         change: noop,
         show: noop,
         hide: noop,
+        cancel: noop,
 
         // Options
         color: false,
@@ -169,6 +170,7 @@
             'change': bind(opts.change, callbackContext),
             'show': bind(opts.show, callbackContext),
             'hide': bind(opts.hide, callbackContext),
+            'cancel': bind(opts.cancel, callbackContext),
             'beforeShow': bind(opts.beforeShow, callbackContext)
         };
 
@@ -334,7 +336,8 @@
             cancelButton.bind("click.spectrum", function (e) {
                 e.stopPropagation();
                 e.preventDefault();
-                revert();
+                //revert();
+                cancel();
                 hide();
             });
 
@@ -676,6 +679,10 @@
             boundElement.trigger('hide.spectrum', [ get() ]);
         }
 
+        function cancel() {
+            callbacks.cancel(get());
+        }
+
         function revert() {
             set(colorOnShow, true);
         }
@@ -954,6 +961,7 @@
         var spect = {
             show: show,
             hide: hide,
+            cancel: cancel,
             toggle: toggle,
             reflow: reflow,
             option: option,
