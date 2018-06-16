@@ -314,28 +314,32 @@ namespace HexaLab {
             Vector3f colWE; // wireframe Exterior
             Vector3f colSI; // surface Interior
             Vector3f colSE; // surface Exterior
+            Vector3f colSW; // surface Wire
 
             switch ( face_count ) {
                 case  3:
                     colWI = Vector3f( 0.8f, 0.30f, 0.30f );
                     colWE = Vector3f( 1.0f, 0.80f, 0.80f );
-                    colSI = colWI * 0.4f;
-                    colSE = colWI;
+                    colSE = Vector3f( 1.0f, 0.30f, 0.30f );
+                    colSI = colSE * 0.6f;
+                    colSW = colSI *0.75f;
                     break;
 
                 case  5:
                     colWI = Vector3f( 0.1f, 0.70f , 0.1f );
                     colWE = Vector3f( 0.5f, 0.90f , 0.5f );
-                    colSI = colWI * 0.3f;
-                    colSE = colWI;
-                    break;
+                    colSE = Vector3f( 0.3f, 1.00f , 0.3f );;
+                    colSI = colSE * 0.5f;
+                    colSW = colSI * 0.75f;
+              break;
 
                 default:
                     colWI  = Vector3f( 0.2f, 0.2f, 1 );
                     colWE = Vector3f( 0.6f, 0.6f, 1 );
-                    colSI = colWI * 0.3f;
+                    colSI = colWI * 0.5f;
                     colSE = colWI;
-                    break;
+                    colSW = colSI * 0.75f;
+              break;
             }
 
             Vector3f black = Vector3f(0,0,0);
@@ -363,10 +367,10 @@ namespace HexaLab {
                 spined_singularity_model.add_wire_vert( v1, colWI );
                 spined_singularity_model.add_wire_vert( v2, colWE );
 
-                full_singularity_model.add_wire_vert( v0, black );
+                full_singularity_model.add_wire_vert( v0, colSW );
                 full_singularity_model.add_wire_vert( v3, colSE );
 
-                full_singularity_model.add_wire_vert( v1, black );
+                full_singularity_model.add_wire_vert( v1, colSW );
                 full_singularity_model.add_wire_vert( v2, colSE );
 
                 // add two tris
