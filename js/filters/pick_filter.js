@@ -6,6 +6,7 @@
 HexaLab.UI.pick_enabled        = $('#pick_enabled')
 HexaLab.UI.pick_button         = $('#pick_button')
 HexaLab.UI.fill_button         = $('#fill_button')
+HexaLab.UI.isolate_button      = $('#isolate_button')
 HexaLab.UI.pick_clear_button   = $('#pick_clear_button')
 HexaLab.UI.pick_menu_content   = $('#pick_menu *')
 
@@ -27,6 +28,10 @@ HexaLab.PickFilter = function () {
     })
     HexaLab.UI.fill_button.click(function () {
 		self.brush = ((self.brush == 2) ? 0 : 2);
+        self.updateBrush()
+    })
+    HexaLab.UI.isolate_button.click(function () {
+		self.brush = ((self.brush == 3) ? 0 : 3);
         self.updateBrush()
     })
     HexaLab.UI.pick_clear_button.click(function () {
@@ -95,28 +100,30 @@ HexaLab.PickFilter.prototype = Object.assign(Object.create(HexaLab.Filter.protot
     },
 
 	updateBrush : function (){
+		HexaLab.UI.pick_button   .css('background',(this.brush==1)?this.activeCol:this.unactiveCol );
+		HexaLab.UI.fill_button   .css('background',(this.brush==2)?this.activeCol:this.unactiveCol );
+		HexaLab.UI.isolate_button.css('background',(this.brush==3)?this.activeCol:this.unactiveCol );
 		switch (this.brush) {
-			case 0:
-				document.removeEventListener('pointerdown', this.mousedown_listener)
-				document.removeEventListener('pointerup',   this.mouseup_listener)		
-				HexaLab.UI.pick_button.css('background', this.unactiveCol)
-				HexaLab.UI.fill_button.css('background', this.unactiveCol)
-				HexaLab.UI.canvas_container.css('cursor', "auto")
-				break;
-			case 1:
-				document.addEventListener('pointerdown', this.mousedown_listener)
-				document.addEventListener('pointerup',   this.mouseup_listener)	
-				HexaLab.UI.pick_button.css('background', this.activeCol)
-				HexaLab.UI.fill_button.css('background', this.unactiveCol)
-				HexaLab.UI.canvas_container.css('cursor', "url('img/pointer24_minus.png') 9 2,alias")
-				break;
-			case 2:
-				document.addEventListener('pointerdown', this.mousedown_listener)
-				document.addEventListener('pointerup',   this.mouseup_listener)	
-				HexaLab.UI.pick_button.css('background', this.unactiveCol)
-				HexaLab.UI.fill_button.css('background', this.activeCol)
-				HexaLab.UI.canvas_container.css('cursor', "url('img/pointer24_plus.png') 9 2,copy")
-				break;
+		case 0:
+			document.removeEventListener('pointerdown', this.mousedown_listener)
+			document.removeEventListener('pointerup',   this.mouseup_listener)		
+			HexaLab.UI.canvas_container.css('cursor', "auto")
+			break;
+		case 1:
+			document.addEventListener('pointerdown', this.mousedown_listener)
+			document.addEventListener('pointerup',   this.mouseup_listener)	
+			HexaLab.UI.canvas_container.css('cursor', "url('img/pointer24_minus.png') 9 2,alias")
+			break;
+		case 2:
+			document.addEventListener('pointerdown', this.mousedown_listener)
+			document.addEventListener('pointerup',   this.mouseup_listener)	
+			HexaLab.UI.canvas_container.css('cursor', "url('img/pointer24_plus.png') 9 2,copy")
+			break;
+		case 3:
+			document.addEventListener('pointerdown', this.mousedown_listener)
+			document.addEventListener('pointerup',   this.mouseup_listener)	
+			HexaLab.UI.canvas_container.css('cursor', "url('img/pointer24.png') 9 2,pointer")
+			break;
 		}
 	},
 	
@@ -150,6 +157,8 @@ HexaLab.PickFilter.prototype = Object.assign(Object.create(HexaLab.Filter.protot
             this.on_pick(e.clientX, e.clientY)
         } else if (this.brush == 2) {
             this.on_fill(e.clientX, e.clientY)
+        }  else if (this.brush == 3) {
+            this.on_isolate(e.clientX, e.clientY)
         }
     },
 
@@ -205,6 +214,26 @@ HexaLab.PickFilter.prototype = Object.assign(Object.create(HexaLab.Filter.protot
                 this.filled_hexas.push(i)
                 this.filled_hexas.sort()
             }
+            HexaLab.app.queue_buffers_update()
+        }
+    },
+
+    on_isolate: function (x, y) {
+        const ray = this.make_ray(x, y)
+        if (!ray) return
+        const p_origin = new Module.vec3()
+        const p_direction = new Module.vec3()
+        p_origin.set_x(ray.origin.x)
+        p_origin.set_y(ray.origin.y)
+        p_origin.set_z(ray.origin.z)
+        p_direction.set_x(ray.direction.x)
+        p_direction.set_y(ray.direction.y)
+        p_direction.set_z(ray.direction.z)
+        const i = this.backend.isolate_hexa(p_origin, p_direction)
+		console.log("ISOLATE ID: "+i)
+        if (i != -1) {
+			this.fitered_hexas = [-1]
+            this.filled_hexas = [i]
             HexaLab.app.queue_buffers_update()
         }
     },

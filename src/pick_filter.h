@@ -21,6 +21,7 @@ namespace HexaLab {
 
         Index dig_hexa(Vector3f origin, Vector3f direction);
         Index undig_hexa(Vector3f origin, Vector3f direction);
+        Index isolate_hexa(Vector3f origin, Vector3f direction);
 
         void filter(Mesh& mesh);
 
@@ -32,6 +33,7 @@ namespace HexaLab {
     private:
         void dig_hexa_id(Index idx);
         void undig_hexa_id(Index idx);
+        void isolate_hexa_id(Index idx);
 
         void raycast( Vector3f origin, Vector3f direction, Index &in , Index &out );
 
