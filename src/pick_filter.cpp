@@ -13,9 +13,12 @@ void PickFilter::filter(Mesh& mesh) {
 
     HL_ASSERT(this->mesh == &mesh);
 
-    for (int i: this->filtered_hexas) {
-        mesh.mark( mesh.hexas[i] );
+    if (filtered_hexas.size() && filtered_hexas[0]==-1) {
+        for (Index i=0; i<mesh.hexas.size(); i++) mesh.mark( mesh.hexas[i] );
+    } else {
+        for (int i: this->filtered_hexas) mesh.mark( mesh.hexas[i] );
     }
+
     for (int i: this->filled_hexas) {
         mesh.unmark( mesh.hexas[i] );
     }
@@ -84,6 +87,14 @@ Index PickFilter::undig_hexa(Vector3f origin, Vector3f direction) {
 
 }
 
+Index PickFilter::isolate_hexa(Vector3f origin, Vector3f direction) {
+    Index in, out;
+    this->raycast( origin, direction , in, out) ;
+
+    if (in>-1) isolate_hexa_id(in);
+    return in;
+}
+
 void PickFilter::add_one_to_filtered( Index idx ){
     if (!this->mesh) return;
     if (idx>=this->mesh->hexas.size()) return;
@@ -116,6 +127,13 @@ void PickFilter::undig_hexa_id(Index idx) {
     } else {
         add_one_to_filled(idx);
     }
+}
+
+void PickFilter::isolate_hexa_id(Index idx){
+    filtered_hexas.clear();
+    filled_hexas.clear();
+    filtered_hexas.push_back(-1);
+    filled_hexas.push_back(idx);
 }
 
 

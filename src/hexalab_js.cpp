@@ -199,6 +199,7 @@ EMSCRIPTEN_BINDINGS ( HexaLab ) {
                                    .function ( "clear",                  &PickFilter::clear )
 								   .function ( "dig_hexa",            	 &PickFilter::dig_hexa )
                                    .function ( "undig_hexa",             &PickFilter::undig_hexa )
+                                   .function ( "isolate_hexa",           &PickFilter::isolate_hexa )
                                    .function ( "add_one_to_filtered",    &PickFilter::add_one_to_filtered )
                                    .function ( "add_one_to_filled",      &PickFilter::add_one_to_filled )
                                    ;
