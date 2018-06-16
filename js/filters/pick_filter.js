@@ -232,7 +232,7 @@ HexaLab.PickFilter.prototype = Object.assign(Object.create(HexaLab.Filter.protot
         const i = this.backend.isolate_hexa(p_origin, p_direction)
 		console.log("ISOLATE ID: "+i)
         if (i != -1) {
-			this.fitered_hexas = [-1]
+			this.filtered_hexas = [-1]
             this.filled_hexas = [i]
             HexaLab.app.queue_buffers_update()
 			this.brush = 0
