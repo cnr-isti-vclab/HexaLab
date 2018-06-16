@@ -235,6 +235,8 @@ HexaLab.PickFilter.prototype = Object.assign(Object.create(HexaLab.Filter.protot
 			this.fitered_hexas = [-1]
             this.filled_hexas = [i]
             HexaLab.app.queue_buffers_update()
+			this.brush = 0
+			this.updateBrush()
         }
     },
 
