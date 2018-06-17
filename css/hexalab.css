@@ -188,7 +188,6 @@ label {
 
 .menu_row #mesh_info_2 {
 	display: none;
-	position: relative;
 	background-image: url("../img/bar.png");
     background-repeat: no-repeat;
     background-size: 0% 100%;
