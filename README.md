@@ -1,13 +1,22 @@
 # HexaLab
-A online hexahedral mesh viewer.
-Developed by [Matteo Bracci](https://github.com/c4stan) as part of his Bachelor Thesis in Computer Science, under the supervision of [Paolo Cignoni](http://vcg.isti.cnr.it/~cignoni) and [Nico Pietroni](http://vcg.isti.cnr.it/~pietroni) and with the help of [Marco Tarini](http://vcg.isti.cnr.it/~tarini/) e [Marco Livesu](http://pers.ge.imati.cnr.it/livesu/).
+An online hexahedral mesh viewer.
 
-Copyright 2017 
+[Matteo Bracci](https://github.com/c4stan)<sup>x</sup>, [Marco Tarini](http://vcg.isti.cnr.it/~tarini/)<sup>1,2,x</sup>, [Marco Livesu](http://pers.ge.imati.cnr.it/livesu/)<sup>3</sup>, [Nico Pietroni](http://vcg.isti.cnr.it/~pietroni)<sup>1,4</sup>, [Paolo Cignoni](http://vcg.isti.cnr.it/~cignoni)<sup>1</sup>
+
+Copyright 2018
 [Visual Computing Lab](http://vcg.isti.cnr.it)
 [ISTI](http://www.isti.cnr.it) - [CNR](http://www.cnr.it)
 
 Live view on [www.hexalab.net](http://www.hexalab.net)
 
-The system aims to offer a simple tool to view, inspect and check hexahedral models in the popular `.mesh` and `.vtk` ASCII formats directly in the browser. HexaLab offers interactive clipping planes, filtering and coloring by hex quality, histograms, singularity detections and visualization and screen space ambient occlusion for enhanced perception of shapes. 
+HexaLab is a WebGL application for real time visualization, exploration and assessment of hexahedral meshes. HexaLab can be used by simply opening www.hexalab.net. This visualization tool targets both users and scholars. Practitioners who employ hexmeshes for Finite Element Analysis, can readily check mesh quality and assess its usability for simulation. Researchers involved in mesh generation may use HexaLab to perform a detailed analysis of the mesh structure, isolating weak points and testing new solutions to improve on the state of the art and generate high quality images. To this end, we support a wide variety of visualization and volume inspection tools. The system also offers immediate access to a repository containing all the publicly available meshes produced with the most recent techniques for hex mesh generation. We believe HexaLab, providing a common tool for visualizing, assessing and distributing results, will push forward the recent strive for replicability in our scientific community. The system supports hexahedral models in the popular `.mesh` and `.vtk` ASCII formats. 
 
 HexaLab aims also to easily present the results of recent papers on hex meshing by directly including them in its own repository when provided by the authors. The datasets presented are copyrighted by the respective paper authors. Look in the [`datasets`](https://github.com/cnr-isti-vclab/HexaLab/tree/master/datasets) folder for more info.
+
+---
+
+- <sup>x</sup> Joint first authors
+- <sup>1</sup> [ISTI](http://www.isti.cnr.it) - [CNR](http://www.cnr.it)
+- <sup>2</sup> [Università degli Studi di Milano ("La Statale")](http://www.unimi.it)
+- <sup>3</sup> [IMATI](http://www.imati.cnr.it/) - [CNR](http://www.cnr.it)
+- <sup>4</sup> [University of Technology, Sidney](https://www.uts.edu.au/)

@@ -40,6 +40,22 @@ border: 0;
 height: 1px;
 }
 
+#toolbar {
+	margin: 5px;
+}
+
+#toolbar button {
+	width: 26px;
+	height: 26px;
+	padding: 2px;
+    margin: 0;
+}
+
+
+#toolbar_buttons :disabled img {
+    opacity: 0.4;
+    filter: alpha(opacity=40); /* msie */
+}
 
 .large{
 	font-size: 200%;
@@ -169,8 +185,9 @@ label {
 	display: none;
 }
 
-.menu_row #mesh_source {
+#mesh_source {
 	font-style: italic;
+	width:100%;
 	width: 80%;
 }
 
@@ -257,20 +274,6 @@ label {
 	width: 100%;
 	height: 100px;
 	margin-top: 5px;
-}
-
-/* Toolbar */
-
-#toolbar {
-	margin: 5px;
-}
-
-#toolbar button {
-	width: 23px;
-	height: 23px;
-	padding:0;
-    margin:0;
-    font-size: 110%;
 }
 
 #plane_snap_camera {
@@ -513,18 +516,24 @@ button:focus {
 }
 .minibutton{
 	width: 20px;
-	height: 100%;
+	height: 22px;
 	padding-left: 0px;
 	padding-right: 0px;
 }
+#plane_swap_sign{
+	padding-top: 3px;
+}
 #plane_snap_nx{
     color: rgb(255, 0, 0);
+	width: 30px;
 }
 #plane_snap_ny{
     color: rgb(0, 180, 0);
+	width: 30px;
 }
 #plane_snap_nz{
     color: rgb(0, 0, 255);
+	width: 30px;
 }
 select {
 	height: 26px;

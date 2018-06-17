@@ -11,7 +11,6 @@
     <link rel="stylesheet" href="css/spectrum.css">
     <link rel="stylesheet" href="css/hexalab.css">
     <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
     <script type="text/javascript" id="cookiebanner" src="js/external/cookiebanner.js"
                 data-height="20px" data-position="top" data-mask="true"
@@ -34,25 +33,25 @@
 			<h1>HexaLab</h1>
 			<div id="toolbar_buttons">
 				<button id="load_mesh" title="Open Local File...">
-					<i class="fa fa-folder-open"></i>
+				<img src="img\icon_open.png" width=20 height=20 ALT="Open"></img>
 				</button>
 				<button id="home" title="Reset Camera">
-					<i class="fa fa-home"></i>
+				<img src="img\icon_reload.png" width=20 height=20 ALT="Reset"></img>
 				</button>
 				<!-- button id="plot" title="Quality Histogram">
 					<i class="fa fa-bar-chart"></i>
 				</button -->
-				<button id="load_settings" title="Open settings">
-					<i class="fa fa-gear"></i>
+				<button id="load_settings" title="Open settings (Ctrl+V pastes them to clipboard)">
+				<img src="img\setting_load.png" width=20 height=20 ALT="Open Settings"></img>
 				</button>
-				<button id="save_settings" title="Save settings">
-					<i class="fa fa-floppy-o"></i>
+				<button id="save_settings" title="Save settings (Ctrl+C copys them to clip board)">
+				<img src="img\setting_save.png" width=20 height=20 ALT="Save Settings"></img>
 				</button>
-				<button id="snapshot" title="Snapshot">
-					<i class="fa fa-camera"></i>
+				<button id="snapshot" title="Screenshot">
+				<img src="img\icon_screenshot.png" width=20 height=20 ALT="Save Settings"></img>
 				</button>
-				<button id="github" title="GitHub">
-					<i class="fa fa-github"></i>
+				<button id="github" title="contribute on GitHub!">
+				<img src="img\github-logo.png" width=20 height=20 ALT="GitHub"></img>
 				</button>
 				<!--button id="about" title="About">
 					<i class="fa fa-question"></i>
@@ -66,7 +65,7 @@
 				<div class="menu_row">
 					<label>Source</label>
 					<div class="menu_row_input">
-						<select id="mesh_source" style="width:100%;">
+						<select id="mesh_source">
 							<option value="-2" selected="selected" style="display: none;">Select a mesh source&hellip;</option>
 							<option value="-1">Select Local File&hellip;</option>
 						</select>
@@ -120,12 +119,10 @@
 					<button id="plane_snap_nx" class="minibutton" title="Slice along the X axis">X</button><!-- 
 					--><button id="plane_snap_ny" class="minibutton"title="Slice along the Y axis">Y</button><!-- 
 					--><button id="plane_snap_nz" class="minibutton" title="Slice along the Z axis">Z</button>
-					<button id="plane_swap_sign" class="minibutton" title="Flip slicing plane">
-						<i class="fa fa-exchange"></i>
-					</button>
-					<input class="scalar_value" type="number" id="plane_nx" style="width:30px;"><!--
-					--><input class="scalar_value" type="number" id="plane_ny" style="width:30px;"><!--
-					--><input class="scalar_value" type="number" id="plane_nz" style="width:30px;">
+					<button id="plane_swap_sign" class="minibutton" title="Flip slicing plane"><img src="img\icon_flip.png" width=13 height=12 ALT="Flip"></img></button>
+					<input class="scalar_value" type="number" id="plane_nx" ><!--
+					--><input class="scalar_value" type="number" id="plane_ny"><!--
+					--><input class="scalar_value" type="number" id="plane_nz">
 			</div>
 			
 
@@ -155,7 +152,7 @@
 			
 			<hr/>
 
-			<div class="menu_row" style="text-align:right;">
+			<div class="menu_row">
 				<label>Regularize</label>
 				<div class="menu_row_input">
 				<div class="slider" id="erode_dilate_slider"></div>
@@ -200,8 +197,8 @@
 				</div>
 			</div>
 			<div class="menu_row">
+				<div class="menu_row_input">
 				<label>Silhouette</label>
-				<div class="menu_row_input" style="width100%">
 					<div class="slider" id="filtered_slider"></div>
 				</div>
 			</div>
