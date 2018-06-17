@@ -525,12 +525,15 @@ button:focus {
 }
 #plane_snap_nx{
     color: rgb(255, 0, 0);
+	width: 30px;
 }
 #plane_snap_ny{
     color: rgb(0, 180, 0);
+	width: 30px;
 }
 #plane_snap_nz{
     color: rgb(0, 0, 255);
+	width: 30px;
 }
 select {
 	height: 26px;

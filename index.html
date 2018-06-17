@@ -120,9 +120,9 @@
 					--><button id="plane_snap_ny" class="minibutton"title="Slice along the Y axis">Y</button><!-- 
 					--><button id="plane_snap_nz" class="minibutton" title="Slice along the Z axis">Z</button>
 					<button id="plane_swap_sign" class="minibutton" title="Flip slicing plane"><img src="img\icon_flip.png" width=13 height=12 ALT="Flip"></img></button>
-					<input class="scalar_value" type="number" id="plane_nx" style="width:30px;"><!--
-					--><input class="scalar_value" type="number" id="plane_ny" style="width:30px;"><!--
-					--><input class="scalar_value" type="number" id="plane_nz" style="width:30px;">
+					<input class="scalar_value" type="number" id="plane_nx" ><!--
+					--><input class="scalar_value" type="number" id="plane_ny"><!--
+					--><input class="scalar_value" type="number" id="plane_nz">
 			</div>
 			
 
@@ -152,7 +152,7 @@
 			
 			<hr/>
 
-			<div class="menu_row" style="text-align:right;">
+			<div class="menu_row">
 				<label>Regularize</label>
 				<div class="menu_row_input">
 				<div class="slider" id="erode_dilate_slider"></div>
@@ -197,8 +197,8 @@
 				</div>
 			</div>
 			<div class="menu_row">
+				<div class="menu_row_input">
 				<label>Silhouette</label>
-				<div class="menu_row_input" style="width100%">
 					<div class="slider" id="filtered_slider"></div>
 				</div>
 			</div>
