@@ -185,8 +185,9 @@ label {
 	display: none;
 }
 
-.menu_row #mesh_source {
+#mesh_source {
 	font-style: italic;
+	width:100%;
 	width: 80%;
 }
 
@@ -515,9 +516,12 @@ button:focus {
 }
 .minibutton{
 	width: 20px;
-	height: 100%;
+	height: 22px;
 	padding-left: 0px;
 	padding-right: 0px;
+}
+#plane_swap_sign{
+	padding-top: 3px;
 }
 #plane_snap_nx{
     color: rgb(255, 0, 0);
