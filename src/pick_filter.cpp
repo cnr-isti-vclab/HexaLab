@@ -96,8 +96,10 @@ Index PickFilter::isolate_hexa(Vector3f origin, Vector3f direction) {
 }
 
 void PickFilter::add_one_to_filtered( Index idx ){
+    HL_LOG("ADDING %d TTO FIL\n",idx);
     if (!this->mesh) return;
-    if (idx>=this->mesh->hexas.size()) return;
+    if (idx>=(int)this->mesh->hexas.size()) return;
+    HL_LOG("FIL [%d] = %d\n",this->filtered_hexas.size(),idx);
     this->filtered_hexas.push_back(idx);
     std::sort(this->filtered_hexas.begin(), this->filtered_hexas.end());
 }
