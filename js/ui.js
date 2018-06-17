@@ -71,9 +71,7 @@ HexaLab.FS = {
         }
 		this.reader.onprogress = function(event) {
 			if (event.lengthComputable) {
-				var ratio = (100 * event.loaded / event.total).toFixed(0);
-				HexaLab.UI.mesh.infobox_2.element.css('background-size', ratio + '% 100%');
-				console.log("Reader progress "+ratio)
+				HexaLab.UI.set_progress_percent(100 * event.loaded / event.total);
 			}
 		}		
         this.reader.readAsArrayBuffer(file, "UTF-8")
@@ -264,10 +262,10 @@ HexaLab.UI.settings.color.quality_map.on('change', function () {
 
 HexaLab.UI.settings.wireframe.slider({
     min: 0,
-    max: 10,
+    max: 20,
     step: 1
 }).addClass('mini-slider').on('slide', function (e, ui) {
-    HexaLab.app.set_visible_wireframe_opacity(ui.value / 10)
+    HexaLab.app.set_visible_wireframe_opacity(ui.value / 20)
 })
 
 HexaLab.UI.settings.crack_size.slider({
@@ -300,7 +298,7 @@ HexaLab.UI.settings.erode_dilate.slider({
 HexaLab.UI.settings.singularity_mode.slider({
     value: 1,
     min: 0,
-    max: 4,
+    max: 6,
     step: 1
 }).addClass('mini-slider').on('slide', function (e, ui) {
     HexaLab.app.set_singularity_mode(ui.value)
@@ -421,12 +419,37 @@ HexaLab.UI.show_mesh_name = function (name) {
     HexaLab.UI.mesh.infobox_1.buttons.container.hide()
 }
 
+var force_redraw = function(el){
+	/* nothing of this works, at least from emscripten code and chrome  :( */
+	var trick;
+	trick = el.offsetHeight;
+	el.hide(0, function(){el.show(0);} );
+	//el.hide();
+	//el.show();
+}
+
+HexaLab.UI.set_progress_phasename = function( str ){
+	HexaLab.UI.mesh.infobox_2.text.text(str).show();
+	force_redraw( HexaLab.UI.mesh.infobox_2.text );
+	force_redraw( HexaLab.UI.mesh.infobox_2.element );
+	//console.log("PHASE NAME: '"+str+"'")
+}
+
+HexaLab.UI.set_progress_percent = function( num ){
+	return; // doesn't work well enought yet
+	num = num.toFixed(0);
+	HexaLab.UI.mesh.infobox_2.element.css('background-size', "" + num + '% 100%');
+	force_redraw( HexaLab.UI.mesh.infobox_2.text );
+	force_redraw( HexaLab.UI.mesh.infobox_2.element );
+	//console.log("PROGRESS "+num+"%")
+}
+
 HexaLab.UI.import_local_mesh = function (file) {
     HexaLab.UI.view_source =  HexaLab.UI.mesh.source[0].selectedIndex
     HexaLab.UI.view_mesh = null
     HexaLab.UI.clear_mesh_info()
     HexaLab.UI.mesh.infobox_2.element.show().css('display', 'flex');
-    HexaLab.UI.mesh.infobox_2.text.text('Loading...').show()
+	HexaLab.UI.set_progress_phasename('Loading...');
     HexaLab.FS.read_data_file(file, HexaLab.UI.import_mesh)
 }
 
@@ -442,9 +465,7 @@ HexaLab.UI.import_remote_mesh = function (source, name) {
     }
 	
 	request.onprogress = function (event) {
-		var ratio = (100 * event.loaded / event.total).toFixed(0);
-		HexaLab.UI.mesh.infobox_2.element.css('background-size', ratio + '% 100%');
-		console.log("PROGRESS "+ratio)
+		HexaLab.UI.set_progress_percent( 100 * event.loaded / event.total );
 	};
 	
 	//request.addEventListener("progress", request.onprogress, false);
@@ -455,7 +476,7 @@ HexaLab.UI.import_remote_mesh = function (source, name) {
     })
     HexaLab.UI.view_source =  HexaLab.UI.mesh.source[0].selectedIndex
     HexaLab.UI.view_mesh = HexaLab.UI.mesh.dataset_content[0].selectedIndex
-    HexaLab.UI.mesh.infobox_2.text.text('Loading...').show()
+    HexaLab.UI.set_progress_phasename('Loading...'); // or, "Downloading...?"
     HexaLab.UI.mesh.dataset_content.css('font-style', 'normal').show()
     HexaLab.UI.mesh.infobox_2.element.show().css('display', 'flex');
 	

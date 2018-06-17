@@ -13,7 +13,7 @@ h1,h2,h3{
 
 h1{
 	font-size: 26px;
-	margin: 0 0 0 5px;
+	margin: 0 0 -4px 5px;
 	display: inline;
 }
 
@@ -188,7 +188,6 @@ label {
 
 .menu_row #mesh_info_2 {
 	display: none;
-	position: relative;
 	background-image: url("../img/bar.png");
     background-repeat: no-repeat;
     background-size: 0% 100%;
@@ -504,7 +503,7 @@ button:focus {
 
 .pickbutton{
 	width: 16.5%;
-	margin-right: 25px;
+	margin-right: 5px;
 	height: 24px;
 	margin-top: 4px;
 }
