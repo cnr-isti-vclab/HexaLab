@@ -1,5 +1,5 @@
 # HexaLab
-A online hexahedral mesh viewer.
+An online hexahedral mesh viewer.
 
 Copyright 2018
 [Visual Computing Lab](http://vcg.isti.cnr.it)
