@@ -28,8 +28,8 @@
 </head>
 
 <body>
-	<div id="GUI">
-		<div id="toolbar"  >
+	<aside id="GUI">
+		<header id="toolbar"  >
 			<h1>HexaLab</h1>
 			<div id="toolbar_buttons">
 				<button id="load_mesh" title="Open Local File...">
@@ -41,11 +41,11 @@
 				<!-- button id="plot" title="Quality Histogram">
 					<i class="fa fa-bar-chart"></i>
 				</button -->
-				<button id="load_settings" title="Open settings (Ctrl+V pastes them to clipboard)">
-				<img src="img\setting_load.png" width=20 height=20 ALT="Open Settings"></img>
-				</button>
-				<button id="save_settings" title="Save settings (Ctrl+C copys them to clip board)">
+				<button id="save_settings" title="Save settings (Ctrl+C: copy them to clipboard)">
 				<img src="img\setting_save.png" width=20 height=20 ALT="Save Settings"></img>
+				</button>
+				<button id="load_settings" title="Load settings (Ctrl+V: paste them to clipboard)">
+				<img src="img\setting_load.png" width=20 height=20 ALT="Open Settings"></img>
 				</button>
 				<button id="snapshot" title="Screenshot">
 				<img src="img\icon_screenshot.png" width=20 height=20 ALT="Save Settings"></img>
@@ -57,9 +57,9 @@
 					<i class="fa fa-question"></i>
 				</button-->
 			</div>
-		</div>
+		</header>
 
-		<div id="model_menu" class="menubox">
+		<section id="model_menu" class="menubox">
 			<h2>Mesh</h2>
 			<div class="menu_content">
 				<div class="menu_row">
@@ -95,9 +95,9 @@
 					</div>
 				</div>
 			</div>
-		</div>
+		</section>
 
-		<div id="plane_menu" class="menubox">
+		<section id="plane_menu" class="menubox">
 			<h2>Filters</h2>
 
 			<div class="menu_row">
@@ -159,8 +159,8 @@
 				</div>
 			</div>
 
-		</div>
-		<div id="rendering_menu" class="menubox">
+		</section>
+		<section id="rendering_menu" class="menubox">
 			<h2>Rendering</h2>
 			<div class="menu_row">
 				<label>Color</label>
@@ -168,7 +168,7 @@
 					<option value="Default" selected="selected">Default</option>
 					<option value="ColorMap">By Quality</option>
 				</select>
-				<div class="menu_row_input" id="visible_color_wrapper">
+				<div class="menu_row_input" id="visible_color_wrapper" style="display:none;">
 					<input type="text" id="visible_outside_color">
 					<input type="text" id="visible_inside_color">
 				</div>
@@ -185,15 +185,15 @@
 				<label>Separation</label>
 				
 				<select id="geometry_mode" class="miniselect">
-                    <option value="Lines">Flat Lines</option>
-					<option value="DynamicLines" selected="selected">Lines</option>
-					<option value="Cracked">Fissures</option>
 					<option value="Smooth">Roundings</option>
+					<option value="Cracked">Fissures</option>
+					<option value="DynamicLines" selected="selected">Lines</option>
+                    <option value="Lines">Flat Lines</option>
 				</select>
 				<div class="menu_row_input">	
                     <div class="slider" id="wireframe_slider" ></div>
 					<div class="slider" id="crack_size" style="display:none;"></div>
-					<div class="slider" id="rounding_radius" style="display:none;"> </div>					
+					<div class="slider" id="rounding_radius" style="display:none;"> </div>
 				</div>
 			</div>
 			<div class="menu_row">
@@ -217,16 +217,16 @@
 					<option value="none">none</option>
 				</select>
 			</div>
-		</div>
+		</section>
 
-		<div id="log_menu" class="menubox" style="display: none;">
+		<section id="log_menu" class="menubox" style="display: none;">
 			<h2>Log</h2>
 			<div class="menu_content">
 				<textarea id="logger" readonly></textarea>
 			</div>
-		</div>
-	</div>
-	<div id="frame">
+		</section>
+	</aside>
+	<main id="frame">
 		<div id="drag_drop_overlay" class="first_drag_drop">
 			<div>
 				<span id="drag_drop_header">Drop a mesh file in the box below<br/> or use the menu to the side</span>
@@ -249,7 +249,7 @@
 			</div>
 			<div style="clear:both"></div>
 		</div>
-	</div>
+	</main>
 
     <!-- Emscripten module -->
     <script src="js/module.js"></script>
