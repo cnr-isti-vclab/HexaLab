@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="css/spectrum.css">
     <link rel="stylesheet" href="css/hexalab.css">
     <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
 
     <script type="text/javascript" id="cookiebanner" src="js/external/cookiebanner.js"
                 data-height="20px" data-position="top" data-mask="true"
@@ -41,16 +42,16 @@
 				<!-- button id="plot" title="Quality Histogram">
 					<i class="fa fa-bar-chart"></i>
 				</button -->
-				<button id="save_settings" title="Save settings (Ctrl+C: copy them to clipboard)">
+				<button id="save_settings" title="Save settings (Ctrl+C to copy to clipboard)">
 				<img src="img\setting_save.png" width=20 height=20 ALT="Save Settings"></img>
 				</button>
-				<button id="load_settings" title="Load settings (Ctrl+V: paste them to clipboard)">
+				<button id="load_settings" title="Open settings (Ctrl+V to paste from clipboard)">
 				<img src="img\setting_load.png" width=20 height=20 ALT="Open Settings"></img>
 				</button>
 				<button id="snapshot" title="Screenshot">
-				<img src="img\icon_screenshot.png" width=20 height=20 ALT="Save Settings"></img>
+				<img src="img\icon_screenshot.png" width=20 height=20 ALT="save snapshot"></img>
 				</button>
-				<button id="github" title="contribute on GitHub!">
+				<button id="github" title="Contribute on GitHub!">
 				<img src="img\github-logo.png" width=20 height=20 ALT="GitHub"></img>
 				</button>
 				<!--button id="about" title="About">
@@ -229,12 +230,12 @@
 	<main id="frame">
 		<div id="drag_drop_overlay" class="first_drag_drop">
 			<div>
-				<span id="drag_drop_header">Drop a mesh file in the box below<br/> or use the menu to the side</span>
+				<span id="drag_drop_header">Drop a file in the box below<br/> or use the menu to the side.</span>
 			</div>
 			<div id="mesh_drag_drop_area">
 				<div id="mesh_drag_drop_quad" class="drag_drop_quad_off">
 					<div id="mesh_drag_drop_content" class="drag_drop_content">
-						<div class="large">Mesh</div>
+						<div>Mesh</div>
 						<i class="fa fa-upload" aria-hidden="true"></i>
 					</div>
 				</div>
@@ -242,7 +243,7 @@
 			<div id="settings_drag_drop_area">
 				<div id="settings_drag_drop_quad" class="drag_drop_quad_off">
 					<div id="settings_drag_drop_content" class="drag_drop_content">
-						<div class="large">Settings</div>
+						<div>Settings<br/>Snapshot</div>
 						<i class="fa fa-upload" aria-hidden="true"></i>
 					</div>
 				</div>
