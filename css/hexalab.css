@@ -351,7 +351,7 @@ input {
 	width: 100%;
 	text-align: center;
 	font-size: 2vw;
-	top: 200px;
+	top: 20%;
 	opacity: 0.5
 }
 
@@ -370,6 +370,7 @@ input {
 	top: 0; left: 0; bottom: 0; right: 0;
 	width: 15%;
 	height: 20%;
+	font-size: 2.5vw;
 }
 
 #settings_drag_drop_quad {
@@ -379,6 +380,7 @@ input {
 	top: 0; left: 50%; bottom: 0; right: 0;
 	width: 15%;
 	height: 20%;
+	font-size: 2vw;
 }
 
 .drag_drop_quad_off {
