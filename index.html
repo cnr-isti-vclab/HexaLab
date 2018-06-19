@@ -11,11 +11,12 @@
     <link rel="stylesheet" href="css/spectrum.css">
     <link rel="stylesheet" href="css/hexalab.css">
     <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
 
     <script type="text/javascript" id="cookiebanner" src="js/external/cookiebanner.js"
                 data-height="20px" data-position="top" data-mask="true"
-                data-message="We use technical, statistical and third parties-cookies to improve HexaLab experience. <br>We DO NOT use profiling and advertising cookies.<br>We reserve the right of tracking your usage of HexaLab for collecting statistical information in aggregate anonymous way. <br><b>Your 3D models will always stay only on your client and NO 3D data is ever transmitted</b>.<br><br>Click anywhere to acknowledge this info and start using HexaLab. " ></script>
+                data-message="<center><br><br><br>We use technical, statistical and third parties-cookies to improve HexaLab experience. <br>We DO NOT use profiling and advertising cookies.<br>We reserve the right of tracking your usage of HexaLab for collecting statistical information in aggregate anonymous way. <br><br><b>Any 3D model loaded inside HexaLab will always stay only on your client and NO 3D data is never ever transmitted</b>.<br><br>If you use HexaLab, please cite it:<br><br><br> <b> HexaLab.net: an online viewer for hexahedral meshes<br>
+Matteo Bracci, Marco Tarini, Nico Pietroni, Marco Livesu, Paolo Cignoni<br><a href='https://arxiv.org/abs/1806.06639'>arXiv:1806.06639 [cs.GR]</a></b><br><br><br>Click anywhere to acknowledge this info and start using HexaLab.</center><br><br><br>" ></script>
     <script src="js/external/jquery-3.3.1.min.js"></script>
     <script src="js/external/jquery-ui.min.js"></script>
     <script src="js/external/jquery.dragbetter.js"></script>
@@ -29,44 +30,44 @@
 </head>
 
 <body>
-	<div id="GUI">
-		<div id="toolbar"  >
+	<aside id="GUI">
+		<header id="toolbar"  >
 			<h1>HexaLab</h1>
 			<div id="toolbar_buttons">
-				<button id="load_mesh" title="Open Local File...">
-					<i class="fa fa-folder-open"></i>
+				<button id="load_mesh" title="Open Local Mesh File...">
+				<img src="img\icon_open.png" width=20 height=20 ALT="Open"></img>
 				</button>
 				<button id="home" title="Reset Camera">
-					<i class="fa fa-home"></i>
+				<img src="img\icon_reload.png" width=20 height=20 ALT="Reset"></img>
 				</button>
 				<!-- button id="plot" title="Quality Histogram">
 					<i class="fa fa-bar-chart"></i>
 				</button -->
-				<button id="load_settings" title="Open settings">
-					<i class="fa fa-gear"></i>
+				<button id="save_settings" title="Save settings (Ctrl+C to copy to clipboard)">
+				<img src="img\setting_save.png" width=20 height=20 ALT="Save Settings"></img>
 				</button>
-				<button id="save_settings" title="Save settings">
-					<i class="fa fa-floppy-o"></i>
+				<button id="load_settings" title="Open settings (Ctrl+V to paste from clipboard)">
+				<img src="img\setting_load.png" width=20 height=20 ALT="Open Settings"></img>
 				</button>
-				<button id="snapshot" title="Snapshot">
-					<i class="fa fa-camera"></i>
+				<button id="snapshot" title="Take a Screenshot">
+				<img src="img\icon_screenshot.png" width=20 height=20 ALT="Save snapshot"></img>
 				</button>
-				<button id="github" title="GitHub">
-					<i class="fa fa-github"></i>
+				<button id="github" title="Info &amp Sources (GitHub page)">
+				<img src="img\github-logo.png" width=20 height=20 ALT="GitHub"></img>
 				</button>
 				<!--button id="about" title="About">
 					<i class="fa fa-question"></i>
 				</button-->
 			</div>
-		</div>
+		</header>
 
-		<div id="model_menu" class="menubox">
+		<section id="model_menu" class="menubox">
 			<h2>Mesh</h2>
 			<div class="menu_content">
 				<div class="menu_row">
 					<label>Source</label>
 					<div class="menu_row_input">
-						<select id="mesh_source" style="width:100%;">
+						<select id="mesh_source">
 							<option value="-2" selected="selected" style="display: none;">Select a mesh source&hellip;</option>
 							<option value="-1">Select Local File&hellip;</option>
 						</select>
@@ -96,9 +97,9 @@
 					</div>
 				</div>
 			</div>
-		</div>
+		</section>
 
-		<div id="plane_menu" class="menubox">
+		<section id="plane_menu" class="menubox">
 			<h2>Filters</h2>
 
 			<div class="menu_row">
@@ -120,12 +121,10 @@
 					<button id="plane_snap_nx" class="minibutton" title="Slice along the X axis">X</button><!-- 
 					--><button id="plane_snap_ny" class="minibutton"title="Slice along the Y axis">Y</button><!-- 
 					--><button id="plane_snap_nz" class="minibutton" title="Slice along the Z axis">Z</button>
-					<button id="plane_swap_sign" class="minibutton" title="Flip slicing plane">
-						<i class="fa fa-exchange"></i>
-					</button>
-					<input class="scalar_value" type="number" id="plane_nx" style="width:30px;"><!--
-					--><input class="scalar_value" type="number" id="plane_ny" style="width:30px;"><!--
-					--><input class="scalar_value" type="number" id="plane_nz" style="width:30px;">
+					<button id="plane_swap_sign" class="minibutton" title="Flip slicing plane"><img src="img\icon_flip.png" width=13 height=12 ALT="Flip"></img></button>
+					<input class="scalar_value" type="number" id="plane_nx" ><!--
+					--><input class="scalar_value" type="number" id="plane_ny"><!--
+					--><input class="scalar_value" type="number" id="plane_nz">
 			</div>
 			
 
@@ -155,15 +154,15 @@
 			
 			<hr/>
 
-			<div class="menu_row" style="text-align:right;">
+			<div class="menu_row">
 				<label>Regularize</label>
 				<div class="menu_row_input">
 				<div class="slider" id="erode_dilate_slider"></div>
 				</div>
 			</div>
 
-		</div>
-		<div id="rendering_menu" class="menubox">
+		</section>
+		<section id="rendering_menu" class="menubox">
 			<h2>Rendering</h2>
 			<div class="menu_row">
 				<label>Color</label>
@@ -171,7 +170,7 @@
 					<option value="Default" selected="selected">Default</option>
 					<option value="ColorMap">By Quality</option>
 				</select>
-				<div class="menu_row_input" id="visible_color_wrapper">
+				<div class="menu_row_input" id="visible_color_wrapper" style="display:none;">
 					<input type="text" id="visible_outside_color">
 					<input type="text" id="visible_inside_color">
 				</div>
@@ -188,20 +187,20 @@
 				<label>Separation</label>
 				
 				<select id="geometry_mode" class="miniselect">
-                    <option value="Lines">Flat Lines</option>
-					<option value="DynamicLines" selected="selected">Lines</option>
-					<option value="Cracked">Fissures</option>
 					<option value="Smooth">Roundings</option>
+					<option value="Cracked">Fissures</option>
+					<option value="DynamicLines" selected="selected">Lines</option>
+                    <option value="Lines">Flat Lines</option>
 				</select>
 				<div class="menu_row_input">	
                     <div class="slider" id="wireframe_slider" ></div>
 					<div class="slider" id="crack_size" style="display:none;"></div>
-					<div class="slider" id="rounding_radius" style="display:none;"> </div>					
+					<div class="slider" id="rounding_radius" style="display:none;"> </div>
 				</div>
 			</div>
 			<div class="menu_row">
+				<div class="menu_row_input">
 				<label>Silhouette</label>
-				<div class="menu_row_input" style="width100%">
 					<div class="slider" id="filtered_slider"></div>
 				</div>
 			</div>
@@ -220,24 +219,24 @@
 					<option value="none">none</option>
 				</select>
 			</div>
-		</div>
+		</section>
 
-		<div id="log_menu" class="menubox" style="display: none;">
+		<section id="log_menu" class="menubox" style="display: none;">
 			<h2>Log</h2>
 			<div class="menu_content">
 				<textarea id="logger" readonly></textarea>
 			</div>
-		</div>
-	</div>
-	<div id="frame">
+		</section>
+	</aside>
+	<main id="frame">
 		<div id="drag_drop_overlay" class="first_drag_drop">
 			<div>
-				<span id="drag_drop_header">Drop a mesh file in the box below<br/> or use the menu to the side</span>
+				<span id="drag_drop_header">Drop a file in the box below<br/> or use the menu to the side.</span>
 			</div>
 			<div id="mesh_drag_drop_area">
 				<div id="mesh_drag_drop_quad" class="drag_drop_quad_off">
 					<div id="mesh_drag_drop_content" class="drag_drop_content">
-						<div class="large">Mesh</div>
+						<div>Mesh</div>
 						<i class="fa fa-upload" aria-hidden="true"></i>
 					</div>
 				</div>
@@ -245,14 +244,14 @@
 			<div id="settings_drag_drop_area">
 				<div id="settings_drag_drop_quad" class="drag_drop_quad_off">
 					<div id="settings_drag_drop_content" class="drag_drop_content">
-						<div class="large">Settings</div>
+						<div>Settings<br/>Snapshot</div>
 						<i class="fa fa-upload" aria-hidden="true"></i>
 					</div>
 				</div>
 			</div>
 			<div style="clear:both"></div>
 		</div>
-	</div>
+	</main>
 
     <!-- Emscripten module -->
     <script src="js/module.js"></script>

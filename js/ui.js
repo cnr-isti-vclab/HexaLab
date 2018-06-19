@@ -215,20 +215,7 @@ document.body.addEventListener('copy', function (e) {
 // UI -> App events
 HexaLab.UI.settings.color.source.on("change", function () {
     var value = this.options[this.selectedIndex].value
-    if (value == "Default") {
-        HexaLab.app.show_visible_quality(false)
-        if (HexaLab.UI.plot_overlay) {
-            HexaLab.UI.plot_overlay.remove()
-            delete HexaLab.UI.plot_overlay
-        }
-    } else if (value == "ColorMap") {
-        HexaLab.app.show_visible_quality(true)
-        if (HexaLab.UI.plot_overlay) {
-            HexaLab.UI.quality_plot_update()
-        } else {
-            HexaLab.UI.create_plot_panel()
-        }
-    }
+    HexaLab.app.show_visible_quality(value == "ColorMap")
 })
 HexaLab.UI.settings.color.default.outside.spectrum({
     cancelText: 'reset',
@@ -330,10 +317,19 @@ HexaLab.UI.on_show_visible_quality = function (do_show) {
         $("#surface_colormap_input").css('display', 'flex');
         HexaLab.UI.settings.color.default.wrapper.hide();
         HexaLab.UI.settings.color.source.val("ColorMap")
+        if (HexaLab.UI.plot_overlay) {
+            HexaLab.UI.quality_plot_update()
+        } else {
+            HexaLab.UI.create_plot_panel()
+        }
     } else {
         $("#surface_colormap_input").hide();
         HexaLab.UI.settings.color.default.wrapper.css('display', 'flex');
         HexaLab.UI.settings.color.source.val("Default")
+        if (HexaLab.UI.plot_overlay) {
+            HexaLab.UI.plot_overlay.remove()
+            delete HexaLab.UI.plot_overlay
+        }
     }
 }
 
@@ -376,7 +372,7 @@ HexaLab.UI.on_set_erode_dilate = function (value) {
 // Mesh/settings file bind and dispatch
 // --------------------------------------------------------------------------------
 HexaLab.UI.on_first_mesh = function () {
-    HexaLab.UI.dragdrop.header.html('Drag&Drop mesh or settings files<br/>in the boxes below.')
+    HexaLab.UI.dragdrop.header.html('Drop the file in one of the boxes below.')
     HexaLab.UI.dragdrop.overlay.removeClass('first_drag_drop').hide();
     HexaLab.UI.dragdrop.mesh.css('margin-left', '20%');
     HexaLab.UI.dragdrop.settings.show();
@@ -1030,7 +1026,7 @@ HexaLab.UI.quality_plot = function(container, axis) {
                             bar_img.onload = function() {
                                 if (axis == 'x') {
                                     ctx.drawImage(plot_img, 0, 0)
-                                    ctx.drawImage(bar_img, 60, canvas_height - (16 + 5), canvas_width - (60 + 30), 16)
+                                    ctx.drawImage(bar_img, 60*magFac, canvas_height - (16 + 5)*magFac, canvas_width - (60 + 30)*magFac, 16*magFac)
                                 } else {
                                     ctx.drawImage(bar_img, 5*magFac, 30*magFac, 16*magFac, canvas_height - (30 + 50)*magFac)
                                     ctx.drawImage(plot_img, (5 + 16)*magFac, 0)
@@ -1189,7 +1185,7 @@ HexaLab.UI.topbar.save_settings.on('click', function () {
 }).prop("disabled", true);
 
 HexaLab.UI.topbar.github.on('click', function () {
-    window.open('https://github.com/cnr-isti-vclab/HexaLab#hexalab', '_blank');
+    window.open('https://github.com/cnr-isti-vclab/HexaLab#hexalabnet-an-online-viewer-for-hexahedral-meshes', '_blank');
 })
 
 HexaLab.UI.overlay = function (x, y, width, height, content) {
