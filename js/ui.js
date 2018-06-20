@@ -1193,7 +1193,7 @@ HexaLab.UI.topbar.save_settings.on('click', function () {
 }).prop("disabled", true);
 
 HexaLab.UI.topbar.github.on('click', function () {
-    window.open('https://github.com/cnr-isti-vclab/HexaLab#hexalab', '_blank');
+    window.open('https://github.com/cnr-isti-vclab/HexaLab#hexalabnet-an-online-viewer-for-hexahedral-meshes', '_blank');
 })
 
 HexaLab.UI.overlay = function (x, y, width, height, content) {
