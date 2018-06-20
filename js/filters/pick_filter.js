@@ -281,8 +281,8 @@ var _nf = HexaLab.filters.length;
 HexaLab.filters.push(new HexaLab.PickFilter())
 
 $(document).keydown(function (e) {
-    if (e.keyCode == 16) { HexaLab.filters[_nf].setBrush( 2 ); } // shift  16
-    if (e.keyCode == 17) { HexaLab.filters[_nf].setBrush( 1 ); } // ctrl 17
+    if ((e.keyCode == 16) && (!HexaLab.UI.fill_button.prop('disabled'))) { HexaLab.filters[_nf].setBrush( 2 ); } // shift  16
+    if ((e.keyCode == 17) && (!HexaLab.UI.pick_button.prop('disabled'))) { HexaLab.filters[_nf].setBrush( 1 ); } // ctrl 17
 	//if (e.keyCode == 18)  // alt  18
 });
 
@@ -291,3 +291,5 @@ $(document).keyup(function (e) {
     if (e.keyCode == 17) HexaLab.filters[_nf].setBrush( 0 ); // ctrl  17
 	//if (e.keyCode == 18) toggle_pick() // alt  18
 });
+
+window.onfocus = function () { HexaLab.filters[_nf].setBrush( 0 ); }; // recover from ctrl-tab
