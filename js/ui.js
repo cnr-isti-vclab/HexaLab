@@ -203,7 +203,7 @@ document.body.addEventListener('paste', function (e) {
     clipboardData = e.clipboardData || window.clipboardData
     pastedData = clipboardData.getData('Text')
 
-    HexaLab.app.set_settings(JSON.parse(pastedData))
+    HexaLab.UI.maybe_set_settings(JSON.parse(pastedData))
 })
 document.body.addEventListener('copy', function (e) { 
     e.clipboardData.setData("text/plain;charset=utf-8", JSON.stringify(HexaLab.app.get_settings(), null, 4))
@@ -596,9 +596,15 @@ HexaLab.UI.on_import_mesh_fail = function (name) {
     HexaLab.UI.view_mesh = null
 }
 
+HexaLab.UI.maybe_set_settings = function ( s ){
+	if (HexaLab.UI.topbar.load_settings.prop("disabled")==false) {
+		HexaLab.app.set_settings(s);
+	}
+}
+
 HexaLab.UI.import_settings_from_txt = function (file) {
     HexaLab.FS.read_json_file(file, function (file, json) {
-        HexaLab.app.set_settings(json)
+        HexaLab.UI.maybe_set_settings(json)
     })
 }
 
@@ -613,7 +619,7 @@ HexaLab.UI.import_settings_from_png = function (file) {
 					alert("No HexaLab settings found in \n\"" + file.name +"\"" );
 				}
 				const json = JSON.parse(d.value)
-				HexaLab.app.set_settings(json)
+				HexaLab.UI.maybe_set_settings(json)
 			}	
 		)
 	}
