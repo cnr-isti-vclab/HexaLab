@@ -1,12 +1,36 @@
 {
     "sources": [{
+      "paper": {
+          "title": "All-Hex Mesh Generation via Volumetric PolyCube Deformation",
+          "venue": "Computer Graphics Forum Volume 30 Issue 5",
+          "authors": "James Gregson, Alla Sheffer, Eugene Zhang",
+          "year": "2011",
+          "PDF": "https://www.cs.ubc.ca/labs/imager/tr/2011/HexMeshingPolycubeDeformation/HexMeshing_files/HexMeshSGP2011.pdf",
+          "web": "https://www.cs.ubc.ca/labs/imager/tr/2011/HexMeshingPolycubeDeformation/",
+          "DOI": "https://doi.org/10.1111/j.1467-8659.2011.02015.x"
+      },
+      "path": "2011 - All-Hex Mesh Generation via Volumetric PolyCube Deformation",
+      "label": "2011 - All-Hex Mesh Generation via Volumetric PolyCube Deformation",
+      "data": [
+          "anc101_a1.mesh",
+          "asm001.mesh",
+          "BU_remesh_hex.mesh",
+          "bumpy_torus.mesh",
+          "bunny_hex.mesh",
+          "casting.mesh",
+          "fertility_refine.mesh",
+          "Kiss_hex_coarse.mesh",
+          "kiss_hex.mesh",
+          "Stab3_refine3.mesh"
+      ]
+  }, {
         "paper": {
             "title": "All-hex Meshing Using Singularity-restricted Field",
             "venue": "ACM Transactions on Graphics Volume 31 Issue 6",
             "authors": "Yufei Li, Yang Liu, Weiwei Xu, Wenping Wang, Baining Guo",
             "year": "2012",
             "PDF": "http://i.cs.hku.hk/~yfli/All-hex/allhex.pdf",
-            "web": "http://www.cs.ubc.ca/labs/imager/tr/2015/untangler/",
+            "web": "",
             "DOI": "10.1145/2366145.2366196"
         },
         "path": "2012 - All-Hex Meshing using Singularity-Restricted Field",
@@ -226,6 +250,7 @@
             "venue": "Computer Graphics Forum, 35 (7),",
             "authors": "Marco Livesu, Alessandro Muntoni, Enrico Puppo, Riccardo Scateni",
             "year": "2016",
+            "PDF": "http://pers.ge.imati.cnr.it/livesu/papers/LMPS16/LMPS16.pdf",
             "web": "http://pers.ge.imati.cnr.it/livesu/papers/ULPTS15/ULPTS15.html",
             "DOI": "10.1111/cgf.13021"
         },
