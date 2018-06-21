@@ -2,6 +2,7 @@
 This folder contains a collection of hexahedral datasets that have been presented in papers and made available by the respective authors. All the datasets are copyrighted by their authors. For any use different from displaying them inside HexaLab you should contact the authors.
 Current datasets came from the following papers:
 
+- [All-Hex Mesh Generation via Volumetric PolyCube Deformation (2011)](https://doi.org/10.1111/j.1467-8659.2011.02015.x)
 - [All-Hex Meshing Using Singularity-Restricted Field (2012)](http://doi.org/10.1145/2366145.2366196)
 - [PolyCut: Monotone Graph-Cuts for PolyCube Base-Complex Construction (2013)](https://doi.org/10.1145/2508363.2508388)
 - [ℓ1-Based Construction of Polycube Maps from Complex Shapes (2014)](https://doi.org/10.1145/2602141)
