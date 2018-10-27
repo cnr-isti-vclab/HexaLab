@@ -369,5 +369,41 @@
             "femur_shell1.mesh",
             "femur_shell2.mesh"
         ]
+    }, {
+        "paper": {
+            "title": "Fuzzy clustering based pseudo-swept volume decomposition for hexahedral meshing",
+            "venue": "Elsevier Computer-Aided Design Volume 96",
+            "authors": "Haiyan Wu, Shuming Gao, Rui Wang, Jinming Chen",
+            "year": "2018",
+            "PDF": "https://www.sciencedirect.com/science/article/pii/S0010448517301616?via%3Dihub",
+            "web": "",
+            "DOI": "10.1016/j.cad.2017.10.001"
+        },
+        "path": "2018 - Fuzzy clustering based pseudo-swept volume decomposition for hexahedral meshing",
+        "label": "2018 - Fuzzy clustering based pseudo-swept volume decomposition for hexahedral meshing",
+        "data": [
+            "Example_1.mesh",
+            "Example_2.mesh",
+            "Example_3.mesh",
+            "Example_5.mesh"
+        ]
+    }, {
+        "paper": {
+            "title": "A global approach to multi-axis swept mesh generation",
+            "venue": "Elsevier Procedia Engineering Volume 203",
+            "authors": "Haiyan Wu, Shuming Gao, Rui Wang, Mao Ding",
+            "year": "2017",
+            "PDF": "https://www.sciencedirect.com/science/article/pii/S1877705817343801?via%3Dihub",
+            "web": "",
+            "DOI": "10.1016/j.proeng.2017.09.817"
+        },
+        "path": "2017 - A global approach to multi-axis swept mesh generation",
+        "label": "2017 - A global approach to multi-axis swept mesh generation",
+        "data": [
+            "Example_1.mesh",
+            "Example_2.mesh",
+            "Example_3.mesh",
+            "Example_4.mesh"
+        ]
     }]
 }

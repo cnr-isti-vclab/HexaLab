@@ -14,6 +14,8 @@ Current datasets came from the following papers:
 - [Structured Volume Decomposition via Generalized Sweeping (2016)](http://doi.org/10.1109/TVCG.2015.2473835)
 - [Hexahedral Mesh Generation via Constrained Quadrilateralization (2017)](http://doi.org/10.1371/journal.pone.0177603)
 - [Explicit Cylindrical Maps for General Tubular Shapes (2017)](https://doi.org/10.1016/j.cad.2017.05.002)
+- [A global approach to multi-axis swept mesh generation (2017)](https://doi.org/10.1016/j.proeng.2017.09.817)
+- [Fuzzy clustering based pseudo-swept volume decomposition for hexahedral meshing (2018)](https://doi.org/10.1016/j.cad.2017.10.001)
 ## How to contribute
 We really welcome datasets from existing papers, and we are collecting the ones we find available on the web. If you have some models related to a published paper you have two ways to contribute:
 1) raise an [issue](https://github.com/cnr-isti-vclab/HexaLab/issues) asking for a dataset/paper to be included providing doi of the paper and the link to the dataset;
