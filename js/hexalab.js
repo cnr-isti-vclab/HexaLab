@@ -694,7 +694,7 @@ Object.assign(HexaLab.Viewer.prototype, {
 
         // ao cache
         const settings = HexaLab.app.get_settings()
-        const relevant_settings = {
+        var relevant_settings = {
             app:        settings.app,
             filters:    settings.filters,
             // materials:  settings.materials,
@@ -703,6 +703,10 @@ Object.assign(HexaLab.Viewer.prototype, {
         // cut off a few irrelevant settings from the app
         relevant_settings.app.singularity_mode = null
         relevant_settings.app.apply_color_map = null
+	
+		// Lines (aka "FlatLines") and (ugh) "DynamicLines" (aka "Lines") have same AO
+		if (relevant_settings.app.geometry_mode == "Lines") relevant_settings.app.geometry_mode = "DynamicLines"
+
         // Dirty hack for not resetting on quality change if quality filtering is disabled
         if (!relevant_settings.filters["Quality"].enabled || 
             (relevant_settings.filters["Quality"].min == 0 && relevant_settings.filters["Quality"].max == 1)) {

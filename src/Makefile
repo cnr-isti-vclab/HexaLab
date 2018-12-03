@@ -14,7 +14,7 @@ CC=emcc
 # -s TOTAL_MEMORY=1073741824 
 
 
-CFLAGS= -I ./ -I ./eigen -s TOTAL_MEMORY=1073741824 --memory-init-file 0 -std=c++11 -s PRECISE_F32=1 -s DEMANGLE_SUPPORT=1 --bind  -s LINKABLE=1 -Os -s ASSERTIONS=1
+CFLAGS= -I ./ -I ./eigen -s WASM=0 -s TOTAL_MEMORY=1073741824 --memory-init-file 0 -std=c++11 -s PRECISE_F32=1 -s DEMANGLE_SUPPORT=1 --bind  -s LINKABLE=1 -Os -s ASSERTIONS=1
 
 OBJ = hexalab_js.bc \
       app.bc \
