@@ -485,7 +485,6 @@ HexaLab.UI.mesh.quality_type.element = $('<select id="quality_type" title="Choos
         <option value="Scaled Jacobian">Scaled Jacobian</option>\
         <option value="Edge Ratio">Edge Ratio</option>\
         <option value="Diagonal">Diagonal</option>\
-        <option value="Dimension">Dimension</option>\
         <option value="Distortion">Distortion</option>\
         <option value="Jacobian">Jacobian</option>\
         <option value="Max Edge Ratio">Max Edge Ratio</option>\
