@@ -223,10 +223,10 @@ EMSCRIPTEN_BINDINGS ( HexaLab ) {
                        .function ( "data",                   &buffer_data<float> )
                        .function ( "size",                   &buffer_size<float> )
                        ;
-    class_<vector<Index>> ( "buffer1i" )
+    class_<vector<HexaLab::Index>> ( "buffer1i" )
                        .constructor<>()
-                       .function ( "data",                   &buffer_data<Index> )
-                       .function ( "size",                   &buffer_size<Index> )
+                       .function ( "data",                   &buffer_data<HexaLab::Index> )
+                       .function ( "size",                   &buffer_size<HexaLab::Index> )
                        ;
 }
 #endif

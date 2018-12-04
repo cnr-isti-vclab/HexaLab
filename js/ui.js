@@ -485,7 +485,6 @@ HexaLab.UI.mesh.quality_type.element = $('<select id="quality_type" title="Choos
         <option value="Scaled Jacobian">Scaled Jacobian</option>\
         <option value="Edge Ratio">Edge Ratio</option>\
         <option value="Diagonal">Diagonal</option>\
-        <option value="Dimension">Dimension</option>\
         <option value="Distortion">Distortion</option>\
         <option value="Jacobian">Jacobian</option>\
         <option value="Max Edge Ratio">Max Edge Ratio</option>\
@@ -890,30 +889,38 @@ HexaLab.UI.quality_plot = function(container, axis) {
 
     let range_min = HexaLab.app.backend.get_lower_quality_range_bound()
     let range_max = HexaLab.app.backend.get_upper_quality_range_bound()
-    let reversed = false
-
-    let min = range_min < range_max ? range_min : range_max 
-    let max = range_min < range_max ? range_max : range_min 
+    let datamin=10000000
+    let datamax=-1000000
+    let sorted_range_min = Math.min(range_min,range_max) 
+    let sorted_range_max = Math.max(range_min,range_max) 
 
     let quality = HexaLab.app.backend.get_hexa_quality()
     if (quality != null) {
         let t = new Float32Array(Module.HEAPU8.buffer, quality.data(), quality.size())
         for (let i = 0; i < quality.size() ; i++) {
-            data[i] = t[i]
+            datamin=Math.min(t[i],datamin)
+            datamax=Math.max(t[i],datamax)
+            data[i] = Math.min(Math.max(range_min, t[i]), range_max) 
         }
     }
-
+    
+    
     // problem: plotly does not map the color to the range, it maps the color to the bins.
     //          the first color is given to the first non-empty bin, the others follow.
     //          following non-empty bins are correctly counted and their color is skipped.
     // solution: skip the first n color ticks, where n is the number of empty bins at the start.
     let mesh = HexaLab.app.backend.get_mesh()
-    let bins = 100
-    let bin_size = (max - min) / bins
-    let base = Math.trunc((mesh.quality_min - min) / bin_size)
-    for (let i = base; i < bins ; i++) {
-        bins_colors[i - base] = 100 - i
+    let bin_num = 100
+    let bin_width = (sorted_range_max - sorted_range_min) / bin_num
+    let emptybinNum = Math.trunc((mesh.quality_min - sorted_range_min) / bin_width)
+    if(emptybinNum<0) emptybinNum=0
+    for (let i = emptybinNum; i < bin_num ; i++) {
+        bins_colors[i - emptybinNum] = 100 - i
     }
+
+    console.log("range minmax",range_min,range_max)
+    console.log("data minmax",datamin,datamax)
+    console.log("quality minmax",mesh.quality_min,mesh.quality_max)
 
     for (let i = 0; i <= 10; ++i) {
         let v = i / 10
@@ -935,16 +942,16 @@ HexaLab.UI.quality_plot = function(container, axis) {
         marker: {
             // showscale: true,
             cmin:   0,
-            cmax:   bins - 1,
+            cmax:   bin_num - 1,
             color:  bins_colors,
             colorscale: colorscale,
         },
     }]
     plot_data[0][axis] = data
     plot_data[0][axis.concat('bins')] = {
-        start:  min,
-        end:    max,
-        size:   bin_size
+        start:  sorted_range_min,
+        end:    sorted_range_max,
+        size:   bin_width
     }
 
     var plot_layout = {

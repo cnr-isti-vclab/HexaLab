@@ -1,5 +1,6 @@
 {
-    "sources": [{
+    "sources": [
+        {
       "paper": {
           "title": "All-Hex Mesh Generation via Volumetric PolyCube Deformation",
           "venue": "Computer Graphics Forum Volume 30 Issue 5",
@@ -23,7 +24,7 @@
           "kiss_hex.mesh",
           "Stab3_refine3.mesh"
       ]
-  }, {
+    }, {
         "paper": {
             "title": "All-hex Meshing Using Singularity-restricted Field",
             "venue": "ACM Transactions on Graphics Volume 31 Issue 6",
@@ -330,20 +331,21 @@
         ]
     }, {
         "paper": {
-            "title": "Hexahedral Mesh Generation via Constrained Quadrilateralization",
-            "venue": " PLoS ONE, Volume 12 Issue 5",
-            "authors": "Feifei Shang, Yangke Gan, and Yufei Guo",
+            "title": "A global approach to multi-axis swept mesh generation",
+            "venue": "Elsevier Procedia Engineering Volume 203",
+            "authors": "Haiyan Wu, Shuming Gao, Rui Wang, Mao Ding",
             "year": "2017",
-            "PDF": "http://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0177603&type=printable",
-            "web": "http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0177603",
-            "DOI": "10.1371/journal.pone.0177603"
+            "PDF": "https://www.sciencedirect.com/science/article/pii/S1877705817343801?via%3Dihub",
+            "web": "",
+            "DOI": "10.1016/j.proeng.2017.09.817"
         },
-        "path": "2017 - Hexahedral Mesh Generation via Constrained Quadrilateralization",
-        "label": "2017 - Hexahedral Mesh Generation via Constrained Quadrilateralization",
+        "path": "2017 - A global approach to multi-axis swept mesh generation",
+        "label": "2017 - A global approach to multi-axis swept mesh generation",
         "data": [
-            "cube - pone.0177603.s001.mesh",
-            "fandisk - pone.0177603.s002.mesh",
-            "joint - pone.0177603.s003.mesh"
+            "Example_1.mesh",
+            "Example_2.mesh",
+            "Example_3.mesh",
+            "Example_4.mesh"
         ]
     }, {
         "paper": {
@@ -371,6 +373,23 @@
         ]
     }, {
         "paper": {
+            "title": "Hexahedral Mesh Generation via Constrained Quadrilateralization",
+            "venue": " PLoS ONE, Volume 12 Issue 5",
+            "authors": "Feifei Shang, Yangke Gan, and Yufei Guo",
+            "year": "2017",
+            "PDF": "http://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0177603&type=printable",
+            "web": "http://journals.plos.org/plosone/article?id=10.1371/journal.pone.0177603",
+            "DOI": "10.1371/journal.pone.0177603"
+        },
+        "path": "2017 - Hexahedral Mesh Generation via Constrained Quadrilateralization",
+        "label": "2017 - Hexahedral Mesh Generation via Constrained Quadrilateralization",
+        "data": [
+            "cube - pone.0177603.s001.mesh",
+            "fandisk - pone.0177603.s002.mesh",
+            "joint - pone.0177603.s003.mesh"
+        ]
+    }, {
+        "paper": {
             "title": "Fuzzy clustering based pseudo-swept volume decomposition for hexahedral meshing",
             "venue": "Elsevier Computer-Aided Design Volume 96",
             "authors": "Haiyan Wu, Shuming Gao, Rui Wang, Jinming Chen",
@@ -387,23 +406,6 @@
             "Example_3.mesh",
             "Example_5.mesh"
         ]
-    }, {
-        "paper": {
-            "title": "A global approach to multi-axis swept mesh generation",
-            "venue": "Elsevier Procedia Engineering Volume 203",
-            "authors": "Haiyan Wu, Shuming Gao, Rui Wang, Mao Ding",
-            "year": "2017",
-            "PDF": "https://www.sciencedirect.com/science/article/pii/S1877705817343801?via%3Dihub",
-            "web": "",
-            "DOI": "10.1016/j.proeng.2017.09.817"
-        },
-        "path": "2017 - A global approach to multi-axis swept mesh generation",
-        "label": "2017 - A global approach to multi-axis swept mesh generation",
-        "data": [
-            "Example_1.mesh",
-            "Example_2.mesh",
-            "Example_3.mesh",
-            "Example_4.mesh"
-        ]
-    }]
+    }
+               ]
 }
