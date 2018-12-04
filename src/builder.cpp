@@ -260,7 +260,7 @@ void Builder::build ( Mesh& mesh, const vector<Vector3f>& vertices, const vector
     add_vertices( mesh, vertices );
 
     HL_SET_PROGRESS_PHASE("Building structures");
-    HL_LOG ( "[Builder] Building %d darts...\n", indices.size() / 8 * 48 );
+    HL_LOG ( "[Builder] Building %lu darts...\n", indices.size() / 8 * 48 );
 
     auto t0 = sample_time();
 
@@ -423,7 +423,7 @@ bool Builder::validate ( Mesh& mesh ) {
     }
 
     auto dt = milli_from_sample ( t0 );
-    HL_LOG ( "[Validator] Surface darts: %d/%d\n", surface_darts, mesh.darts.size() );
+    HL_LOG ( "[Validator] Surface darts: %d/%lu\n", surface_darts, mesh.darts.size() );
     HL_LOG ( "[Validator] Validation took %dms.\n", dt );
     return true;
 }

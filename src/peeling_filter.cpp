@@ -27,7 +27,7 @@ namespace HexaLab {
         this->max_depth         = HL_PEELING_FILTER_DEFAULT_MESH_MAX;
 
         // Compute depth
-        printf("[Peeling Filter] %i %i on_mesh_set\n", mesh.hexas.size(), this->HexaDepth.size());
+        printf("[Peeling Filter] %lu %lu on_mesh_set\n", mesh.hexas.size(), this->HexaDepth.size());
         const size_t hn = mesh.hexas.size();
         this->HexaDepth.clear();
         this->HexaDepth.resize(hn,-1);
