@@ -63,7 +63,7 @@ static float normalize_quality_measure(QualityMeasureEnum metric,
         case QualityMeasureEnum::MEAF: return (q_max-q)/(q_max-1.f);
         case QualityMeasureEnum::ODD : return (q_max-q)/q_max;
         case QualityMeasureEnum::RSS : return q;
-        case QualityMeasureEnum::SJ  : return (q>1.00001) ? 0.f : std::max(q,0.f);
+        case QualityMeasureEnum::SJ  : return ((q>=0.f) && (q<=1.f)) ? q : 0.f;
         case QualityMeasureEnum::SHA : return q;
         case QualityMeasureEnum::SHAS: return q;
         case QualityMeasureEnum::SHE : return q;
