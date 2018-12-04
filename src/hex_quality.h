@@ -233,7 +233,7 @@ HL_QUALITY_MEASURE_DEF(maximum_aspect_frobenius)
         X1.dot ( X2.cross ( X3) )
     };
 
-    Eigen::Matrix3Xf A[9];
+    Eigen::Matrix3f A[9];
     // A0
     A[0](0,0) = L0[0];  A[0](0,1) = L3[1];  A[0](0,2) = L4[2];
     A[0](1,0) = L0[0];  A[0](1,1) = L3[1];  A[0](1,2) = L4[2];
@@ -312,7 +312,7 @@ HL_QUALITY_MEASURE_DEF(mean_aspect_frobenius)
         X1.dot ( X2.cross ( X3) )
     };
 
-    Eigen::Matrix3Xf A[9];
+    Eigen::Matrix3f A[9];
     // A0
     A[0](0,0) = L0[0];  A[0](0,1) = L3[1];  A[0](0,2) = L4[2];
     A[0](1,0) = L0[0];  A[0](1,1) = L3[1];  A[0](1,2) = L4[2];
@@ -391,7 +391,7 @@ HL_QUALITY_MEASURE_DEF(oddy)
         X1.dot ( X2.cross ( X3) )
     };
 
-    Eigen::Matrix3Xf A[9];
+    Eigen::Matrix3f A[9];
     // A0
     A[0](0,0) = L0[0];  A[0](0,1) = L3[1];  A[0](0,2) = L4[2];
     A[0](1,0) = L0[0];  A[0](1,1) = L3[1];  A[0](1,2) = L4[2];
