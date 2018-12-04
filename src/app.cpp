@@ -113,6 +113,7 @@ namespace HexaLab {
 
     void App::set_quality_measure ( QualityMeasureEnum e ) {
         this->quality_measure = e;
+        if(this->mesh == nullptr) return; 
         this->compute_hexa_quality();
 
         if ( this->is_quality_color_mapping_enabled() ) {
@@ -252,7 +253,7 @@ namespace HexaLab {
 
         this->mesh_stats.normalized_quality_min = minQ;
         this->mesh_stats.normalized_quality_max = maxQ;
-        HL_LOG ( "[QUALITY] %f %f - norm %f %f.\n", mesh_stats.quality_min,mesh_stats.quality_max,mesh_stats.normalized_quality_min,mesh_stats.normalized_quality_max );
+        HL_LOG ( "[QUALITY: %s] %f %f - norm %f %f.\n", get_quality_name(this->quality_measure), mesh_stats.quality_min,mesh_stats.quality_max,mesh_stats.normalized_quality_min,mesh_stats.normalized_quality_max );
     }
 
     void App::build_singularity_models() {
