@@ -1242,6 +1242,7 @@ HexaLab.App = function (dom_element) {
 
     // Viewer
     this.viewer = new HexaLab.Viewer(width, height)
+    this.screen_rendering = true
 
     this.canvas = {
         element: this.viewer.get_element(),
@@ -1272,14 +1273,7 @@ HexaLab.App = function (dom_element) {
 
     // App
     this.default_app_settings = {
-        apply_color_map:    false,
-        singularity_mode:   1,
-        color_map:          'Parula',
-        quality_measure:    'Scaled Jacobian',
-        geometry_mode:      'DynamicLines',
-        crack_size:         0.25,
-        rounding_radius:    0.25,
-        erode_dilate_level: 0
+        
     }
 
     // Materials
@@ -1321,6 +1315,15 @@ HexaLab.App = function (dom_element) {
         lighting:        'AO',
         antialiasing:    'msaa',
         light_intensity: 1,
+
+        apply_color_map:    false,
+        singularity_mode:   1,
+        color_map:          'Parula',
+        quality_measure:    'ScaledJacobian',
+        geometry_mode:      'DynamicLines',
+        crack_size:         0.25,
+        rounding_radius:    0.25,
+        erode_dilate_level: 0
     }
 
     // Filters
@@ -1338,6 +1341,9 @@ HexaLab.App = function (dom_element) {
 
     // Resize callback
     window.addEventListener('resize', this.resize.bind(this))
+
+    // See if the user already requested a mesh via GET params
+    HexaLab.UI.process_html_params()
 };
 
 Object.assign(HexaLab.App.prototype, {
@@ -1370,6 +1376,15 @@ Object.assign(HexaLab.App.prototype, {
             light_intensity: this.viewer.get_light_intensity(),
             lighting:        this.viewer.get_lighting_mode(),
             antialiasing:    this.viewer.get_aa_mode(),
+
+            singularity_mode:                       this.singularity_mode,
+            quality_measure:                        this.quality_measure,
+            apply_color_map:                        this.apply_color_map,
+            color_map:                              this.color_map,
+            geometry_mode:                          this.geometry_mode,
+            crack_size:                             this.crack_size,
+            rounding_radius:                        this.rounding_radius,
+            erode_dilate_level:                     this.erode_dilate_level
         }
     },
 
@@ -1407,14 +1422,7 @@ Object.assign(HexaLab.App.prototype, {
 
     get_app_settings: function () {
         const x =  {
-            singularity_mode:                       this.singularity_mode,
-            quality_measure:                        this.quality_measure,
-            apply_color_map:                        this.apply_color_map,
-            color_map:                              this.color_map,
-            geometry_mode:                          this.geometry_mode,
-            crack_size:                             this.crack_size,
-            rounding_radius:                        this.rounding_radius,
-            erode_dilate_level:                     this.erode_dilate_level
+            
         }
         return x
     },
@@ -1452,6 +1460,15 @@ Object.assign(HexaLab.App.prototype, {
         this.set_light_intensity(settings.light_intensity)
         this.set_lighting_mode(settings.lighting)
         this.set_antialiasing(settings.antialiasing)
+
+        this.set_color_map(settings.color_map)
+        this.show_visible_quality(settings.apply_color_map)
+        this.set_singularity_mode(settings.singularity_mode)
+        this.set_quality_measure(settings.quality_measure)
+        this.set_geometry_mode(settings.geometry_mode)
+        this.set_crack_size(settings.crack_size)
+        this.set_rounding_radius(settings.rounding_radius)
+        this.set_erode_dilate_level(settings.erode_dilate_level)
     },
 
     set_material_settings: function (settings) {
@@ -1474,14 +1491,7 @@ Object.assign(HexaLab.App.prototype, {
     },
 
     set_app_settings: function (settings) {
-        this.set_color_map(settings.color_map)
-        this.show_visible_quality(settings.apply_color_map)
-        this.set_singularity_mode(settings.singularity_mode)
-        this.set_quality_measure(settings.quality_measure)
-        this.set_geometry_mode(settings.geometry_mode)
-        this.set_crack_size(settings.crack_size)
-        this.set_rounding_radius(settings.rounding_radius)
-        this.set_erode_dilate_level(settings.erode_dilate_level)
+        
     },
 
     get_settings: function () {
@@ -1563,21 +1573,21 @@ Object.assign(HexaLab.App.prototype, {
     },
 
     set_quality_measure: function (measure) {
-        if      (measure == "Scaled Jacobian")          this.backend.set_quality_measure(Module.QualityMeasure.ScaledJacobian)
-        else if (measure == "Edge Ratio")               this.backend.set_quality_measure(Module.QualityMeasure.EdgeRatio)
+        if      (measure == "ScaledJacobian")           this.backend.set_quality_measure(Module.QualityMeasure.ScaledJacobian)
+        else if (measure == "EdgeRatio")                this.backend.set_quality_measure(Module.QualityMeasure.EdgeRatio)
         else if (measure == "Diagonal")                 this.backend.set_quality_measure(Module.QualityMeasure.Diagonal)
         else if (measure == "Dimension")                this.backend.set_quality_measure(Module.QualityMeasure.Dimension)
         else if (measure == "Distortion")               this.backend.set_quality_measure(Module.QualityMeasure.Distortion)
         else if (measure == "Jacobian")                 this.backend.set_quality_measure(Module.QualityMeasure.Jacobian)
-        else if (measure == "Max Edge Ratio")           this.backend.set_quality_measure(Module.QualityMeasure.MaxEdgeRatio)
-        else if (measure == "Max Aspect Frobenius")     this.backend.set_quality_measure(Module.QualityMeasure.MaxAspectFrobenius)
-        else if (measure == "Mean Aspect Frobenius")    this.backend.set_quality_measure(Module.QualityMeasure.MeanAspectFrobenius)
+        else if (measure == "MaxEdgeRatio")             this.backend.set_quality_measure(Module.QualityMeasure.MaxEdgeRatio)
+        else if (measure == "MaxAspectFrobenius")       this.backend.set_quality_measure(Module.QualityMeasure.MaxAspectFrobenius)
+        else if (measure == "MeanAspectFrobenius")      this.backend.set_quality_measure(Module.QualityMeasure.MeanAspectFrobenius)
         else if (measure == "Oddy")                     this.backend.set_quality_measure(Module.QualityMeasure.Oddy)
-        else if (measure == "Relative Size Squared")    this.backend.set_quality_measure(Module.QualityMeasure.RelativeSizeSquared)
+        else if (measure == "RelativeSizeSquared")      this.backend.set_quality_measure(Module.QualityMeasure.RelativeSizeSquared)
         else if (measure == "Shape")                    this.backend.set_quality_measure(Module.QualityMeasure.Shape)
-        else if (measure == "Shape and Size")           this.backend.set_quality_measure(Module.QualityMeasure.ShapeAndSize)
+        else if (measure == "ShapeAndSize")             this.backend.set_quality_measure(Module.QualityMeasure.ShapeAndSize)
         else if (measure == "Shear")                    this.backend.set_quality_measure(Module.QualityMeasure.Shear)
-        else if (measure == "Shear and Size")           this.backend.set_quality_measure(Module.QualityMeasure.ShearAndSize)
+        else if (measure == "ShearAndSize")             this.backend.set_quality_measure(Module.QualityMeasure.ShearAndSize)
         else if (measure == "Skew")                     this.backend.set_quality_measure(Module.QualityMeasure.Skew)
         else if (measure == "Stretch")                  this.backend.set_quality_measure(Module.QualityMeasure.Stretch)
         else if (measure == "Taper")                    this.backend.set_quality_measure(Module.QualityMeasure.Taper)
@@ -1830,17 +1840,6 @@ Object.assign(HexaLab.App.prototype, {
         this.queue_canvas_update() 
     },
 	
-
-	// reset settings: FIRST loaded mesh only
-	set_default_rendering_settings: function(){
-		this.set_settings({
-			//app:        this.default_app_settings,
-            //camera:     this.default_camera_settings,
-            rendering:  this.default_rendering_settings,
-            materials:  this.default_material_settings
-        })
-	},
-	
     // Import a new mesh. First invoke the backend for the parser and builder.
     // If everything goes well, reset settings to default and propagate the
     // fact that a new mesh is in use to the entire system. Finally sync
@@ -1852,18 +1851,29 @@ Object.assign(HexaLab.App.prototype, {
             HexaLab.UI.on_import_mesh_fail(path)
             return
         }
+        let first = this.mesh == null
         this.mesh = this.backend.get_mesh()
         // update UI
         HexaLab.UI.on_import_mesh(path)
 		
 		
         // reset settings: every loaded mesh
-        this.set_settings({
-            app:        this.default_app_settings,
-            camera:     this.default_camera_settings,
-            //rendering:  this.default_rendering_settings,
-            //materials:  this.default_material_settings
-        })
+        if (first) {
+            this.set_settings({
+                app:        this.default_app_settings,
+                camera:     this.default_camera_settings,
+                rendering:  this.default_rendering_settings,
+                materials:  this.default_material_settings
+            })
+        } else {
+            this.set_settings({
+                app:        this.default_app_settings,
+                camera:     this.default_camera_settings,
+                //rendering:  this.default_rendering_settings,
+                //materials:  this.default_material_settings
+            })    
+        }
+        
 		
         // notify filters
         for (var k in this.filters) {
@@ -1875,10 +1885,20 @@ Object.assign(HexaLab.App.prototype, {
 
     // The application main loop. Call this after instancing an App object to start rendering.
     animate: function () {
-        this.controls.update()
-        this.viewer.update()
+        if (this.screen_rendering) {
+            this.controls.update()
+            this.viewer.update()
+        }
         // queue next frame
         requestAnimationFrame(this.animate.bind(this))
+    },
+
+    enable_screen_rendering: function (enabled) {
+        this.screen_rendering = enabled
+    },
+
+    force_canvas_update: function () {
+        this.viewer.update()
     }
 
 });
