@@ -154,6 +154,11 @@ HexaLab.UI = {
             element:        $('#mesh_info_2'),
             text:           $('#mesh_info_2 .box_text'),
         },
+
+        progress_row: {
+            element:        $('#progress_row'),
+            text:           $('#progress_row .box_text'),
+        },
         // mesh stats quality measure dropdown list
         quality_type: {
             element:        null,
@@ -595,6 +600,17 @@ HexaLab.UI.get_selected_quality_measure_name = function () {
     return HexaLab.UI.selected_quality_measure_name
 }
 
+HexaLab.UI.show_progress_bar = function (i, max) {
+    let row = HexaLab.UI.mesh.progress_row
+    row.text.empty().append('<progress style="width:100%;" value="' + i + '" max="' + max + '"></progress>')
+    row.element.show().css('display', 'flex')
+}
+
+HexaLab.UI.clear_progress_bar = function () {
+    HexaLab.UI.mesh.progress_row.element.hide()
+    HexaLab.UI.mesh.progress_row.text.empty()
+}
+
 HexaLab.UI.show_infobox_1 = function () {
     let dataset = HexaLab.UI.get_selected_dataset()
     let infobox = HexaLab.UI.mesh.infobox_1
@@ -954,6 +970,7 @@ HexaLab.UI.process_mesh_pack = function (file, settings) {
     let out = new JSZip()
     var zip = null
     var items = []
+    var count = 0
 
     function process_files (mesh_files) {
         mesh_files.forEach(function (mesh) {
@@ -995,8 +1012,9 @@ HexaLab.UI.process_mesh_pack = function (file, settings) {
                     }
                 })
             } else {
+                let settings = HexaLab.UI.first_mesh? null : HexaLab.app.get_settings()
                 let item = {
-                    settings: HexaLab.app.get_settings(),
+                    settings: settings,
                     mesh: mesh
                 }
                 items.push(item)
@@ -1023,30 +1041,34 @@ HexaLab.UI.process_mesh_pack = function (file, settings) {
                     HexaLab.UI.export_plot(settings.plot_format, function(blob) {
                         let out_name = name.substr(0, name.lastIndexOf(".")) + "_quality." + settings.plot_format
                         out.file(out_name, blob)
+                        HexaLab.UI.show_progress_bar(count - items.length, count)
                         if (items.length == 0) {
                             out.generateAsync({type:"blob"}).then(function (b) {
-                                saveAs(b, "HexaPack.zip")
+                                saveAs(b, "HexaLab.zip")
                                 HexaLab.UI.clear_dataset_dropdown_list()
                                 HexaLab.UI.is_pack_processing = false
                                 if (HexaLab.UI.plot_overlay && !HexaLab.UI.color_map) {
                                     HexaLab.UI.plot_overlay.remove()
                                     delete HexaLab.UI.plot_overlay
                                 }
+                                HexaLab.UI.clear_progress_bar()
                             })
                         } else {
                             generate_output()
                         }
                     })
                 } else {
+                    HexaLab.UI.show_progress_bar(count - items.length, count)
                     if (items.length == 0) {
                         out.generateAsync({type:"blob"}).then(function (blob) {
-                            saveAs(blob, "HexaPack.zip")
+                            saveAs(blob, "HexaLab.zip")
                             HexaLab.UI.clear_dataset_dropdown_list()
                             HexaLab.UI.is_pack_processing = false
                             if (HexaLab.UI.plot_overlay && !HexaLab.UI.color_map) {
                                 HexaLab.UI.plot_overlay.remove()
                                 delete HexaLab.UI.plot_overlay
                             }
+                            HexaLab.UI.clear_progress_bar()
                         })
                     } else {
                         generate_output()
@@ -1090,6 +1112,8 @@ HexaLab.UI.process_mesh_pack = function (file, settings) {
                 files.push(file)
             }
         })
+        count = files.length
+        HexaLab.UI.show_progress_bar(0, count)
         process_files(files)
     })
 }
