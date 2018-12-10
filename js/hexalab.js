@@ -1889,6 +1889,12 @@ Object.assign(HexaLab.App.prototype, {
             this.controls.update()
             this.viewer.update()
         }
+
+        if (this.on_stable_rendering_callback && (this.get_rendering_settings().lighting != 'AO' || this.viewer.ao_pass.progress.done == true)) {
+            this.on_stable_rendering_callback()
+            this.on_stable_rendering_callback = null
+        }
+
         // queue next frame
         requestAnimationFrame(this.animate.bind(this))
     },
@@ -1899,6 +1905,10 @@ Object.assign(HexaLab.App.prototype, {
 
     force_canvas_update: function () {
         this.viewer.update()
+    },
+
+    on_stable_rendering: function (cb) {
+        this.on_stable_rendering_callback = cb
     }
 
 });
