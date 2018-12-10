@@ -436,6 +436,7 @@ HexaLab.UI.on_show_visible_quality = function (do_show) {
         $("#surface_colormap_input").css('display', 'flex');
         HexaLab.UI.settings.color.default.wrapper.hide();
         HexaLab.UI.settings.color.source.val("ColorMap")
+        HexaLab.UI.color_map = true
         if (HexaLab.UI.plot_overlay) {
             HexaLab.UI.quality_plot_update()
         } else {
@@ -445,6 +446,7 @@ HexaLab.UI.on_show_visible_quality = function (do_show) {
         $("#surface_colormap_input").hide();
         HexaLab.UI.settings.color.default.wrapper.css('display', 'flex');
         HexaLab.UI.settings.color.source.val("Default")
+        HexaLab.UI.color_map = false
         if (HexaLab.UI.plot_overlay) {
             HexaLab.UI.plot_overlay.remove()
             delete HexaLab.UI.plot_overlay
@@ -932,10 +934,10 @@ HexaLab.UI.query_process_pack_options = function (file) {
     HexaLab.UI.process_pack_env.dialog = HexaLab.UI.dialog(600, 300, '<div title="Settings"><br>\
             <input type="checkbox" checked onclick="HexaLab.UI.process_pack_env.toggle_map()"> Try using one settings file per mesh (abc.mesh -> abc.txt) <br>\
             <input type="checkbox" checked onclick="HexaLab.UI.process_pack_env.toggle_global()"> Try using a global settings file as fallback <input type="text" id="process_pack_global_name" value="settings.txt"> <br>\
-            <input type="checkbox" checked onclick="HexaLab.UI.process_pack_env.best_rendering()"> Wait for best rendering <br><br>\
+            <input type="checkbox" checked onclick="HexaLab.UI.process_pack_env.toggle_best_rendering()"> Wait for best rendering <br><br>\
             <input type="checkbox" checked onclick="HexaLab.UI.process_pack_env.toggle_screenshot()"> Generate screenshots <br>\
             <input type="checkbox" checked onclick="HexaLab.UI.process_pack_env.toggle_plot()"> Generate quality plots \
-                <select id="process_pack_plot_format"><option value="png">png</option> <option value="html">html</option> <option value="csv">csv</option></select> <br><br>\
+                <select id="process_pack_plot_format"><option value="png">png</option> <option value="svg">svg</option> <option value="csv">csv</option></select> <br><br>\
             <input type="button" onclick="HexaLab.UI.process_pack_env.generate()" value="Generate">\
         </div>')
 }
@@ -1015,15 +1017,9 @@ HexaLab.UI.process_mesh_pack = function (file, settings) {
                 let out_name = name.substr(0, name.lastIndexOf(".")) + ".png"
                 out.file(out_name, blob)
                 if (settings.plot) {
-                    // TODO wrap this
-                    var size = HexaLab.app.get_canvas_size()
-                    var x = HexaLab.UI.menu.width()
-                    var y = 0
-                    var width = size.width / 4
-                    var height = size.height - 2
-                    HexaLab.UI.plot_overlay = HexaLab.UI.overlay(x, y, width, height,
-                        '<div id="plot_container" style="display:flex;"><div id="bar_div"><img id="bar_img" /></div><div id="plot_div"></div></div>')
-                    HexaLab.UI.quality_plot(HexaLab.UI.plot_overlay, 'y')
+                    if (!HexaLab.UI.plot_overlay) {
+                        HexaLab.UI.create_plot_panel()
+                    }
                     HexaLab.UI.export_plot(settings.plot_format, function(blob) {
                         let out_name = name.substr(0, name.lastIndexOf(".")) + "_quality." + settings.plot_format
                         out.file(out_name, blob)
@@ -1032,6 +1028,10 @@ HexaLab.UI.process_mesh_pack = function (file, settings) {
                                 saveAs(b, "HexaPack.zip")
                                 HexaLab.UI.clear_dataset_dropdown_list()
                                 HexaLab.UI.is_pack_processing = false
+                                if (HexaLab.UI.plot_overlay && !HexaLab.UI.color_map) {
+                                    HexaLab.UI.plot_overlay.remove()
+                                    delete HexaLab.UI.plot_overlay
+                                }
                             })
                         } else {
                             generate_output()
@@ -1043,6 +1043,10 @@ HexaLab.UI.process_mesh_pack = function (file, settings) {
                             saveAs(blob, "HexaPack.zip")
                             HexaLab.UI.clear_dataset_dropdown_list()
                             HexaLab.UI.is_pack_processing = false
+                            if (HexaLab.UI.plot_overlay && !HexaLab.UI.color_map) {
+                                HexaLab.UI.plot_overlay.remove()
+                                delete HexaLab.UI.plot_overlay
+                            }
                         })
                     } else {
                         generate_output()
@@ -1480,17 +1484,17 @@ HexaLab.UI.export_plot = function (format, callback) {
                         ctx.drawImage(plot_img, (5 + 16)*magFac, 0)
                     }
                     let img = c.toDataURL("image/png")
+                    reset_plot()
                     callback(dataURItoBlob(img))
-                    //reset_plot()
                 }
             }
         })
-    } else if (format == 'html') {
+    } else if (format == 'svg') {
         // extract the svg from the DOM
         let html = $('.main-svg').first().parent().html()
         let blob = new Blob([html], {type: "text/plain;charset=utf-8"})
-        callback(blob)
         reset_plot()
+        callback(blob)
     } else if (format == 'csv') {
         let sorted_data = env.data.slice()
         sorted_data.sort(function(a, b) {
@@ -1509,10 +1513,10 @@ HexaLab.UI.export_plot = function (format, callback) {
         }
         let blob = new Blob([csv], {type: "text/plain;charset=utf-8"})
         retval = blob
-        callback(blob)
         reset_plot()
+        callback(blob)
     }
-    reset_plot()
+    //reset_plot()
 }
 
 HexaLab.UI.quality_plot = function(container, axis) {
@@ -1581,6 +1585,7 @@ HexaLab.UI.quality_plot = function(container, axis) {
     for (let i = emptybinNum; i < bin_num ; i++) {
         bins_colors[i - emptybinNum] = 100 - i
     }
+    HexaLab.UI.plot_env.data = data
     HexaLab.UI.plot_env.bin_num = bin_num
     HexaLab.UI.plot_env.bin_width = bin_width
 
@@ -1655,9 +1660,9 @@ HexaLab.UI.quality_plot = function(container, axis) {
             HexaLab.UI.export_plot(format, function (blob) {
                 saveAs(blob, "HLPlot.png")
             })
-        } else if (format == 'html') {
+        } else if (format == 'svg') {
             HexaLab.UI.export_plot(format, function (blob) {
-                saveAs(blob, "HLPlot.html")
+                saveAs(blob, "HLPlot.svg")
             })
         } else if (format == 'csv') {
             HexaLab.UI.export_plot(format, function (blob) {
@@ -1686,7 +1691,7 @@ HexaLab.UI.quality_plot = function(container, axis) {
                     HexaLab.UI.plot_format_dialog = HexaLab.UI.dialog(200, 150, "<div title='Choose format'>\
                         <ul style='list-style-type:none;'>\
                             <li><a href='javascript:void(0)' onclick='HexaLab.UI.save_plot(\"png\")'>png</a></li>\
-                            <li><a href='javascript:void(0)' onclick='HexaLab.UI.save_plot(\"html\")'>html</a></li>\
+                            <li><a href='javascript:void(0)' onclick='HexaLab.UI.save_plot(\"svg\")'>svg</a></li>\
                             <li><a href='javascript:void(0)' onclick='HexaLab.UI.save_plot(\"csv\")'>csv</a></li>\
                         </ul>\
                     </div>")
