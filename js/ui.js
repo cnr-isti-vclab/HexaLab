@@ -944,6 +944,7 @@ HexaLab.UI.process_mesh_pack = function (file, settings) {
     HexaLab.UI.is_pack_processing = true
     HexaLab.UI.clear_infobox_1()
     HexaLab.UI.clear_infobox_2()
+    HexaLab.UI.clear_dataset_dropdown_list()
     HexaLab.UI.clear_mesh_dropdown_list()
     HexaLab.UI.set_displayed_mesh_idx(HexaLab.UI.MESH_IDX_CUSTOM)
     HexaLab.UI.set_progress_phasename('Loading...');
@@ -1029,7 +1030,6 @@ HexaLab.UI.process_mesh_pack = function (file, settings) {
                         if (items.length == 0) {
                             out.generateAsync({type:"blob"}).then(function (b) {
                                 saveAs(b, "HexaPack.zip")
-                                HexaLab.UI.clear_infobox_2()
                                 HexaLab.UI.clear_dataset_dropdown_list()
                                 HexaLab.UI.is_pack_processing = false
                             })
@@ -1041,7 +1041,6 @@ HexaLab.UI.process_mesh_pack = function (file, settings) {
                     if (items.length == 0) {
                         out.generateAsync({type:"blob"}).then(function (blob) {
                             saveAs(blob, "HexaPack.zip")
-                            HexaLab.UI.clear_infobox_2()
                             HexaLab.UI.clear_dataset_dropdown_list()
                             HexaLab.UI.is_pack_processing = false
                         })
