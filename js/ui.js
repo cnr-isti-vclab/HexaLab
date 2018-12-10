@@ -1083,6 +1083,8 @@ HexaLab.UI.process_mesh_pack = function (file, settings) {
         zip = _zip
         var files = []
         zip.forEach(function (path, file) {
+            let filename = path.substring(path.lastIndexOf('/') + 1)
+            if (filename.charAt(0) == '.') return
             let ext = HexaLab.FS.get_path_file_extension(path)
             if (ext == "mesh" || ext == "vtk") {
                 files.push(file)
