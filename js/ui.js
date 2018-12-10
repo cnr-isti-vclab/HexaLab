@@ -1491,7 +1491,7 @@ HexaLab.UI.export_plot = function (format, callback) {
         })
     } else if (format == 'svg') {
         // extract the svg from the DOM
-        let html = $('.main-svg').first().parent().html()
+        let html = $('.main-svg')[0].outerHTML
         let blob = new Blob([html], {type: "text/plain;charset=utf-8"})
         reset_plot()
         callback(blob)
