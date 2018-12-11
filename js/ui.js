@@ -1580,21 +1580,22 @@ HexaLab.UI.quality_plot = function(container, axis) {
     let data = []
     let bins_colors = []
     let colorscale = []
-
-    let range_min = HexaLab.app.backend.get_lower_quality_range_bound()
-    let range_max = HexaLab.app.backend.get_upper_quality_range_bound()
-    let datamin=10000000
-    let datamax=-1000000
-    let sorted_range_min = Math.min(range_min,range_max) 
-    let sorted_range_max = Math.max(range_min,range_max) 
+    // Note that 
+    let range_bad  = HexaLab.app.backend.get_lower_quality_range_bound()
+    let range_good = HexaLab.app.backend.get_upper_quality_range_bound()
+    let data_min= 10000000
+    let data_max=-10000000
+    let sorted_range_min = Math.min(range_bad,range_good) 
+    let sorted_range_max = Math.max(range_bad,range_good) 
 
     let quality = HexaLab.app.backend.get_hexa_quality()
     if (quality != null) {
         let t = new Float32Array(Module.HEAPU8.buffer, quality.data(), quality.size())
         for (let i = 0; i < quality.size() ; i++) {
-            datamin=Math.min(t[i],datamin)
-            datamax=Math.max(t[i],datamax)
-            data[i] = Math.min(Math.max(range_min, t[i]), range_max) 
+            data_min=Math.min(t[i],data_min)
+            data_max=Math.max(t[i],data_max)
+            //data[i] = Math.min(Math.max(range_bad, t[i]), range_bad) 
+            data[i] = t[i]
         }
     }
     
@@ -1615,13 +1616,13 @@ HexaLab.UI.quality_plot = function(container, axis) {
     HexaLab.UI.plot_env.bin_num = bin_num
     HexaLab.UI.plot_env.bin_width = bin_width
 
-    console.log("range minmax",range_min,range_max)
-    console.log("data minmax",datamin,datamax)
+    console.log("range  badgood",range_bad,range_good)
+    console.log("data    minmax",data_min,data_max)
     console.log("quality minmax",mesh.quality_min,mesh.quality_max)
 
     for (let i = 0; i <= 10; ++i) {
         let v = i / 10
-        let v2 = range_min < range_max ? 1 - v : v
+        let v2 = range_bad < range_good ? 1 - v : v
         let rgb = HexaLab.app.backend.map_value_to_color(v2)
         let r = (rgb.x() * 255).toFixed(0)
         let g = (rgb.y() * 255).toFixed(0)
@@ -1646,8 +1647,8 @@ HexaLab.UI.quality_plot = function(container, axis) {
     }]
     plot_data[0][axis] = data
     plot_data[0][axis.concat('bins')] = {
-        start:  sorted_range_min,
-        end:    sorted_range_max,
+        start:  data_min,
+        end:    data_max,
         size:   bin_width
     }
     HexaLab.UI.plot_env.plot_data = plot_data
@@ -1669,11 +1670,11 @@ HexaLab.UI.quality_plot = function(container, axis) {
     }
     plot_layout[axis.concat('axis')] = {
         autorange:  false,
-        range:      [range_max, range_min],
+        range:      [range_good,range_bad],
         type:       'linear',
         ticks:      'outside',
         tick0:      0,
-        dtick:      (range_max - range_min) / 10, //0.25,
+        dtick:      Math.abs(range_bad - range_good) / 10, //0.25,
         ticklen:    2,
         tickwidth:  2,
         tickcolor:  '#444444'
