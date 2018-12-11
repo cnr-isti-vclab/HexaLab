@@ -26,6 +26,8 @@ Matteo Bracci, Marco Tarini, Nico Pietroni, Marco Livesu, Paolo Cignoni<br><a hr
     <script src="js/external/FileSaver.js"></script>
     <script src="js/external/Stats.js"></script>
     <script src="js/external/object_hash.js"></script>
+    <script src="js/external/jszip.min.js"></script>
+    <script src="js/external/js.cookie.js"></script>
 	<script></script>
 </head>
 
@@ -52,6 +54,9 @@ Matteo Bracci, Marco Tarini, Nico Pietroni, Marco Livesu, Paolo Cignoni<br><a hr
 				<button id="snapshot" title="Take a Screenshot">
 				<img src="img\icon_screenshot.png" width=20 height=20 ALT="Save snapshot"></img>
 				</button>
+                <button id="process_pack" title="Open .zip file and process all meshes contained">
+                <img src="img\pointer24.png" width=20 height=20 ALT="Process pack"></img>
+                </button>
 				<button id="github" title="Info &amp Sources (GitHub page)">
 				<img src="img\github-logo.png" width=20 height=20 ALT="GitHub"></img>
 				</button>
@@ -90,6 +95,12 @@ Matteo Bracci, Marco Tarini, Nico Pietroni, Marco Livesu, Paolo Cignoni<br><a hr
 						</select>
 					</div>
 				</div>
+                <div class="menu_row">
+                    <div class="menu_row_infobox" id="progress_row">
+                        <div class="box_text">
+                        </div>
+                    </div>
+                </div>
 				<div class="menu_row">
 					<div id="mesh_info_2" class="menu_row_infobox">
 						<div class="box_text">
@@ -168,7 +179,7 @@ Matteo Bracci, Marco Tarini, Nico Pietroni, Marco Livesu, Paolo Cignoni<br><a hr
 				<label>Color</label>
 				<select id="surface_color_source" class="miniselect">
 					<option value="Default" selected="selected">Default</option>
-					<option value="ColorMap">By Quality</option>
+					<option value="ColorMap">Hex Quality</option>
 				</select>
 				<div class="menu_row_input" id="visible_color_wrapper" style="display:none;">
 					<input type="text" id="visible_outside_color">
@@ -212,12 +223,14 @@ Matteo Bracci, Marco Tarini, Nico Pietroni, Marco Livesu, Paolo Cignoni<br><a hr
 			</div>
 			<div class="menu_row">
 				<label>Lighting</label>
-				<select id="lighting_mode" class="miniselect">
-					<option value="AO" selected="selected">best (AO)</option>
-					<option value="SSAO">fast (SSAO)</option>
-                    <option value="Direct">local only</option>
-					<option value="none">none</option>
-				</select>
+    				<select id="lighting_mode" class="miniselect">
+    					<option value="AO" selected="selected">best (AO)</option>
+    					<option value="SSAO">fast (SSAO)</option>
+                        <option value="Direct">local only</option>
+    					<option value="none">none</option>
+    				</select>
+                <div class="menu_row_input">
+                </div>
 			</div>
 		</section>
 

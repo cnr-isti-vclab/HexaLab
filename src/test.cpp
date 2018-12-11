@@ -50,20 +50,12 @@ int main() {
             ++meshCnt;
             string filename = dataVec[j];
             const string basepath = "../datasets/";
+            app.set_quality_measure( QualityMeasureEnum::SJ );
             bool ret = app.import_mesh ( basepath + path + "/" + filename );
             printf("     Hex %4lu\n",app.get_mesh()->hexas.size());
             hexMin=std::min(hexMin,app.get_mesh()->hexas.size());
             hexMax=std::max(hexMax,app.get_mesh()->hexas.size());
-//            app.set_geometry_mode(GeometryMode::Smooth);
-//            app.update_models();
-            
-            if ( !ret ) {
-                ++failCnt;
-            }
-
-//            PeelingFilter pf;
-//            pf.on_mesh_set ( *app.get_mesh() );
-           
+            app.set_quality_measure( QualityMeasureEnum::ODD );
             fflush ( stdout );
         }
     }

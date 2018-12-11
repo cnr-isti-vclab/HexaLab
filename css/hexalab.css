@@ -203,6 +203,10 @@ label {
 	display: none;
 }
 
+.menu_row #progress_row {
+	display: none;
+}
+
 .menu_row #mesh_info_2 {
 	display: none;
 	background-image: url("../img/bar.png");

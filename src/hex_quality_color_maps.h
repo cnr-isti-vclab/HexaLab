@@ -63,7 +63,7 @@ static float normalize_quality_measure(QualityMeasureEnum metric,
         case QualityMeasureEnum::MEAF: return (q_max-q)/(q_max-1.f);
         case QualityMeasureEnum::ODD : return (q_max-q)/q_max;
         case QualityMeasureEnum::RSS : return q;
-        case QualityMeasureEnum::SJ  : return (q>1.00001) ? 0.f : std::max(q,0.f);
+        case QualityMeasureEnum::SJ  : return ((q>=0.f) && (q<=1.f)) ? q : 0.f;
         case QualityMeasureEnum::SHA : return q;
         case QualityMeasureEnum::SHAS: return q;
         case QualityMeasureEnum::SHE : return q;
@@ -139,6 +139,32 @@ static quality_measure_fun* get_quality_measure_fun(QualityMeasureEnum measure)
     return fun;
 }
 
+static const char *get_quality_name(QualityMeasureEnum measure)
+{
+  switch(measure)
+  {
+      case QualityMeasureEnum::SJ:   return "scaled_jacobian";         
+      case QualityMeasureEnum::DIA:  return "diagonal";                
+      case QualityMeasureEnum::ER:   return "edge_ratio";              
+      case QualityMeasureEnum::DIM:  return "dimension";               
+      case QualityMeasureEnum::DIS:  return "distortion";              
+      case QualityMeasureEnum::J:    return "jacobian";                
+      case QualityMeasureEnum::MER:  return "maximum_edge_ratio";      
+      case QualityMeasureEnum::MAAF: return "maximum_aspect_frobenius";
+      case QualityMeasureEnum::MEAF: return "mean_aspect_frobenius";   
+      case QualityMeasureEnum::ODD:  return "oddy";                    
+      case QualityMeasureEnum::RSS:  return "relative_size_squared";   
+      case QualityMeasureEnum::SHA:  return "shape";                   
+      case QualityMeasureEnum::SHAS: return "shape_and_size";          
+      case QualityMeasureEnum::SHE:  return "shear";                   
+      case QualityMeasureEnum::SHES: return "shear_and_size";          
+      case QualityMeasureEnum::SKE:  return "skew";                    
+      case QualityMeasureEnum::STR:  return "stretch";                 
+      case QualityMeasureEnum::TAP:  return "taper";                   
+      case QualityMeasureEnum::VOL:  return "volume";                  
+      default: return "Unknown Measure";
+  }
+  return ""; 
 }
-
+}// end namespace
 #endif // HEX_QUALITY_COLOR_MAPS_H

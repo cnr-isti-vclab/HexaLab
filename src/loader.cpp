@@ -92,7 +92,7 @@ bool Loader::load_MESH(const string& path, vector<Vector3f>& vertices, vector<In
     // Make a fast check that all the index are in range
     vector<int> usedVert(vertices.size(),0);
     for(size_t i = 0; i< indices.size();++i) {
-        HL_ASSERT_LOG((indices[i]>=0 && indices[i]<vertices.size()),"ERROR: hex %i has index out of range with val: %i\n",i/8,indices[i]);
+        HL_ASSERT_LOG((indices[i]>=0 && indices[i]<vertices.size()),"ERROR: hex %lu has index out of range with val: %i\n",i/8,indices[i]);
         ++usedVert[indices[i]];
     }
     // And yell a warning for unreferenced vertices...
