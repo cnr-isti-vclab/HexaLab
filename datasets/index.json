@@ -406,6 +406,32 @@
             "Example_3.mesh",
             "Example_5.mesh"
         ]
+    } , {
+        "paper": {
+            "title": "Selective Padding for Polycube‐Based Hexahedral Meshing",
+            "venue": "Computer Graphics Forum",
+            "authors": "Gianmarco Cherchi, Pierre Alliez, Riccardo Scateni, Max Lyon, David Bommes",
+            "year": "2019",
+            "PDF": "https://onlinelibrary.wiley.com/doi/epdf/10.1111/cgf.13593",
+            "web": "",
+            "DOI": "10.1111/cgf.13593"
+        },
+        "path": "2019 - Selective Padding for Polycube‐Based Hexahedral Meshing",
+        "label": "2019 - Selective Padding for Polycube‐Based Hexahedral Meshing",
+        "data": [
+            "Bearing.mesh",
+            "Chamfer_L0.mesh",
+            "Chamfer_L4.mesh",
+            "Column.mesh",
+            "Double_hinge_NH.mesh",
+            "Double_hinge_WH.mesh",
+            "Gear.mesh",
+            "Joint.mesh",
+            "Lego_L0.mesh",
+            "Lego_L2.mesh",
+            "Lego_L4.mesh",
+            "Wrench.mesh"
+        ]
     }
                ]
 }
