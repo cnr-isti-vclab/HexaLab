@@ -8,7 +8,7 @@
           "year": "2011",
           "PDF": "https://www.cs.ubc.ca/labs/imager/tr/2011/HexMeshingPolycubeDeformation/HexMeshing_files/HexMeshSGP2011.pdf",
           "web": "https://www.cs.ubc.ca/labs/imager/tr/2011/HexMeshingPolycubeDeformation/",
-          "DOI": "https://doi.org/10.1111/j.1467-8659.2011.02015.x"
+          "DOI": "10.1111/j.1467-8659.2011.02015.x",
       },
       "path": "2011 - All-Hex Mesh Generation via Volumetric PolyCube Deformation",
       "label": "2011 - All-Hex Mesh Generation via Volumetric PolyCube Deformation",
@@ -30,7 +30,7 @@
             "venue": "ACM Transactions on Graphics Volume 31 Issue 6",
             "authors": "Yufei Li, Yang Liu, Weiwei Xu, Wenping Wang, Baining Guo",
             "year": "2012",
-            "PDF": "http://i.cs.hku.hk/~yfli/All-hex/allhex.pdf",
+            "PDF": "",
             "web": "",
             "DOI": "10.1145/2366145.2366196"
         },
@@ -198,8 +198,8 @@
             "authors": "Gianmarco Cherchi  Marco Livesu  Riccardo Scateni",
             "year": "2016",
             "PDF": "http://people.unica.it/gianmarcocherchi/files/2016/10/polycube_simplification_pdf.pdf",
-            "web": "http://people.unica.it/gianmarcocherchi/polycube-simplification-for-coarse-layouts-of-surfaces-and-volumes/",
-            "DOI": "10.1111/cgf.12959 "
+            "web": "http://people.unica.it/gianmarcocherchi/pc_simplification/",
+            "DOI": "10.1111/cgf.12959"
         },
         "path": "2016 - Polycube simplification for coarse layouts of surfaces and volumes",
         "label": "2016 - Polycube Simplification for Coarse Layouts of Surfaces and Volumes",
@@ -281,7 +281,7 @@
             "authors": "Xifeng Gao, Tobias Martin, Sai Deng, Elaine Cohen, Zhigang Deng and Guoning Chen",
             "year": "2016",
             "PDF": "http://www2.cs.uh.edu/~chengu/hex_meshing/hex-meshing.pdf",
-            "web": "https://gaoxifeng.github.io/research.html",
+            "web": "",
             "DOI": "10.1109/TVCG.2015.2473835"
         },
         "path": "2016 - Structured Volume Decomposition via Generalized Sweeping",
@@ -412,8 +412,8 @@
             "venue": "Computer Graphics Forum",
             "authors": "Gianmarco Cherchi, Pierre Alliez, Riccardo Scateni, Max Lyon, David Bommes",
             "year": "2019",
-            "PDF": "https://onlinelibrary.wiley.com/doi/epdf/10.1111/cgf.13593",
-            "web": "",
+            "PDF": "http://people.unica.it/gianmarcocherchi/files/2018/12/paper-Selective-Padding-polycubes.pdf",
+            "web": "http://people.unica.it/gianmarcocherchi/pc_selective_padding/",
             "DOI": "10.1111/cgf.13593"
         },
         "path": "2019 - Selective Padding for Polycube‐Based Hexahedral Meshing",
