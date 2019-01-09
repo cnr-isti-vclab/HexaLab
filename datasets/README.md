@@ -16,7 +16,7 @@ Current datasets come from the following papers:
 - [Explicit Cylindrical Maps for General Tubular Shapes (2017)](https://doi.org/10.1016/j.cad.2017.05.002)
 - [A global approach to multi-axis swept mesh generation (2017)](https://doi.org/10.1016/j.proeng.2017.09.817)
 - [Fuzzy clustering based pseudo-swept volume decomposition for hexahedral meshing (2018)](https://doi.org/10.1016/j.cad.2017.10.001)
-- [Selective Padding for Polycube‐Based Hexahedral Meshing](https://doi.org/10.1111/cgf.13593)
+- [Selective Padding for Polycube‐Based Hexahedral Meshing (2019)](https://doi.org/10.1111/cgf.13593)
 ## How to contribute
 We really welcome datasets from existing papers, and we are collecting the ones we find available on the web. If you have some models related to a published paper you have two ways to contribute:
 1) raise an [issue](https://github.com/cnr-isti-vclab/HexaLab/issues) asking for a dataset/paper to be included providing doi of the paper and the link to the dataset;
