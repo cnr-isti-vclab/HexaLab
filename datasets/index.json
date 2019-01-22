@@ -432,6 +432,36 @@
             "Lego_L4.mesh",
             "Wrench.mesh"
         ]
-    }
+    } , {
+        "paper": {
+            "title": "Singularity Structure Simplification of Hexahedral Mesh via Weighted Ranking",
+            "venue": "Geometric Modeling and Processing",
+            "authors": "Gang Xu, Ran Ling, Jessica Zhang, Zhoufang Xiao, Zhongping Ji, Timon Rabczuk",
+            "year": "2019",
+            "PDF": "https://arxiv.org/pdf/1901.00238.pdf",
+            "web": "https://arxiv.org/abs/1901.00238",
+            "DOI": ""
+        },
+        "path": "2019 - Singularity Structure Simplification of Hexahedral Mesh via Weighted Ranking",
+        "label": "2019 - Singularity Structure Simplification of Hexahedral Mesh via Weighted Ranking",
+        "data": [
+            "bottle2/bottle2_input.mesh",
+            "bottle2/bottle2_output.mesh",
+            "buste/buste_input.mesh",
+            "buste/buste_output.mesh",
+            "deckel/deckel_input.mesh",
+            "deckel/deckel_output.mesh",
+            "eight/eight_input.mesh",
+            "eight/eight_output.mesh",
+            "fertility/fertility_input.mesh",
+            "fertility/fertility_output.mesh",
+            "pig/pig_input.mesh",
+            "pig/pig_output.mesh",
+            "toy1/toy1_input.mesh",
+            "toy1/toy1_output.mehs",
+            "toy2/toy2_input.mesh",
+            "toy2/toy2_output.mesh"
+        ]
+    } 
                ]
 }
