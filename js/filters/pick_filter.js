@@ -270,6 +270,10 @@ HexaLab.PickFilter.prototype = Object.assign(Object.create(HexaLab.Filter.protot
         origin.applyMatrix4(inv_world_m)
         Module.print("[Pick Filter] Origin: " + origin.x.toFixed(6) + " " + origin.y.toFixed(6) + " " + origin.z.toFixed(6))
         Module.print("[Pick Filter] Direction: " + direction.x.toFixed(6) + " " + direction.y.toFixed(6) + " " + direction.z.toFixed(6))
+        // Uncomment the following three lines to get opengl style info on the current transf matrix
+        //Module.print("projectionMatrix: ["+proj_m.elements+" ]")
+        //Module.print("matrixWorldInverse: ["+view_m.elements+" ]")
+        //Module.print("viewport [0,0,"+canvas_rect.width+", "+canvas_rect.height+"]")
         return {
             origin:     origin,
             direction:  direction
