@@ -154,6 +154,11 @@ HexaLab.UI = {
             element:        $('#mesh_info_2'),
             text:           $('#mesh_info_2 .box_text'),
         },
+
+        progress_row: {
+            element:        $('#progress_row'),
+            text:           $('#progress_row .box_text'),
+        },
         // mesh stats quality measure dropdown list
         quality_type: {
             element:        null,
@@ -436,6 +441,7 @@ HexaLab.UI.on_show_visible_quality = function (do_show) {
         $("#surface_colormap_input").css('display', 'flex');
         HexaLab.UI.settings.color.default.wrapper.hide();
         HexaLab.UI.settings.color.source.val("ColorMap")
+        HexaLab.UI.color_map = true
         if (HexaLab.UI.plot_overlay) {
             HexaLab.UI.quality_plot_update()
         } else {
@@ -445,6 +451,7 @@ HexaLab.UI.on_show_visible_quality = function (do_show) {
         $("#surface_colormap_input").hide();
         HexaLab.UI.settings.color.default.wrapper.css('display', 'flex');
         HexaLab.UI.settings.color.source.val("Default")
+        HexaLab.UI.color_map = false
         if (HexaLab.UI.plot_overlay) {
             HexaLab.UI.plot_overlay.remove()
             delete HexaLab.UI.plot_overlay
@@ -591,6 +598,17 @@ HexaLab.UI.set_displayed_mesh_idx = function (idx) {
 
 HexaLab.UI.get_selected_quality_measure_name = function () {
     return HexaLab.UI.selected_quality_measure_name
+}
+
+HexaLab.UI.show_progress_bar = function (i, max) {
+    let row = HexaLab.UI.mesh.progress_row
+    row.text.empty().append('<progress style="width:100%;" value="' + i + '" max="' + max + '"></progress>')
+    row.element.show().css('display', 'flex')
+}
+
+HexaLab.UI.clear_progress_bar = function () {
+    HexaLab.UI.mesh.progress_row.element.hide()
+    HexaLab.UI.mesh.progress_row.text.empty()
 }
 
 HexaLab.UI.show_infobox_1 = function () {
@@ -932,10 +950,10 @@ HexaLab.UI.query_process_pack_options = function (file) {
     HexaLab.UI.process_pack_env.dialog = HexaLab.UI.dialog(600, 300, '<div title="Settings"><br>\
             <input type="checkbox" checked onclick="HexaLab.UI.process_pack_env.toggle_map()"> Try using one settings file per mesh (abc.mesh -> abc.txt) <br>\
             <input type="checkbox" checked onclick="HexaLab.UI.process_pack_env.toggle_global()"> Try using a global settings file as fallback <input type="text" id="process_pack_global_name" value="settings.txt"> <br>\
-            <input type="checkbox" checked onclick="HexaLab.UI.process_pack_env.best_rendering()"> Wait for best rendering <br><br>\
+            <input type="checkbox" checked onclick="HexaLab.UI.process_pack_env.toggle_best_rendering()"> Wait for best rendering <br><br>\
             <input type="checkbox" checked onclick="HexaLab.UI.process_pack_env.toggle_screenshot()"> Generate screenshots <br>\
             <input type="checkbox" checked onclick="HexaLab.UI.process_pack_env.toggle_plot()"> Generate quality plots \
-                <select id="process_pack_plot_format"><option value="png">png</option> <option value="html">html</option> <option value="csv">csv</option></select> <br><br>\
+                <select id="process_pack_plot_format"><option value="png">png</option> <option value="svg">svg</option> <option value="csv">csv</option></select> <br><br>\
             <input type="button" onclick="HexaLab.UI.process_pack_env.generate()" value="Generate">\
         </div>')
 }
@@ -952,6 +970,7 @@ HexaLab.UI.process_mesh_pack = function (file, settings) {
     let out = new JSZip()
     var zip = null
     var items = []
+    var count = 0
 
     function process_files (mesh_files) {
         mesh_files.forEach(function (mesh) {
@@ -993,8 +1012,9 @@ HexaLab.UI.process_mesh_pack = function (file, settings) {
                     }
                 })
             } else {
+                let settings = HexaLab.UI.first_mesh? null : HexaLab.app.get_settings()
                 let item = {
-                    settings: HexaLab.app.get_settings(),
+                    settings: settings,
                     mesh: mesh
                 }
                 items.push(item)
@@ -1015,34 +1035,40 @@ HexaLab.UI.process_mesh_pack = function (file, settings) {
                 let out_name = name.substr(0, name.lastIndexOf(".")) + ".png"
                 out.file(out_name, blob)
                 if (settings.plot) {
-                    // TODO wrap this
-                    var size = HexaLab.app.get_canvas_size()
-                    var x = HexaLab.UI.menu.width()
-                    var y = 0
-                    var width = size.width / 4
-                    var height = size.height - 2
-                    HexaLab.UI.plot_overlay = HexaLab.UI.overlay(x, y, width, height,
-                        '<div id="plot_container" style="display:flex;"><div id="bar_div"><img id="bar_img" /></div><div id="plot_div"></div></div>')
-                    HexaLab.UI.quality_plot(HexaLab.UI.plot_overlay, 'y')
+                    if (!HexaLab.UI.plot_overlay) {
+                        HexaLab.UI.create_plot_panel()
+                    }
                     HexaLab.UI.export_plot(settings.plot_format, function(blob) {
                         let out_name = name.substr(0, name.lastIndexOf(".")) + "_quality." + settings.plot_format
                         out.file(out_name, blob)
+                        HexaLab.UI.show_progress_bar(count - items.length, count)
                         if (items.length == 0) {
                             out.generateAsync({type:"blob"}).then(function (b) {
-                                saveAs(b, "HexaPack.zip")
+                                saveAs(b, "HexaLab.zip")
                                 HexaLab.UI.clear_dataset_dropdown_list()
                                 HexaLab.UI.is_pack_processing = false
+                                if (HexaLab.UI.plot_overlay && !HexaLab.UI.color_map) {
+                                    HexaLab.UI.plot_overlay.remove()
+                                    delete HexaLab.UI.plot_overlay
+                                }
+                                HexaLab.UI.clear_progress_bar()
                             })
                         } else {
                             generate_output()
                         }
                     })
                 } else {
+                    HexaLab.UI.show_progress_bar(count - items.length, count)
                     if (items.length == 0) {
                         out.generateAsync({type:"blob"}).then(function (blob) {
-                            saveAs(blob, "HexaPack.zip")
+                            saveAs(blob, "HexaLab.zip")
                             HexaLab.UI.clear_dataset_dropdown_list()
                             HexaLab.UI.is_pack_processing = false
+                            if (HexaLab.UI.plot_overlay && !HexaLab.UI.color_map) {
+                                HexaLab.UI.plot_overlay.remove()
+                                delete HexaLab.UI.plot_overlay
+                            }
+                            HexaLab.UI.clear_progress_bar()
                         })
                     } else {
                         generate_output()
@@ -1079,11 +1105,15 @@ HexaLab.UI.process_mesh_pack = function (file, settings) {
         zip = _zip
         var files = []
         zip.forEach(function (path, file) {
+            let filename = path.substring(path.lastIndexOf('/') + 1)
+            if (filename.charAt(0) == '.') return
             let ext = HexaLab.FS.get_path_file_extension(path)
             if (ext == "mesh" || ext == "vtk") {
                 files.push(file)
             }
         })
+        count = files.length
+        HexaLab.UI.show_progress_bar(0, count)
         process_files(files)
     })
 }
@@ -1480,17 +1510,17 @@ HexaLab.UI.export_plot = function (format, callback) {
                         ctx.drawImage(plot_img, (5 + 16)*magFac, 0)
                     }
                     let img = c.toDataURL("image/png")
+                    reset_plot()
                     callback(dataURItoBlob(img))
-                    //reset_plot()
                 }
             }
         })
-    } else if (format == 'html') {
+    } else if (format == 'svg') {
         // extract the svg from the DOM
-        let html = $('.main-svg').first().parent().html()
+        let html = $('.main-svg')[0].outerHTML
         let blob = new Blob([html], {type: "text/plain;charset=utf-8"})
-        callback(blob)
         reset_plot()
+        callback(blob)
     } else if (format == 'csv') {
         let sorted_data = env.data.slice()
         sorted_data.sort(function(a, b) {
@@ -1509,10 +1539,10 @@ HexaLab.UI.export_plot = function (format, callback) {
         }
         let blob = new Blob([csv], {type: "text/plain;charset=utf-8"})
         retval = blob
-        callback(blob)
         reset_plot()
+        callback(blob)
     }
-    reset_plot()
+    //reset_plot()
 }
 
 HexaLab.UI.quality_plot = function(container, axis) {
@@ -1550,21 +1580,22 @@ HexaLab.UI.quality_plot = function(container, axis) {
     let data = []
     let bins_colors = []
     let colorscale = []
-
-    let range_min = HexaLab.app.backend.get_lower_quality_range_bound()
-    let range_max = HexaLab.app.backend.get_upper_quality_range_bound()
-    let datamin=10000000
-    let datamax=-1000000
-    let sorted_range_min = Math.min(range_min,range_max) 
-    let sorted_range_max = Math.max(range_min,range_max) 
+    // Note that 
+    let range_bad  = HexaLab.app.backend.get_lower_quality_range_bound()
+    let range_good = HexaLab.app.backend.get_upper_quality_range_bound()
+    let data_min= 10000000
+    let data_max=-10000000
+    let sorted_range_min = Math.min(range_bad,range_good) 
+    let sorted_range_max = Math.max(range_bad,range_good) 
 
     let quality = HexaLab.app.backend.get_hexa_quality()
     if (quality != null) {
         let t = new Float32Array(Module.HEAPU8.buffer, quality.data(), quality.size())
         for (let i = 0; i < quality.size() ; i++) {
-            datamin=Math.min(t[i],datamin)
-            datamax=Math.max(t[i],datamax)
-            data[i] = Math.min(Math.max(range_min, t[i]), range_max) 
+            data_min=Math.min(t[i],data_min)
+            data_max=Math.max(t[i],data_max)
+            //data[i] = Math.min(Math.max(range_bad, t[i]), range_bad) 
+            data[i] = t[i]
         }
     }
     
@@ -1581,16 +1612,17 @@ HexaLab.UI.quality_plot = function(container, axis) {
     for (let i = emptybinNum; i < bin_num ; i++) {
         bins_colors[i - emptybinNum] = 100 - i
     }
+    HexaLab.UI.plot_env.data = data
     HexaLab.UI.plot_env.bin_num = bin_num
     HexaLab.UI.plot_env.bin_width = bin_width
 
-    console.log("range minmax",range_min,range_max)
-    console.log("data minmax",datamin,datamax)
+    console.log("range  badgood",range_bad,range_good)
+    console.log("data    minmax",data_min,data_max)
     console.log("quality minmax",mesh.quality_min,mesh.quality_max)
 
     for (let i = 0; i <= 10; ++i) {
         let v = i / 10
-        let v2 = range_min < range_max ? 1 - v : v
+        let v2 = range_bad < range_good ? 1 - v : v
         let rgb = HexaLab.app.backend.map_value_to_color(v2)
         let r = (rgb.x() * 255).toFixed(0)
         let g = (rgb.y() * 255).toFixed(0)
@@ -1615,8 +1647,8 @@ HexaLab.UI.quality_plot = function(container, axis) {
     }]
     plot_data[0][axis] = data
     plot_data[0][axis.concat('bins')] = {
-        start:  sorted_range_min,
-        end:    sorted_range_max,
+        start:  data_min,
+        end:    data_max,
         size:   bin_width
     }
     HexaLab.UI.plot_env.plot_data = plot_data
@@ -1638,11 +1670,11 @@ HexaLab.UI.quality_plot = function(container, axis) {
     }
     plot_layout[axis.concat('axis')] = {
         autorange:  false,
-        range:      [range_max, range_min],
+        range:      [range_good,range_bad],
         type:       'linear',
         ticks:      'outside',
         tick0:      0,
-        dtick:      (range_max - range_min) / 10, //0.25,
+        dtick:      Math.abs(range_bad - range_good) / 10, //0.25,
         ticklen:    2,
         tickwidth:  2,
         tickcolor:  '#444444'
@@ -1655,9 +1687,9 @@ HexaLab.UI.quality_plot = function(container, axis) {
             HexaLab.UI.export_plot(format, function (blob) {
                 saveAs(blob, "HLPlot.png")
             })
-        } else if (format == 'html') {
+        } else if (format == 'svg') {
             HexaLab.UI.export_plot(format, function (blob) {
-                saveAs(blob, "HLPlot.html")
+                saveAs(blob, "HLPlot.svg")
             })
         } else if (format == 'csv') {
             HexaLab.UI.export_plot(format, function (blob) {
@@ -1686,7 +1718,7 @@ HexaLab.UI.quality_plot = function(container, axis) {
                     HexaLab.UI.plot_format_dialog = HexaLab.UI.dialog(200, 150, "<div title='Choose format'>\
                         <ul style='list-style-type:none;'>\
                             <li><a href='javascript:void(0)' onclick='HexaLab.UI.save_plot(\"png\")'>png</a></li>\
-                            <li><a href='javascript:void(0)' onclick='HexaLab.UI.save_plot(\"html\")'>html</a></li>\
+                            <li><a href='javascript:void(0)' onclick='HexaLab.UI.save_plot(\"svg\")'>svg</a></li>\
                             <li><a href='javascript:void(0)' onclick='HexaLab.UI.save_plot(\"csv\")'>csv</a></li>\
                         </ul>\
                     </div>")
