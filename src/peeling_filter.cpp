@@ -13,10 +13,10 @@ namespace HexaLab {
         if (!this->enabled) 
             return;
         
-        assert(mesh.hexas.size() == this->HexaDepth.size());
-        for (size_t i = 0; i < mesh.hexas.size(); ++i) {
+        assert(mesh.cells.size() == this->HexaDepth.size());
+        for (size_t i = 0; i < mesh.cells.size(); ++i) {
             if(this->HexaDepth[i] < this->depth_threshold)
-                mesh.mark(mesh.hexas[i]);
+                mesh.mark(mesh.cells[i]);
         }
     }
 
@@ -27,15 +27,15 @@ namespace HexaLab {
         this->max_depth         = HL_PEELING_FILTER_DEFAULT_MESH_MAX;
 
         // Compute depth
-        printf("[Peeling Filter] %lu %lu on_mesh_set\n", mesh.hexas.size(), this->HexaDepth.size());
-        const size_t hn = mesh.hexas.size();
+        printf("[Peeling Filter] %lu %lu on_mesh_set\n", mesh.cells.size(), this->HexaDepth.size());
+        const size_t hn = mesh.cells.size();
         this->HexaDepth.clear();
         this->HexaDepth.resize(hn,-1);
         std::vector<size_t> toBeProcessed, toBeProcessedNext;
         
         for(size_t i = 0; i < mesh.faces.size(); ++i) {
             if(mesh.navigate(mesh.faces[i]).is_face_boundary())
-                this->HexaDepth[mesh.navigate(mesh.faces[i]).hexa_index()] = 0;
+                this->HexaDepth[mesh.navigate(mesh.faces[i]).cell_index()] = 0;
         }
 
         for(size_t i = 0; i < hn; ++i) {
@@ -48,7 +48,7 @@ namespace HexaLab {
             curDepth++;
             toBeProcessedNext.clear();
             for (size_t i : toBeProcessed) {
-                auto navStart = mesh.navigate(mesh.hexas[i]);
+                auto navStart = mesh.navigate(mesh.cells[i]);
                 assert(this->HexaDepth[i] == -1);
                 int minInd = std::numeric_limits<int>::max();
                 auto nav = navStart;
@@ -56,10 +56,10 @@ namespace HexaLab {
                 do {
                     faceCnt++;
                     assert(!nav.is_face_boundary());            
-                    int otherDepth = this->HexaDepth[nav.flip_hexa().hexa_index()];
+                    int otherDepth = this->HexaDepth[nav.flip_cell().cell_index()];
                     assert(otherDepth == -1 || otherDepth <= curDepth);
                     if (otherDepth >= 0 && otherDepth < curDepth && otherDepth < minInd) minInd = otherDepth;            
-                    nav = nav.next_hexa_face();
+                    nav = nav.next_cell_face();
                 } while(!(nav == navStart));
                 assert(faceCnt == 6);
 

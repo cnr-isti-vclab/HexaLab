@@ -13,14 +13,14 @@ void PickFilter::filter(Mesh& mesh) {
 
     HL_ASSERT(this->mesh == &mesh);
 
-    if (filtered_hexas.size() && filtered_hexas[0]==-1) {
-        for (Index i=0; i<mesh.hexas.size(); i++) mesh.mark( mesh.hexas[i] );
+    if (filtered_cells.size() && filtered_cells[0]==-1) {
+        for (Index i=0; i<mesh.cells.size(); i++) mesh.mark( mesh.cells[i] );
     } else {
-        for (int i: this->filtered_hexas) mesh.mark( mesh.hexas[i] );
+        for (int i: this->filtered_cells) mesh.mark( mesh.cells[i] );
     }
 
-    for (int i: this->filled_hexas) {
-        mesh.unmark( mesh.hexas[i] );
+    for (int i: this->filled_cells) {
+        mesh.unmark( mesh.cells[i] );
     }
 }
 
@@ -31,8 +31,8 @@ void PickFilter::on_mesh_set(Mesh& mesh) {
 }
 
 void PickFilter::clear(){
-    this->filtered_hexas.clear();
-    this->filled_hexas.clear();
+    this->filtered_cells.clear();
+    this->filled_cells.clear();
 }
 
 void PickFilter::raycast( Vector3f origin, Vector3f direction, Index &in , Index &out ){
@@ -47,16 +47,16 @@ void PickFilter::raycast( Vector3f origin, Vector3f direction, Index &in , Index
         bool in0, in1;
 
         MeshNavigator nav = mesh->navigate(f);
-        h0 = nav.hexa_index();
-        in0 = !mesh->is_marked( nav.hexa() );
+        h0 = nav.cell_index();
+        in0 = !mesh->is_marked( nav.cell() );
 
-        if (nav.dart().hexa_neighbor == -1) {
+        if (nav.dart().cell_neighbor == -1) {
             h1 = -1;
             in1 = false;
         } else {
-            nav = nav.flip_hexa();
-            h1 = nav.hexa_index();
-            in1 = !mesh->is_marked( nav.hexa() );
+            nav = nav.flip_cell();
+            h1 = nav.cell_index();
+            in1 = !mesh->is_marked( nav.cell() );
         }
         if (in0==in1) continue; // not a current boundary face
 
@@ -68,74 +68,74 @@ void PickFilter::raycast( Vector3f origin, Vector3f direction, Index &in , Index
 
 }
 
-Index PickFilter::dig_hexa(Vector3f origin, Vector3f direction) {
+Index PickFilter::dig_cell(Vector3f origin, Vector3f direction) {
     Index in, out;
     this->raycast( origin, direction , in, out) ;
 
-    if (in>-1) dig_hexa_id( in );
+    if (in>-1) dig_cell_id( in );
 
     return in;
 }
 
 
-Index PickFilter::undig_hexa(Vector3f origin, Vector3f direction) {
+Index PickFilter::undig_cell(Vector3f origin, Vector3f direction) {
     Index in, out;
     this->raycast( origin, direction , in, out) ;
 
-    if (out>-1) undig_hexa_id(out);
+    if (out>-1) undig_cell_id(out);
     return out;
 
 }
 
-Index PickFilter::isolate_hexa(Vector3f origin, Vector3f direction) {
+Index PickFilter::isolate_cell(Vector3f origin, Vector3f direction) {
     Index in, out;
     this->raycast( origin, direction , in, out) ;
 
-    if (in>-1) isolate_hexa_id(in);
+    if (in>-1) isolate_cell_id(in);
     return in;
 }
 
 void PickFilter::add_one_to_filtered( Index idx ){
     HL_LOG("ADDING %d TTO FIL\n",idx);
     if (!this->mesh) return;
-    if (idx>=(int)this->mesh->hexas.size()) return;
-    HL_LOG("FIL [%lu] = %d\n",this->filtered_hexas.size(),idx);
-    this->filtered_hexas.push_back(idx);
-    std::sort(this->filtered_hexas.begin(), this->filtered_hexas.end());
+    if (idx>=(int)this->mesh->cells.size()) return;
+    HL_LOG("FIL [%lu] = %d\n",this->filtered_cells.size(),idx);
+    this->filtered_cells.push_back(idx);
+    std::sort(this->filtered_cells.begin(), this->filtered_cells.end());
 }
 
 void PickFilter::add_one_to_filled( Index idx ){
     if (!this->mesh) return;
-    if (idx>=this->mesh->hexas.size()) return;
-    this->filled_hexas.push_back(idx);
-    std::sort(this->filled_hexas.begin(), this->filled_hexas.end());
+    if (idx>=this->mesh->cells.size()) return;
+    this->filled_cells.push_back(idx);
+    std::sort(this->filled_cells.begin(), this->filled_cells.end());
 
 }
 
-void PickFilter::dig_hexa_id(Index idx) {
-    auto it = std::find(this->filled_hexas.begin(), this->filled_hexas.end(), idx );
+void PickFilter::dig_cell_id(Index idx) {
+    auto it = std::find(this->filled_cells.begin(), this->filled_cells.end(), idx );
 
-    if (it != this->filled_hexas.end()) {
-        this->filled_hexas.erase(it);
+    if (it != this->filled_cells.end()) {
+        this->filled_cells.erase(it);
     } else {
         add_one_to_filtered(idx);
     }
 }
 
-void PickFilter::undig_hexa_id(Index idx) {
-    auto it = std::find(this->filtered_hexas.begin(), this->filtered_hexas.end(), idx);
-    if (it != this->filtered_hexas.end()) {
-        this->filtered_hexas.erase(it);
+void PickFilter::undig_cell_id(Index idx) {
+    auto it = std::find(this->filtered_cells.begin(), this->filtered_cells.end(), idx);
+    if (it != this->filtered_cells.end()) {
+        this->filtered_cells.erase(it);
     } else {
         add_one_to_filled(idx);
     }
 }
 
-void PickFilter::isolate_hexa_id(Index idx){
-    filtered_hexas.clear();
-    filled_hexas.clear();
-    filtered_hexas.push_back(-1);
-    filled_hexas.push_back(idx);
+void PickFilter::isolate_cell_id(Index idx){
+    filtered_cells.clear();
+    filled_cells.clear();
+    filtered_cells.push_back(-1);
+    filled_cells.push_back(idx);
 }
 
 
