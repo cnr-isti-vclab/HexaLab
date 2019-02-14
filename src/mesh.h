@@ -10,6 +10,15 @@
 #include <mesh_navigator.h>
 #include <hex_quality_color_maps.h>
 
+// How to save a lot of mem
+// Darts are quite verbous, you need 48 of them for a hexa, and in most of 'reasonable' subdivisions they are uselessy repetitive
+// Nice trick is to compact them (e.g. moving to halfedge like structures) 
+// This can be done implicitly
+// consider that for example the four darts inside a wedge: they share the same cell and edge and refers two vertices and two faces; 
+// You always will have this 4plets of darts, so if you keep them distributed in fixed way in a vector you can avoid to explicitly store them. 
+// In this way you store a vector of N/4 FatDarts that can be used to represent a vector of N darts and simply use the 2 LSB to disambiguate a FatDart into the right dart.
+
+
 namespace HexaLab {
     using namespace Eigen;
     using namespace std;
@@ -17,18 +26,18 @@ namespace HexaLab {
     // https://en.wikipedia.org/wiki/Generalized_map
     // TODO switch to combinatorial maps (half-edge structures) ?
     struct Dart {
-        Index hexa_neighbor = -1;
+        Index cell_neighbor = -1;
         Index face_neighbor = -1;
         Index edge_neighbor = -1;
         Index vert_neighbor = -1;
-        Index hexa = -1;
+        Index cell = -1;
         Index face = -1;
         Index edge = -1;
         Index vert = -1;
 
         Dart() {}
-        Dart ( Index hexa, Index face, Index edge, Index vert ) {
-            this->hexa = hexa;
+        Dart ( Index cell, Index face, Index edge, Index vert ) {
+            this->cell = cell;
             this->face = face;
             this->edge = edge;
             this->vert = vert;
@@ -37,23 +46,23 @@ namespace HexaLab {
         Dart ( const Dart& other ) = delete;
 
         Dart ( const Dart&& other ) {
-            this->hexa_neighbor = other.hexa_neighbor;
+            this->cell_neighbor = other.cell_neighbor;
             this->face_neighbor = other.face_neighbor;
             this->edge_neighbor = other.edge_neighbor;
             this->vert_neighbor = other.vert_neighbor;
-            this->hexa          = other.hexa;
+            this->cell          = other.cell;
             this->face          = other.face;
             this->edge          = other.edge;
             this->vert          = other.vert;
         }
 
         bool operator== ( const Dart& other ) const {
-            // TODO avoid comparing neighbors, only compare hexa/face/edeg/vert fields ?
-            return this->hexa_neighbor == other.hexa_neighbor
+            // TODO avoid comparing neighbors, only compare cell/face/edeg/vert fields ?
+            return this->cell_neighbor == other.cell_neighbor
                    && this->face_neighbor == other.face_neighbor
                    && this->edge_neighbor == other.edge_neighbor
                    && this->vert_neighbor == other.vert_neighbor
-                   && this->hexa          == other.hexa
+                   && this->cell          == other.cell
                    && this->face          == other.face
                    && this->edge          == other.edge
                    && this->vert          == other.vert;
@@ -62,14 +71,14 @@ namespace HexaLab {
 
     // marked <=> filtered
 
-    struct Hexa {
+    struct Cell {
         Index dart      = -1;
-        uint32_t mark   =  0;       // mark == mesh.mark -> hexa is filtered
+        uint32_t mark   =  0;       // mark == mesh.mark -> cell is filtered
 
-        Hexa() {}
-        Hexa ( Index dart ) { this->dart = dart; }
-        bool operator== ( const Hexa& other ) const { return this->dart == other.dart; }
-        bool operator!= ( const Hexa& other ) const { return ! ( *this == other ); }
+        Cell() {}
+        Cell ( Index dart ) { this->dart = dart; }
+        bool operator== ( const Cell& other ) const { return this->dart == other.dart; }
+        bool operator!= ( const Cell& other ) const { return ! ( *this == other ); }
     };
 
     struct Face {
@@ -122,7 +131,7 @@ namespace HexaLab {
         uint32_t current_mark = 0;
 
       public:
-        vector<Hexa> hexas;
+        vector<Cell> cells;
         vector<Face> faces;
         vector<Edge> edges;
         vector<Vert> verts;
@@ -132,17 +141,17 @@ namespace HexaLab {
 
         void unmark_all() { ++this->current_mark; }
 
-        //bool mark_is_current ( const Hexa& hexa ) const { return hexa.mark == this->current_mark; }
-        bool is_marked ( const Hexa& hexa ) const { return hexa.mark == this->current_mark ; }
+        //bool mark_is_current ( const Cell& cell ) const { return cell.mark == this->current_mark; }
+        bool is_marked ( const Cell& cell ) const { return cell.mark == this->current_mark ; }
         bool is_marked ( const Vert& vert ) const { return vert.visible_mark == this->current_mark; }
-        void unmark ( Hexa& hexa ) const { hexa.mark = this->current_mark - 1; }
+        void unmark ( Cell& cell ) const { cell.mark = this->current_mark - 1; }
         void unmark ( Vert& vert ) const { vert.visible_mark = this->current_mark - 1; }
-        void mark ( Hexa& hexa ) const { hexa.mark = this->current_mark; }
+        void mark ( Cell& cell ) const { cell.mark = this->current_mark; }
         void mark ( Vert& vert ) const { vert.visible_mark = this->current_mark; }
 
         // Methods to spawn a mesh navigator off of a mesh element
         MeshNavigator navigate ( Dart& dart ) { return MeshNavigator ( dart, *this ); }
-        MeshNavigator navigate ( Hexa& hexa ) { Dart& d = darts[hexa.dart]; return navigate ( d ); }
+        MeshNavigator navigate ( Cell& cell ) { Dart& d = darts[cell.dart]; return navigate ( d ); }
         MeshNavigator navigate ( Face& face ) { Dart& d = darts[face.dart]; return navigate ( d ); }
         MeshNavigator navigate ( Edge& edge ) { Dart& d = darts[edge.dart]; return navigate ( d ); }
         MeshNavigator navigate ( Vert& vert ) { Dart& d = darts[vert.dart]; return navigate ( d ); }

@@ -1,22 +1,22 @@
 #include <mesh.h>
 
 namespace HexaLab {
-    MeshNavigator MeshNavigator::flip_hexa() { return MeshNavigator(_mesh->darts[_dart->hexa_neighbor], *_mesh); }
+    MeshNavigator MeshNavigator::flip_cell() { return MeshNavigator(_mesh->darts[_dart->cell_neighbor], *_mesh); }
     MeshNavigator MeshNavigator::flip_face() { return MeshNavigator(_mesh->darts[_dart->face_neighbor], *_mesh); }
     MeshNavigator MeshNavigator::flip_edge() { return MeshNavigator(_mesh->darts[_dart->edge_neighbor], *_mesh); }
     MeshNavigator MeshNavigator::flip_vert() { return MeshNavigator(_mesh->darts[_dart->vert_neighbor], *_mesh); }
 
     MeshNavigator MeshNavigator::rotate_on_edge() {
-        Hexa& h = hexa();
+        Cell& h = cell();
         MeshNavigator nav = flip_face();
-        if ( nav.hexa() == h && nav.dart().hexa_neighbor != -1 ) {
-            nav = nav.flip_hexa();
+        if ( nav.cell() == h && nav.dart().cell_neighbor != -1 ) {
+            nav = nav.flip_cell();
         }
         return nav;
     }
     MeshNavigator MeshNavigator::rotate_on_face() { return flip_vert().flip_edge(); }
-    MeshNavigator MeshNavigator::rotate_on_hexa() { return flip_vert().flip_edge().flip_face().flip_edge(); }
-    MeshNavigator MeshNavigator::next_hexa_face() { return flip_vert().flip_edge().flip_face(); }
+    MeshNavigator MeshNavigator::rotate_on_cell() { return flip_vert().flip_edge().flip_face().flip_edge(); }
+    MeshNavigator MeshNavigator::next_cell_face() { return flip_vert().flip_edge().flip_face(); }
     MeshNavigator MeshNavigator::flip_side() { return flip_face().flip_edge().flip_vert().flip_edge().flip_face(); }
 
 
@@ -52,13 +52,13 @@ namespace HexaLab {
       assert(posVec.size()==4);
     }
 
-    bool MeshNavigator::is_face_boundary() const { return (_dart->hexa_neighbor == -1); }
+    bool MeshNavigator::is_face_boundary() const { return (_dart->cell_neighbor == -1); }
 
-    Hexa& MeshNavigator::hexa() { return _mesh->hexas[_dart->hexa]; }
+    Cell& MeshNavigator::cell() { return _mesh->cells[_dart->cell]; }
     Face& MeshNavigator::face() { return _mesh->faces[_dart->face]; }
     Edge& MeshNavigator::edge() { return _mesh->edges[_dart->edge]; }
     Vert& MeshNavigator::vert() { return _mesh->verts[_dart->vert]; }
-    Index MeshNavigator::hexa_index() { return _dart->hexa; }
+    Index MeshNavigator::cell_index() { return _dart->cell; }
     Index MeshNavigator::face_index() { return _dart->face; }
     Index MeshNavigator::edge_index() { return _dart->edge; }
     Index MeshNavigator::vert_index() { return _dart->vert; }

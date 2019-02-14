@@ -197,9 +197,9 @@ EMSCRIPTEN_BINDINGS ( HexaLab ) {
                                    .function ( "filter",                 &PickFilter::filter )
                                    .function ( "on_mesh_set",            static_cast<void ( PickFilter::* ) ( Mesh& ) > ( &IFilter::on_mesh_set ) )
                                    .function ( "clear",                  &PickFilter::clear )
-								   .function ( "dig_hexa",            	 &PickFilter::dig_hexa )
-                                   .function ( "undig_hexa",             &PickFilter::undig_hexa )
-                                   .function ( "isolate_hexa",           &PickFilter::isolate_hexa )
+								   .function ( "dig_hexa",            	 &PickFilter::dig_cell )
+                                   .function ( "undig_hexa",             &PickFilter::undig_cell )
+                                   .function ( "isolate_hexa",           &PickFilter::isolate_cell )
                                    .function ( "add_one_to_filtered",    &PickFilter::add_one_to_filtered )
                                    .function ( "add_one_to_filled",      &PickFilter::add_one_to_filled )
                                    ;

@@ -9,9 +9,9 @@
 namespace HexaLab {
     class PickFilter : public IFilter {
     private:
-        // Sorted array of indices of filtered hexas
-        std::vector<Index> filtered_hexas;
-        std::vector<Index> filled_hexas;
+        // Sorted array of indices of filtered cells
+        std::vector<Index> filtered_cells;
+        std::vector<Index> filled_cells;
         // A reference to the mesh is kept to be albe to raycast it later
         Mesh* mesh = nullptr;
 
@@ -19,9 +19,9 @@ namespace HexaLab {
 
         void clear ();
 
-        Index dig_hexa(Vector3f origin, Vector3f direction);
-        Index undig_hexa(Vector3f origin, Vector3f direction);
-        Index isolate_hexa(Vector3f origin, Vector3f direction);
+        Index dig_cell(Vector3f origin, Vector3f direction);
+        Index undig_cell(Vector3f origin, Vector3f direction);
+        Index isolate_cell(Vector3f origin, Vector3f direction);
 
         void filter(Mesh& mesh);
 
@@ -31,9 +31,9 @@ namespace HexaLab {
         void add_one_to_filled( Index idx );
 
     private:
-        void dig_hexa_id(Index idx);
-        void undig_hexa_id(Index idx);
-        void isolate_hexa_id(Index idx);
+        void dig_cell_id(Index idx);
+        void undig_cell_id(Index idx);
+        void isolate_cell_id(Index idx);
 
         void raycast( Vector3f origin, Vector3f direction, Index &in , Index &out );
 

@@ -54,9 +54,9 @@ namespace HexaLab {
         float avg_v = 0;
         Vector3f v[8];
 
-        for ( size_t i = 0; i < mesh->hexas.size(); ++i ) {
+        for ( size_t i = 0; i < mesh->cells.size(); ++i ) {
             int j = 0;
-            MeshNavigator nav = mesh->navigate ( mesh->hexas[i] );
+            MeshNavigator nav = mesh->navigate ( mesh->cells[i] );
             Vert& a = nav.vert();
 
             do {
@@ -64,7 +64,7 @@ namespace HexaLab {
                 nav = nav.rotate_on_face();
             } while ( nav.vert() != a );
 
-            nav = nav.rotate_on_hexa().rotate_on_hexa().flip_vert();
+            nav = nav.rotate_on_cell().rotate_on_cell().flip_vert();
             Vert& b = nav.vert();
 
             do {
@@ -75,10 +75,10 @@ namespace HexaLab {
             avg_v += QualityMeasureFun::volume ( v[0], v[1], v[2], v[3], v[4], v[5], v[6], v[7], nullptr );
         }
 
-        avg_v /= mesh->hexas.size();
+        avg_v /= mesh->cells.size();
         mesh_stats.avg_volume = avg_v;
         mesh_stats.vert_count = mesh->verts.size();
-        mesh_stats.hexa_count = mesh->hexas.size();
+        mesh_stats.hexa_count = mesh->cells.size();
         mesh_stats.aabb = mesh->aabb;
         mesh_stats.quality_min = 0;
         mesh_stats.quality_max = 0;
@@ -207,13 +207,13 @@ namespace HexaLab {
         float maxQ = -std::numeric_limits<float>::max();
         float sum = 0;
         float sum2 = 0;
-        mesh->hexa_quality.resize ( mesh->hexas.size() );
-        mesh->normalized_hexa_quality.resize ( mesh->hexas.size() );
+        mesh->hexa_quality.resize ( mesh->cells.size() );
+        mesh->normalized_hexa_quality.resize ( mesh->cells.size() );
         Vector3f v[8];
 
-        for ( size_t i = 0; i < mesh->hexas.size(); ++i ) {
+        for ( size_t i = 0; i < mesh->cells.size(); ++i ) {
             int j = 0;
-            MeshNavigator nav = mesh->navigate ( mesh->hexas[i] );
+            MeshNavigator nav = mesh->navigate ( mesh->cells[i] );
             Vert& a = nav.vert();
 
             do {
@@ -221,7 +221,7 @@ namespace HexaLab {
                 nav = nav.rotate_on_face();
             } while ( nav.vert() != a );
 
-            nav = nav.rotate_on_hexa().rotate_on_hexa().flip_vert();
+            nav = nav.rotate_on_cell().rotate_on_cell().flip_vert();
             Vert& b = nav.vert();
 
             do {
@@ -239,12 +239,12 @@ namespace HexaLab {
 
         this->mesh_stats.quality_min = minQ;
         this->mesh_stats.quality_max = maxQ;
-        this->mesh_stats.quality_avg = sum / mesh->hexas.size();
-        this->mesh_stats.quality_var = sum2 / mesh->hexas.size() - this->mesh_stats.quality_avg * this->mesh_stats.quality_avg;
+        this->mesh_stats.quality_avg = sum / mesh->cells.size();
+        this->mesh_stats.quality_var = sum2 / mesh->cells.size() - this->mesh_stats.quality_avg * this->mesh_stats.quality_avg;
         minQ = std::numeric_limits<float>::max();
         maxQ = -std::numeric_limits<float>::max();
 
-        for ( size_t i = 0; i < mesh->hexas.size(); ++i ) {
+        for ( size_t i = 0; i < mesh->cells.size(); ++i ) {
             float q = normalize_quality_measure ( this->quality_measure, mesh->hexa_quality[i], this->mesh_stats.quality_min, this->mesh_stats.quality_max );
             minQ = min(q,minQ);
             maxQ = max(q,maxQ);
@@ -288,7 +288,7 @@ namespace HexaLab {
             //         // Boundary Crease
             //         MeshNavigator nav2 = nav.flip_face();
             //         if (!nav2.is_face_boundary()) {
-            //             nav2 = nav2.flip_hexa().flip_face();
+            //             nav2 = nav2.flip_cell().flip_face();
             //             float dot = nav.face().normal.dot(nav2.face().normal);
             //             if (std::acos(dot) > 30 * D2R) {
             //                 for (int n = 0; n < 2; ++n) {     // 2 verts that make the edge
@@ -445,19 +445,19 @@ namespace HexaLab {
     void App::add_visible_face ( Dart& dart, float normal_sign ) {
         MeshNavigator nav = mesh->navigate ( dart );
 
-        // Faces are normally shared between two hexas, but their data structure references only one of them, the 'main' (the first encountered when parsing the mesh file).
-        // If the normal sign is -1, it means that the hexa we want to render is not the main.
-        // Therefore a flip hexa is performed, along with a flip edge to maintain the winding.
+        // Faces are normally shared between two cells, but their data structure references only one of them, the 'main' (the first encountered when parsing the mesh file).
+        // If the normal sign is -1, it means that the cell we want to render is not the main.
+        // Therefore a flip cell is performed, along with a flip edge to maintain the winding.
         if ( normal_sign == -1 ) {
-            nav = nav.flip_hexa().flip_edge();
+            nav = nav.flip_cell().flip_edge();
         }
 
-        // If hexa quality display is enabled, fetch the appropriate quality color.
+        // If cell quality display is enabled, fetch the appropriate quality color.
         // Otherwise use the defautl coloration (white for outer faces, yellow for everything else)
         Vector3f color;
 
         if ( is_quality_color_mapping_enabled() ) {
-            color = color_map.get ( mesh->normalized_hexa_quality[nav.hexa_index()] );
+            color = color_map.get ( mesh->normalized_hexa_quality[nav.cell_index()] );
         } else {
             color = nav.is_face_boundary() ? this->default_outside_color : this->default_inside_color;
         }
@@ -470,10 +470,10 @@ namespace HexaLab {
         }
 
         nav = mesh->navigate ( dart );
-        // nav = mesh->navigate(nav.hexa());   // TODO remove this
+        // nav = mesh->navigate(nav.cell());   // TODO remove this
 
         if ( normal_sign == -1 ) {
-            nav = nav.flip_vert();    // TODO flip hexa/edge instead? same thing?
+            nav = nav.flip_vert();    // TODO flip cell/edge instead? same thing?
         }
 
         Vert& vert = nav.vert();
@@ -529,16 +529,16 @@ namespace HexaLab {
 
         float alpha;
         if (this->do_show_visible_wireframe_singularity) {
-            size_t unfiltered_hexas = 0;
-            Hexa& h = edge_nav.hexa();
+            size_t unfiltered_cells = 0;
+            Cell& h = edge_nav.cell();
             do {
-                if ( !mesh->is_marked( edge_nav.hexa() ) ) {
-                    ++unfiltered_hexas;
+                if ( !mesh->is_marked( edge_nav.cell() ) ) {
+                    ++unfiltered_cells;
                 }
                 edge_nav = edge_nav.rotate_on_edge();
-            } while ( edge_nav.hexa() != h );
+            } while ( edge_nav.cell() != h );
 
-            switch ( unfiltered_hexas ) {
+            switch ( unfiltered_cells ) {
             case 0:             // should never hit
                 alpha = 0;
             case 1:
@@ -629,15 +629,15 @@ namespace HexaLab {
         for ( size_t i = 0; i < mesh->faces.size(); ++i ) {
             MeshNavigator nav = mesh->navigate ( mesh->faces[i] );
 
-            // hexa a visible, hexa b not existing or not visible
-            if ( !mesh->is_marked ( nav.hexa() ) && ( nav.dart().hexa_neighbor == -1 || mesh->is_marked ( nav.flip_hexa().hexa() ) ) ) {
+            // cell a visible, cell b not existing or not visible
+            if ( !mesh->is_marked ( nav.cell() ) && ( nav.dart().cell_neighbor == -1 || mesh->is_marked ( nav.flip_cell().cell() ) ) ) {
                 this->add_visible_face ( nav.dart(), 1 );
-                // hexa a invisible, hexa b existing and visible
-            } else if ( mesh->is_marked ( nav.hexa() ) && nav.dart().hexa_neighbor != -1 && !mesh->is_marked ( nav.flip_hexa().hexa() ) ) {
+                // cell a invisible, cell b existing and visible
+            } else if ( mesh->is_marked ( nav.cell() ) && nav.dart().cell_neighbor != -1 && !mesh->is_marked ( nav.flip_cell().cell() ) ) {
                 this->add_visible_face ( nav.dart(), -1 );
                 // add_filtered_face(nav.dart());
                 // face was culled by the plane, is surface
-            } else if ( mesh->is_marked ( nav.hexa() ) && nav.dart().hexa_neighbor == -1 ) {
+            } else if ( mesh->is_marked ( nav.cell() ) && nav.dart().cell_neighbor == -1 ) {
                 this->add_filtered_face ( nav.flip_edge().dart() );
             }
         }
@@ -695,7 +695,7 @@ namespace HexaLab {
     return p[0]*p[0]+p[1]*p[1]+p[2]*p[2];
     }*/
     // 8 [pp]ositions, 6 [nn]ormals, 8 [vv]isible 6 [ww]hite_or_not
-    void App::build_smooth_hexa ( const Vector3f pp[8], const Vector3f nn[6], const bool vv[8], const bool ww[6], Index hexa_idx ) {
+    void App::build_smooth_hexa ( const Vector3f pp[8], const Vector3f nn[6], const bool vv[8], const bool ww[6], Index cell_idx ) {
         if ( !vv[0] && !vv[1] && !vv[2] && !vv[3] && !vv[4] && !vv[5] && !vv[6] && !vv[7] ) {
             return;
         }
@@ -863,7 +863,7 @@ namespace HexaLab {
                     Vector3f c;
 
                     if ( is_quality_color_mapping_enabled() ) {
-                        c = color_map.get ( mesh->normalized_hexa_quality[hexa_idx] );
+                        c = color_map.get ( mesh->normalized_hexa_quality[cell_idx] );
                     } else {
                         c = w[x][y][z] ? this->default_outside_color : this->default_inside_color;
                     }
@@ -915,9 +915,9 @@ namespace HexaLab {
         for ( size_t i = 0; i < mesh->faces.size(); ++i ) {
             MeshNavigator nav = mesh->navigate ( mesh->faces[i] );
 
-            if ( !mesh->is_marked ( nav.hexa() ) && ( nav.dart().hexa_neighbor == -1 || mesh->is_marked ( nav.flip_hexa().hexa() ) ) ) {
+            if ( !mesh->is_marked ( nav.cell() ) && ( nav.dart().cell_neighbor == -1 || mesh->is_marked ( nav.flip_cell().cell() ) ) ) {
                 mark_face_as_visible ( this->mesh, nav.dart() );
-            } else if ( mesh->is_marked ( nav.hexa() ) && nav.dart().hexa_neighbor != -1 && !mesh->is_marked ( nav.flip_hexa().hexa() ) ) {
+            } else if ( mesh->is_marked ( nav.cell() ) && nav.dart().cell_neighbor != -1 && !mesh->is_marked ( nav.flip_cell().cell() ) ) {
                 mark_face_as_visible ( this->mesh, nav.dart() );
             }
         }
@@ -925,13 +925,13 @@ namespace HexaLab {
         for ( size_t i = 0; i < mesh->faces.size(); ++i ) {
             MeshNavigator nav = mesh->navigate ( mesh->faces[i] );
 
-            if ( mesh->is_marked ( nav.hexa() ) && nav.dart().hexa_neighbor == -1 ) {
+            if ( mesh->is_marked ( nav.cell() ) && nav.dart().cell_neighbor == -1 ) {
                 this->add_filtered_face ( nav.flip_edge().dart() );
             }
         }
 
-        for ( size_t i = 0; i < mesh->hexas.size(); ++i ) {
-            if ( mesh->is_marked ( mesh->hexas[i] ) ) {
+        for ( size_t i = 0; i < mesh->cells.size(); ++i ) {
+            if ( mesh->is_marked ( mesh->cells[i] ) ) {
                 continue;
             }
 
@@ -949,7 +949,7 @@ namespace HexaLab {
             Vector3f    faces_norms[6];
             // ******
             // Extract face normals
-            MeshNavigator nav = this->mesh->navigate ( mesh->hexas[i] );
+            MeshNavigator nav = this->mesh->navigate ( mesh->cells[i] );
             Face& face = nav.face();
             Vector3f    norms_buffer[6];
             Vector3f    colors_buffer[6];
@@ -958,23 +958,23 @@ namespace HexaLab {
                 MeshNavigator n2 = this->mesh->navigate ( nav.face() );
                 float normal_sign;
 
-                if ( n2.hexa() == nav.hexa() ) {
+                if ( n2.cell() == nav.cell() ) {
                     normal_sign = 1;
                 } else {
                     normal_sign = -1;
-                    n2 = n2.flip_hexa().flip_edge();
+                    n2 = n2.flip_cell().flip_edge();
                 }
 
                 norms_buffer[f] = n2.face().normal * normal_sign;
 
                 // color
                 if ( is_quality_color_mapping_enabled() ) {
-                    colors_buffer[f] = color_map.get ( mesh->normalized_hexa_quality[nav.hexa_index()] );
+                    colors_buffer[f] = color_map.get ( mesh->normalized_hexa_quality[nav.cell_index()] );
                 } else {
                     colors_buffer[f] = nav.is_face_boundary() ? this->default_outside_color : this->default_inside_color;
                 }
 
-                nav = nav.next_hexa_face();
+                nav = nav.next_cell_face();
             }
 
             faces_norms[0] = norms_buffer[4];
@@ -990,26 +990,26 @@ namespace HexaLab {
             faces_colors[4] = colors_buffer[0];
             faces_colors[5] = colors_buffer[3];
             // Extract vertices
-            nav = mesh->navigate ( mesh->hexas[i] );
+            nav = mesh->navigate ( mesh->cells[i] );
             auto store_vert = [&] ( size_t i ) {
                 verts_pos[i] = nav.vert().position;
                 verts_vis[i] = mesh->is_marked ( nav.vert() );
             };
-            nav = mesh->navigate ( mesh->hexas[i] ).flip_vert();
+            nav = mesh->navigate ( mesh->cells[i] ).flip_vert();
             store_vert ( 1 );
-            nav = mesh->navigate ( mesh->hexas[i] );
+            nav = mesh->navigate ( mesh->cells[i] );
             store_vert ( 0 );
-            nav = mesh->navigate ( mesh->hexas[i] ).flip_side().flip_vert();
+            nav = mesh->navigate ( mesh->cells[i] ).flip_side().flip_vert();
             store_vert ( 5 );
-            nav = mesh->navigate ( mesh->hexas[i] ).flip_side();
+            nav = mesh->navigate ( mesh->cells[i] ).flip_side();
             store_vert ( 4 );
-            nav = mesh->navigate ( mesh->hexas[i] ).flip_vert().flip_edge().flip_vert();
+            nav = mesh->navigate ( mesh->cells[i] ).flip_vert().flip_edge().flip_vert();
             store_vert ( 3 );
-            nav = mesh->navigate ( mesh->hexas[i] ).flip_edge().flip_vert();
+            nav = mesh->navigate ( mesh->cells[i] ).flip_edge().flip_vert();
             store_vert ( 2 );
-            nav = mesh->navigate ( mesh->hexas[i] ).flip_side().flip_vert().flip_edge().flip_vert();
+            nav = mesh->navigate ( mesh->cells[i] ).flip_side().flip_vert().flip_edge().flip_vert();
             store_vert ( 7 );
-            nav = mesh->navigate ( mesh->hexas[i] ).flip_side().flip_edge().flip_vert();
+            nav = mesh->navigate ( mesh->cells[i] ).flip_side().flip_edge().flip_vert();
             store_vert ( 6 );
             build_gap_hexa ( verts_pos, faces_norms, verts_vis, faces_colors );
         }
@@ -1032,9 +1032,9 @@ namespace HexaLab {
         for ( size_t i = 0; i < mesh->faces.size(); ++i ) {
             MeshNavigator nav = mesh->navigate ( mesh->faces[i] );
 
-            if ( !mesh->is_marked ( nav.hexa() ) && ( nav.dart().hexa_neighbor == -1 || mesh->is_marked ( nav.flip_hexa().hexa() ) ) ) {
+            if ( !mesh->is_marked ( nav.cell() ) && ( nav.dart().cell_neighbor == -1 || mesh->is_marked ( nav.flip_cell().cell() ) ) ) {
                 mark_face_as_visible ( this->mesh, nav.dart() );
-            } else if ( mesh->is_marked ( nav.hexa() ) && nav.dart().hexa_neighbor != -1 && !mesh->is_marked ( nav.flip_hexa().hexa() ) ) {
+            } else if ( mesh->is_marked ( nav.cell() ) && nav.dart().cell_neighbor != -1 && !mesh->is_marked ( nav.flip_cell().cell() ) ) {
                 mark_face_as_visible ( this->mesh, nav.dart() );
             }
         }
@@ -1042,13 +1042,13 @@ namespace HexaLab {
         for ( size_t i = 0; i < mesh->faces.size(); ++i ) {
             MeshNavigator nav = mesh->navigate ( mesh->faces[i] );
 
-            if ( mesh->is_marked ( nav.hexa() ) && nav.dart().hexa_neighbor == -1 ) {
+            if ( mesh->is_marked ( nav.cell() ) && nav.dart().cell_neighbor == -1 ) {
                 this->add_filtered_face ( nav.flip_edge().dart() );
             }
         }
 
-        for ( size_t i = 0; i < mesh->hexas.size(); ++i ) {
-            if ( mesh->is_marked ( mesh->hexas[i] ) ) {
+        for ( size_t i = 0; i < mesh->cells.size(); ++i ) {
+            if ( mesh->is_marked ( mesh->cells[i] ) ) {
                 continue;
             }
 
@@ -1066,7 +1066,7 @@ namespace HexaLab {
             Vector3f    faces_norms[6];
             // ******
             // Extract face normals
-            MeshNavigator nav = this->mesh->navigate ( mesh->hexas[i] );
+            MeshNavigator nav = this->mesh->navigate ( mesh->cells[i] );
             Face& face = nav.face();
             Vector3f    norms_buffer[6];
             bool        vis_buffer[6];
@@ -1075,16 +1075,16 @@ namespace HexaLab {
                 MeshNavigator n2 = this->mesh->navigate ( nav.face() );
                 float normal_sign;
 
-                if ( n2.hexa() == nav.hexa() ) {
+                if ( n2.cell() == nav.cell() ) {
                     normal_sign = 1;
                 } else {
                     normal_sign = -1;
-                    n2 = n2.flip_hexa().flip_edge();
+                    n2 = n2.flip_cell().flip_edge();
                 }
 
                 norms_buffer[f] = n2.face().normal * normal_sign;
-                vis_buffer[f] = n2.dart().hexa_neighbor == -1;
-                nav = nav.next_hexa_face();
+                vis_buffer[f] = n2.dart().cell_neighbor == -1;
+                nav = nav.next_cell_face();
             }
 
             faces_norms[0] = norms_buffer[4];
@@ -1100,28 +1100,28 @@ namespace HexaLab {
             faces_vis[4] = vis_buffer[0];
             faces_vis[5] = vis_buffer[3];
             // Extract vertices
-            nav = mesh->navigate ( mesh->hexas[i] );
+            nav = mesh->navigate ( mesh->cells[i] );
             auto store_vert = [&] ( size_t i ) {
                 verts_pos[i] = nav.vert().position;
                 verts_vis[i] = mesh->is_marked ( nav.vert() );
             };
-            nav = mesh->navigate ( mesh->hexas[i] ).flip_vert();
+            nav = mesh->navigate ( mesh->cells[i] ).flip_vert();
             store_vert ( 1 );
-            nav = mesh->navigate ( mesh->hexas[i] );
+            nav = mesh->navigate ( mesh->cells[i] );
             store_vert ( 0 );
-            nav = mesh->navigate ( mesh->hexas[i] ).flip_side().flip_vert();
+            nav = mesh->navigate ( mesh->cells[i] ).flip_side().flip_vert();
             store_vert ( 5 );
-            nav = mesh->navigate ( mesh->hexas[i] ).flip_side();
+            nav = mesh->navigate ( mesh->cells[i] ).flip_side();
             store_vert ( 4 );
-            nav = mesh->navigate ( mesh->hexas[i] ).flip_vert().flip_edge().flip_vert();
+            nav = mesh->navigate ( mesh->cells[i] ).flip_vert().flip_edge().flip_vert();
             store_vert ( 3 );
-            nav = mesh->navigate ( mesh->hexas[i] ).flip_edge().flip_vert();
+            nav = mesh->navigate ( mesh->cells[i] ).flip_edge().flip_vert();
             store_vert ( 2 );
-            nav = mesh->navigate ( mesh->hexas[i] ).flip_side().flip_vert().flip_edge().flip_vert();
+            nav = mesh->navigate ( mesh->cells[i] ).flip_side().flip_vert().flip_edge().flip_vert();
             store_vert ( 7 );
-            nav = mesh->navigate ( mesh->hexas[i] ).flip_side().flip_edge().flip_vert();
+            nav = mesh->navigate ( mesh->cells[i] ).flip_side().flip_edge().flip_vert();
             store_vert ( 6 );
-            build_smooth_hexa ( verts_pos, faces_norms, verts_vis, faces_vis, nav.hexa_index() );
+            build_smooth_hexa ( verts_pos, faces_norms, verts_vis, faces_vis, nav.cell_index() );
         }
     }
     void App::build_surface_models() {
@@ -1166,8 +1166,8 @@ namespace HexaLab {
         for ( size_t i = 0; i < mesh->faces.size(); ++i ) {
             MeshNavigator nav = mesh->navigate ( mesh->faces[i] );
 
-            // hexa a visible, hexa b not existing or not visible
-            if ( nav.dart().hexa_neighbor == -1 ) {
+            // cell a visible, cell b not existing or not visible
+            if ( nav.dart().cell_neighbor == -1 ) {
                 this->add_full_face ( nav.dart() );
             }
         }
@@ -1198,24 +1198,24 @@ namespace HexaLab {
         for ( size_t i = 0; i < mesh->faces.size(); ++i ) {
             MeshNavigator nav = mesh->navigate ( mesh->faces[i] );
 
-            if ( !mesh->is_marked ( nav.hexa() ) && ( nav.dart().hexa_neighbor == -1 || mesh->is_marked ( nav.flip_hexa().hexa() ) ) ) {
+            if ( !mesh->is_marked ( nav.cell() ) && ( nav.dart().cell_neighbor == -1 || mesh->is_marked ( nav.flip_cell().cell() ) ) ) {
                 mark_face_as_visible ( this->mesh, nav.dart() );
-            } else if ( mesh->is_marked ( nav.hexa() ) && nav.dart().hexa_neighbor != -1 && !mesh->is_marked ( nav.flip_hexa().hexa() ) ) {
+            } else if ( mesh->is_marked ( nav.cell() ) && nav.dart().cell_neighbor != -1 && !mesh->is_marked ( nav.flip_cell().cell() ) ) {
                 mark_face_as_visible ( this->mesh, nav.dart() );
             }
         }
 
-        for ( size_t i = 0; i < mesh->hexas.size(); ++i ) {
-            if ( mesh->is_marked ( mesh->hexas[i] ) ) {
+        for ( size_t i = 0; i < mesh->cells.size(); ++i ) {
+            if ( mesh->is_marked ( mesh->cells[i] ) ) {
                 continue;
             }
 
-            MeshNavigator nav = mesh->navigate ( mesh->hexas[i] );
+            MeshNavigator nav = mesh->navigate ( mesh->cells[i] );
             bool exit = false;
 
             for ( size_t j = 0; j < 4; ++j ) {
                 if ( mesh->is_marked ( nav.vert() ) && !nav.vert().is_surface ) {
-                    mesh->mark ( nav.hexa() );
+                    mesh->mark ( nav.cell() );
                     exit = true;
                     break;
                 }
@@ -1227,11 +1227,11 @@ namespace HexaLab {
                 continue;
             }
 
-            nav = nav.rotate_on_hexa().rotate_on_hexa();
+            nav = nav.rotate_on_cell().rotate_on_cell();
 
             for ( size_t j = 0; j < 4; ++j ) {
                 if ( mesh->is_marked ( nav.vert() ) && !nav.vert().is_surface ) {
-                    mesh->mark ( nav.hexa() );
+                    mesh->mark ( nav.cell() );
                     break;
                 }
 
@@ -1258,24 +1258,24 @@ namespace HexaLab {
         for ( size_t i = 0; i < mesh->faces.size(); ++i ) {
             MeshNavigator nav = mesh->navigate ( mesh->faces[i] );
 
-            if ( !mesh->is_marked ( nav.hexa() ) && ( nav.dart().hexa_neighbor == -1 || mesh->is_marked ( nav.flip_hexa().hexa() ) ) ) {
+            if ( !mesh->is_marked ( nav.cell() ) && ( nav.dart().cell_neighbor == -1 || mesh->is_marked ( nav.flip_cell().cell() ) ) ) {
                 mark_face_as_visible ( this->mesh, nav.dart() );
-            } else if ( mesh->is_marked ( nav.hexa() ) && nav.dart().hexa_neighbor != -1 && !mesh->is_marked ( nav.flip_hexa().hexa() ) ) {
+            } else if ( mesh->is_marked ( nav.cell() ) && nav.dart().cell_neighbor != -1 && !mesh->is_marked ( nav.flip_cell().cell() ) ) {
                 mark_face_as_visible ( this->mesh, nav.dart() );
             }
         }
 
-        for ( size_t i = 0; i < mesh->hexas.size(); ++i ) {
-            if ( !mesh->is_marked ( mesh->hexas[i] ) ) {
+        for ( size_t i = 0; i < mesh->cells.size(); ++i ) {
+            if ( !mesh->is_marked ( mesh->cells[i] ) ) {
                 continue;
             }
 
-            MeshNavigator nav = mesh->navigate ( mesh->hexas[i] );
+            MeshNavigator nav = mesh->navigate ( mesh->cells[i] );
             bool exit = false;
 
             for ( size_t j = 0; j < 4; ++j ) {
                 if ( mesh->is_marked ( nav.vert() ) && !nav.vert().is_surface ) {
-                    mesh->unmark ( nav.hexa() );
+                    mesh->unmark ( nav.cell() );
                     exit = true;
                     break;
                 }
@@ -1287,11 +1287,11 @@ namespace HexaLab {
                 continue;
             }
 
-            nav = nav.rotate_on_hexa().rotate_on_hexa();
+            nav = nav.rotate_on_cell().rotate_on_cell();
 
             for ( size_t j = 0; j < 4; ++j ) {
                 if ( mesh->is_marked ( nav.vert() ) && !nav.vert().is_surface ) {
-                    mesh->unmark ( nav.hexa() );
+                    mesh->unmark ( nav.cell() );
                     break;
                 }
 

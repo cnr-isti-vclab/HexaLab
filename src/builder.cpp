@@ -43,20 +43,20 @@ void Builder::link_hexas ( Mesh& mesh, Index d1, Index d2 ) {
     for ( size_t i = 0; i < 4; ++i ) {
         for ( size_t j = 0; j < 4; ++j ) {
             if ( n2.vert() == n1.vert() && n2.edge() == n1.edge() ) {
-                n2.dart().hexa_neighbor = n1.dart_index();
-                n1.dart().hexa_neighbor = n2.dart_index();
-                n2.flip_vert().dart().hexa_neighbor = n1.flip_vert().dart_index();
-                n1.flip_vert().dart().hexa_neighbor = n2.flip_vert().dart_index();
+                n2.dart().cell_neighbor = n1.dart_index();
+                n1.dart().cell_neighbor = n2.dart_index();
+                n2.flip_vert().dart().cell_neighbor = n1.flip_vert().dart_index();
+                n1.flip_vert().dart().cell_neighbor = n2.flip_vert().dart_index();
                 ++found;
             }
 
             n2 = n2.flip_vert();
 
             if ( n2.vert() == n1.vert() && n2.edge() == n1.edge() ) {
-                n2.dart().hexa_neighbor = n1.dart_index();
-                n1.dart().hexa_neighbor = n2.dart_index();
-                n2.flip_vert().dart().hexa_neighbor = n1.flip_vert().dart_index();
-                n1.flip_vert().dart().hexa_neighbor = n2.flip_vert().dart_index();
+                n2.dart().cell_neighbor = n1.dart_index();
+                n1.dart().cell_neighbor = n2.dart_index();
+                n2.flip_vert().dart().cell_neighbor = n1.flip_vert().dart_index();
+                n1.flip_vert().dart().cell_neighbor = n2.flip_vert().dart_index();
                 ++found;
             }
 
@@ -205,8 +205,8 @@ Index Builder::add_face ( Mesh& mesh, Index h, const Index* face ) {
 
 // hexa: array of 8 vertex indices representing the hexa.
 Index Builder::add_hexa ( Mesh& mesh, const Index* hexa ) {
-    const Index h = mesh.hexas.size();
-    mesh.hexas.emplace_back ( mesh.darts.size() );
+    const Index h = mesh.cells.size();
+    mesh.cells.emplace_back ( mesh.darts.size() );
     Index base = mesh.darts.size();
     Index faces[6];
 
@@ -273,7 +273,7 @@ void Builder::build ( Mesh& mesh, const vector<Vector3f>& vertices, const vector
     add_hexas(mesh, indices , 50, 75);
     add_hexas(mesh, indices , 75, 100);
 
-    mesh.hexa_quality.resize ( mesh.hexas.size() );
+    mesh.hexa_quality.resize ( mesh.cells.size() );
     HL_LOG ( "100%%\n" );
 
     auto dt = milli_from_sample ( t0 );
@@ -301,7 +301,7 @@ void Builder::update_surface_status( Mesh& mesh ) {
         Face& begin = nav.face();
 
         do {
-            if ( nav.dart().hexa_neighbor == -1 ) {
+            if ( nav.dart().cell_neighbor == -1 ) {
                 nav.edge().is_surface = true;
                 nav.vert().is_surface = true;
                 nav.flip_vert().vert().is_surface = true;
@@ -321,7 +321,7 @@ bool Builder::validate ( Mesh& mesh ) {
 
     for ( size_t i = 0; i < mesh.darts.size(); ++i ) {
         Dart& dart = mesh.darts[i];
-        HL_ASSERT ( dart.hexa != -1 && dart.hexa < mesh.hexas.size() );
+        HL_ASSERT ( dart.cell != -1 && dart.cell < mesh.cells.size() );
         HL_ASSERT ( dart.face != -1 && dart.face < mesh.faces.size() );
         HL_ASSERT ( dart.edge != -1 && dart.edge < mesh.edges.size() );
         HL_ASSERT ( dart.vert != -1 && dart.vert < mesh.verts.size() );
@@ -329,8 +329,8 @@ bool Builder::validate ( Mesh& mesh ) {
         HL_ASSERT ( dart.edge_neighbor != -1 && dart.edge_neighbor < mesh.darts.size() );
         HL_ASSERT ( dart.vert_neighbor != -1 && dart.vert_neighbor < mesh.darts.size() );
 
-        if ( dart.hexa_neighbor != -1 ) {
-            HL_ASSERT ( dart.hexa_neighbor < mesh.darts.size() );
+        if ( dart.cell_neighbor != -1 ) {
+            HL_ASSERT ( dart.cell_neighbor < mesh.darts.size() );
         } else {
             ++surface_darts;
         }
@@ -345,7 +345,7 @@ bool Builder::validate ( Mesh& mesh ) {
             HL_ASSERT ( nav.vert() == v );
             Dart& d1 = nav.dart();
             nav = nav.flip_vert();
-            HL_ASSERT ( nav.dart().hexa == d1.hexa
+            HL_ASSERT ( nav.dart().cell == d1.cell
                         && nav.dart().face == d1.face
                         && nav.dart().edge == d1.edge );
             nav = nav.flip_vert();
@@ -360,7 +360,7 @@ bool Builder::validate ( Mesh& mesh ) {
         HL_ASSERT ( nav.edge() == e );
         Dart& d1 = nav.dart();
         nav = nav.flip_edge();
-        HL_ASSERT ( nav.dart().hexa == d1.hexa
+        HL_ASSERT ( nav.dart().cell == d1.cell
                     && nav.dart().face == d1.face
                     && nav.dart().vert == d1.vert );
         nav = nav.flip_edge();
@@ -374,32 +374,32 @@ bool Builder::validate ( Mesh& mesh ) {
         HL_ASSERT ( nav.face() == f );
         Dart& d1 = nav.dart();
         nav = nav.flip_face();
-        HL_ASSERT ( nav.dart().hexa == d1.hexa
+        HL_ASSERT ( nav.dart().cell == d1.cell
                     && nav.dart().edge == d1.edge
                     && nav.dart().vert == d1.vert );
         nav = nav.flip_face();
         HL_ASSERT ( nav.face() == f );
     }
 
-    for ( size_t i = 0; i < mesh.hexas.size(); ++i ) {
-        Hexa& h = mesh.hexas[i];
+    for ( size_t i = 0; i < mesh.cells.size(); ++i ) {
+        Cell& h = mesh.cells[i];
         HL_ASSERT ( h.dart != -1 );
         auto nav = mesh.navigate ( h );
-        HL_ASSERT ( nav.hexa() == h );
+        HL_ASSERT ( nav.cell() == h );
 
-        if ( nav.dart().hexa_neighbor != -1 ) {
+        if ( nav.dart().cell_neighbor != -1 ) {
             Dart& d1 = nav.dart();
-            nav = nav.flip_hexa();
+            nav = nav.flip_cell();
             HL_ASSERT ( nav.dart().face == d1.face
                         && nav.dart().edge == d1.edge
                         && nav.dart().vert == d1.vert );
-            nav = nav.flip_hexa();
-            HL_ASSERT ( nav.hexa() == h );
+            nav = nav.flip_cell();
+            HL_ASSERT ( nav.cell() == h );
         }
     }
 
-    for ( size_t i = 0; i < mesh.hexas.size(); ++i ) {
-        Hexa& h = mesh.hexas[i];
+    for ( size_t i = 0; i < mesh.cells.size(); ++i ) {
+        Cell& h = mesh.cells[i];
         Vector3f v[8];
         int j = 0;
         auto nav = mesh.navigate ( h );
@@ -410,7 +410,7 @@ bool Builder::validate ( Mesh& mesh ) {
             nav = nav.rotate_on_face();
         } while ( nav.vert() != a );
 
-        nav = nav.rotate_on_hexa().rotate_on_hexa().flip_vert();
+        nav = nav.rotate_on_cell().rotate_on_cell().flip_vert();
         Vert& b = nav.vert();
 
         do {

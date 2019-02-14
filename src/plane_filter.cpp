@@ -27,18 +27,18 @@ namespace HexaLab {
         if (!this->enabled)
             return;
 
-        for (unsigned int i = 0; i < mesh.hexas.size(); ++i) {
-            Hexa& hexa = mesh.hexas[i];
+        for (unsigned int i = 0; i < mesh.cells.size(); ++i) {
+            Cell& cell = mesh.cells[i];
 
             // front face plane cull check
-            MeshNavigator nav = mesh.navigate(hexa);
+            MeshNavigator nav = mesh.navigate(cell);
             if (plane_cull_test(mesh, nav.face())) { 
-                mesh.mark(nav.hexa());
+                mesh.mark(nav.cell());
                 continue;
             }
-            nav = nav.rotate_on_hexa().rotate_on_hexa();
+            nav = nav.rotate_on_cell().rotate_on_cell();
             if (plane_cull_test(mesh, nav.face())) { 
-                mesh.mark(nav.hexa());
+                mesh.mark(nav.cell());
                 continue;
             }
         }
