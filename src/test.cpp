@@ -11,7 +11,7 @@ using namespace HexaLab;
 using json = nlohmann::json; // for json reading
 
 int main() {
-    printf ( "Size of Hexa %lu\n", sizeof ( Hexa ) );
+    printf ( "Size of Hexa %lu\n", sizeof ( Cell ) );
     printf ( "Size of Face %lu\n", sizeof ( Face ) );
     printf ( "Size of Edge %lu\n", sizeof ( Edge ) );
     printf ( "Size of Vert %lu\n", sizeof ( Vert ) );
@@ -33,11 +33,11 @@ int main() {
     int meshCnt = 0;
     size_t hexMin= UINT_MAX;
     size_t hexMax = 0;
+    std::string minMeshName, maxMeshName;
     int failCnt = 0;
     App app;
-
     for ( size_t i = 0; i < paperArrayJSON.size(); i++ ) {
-//      for ( size_t i = 0; i < 1; i++ ) {
+//    { size_t i= 9;
         printf ( "Dataset %lu %lu \n", i, paperArrayJSON[i]["paper"].size() );
         json paper = paperArrayJSON[i]["paper"];
         string path = paperArrayJSON[i]["path"];
@@ -45,22 +45,37 @@ int main() {
         json dataVec = paperArrayJSON[i]["data"];
         printf ( "-- title %s\n", title.c_str() );
 
-        for ( size_t j = 0; j < dataVec.size(); ++j ) {
-            printf ("Mesh %lu/%lu on dataset %lu/%lu\n",j+1,dataVec.size(),i+1,paperArrayJSON.size());
+      for ( size_t j = 0; j < dataVec.size(); ++j ) {
+//        { size_t j= 2;
+            printf ("Mesh %lu/%lu on dataset %lu/%lu\n",j+1,dataVec.size(),i+1,paperArrayJSON.size());fflush ( stdout );
             ++meshCnt;
             string filename = dataVec[j];
             const string basepath = "../datasets/";
             app.set_quality_measure( QualityMeasureEnum::SJ );
             bool ret = app.import_mesh ( basepath + path + "/" + filename );
-            printf("     Hex %4lu\n",app.get_mesh()->hexas.size());
-            hexMin=std::min(hexMin,app.get_mesh()->hexas.size());
-            hexMax=std::max(hexMax,app.get_mesh()->hexas.size());
-            app.set_quality_measure( QualityMeasureEnum::ODD );
+            if(!ret) {
+              failCnt++;
+              meshCnt--;
+              printf("\n\n ************** FAILURE ***************\n in loading mesh  %s\n\n",filename.c_str());
+            }
+            printf("     Hex %4lu\n",app.get_mesh()->cells.size());fflush ( stdout );
+            if(hexMin>app.get_mesh()->cells.size()) {
+              hexMin=app.get_mesh()->cells.size();
+              minMeshName= basepath + path + "/" + filename;
+            } 
+            if(hexMax<app.get_mesh()->cells.size()) {
+              hexMax=app.get_mesh()->cells.size();
+              maxMeshName= basepath + path + "/" + filename;
+            }
+            hexMax=std::max(hexMax,app.get_mesh()->cells.size());
+            //app.set_quality_measure( QualityMeasureEnum::ODD );
             fflush ( stdout );
         }
     }
 
     printf ( "%i meshes in the archive (%i fails to load)\n", meshCnt, failCnt );
-    printf ( "Range %lu - %lu\n", hexMin,hexMax);
+    printf ( "Range of Meshes\n"
+             "   Min %10lu hex (%s) \n"
+             "   Max %10lu hex (%s) \n", hexMin, minMeshName.c_str(),hexMax,maxMeshName.c_str());
     printf ( "Press enter to exit.\n" );
 }

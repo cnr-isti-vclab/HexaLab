@@ -18,7 +18,7 @@ namespace HexaLab {
             return;
         }
 
-        for ( size_t i = 0; i < mesh.hexas.size(); ++i ) {
+        for ( size_t i = 0; i < mesh.cells.size(); ++i ) {
             bool is_filtered;
 
             switch ( this->op ) {
@@ -32,7 +32,7 @@ namespace HexaLab {
             }
 
             if ( is_filtered ) {
-                mesh.mark ( mesh.hexas[i] );
+                mesh.mark ( mesh.cells[i] );
             }
         }
     }
