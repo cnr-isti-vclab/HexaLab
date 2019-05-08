@@ -491,5 +491,29 @@
             "hex_prisma.vtk"    
         ]
     }
+        , {
+        "paper": {
+            "title": "Dual Sheet Meshing: An Interactive Approach to Robust Hexahedralization",
+            "venue": "Computer Graphics Forum, Volume 38 Issue 2",
+            "authors": "Takayama, Kenshi",
+            "year": "2019",
+            "PDF": "http://research.nii.ac.jp/~takayama/dual-sheet-meshing/dual-sheet-meshing-eg2019.pdf",
+            "web": "http://research.nii.ac.jp/~takayama/",
+            "DOI": "https://doi.org/10.1111/cgf.13617"
+        },
+        "path": "2019 - Dual Sheet Meshing - An Interactive Approach to Robust Hexahedralization",
+        "label": "2019 - Dual Sheet Meshing - An Interactive Approach to Robust Hexahedralization",
+        "data": [
+            "bone.vtk",
+            "bunny.vtk",
+            "double-torus.vtk",
+            "fandisk.liu18.vtk",
+            "fandisk.vtk",
+            "hanger.vtk",
+            "joint.vtk",
+            "rockarm.vtk",
+            "rod.vtk"
+        ]
+    }
                ]
 }
