@@ -462,6 +462,58 @@
             "toy2/toy2_input.mesh",
             "toy2/toy2_output.mesh"
         ]
-    } 
+    }
+        , {
+        "paper": {
+            "title": "Symmetric Moving Frames",
+            "venue": "ACM Trans. Graph.",
+            "authors": "Etienne Corman and Keenan Crane",
+            "year": "2019",
+            "PDF": "http://www.cs.cmu.edu/~kmcrane/Projects/SymmetricMovingFrames/paper.pdf",
+            "web": "http://www.cs.cmu.edu/~kmcrane/Projects/SymmetricMovingFrames/index.html",
+            "DOI": ""
+        },
+        "path": "2019 - Symmetric Moving Frames",
+        "label": "2019 - Symmetric Moving Frames",
+        "data": [
+            "hex_ellipsoid_coarse.vtk",
+            "hex_sculpture.vtk",
+            "hex_brokenbullet.vtk",
+            "hex_ellipsoid_fine.vtk",
+            "hex_sphere.vtk",
+            "hex_cube_coarse.vtk",
+            "hex_fanpart.vtk",
+            "hex_tetrahedron.vtk",
+            "hex_cube_fine.vtk",
+            "hex_joint.vtk",
+            "hex_torus.vtk",
+            "hex_cylinder.vtk",
+            "hex_prisma.vtk"    
+        ]
+    }
+        , {
+        "paper": {
+            "title": "Dual Sheet Meshing: An Interactive Approach to Robust Hexahedralization",
+            "venue": "Computer Graphics Forum, Volume 38 Issue 2",
+            "authors": "Takayama, Kenshi",
+            "year": "2019",
+            "PDF": "http://research.nii.ac.jp/~takayama/dual-sheet-meshing/dual-sheet-meshing-eg2019.pdf",
+            "web": "http://research.nii.ac.jp/~takayama/",
+            "DOI": "https://doi.org/10.1111/cgf.13617"
+        },
+        "path": "2019 - Dual Sheet Meshing - An Interactive Approach to Robust Hexahedralization",
+        "label": "2019 - Dual Sheet Meshing - An Interactive Approach to Robust Hexahedralization",
+        "data": [
+            "bone.vtk",
+            "bunny.vtk",
+            "double-torus.vtk",
+            "fandisk.liu18.vtk",
+            "fandisk.vtk",
+            "hanger.vtk",
+            "joint.vtk",
+            "rockarm.vtk",
+            "rod.vtk"
+        ]
+    }
                ]
 }
