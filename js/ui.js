@@ -3,15 +3,15 @@
 var HexaLab = {}
 
 // --------------------------------------------------------------------------------
-//  ______ _ _       _____           _                 
-// |  ____(_) |     / ____|         | |                
-// | |__   _| | ___| (___  _   _ ___| |_ ___ _ __ ___  
-// |  __| | | |/ _ \\___ \| | | / __| __/ _ \ '_ ` _ \ 
+//  ______ _ _       _____           _
+// |  ____(_) |     / ____|         | |
+// | |__   _| | ___| (___  _   _ ___| |_ ___ _ __ ___
+// |  __| | | |/ _ \\___ \| | | / __| __/ _ \ '_ ` _ \
 // | |    | | |  __/____) | |_| \__ \ ||  __/ | | | | |
 // |_|    |_|_|\___|_____/ \__, |___/\__\___|_| |_| |_|
-//                          __/ |                      
-//                         |___/                 
-// @FileSystem      
+//                          __/ |
+//                         |___/
+// @FileSystem
 // --------------------------------------------------------------------------------
 HexaLab.FS = {
         // check if a virtual file has been mapped to the path
@@ -33,7 +33,7 @@ HexaLab.FS = {
         // create the file
         FS.createDataFile("/", name, data, true, true);
     },
-    
+
     // delete a virtual file
     delete_file: function (name) {
         try {
@@ -43,7 +43,7 @@ HexaLab.FS = {
         } catch (err) {
         }
     },
-    
+
     // parse the file path and return the last token (the file name) TODO rename to get_path_file_name
     short_path: function(path) {
         if (path.includes("/")) {
@@ -54,7 +54,7 @@ HexaLab.FS = {
 
     // HTML element that when triggered pops the file picker system UI to pick a file path from the actual physical drive
     element: $('<input type="file">'),
-    
+
     // pop the UI, send the file object picked to the callback (the file object is metadata)
     trigger_file_picker: function (callback) {
 		// TODO: accept element.setAttribute("accept",fileType);
@@ -72,10 +72,10 @@ HexaLab.FS = {
 
     // Javascript object to read a file from the physical drive
     reader: new FileReader(),
-	
+
     // read file metadata (same thing that trigger_file_picker passes to the callback) from physical drive using the file reader and callback passing the filename and the content
     read_json: function (file, callback) {
-        this.reader.onload = function () {
+        this.reader.onloadend = function () {
             const json = JSON.parse(this.result)
             callback(file.name, json)
         }
@@ -91,7 +91,7 @@ HexaLab.FS = {
 			if (event.lengthComputable) {
 				HexaLab.UI.set_progress_percent(100 * event.loaded / event.total);
 			}
-		}		
+		}
         this.reader.readAsArrayBuffer(file, "UTF-8")
     },
 
@@ -102,11 +102,11 @@ HexaLab.FS = {
     }
 }
 // --------------------------------------------------------------------------------
-//  _    _ _____ 
+//  _    _ _____
 // | |  | |_   _|
-// | |  | | | |  
-// | |  | | | |  
-// | |__| |_| |_ 
+// | |  | | | |
+// | |  | | | |
+// | |__| |_| |_
 //  \____/|_____|
 // @UI
 // --------------------------------------------------------------------------------
@@ -127,8 +127,6 @@ HexaLab.UI = {
     dragdrop: {
         overlay:            $('#drag_drop_overlay'),
         header:             $('#drag_drop_header'),
-        mesh:               $('#mesh_drag_drop_quad'),
-        settings:           $('#settings_drag_drop_quad'),
     },
 
     // Mesh dialog
@@ -165,7 +163,7 @@ HexaLab.UI = {
             listeners:      [],
         },
     },
-    
+
     // Toolbar
     topbar: {
         load_mesh:          $('#load_mesh'),
@@ -185,8 +183,8 @@ HexaLab.UI = {
             this.save_settings.prop("disabled", false)
             this.snapshot.prop("disabled", false)
             HexaLab.UI.settings.rendering_menu_content.prop('disabled', false)
-            HexaLab.UI.settings.silhouette.slider('enable')    
-            HexaLab.UI.settings.erode_dilate.slider('enable')    
+            HexaLab.UI.settings.silhouette.slider('enable')
+            HexaLab.UI.settings.erode_dilate.slider('enable')
             HexaLab.UI.settings.singularity_mode.slider('enable')
             HexaLab.UI.settings.wireframe.slider('enable')
             HexaLab.UI.settings.crack_size.slider('enable')
@@ -202,7 +200,7 @@ HexaLab.UI = {
             this.snapshot.prop("disabled", true)
         },
     },
-    
+
     // Settings
     settings: {
         color: {
@@ -243,7 +241,7 @@ HexaLab.UI = {
         // erode dilate filter slider
         erode_dilate:       $('#erode_dilate_slider')
     },
-    
+
     // datasets index js file content
     datasets_index: {},
 }
@@ -284,21 +282,21 @@ $.ajax({
     });
 })
 // --------------------------------------------------------------------------------
-//   _____      _   _   _                 
-//  / ____|    | | | | (_)                
-// | (___   ___| |_| |_ _ _ __   __ _ ___ 
+//   _____      _   _   _
+//  / ____|    | | | | (_)
+// | (___   ___| |_| |_ _ _ __   __ _ ___
 //  \___ \ / _ \ __| __| | '_ \ / _` / __|
 //  ____) |  __/ |_| |_| | | | | (_| \__ \
 // |_____/ \___|\__|\__|_|_| |_|\__, |___/
-//                               __/ |    
-//                              |___/     
+//                               __/ |
+//                              |___/
 // @Settings
 // --------------------------------------------------------------------------------
 // User copy-paste event listeners.
 // On copy, app settings are copied to the user system clipboard.
-// On paste, the app reads and imports settings from the clipboard. 
+// On paste, the app reads and imports settings from the clipboard.
 // --------------------------------------------------------------------------------
-document.body.addEventListener('paste', function (e) { 
+document.body.addEventListener('paste', function (e) {
     var clipboardData, pastedData
 
     e.stopPropagation()
@@ -309,10 +307,12 @@ document.body.addEventListener('paste', function (e) {
 
     HexaLab.UI.maybe_set_settings(JSON.parse(pastedData))
 })
-document.body.addEventListener('copy', function (e) { 
-    e.clipboardData.setData("text/plain;charset=utf-8", JSON.stringify(HexaLab.app.get_settings(), null, 4))
-    e.stopPropagation()
-    e.preventDefault()
+document.body.addEventListener('copy', function (e) {
+    if (window.getSelection().toString().length == 0) {
+        e.clipboardData.setData("text/plain;charset=utf-8", JSON.stringify(HexaLab.app.get_settings(), null, 4))
+        e.stopPropagation()
+        e.preventDefault()
+    }
 })
 
 HexaLab.UI.update_cookie = function () {
@@ -326,7 +326,7 @@ HexaLab.UI.update_cookie = function () {
 
 // --------------------------------------------------------------------------------
 // The following events register to the UI elements and propagate the changes to the HexaLab app
-// The HexaLab app upon receiving new settings will often bounce them back again to the UI to make sure it is sync'd with the backend. In this case this is useless but harmless. 
+// The HexaLab app upon receiving new settings will often bounce them back again to the UI to make sure it is sync'd with the backend. In this case this is useless but harmless.
 // --------------------------------------------------------------------------------
 HexaLab.UI.settings.color.source.on("change", function () {
     var value = this.options[this.selectedIndex].value
@@ -535,9 +535,9 @@ HexaLab.UI.on_set_geometry_mode = function (v) {
 }
 
 // --------------------------------------------------------------------------------
-//   _____ _     _        __  __                  
-//  / ____(_)   | |      |  \/  |                 
-// | (___  _  __| | ___  | \  / | ___ _ __  _   _ 
+//   _____ _     _        __  __
+//  / ____(_)   | |      |  \/  |
+// | (___  _  __| | ___  | \  / | ___ _ __  _   _
 //  \___ \| |/ _` |/ _ \ | |\/| |/ _ \ '_ \| | | |
 //  ____) | | (_| |  __/ | |  | |  __/ | | | |_| |
 // |_____/|_|\__,_|\___| |_|  |_|\___|_| |_|\__,_|
@@ -588,7 +588,7 @@ HexaLab.UI.set_displayed_dataset_idx = function (idx) {
     if (idx < 0) {
         HexaLab.UI.set_displayed_mesh_idx(HexaLab.UI.MESH_IDX_CUSTOM)
     } else {
-        HexaLab.UI.displayed_dataset = HexaLab.UI.datasets_index.sources[idx]        
+        HexaLab.UI.displayed_dataset = HexaLab.UI.datasets_index.sources[idx]
     }
 }
 
@@ -715,8 +715,8 @@ HexaLab.UI.show_infobox_2 = function () {
 
     let quality_measure = HexaLab.UI.get_selected_quality_measure_name()
     if (quality_measure) {
-        HexaLab.UI.mesh.quality_type.element.val(HexaLab.UI.view_quality_measure)  
-    } 
+        HexaLab.UI.mesh.quality_type.element.val(HexaLab.UI.view_quality_measure)
+    }
 
     let min = mesh.quality_min.toFixed(3)
     let max = mesh.quality_max.toFixed(3)
@@ -729,7 +729,7 @@ HexaLab.UI.show_infobox_2 = function () {
     infobox.text.append('<table style="width:100%;">' +
         '<tr> <td align="center"><span class="simple-font">Min: </span> <span class="simple-font">' + min + '</span></td>' +
             ' <td align="center"><span class="simple-font">Max: </span> <span class="simple-font">' + max + '</span></td>' +
-            ' <td align="center"><span class="simple-font">Avg: </span> <span class="simple-font">' + avg + '</span></td>' + 
+            ' <td align="center"><span class="simple-font">Avg: </span> <span class="simple-font">' + avg + '</span></td>' +
             ' <td align="center"><span class="simple-font">Var: </span> <span class="simple-font">' + vri + '</span></td> </tr>' +
         '</table>'
     )
@@ -766,15 +766,13 @@ HexaLab.UI.set_selected_mesh_by_idx = function (idx) {
         } else {
             $(this).removeProp('selected');
         }
-    })   
+    })
 }
 
 // TODO redo this
 HexaLab.UI.on_first_mesh = function () {
-    HexaLab.UI.dragdrop.header.html('Drop the file in one of the boxes below.')
+    HexaLab.UI.dragdrop.header.html('Drop a mesh or settings file here')
     HexaLab.UI.dragdrop.overlay.removeClass('first_drag_drop').hide();
-    HexaLab.UI.dragdrop.mesh.css('margin-left', '20%');
-    HexaLab.UI.dragdrop.settings.show();
 }
 
 /*HexaLab.UI.clear_mesh_info_keep_source = function () {
@@ -802,14 +800,14 @@ HexaLab.UI.menu.resizable({
     start: function(event, ui){
         ui.total_width = ui.originalSize.width + ui.originalElement.next().outerWidth();
     },
-    stop: function(event, ui){     
+    stop: function(event, ui){
         var cellPercentWidth=100 * ui.originalElement.outerWidth()/ HexaLab.UI.display.innerWidth();
-        ui.originalElement.css('width', cellPercentWidth + '%');  
+        ui.originalElement.css('width', cellPercentWidth + '%');
         var nextCell = ui.originalElement.next();
         var nextPercentWidth=100 * nextCell.outerWidth()/HexaLab.UI.display.innerWidth();
         nextCell.css('width', nextPercentWidth + '%');
     },
-    resize: function(event, ui){ 
+    resize: function(event, ui){
         ui.originalElement.next().width(ui.total_width - ui.size.width);
     }
 })
@@ -834,7 +832,7 @@ HexaLab.UI.menu.on('resize', function () {
                 // delete HexaLab.UI.plot_overlay
                 // HexaLab.UI.create_plot_panel()
             }
-        }  
+        }
     }
     if (!HexaLab.UI.menu_resize_timeout) {
         HexaLab.UI.menu_resize_timeout = true
@@ -857,14 +855,14 @@ HexaLab.UI.menu.on('resize', function () {
 })
 // --------------------------------------------------------------------------------
 //
-//  __  __           _       _____                            _   
-// |  \/  |         | |     |_   _|                          | |  
-// | \  / | ___  ___| |__     | |  _ __ ___  _ __   ___  _ __| |_ 
+//  __  __           _       _____                            _
+// |  \/  |         | |     |_   _|                          | |
+// | \  / | ___  ___| |__     | |  _ __ ___  _ __   ___  _ __| |_
 // | |\/| |/ _ \/ __| '_ \    | | | '_ ` _ \| '_ \ / _ \| '__| __|
-// | |  | |  __/\__ \ | | |  _| |_| | | | | | |_) | (_) | |  | |_ 
+// | |  | |  __/\__ \ | | |  _| |_| | | | | | |_) | (_) | |  | |_
 // |_|  |_|\___||___/_| |_| |_____|_| |_| |_| .__/ \___/|_|   \__|
-//                                          | |                   
-//                                          |_|                   
+//                                          | |
+//                                          |_|
 // @MeshImport @Import
 // --------------------------------------------------------------------------------
 // parse and process HTML GET params
@@ -901,7 +899,7 @@ HexaLab.UI.process_html_params = function () {
     } else {
         return
     }
-    
+
     HexaLab.UI.import_selected_mesh()
     if (params['settings']) {
         HexaLab.UI.queued_settings = JSON.parse(decodeURIComponent(params['settings']))
@@ -978,7 +976,7 @@ HexaLab.UI.process_mesh_pack = function (file, settings) {
 
             var global_settings_file = null
             var settings_file = null
-            
+
             if (settings.map) {
                 zip.forEach(function (path, file) {
                     if (file.name == name.substr(0, name.lastIndexOf(".")) + ".txt") {
@@ -986,7 +984,7 @@ HexaLab.UI.process_mesh_pack = function (file, settings) {
                     }
                 })
             }
-            
+
             if (settings.global) {
                 zip.forEach(function (path, file) {
                     if (file.name == settings.global_name) {
@@ -1008,7 +1006,7 @@ HexaLab.UI.process_mesh_pack = function (file, settings) {
                     }
                     items.push(item)
                     if (items.length == mesh_files.length) {
-                        generate_output()                    
+                        generate_output()
                     }
                 })
             } else {
@@ -1019,7 +1017,7 @@ HexaLab.UI.process_mesh_pack = function (file, settings) {
                 }
                 items.push(item)
                 if (items.length == mesh_files.length) {
-                    generate_output()                    
+                    generate_output()
                 }
             }
         })
@@ -1028,7 +1026,7 @@ HexaLab.UI.process_mesh_pack = function (file, settings) {
     function post_stable_callback () {
         let item = HexaLab.UI.process_pack_env.item
         let name = item.mesh.name
-        
+
         if (settings.screenshot) {
             HexaLab.app.force_canvas_update()
             HexaLab.app.canvas.element.toBlob(function (blob) {
@@ -1084,7 +1082,7 @@ HexaLab.UI.process_mesh_pack = function (file, settings) {
         HexaLab.UI.process_pack_env.item = item
         item.mesh.async("uint8array").then(function (data) {
             let name = item.mesh.name
-            
+
             HexaLab.UI.set_mesh(name, data)
             HexaLab.UI.show_infobox_2()
             if (item.settings) {
@@ -1097,7 +1095,7 @@ HexaLab.UI.process_mesh_pack = function (file, settings) {
                 post_stable_callback()
             }
 
-            
+
         })
     }
 
@@ -1123,7 +1121,7 @@ HexaLab.UI.set_mesh = function (long_name, byte_array) {
     var name = HexaLab.FS.short_path(long_name)
     HexaLab.UI.mesh_long_name = long_name
     HexaLab.FS.make_file(byte_array, name);
-	
+
     HexaLab.app.import_mesh(name);
     HexaLab.FS.delete_file(name);
 
@@ -1200,18 +1198,18 @@ HexaLab.UI.import_selected_mesh = function () {
         HexaLab.UI.show_infobox_2()
 		// TODO ? HexaLab.UI.mesh.infobox_2.element.css('background-size', '0% 100%');
     }
-	
+
 	/*request.onprogress = function (event) {
 		HexaLab.UI.set_progress_percent( 100 * event.loaded / event.total );
 	};*/
-	
+
 	//request.addEventListener("progress", request.onprogress, false);
 
-    
+
     HexaLab.UI.set_progress_phasename('Loading...')
     // Early remove italic from the mesh dropdown list
     HexaLab.UI.mesh.dataset_content.css('font-style', 'normal').show()
-	
+
 	request.send();
 }
 
@@ -1237,28 +1235,28 @@ HexaLab.UI.maybe_set_settings = function ( s ){
 }
 
 HexaLab.UI.import_settings_from_txt = function (file) {
-    HexaLab.FS.read_json_file(file, function (file, json) {
+    HexaLab.FS.read_json(file, function (file, json) {
         HexaLab.UI.maybe_set_settings(json)
     })
 }
 
 HexaLab.UI.import_settings_from_png = function (file) {
-	
+
 	var fr = new FileReader();
 	fr.onloadend = function( e ) {
-		
-		pngitxt.get( fr.result, "hexalab" , 
+
+		pngitxt.get( fr.result, "hexalab" ,
 			function(err,d) {
 				if (err != null) {
 					alert("No HexaLab settings found in \n\"" + file.name +"\"" );
 				}
 				const json = JSON.parse(d.value)
 				HexaLab.UI.maybe_set_settings(json)
-			}	
+			}
 		)
 	}
 	fr.readAsBinaryString( file );
-	
+
 }
 
 // HexaLab.UI.mesh.source.on("click", function () {
@@ -1282,12 +1280,12 @@ HexaLab.UI.mesh.source.on("click", function () {
 HexaLab.UI.mesh.source.on("change", function () {
     HexaLab.UI.mesh.source.css('font-style', 'normal')
     HexaLab.UI.mesh.source.select_click_flag = 1
-    
+
     //var selected_source = this.options[this.selectedIndex].value
     //var prev_source = HexaLab.UI.mesh.selected_source
     //HexaLab.UI.mesh.selected_source = selected_source
     let selected_dataset_idx = HexaLab.UI.get_selected_dataset_idx()
-    
+
     HexaLab.UI.clear_infobox_1()
     HexaLab.UI.clear_infobox_2()
     HexaLab.UI.clear_mesh_dropdown_list()
@@ -1320,14 +1318,14 @@ HexaLab.UI.mesh.dataset_content.on("change", function () {
     HexaLab.UI.import_selected_mesh()
 })
 // --------------------------------------------------------------------------------
-//  _____                         _____                  
-// |  __ \                  ___  |  __ \                 
-// | |  | |_ __ __ _  __ _ ( _ ) | |  | |_ __ ___  _ __  
-// | |  | | '__/ _` |/ _` |/ _ \/\ |  | | '__/ _ \| '_ \ 
+//  _____                         _____
+// |  __ \                  ___  |  __ \
+// | |  | |_ __ __ _  __ _ ( _ ) | |  | |_ __ ___  _ __
+// | |  | | '__/ _` |/ _` |/ _ \/\ |  | | '__/ _ \| '_ \
 // | |__| | | | (_| | (_| | (_>  < |__| | | | (_) | |_) |
-// |_____/|_|  \__,_|\__, |\___/\/_____/|_|  \___/| .__/ 
-//                    __/ |                       | |    
-//                   |___/                        |_|    
+// |_____/|_|  \__,_|\__, |\___/\/_____/|_|  \___/| .__/
+//                    __/ |                       | |
+//                   |___/                        |_|
 // @DragDrop
 // --------------------------------------------------------------------------------
 HexaLab.UI.canvas_container.on('dragbetterenter', function (event) {
@@ -1343,66 +1341,27 @@ HexaLab.UI.canvas_container.on('dragbetterleave', function (event) {
     if (!HexaLab.UI.first_mesh) HexaLab.UI.dragdrop.overlay.hide();
 })
 
-HexaLab.UI.dragdrop.mesh.on('dragbetterenter', function (event) {
-    $(this).removeClass('drag_drop_quad_off').addClass('drag_drop_quad_on');
-})
-HexaLab.UI.dragdrop.mesh.on('dragover', function (event) {
-    event.preventDefault()
-})
-HexaLab.UI.dragdrop.mesh.on('drop', function (event) {
-    event.preventDefault()
-    var files = event.originalEvent.target.files || event.originalEvent.dataTransfer.files
-    HexaLab.UI.import_custom_mesh(files[0])
-})
-HexaLab.UI.dragdrop.mesh.on('dragbetterleave', function (event) {
-    $(this).removeClass('drag_drop_quad_on').addClass('drag_drop_quad_off');
-})
-
-
-HexaLab.UI.dragdrop.settings.on('dragbetterenter', function (event) {
-    $(this).removeClass('drag_drop_quad_off').addClass('drag_drop_quad_on');
-})
-
-HexaLab.UI.dragdrop.settings.on('dragover', function (event) {
-    event.preventDefault()
-})
-
-
-HexaLab.UI.dragdrop.settings.on('drop', function (event) {
-    event.preventDefault()
-    var files = event.originalEvent.target.files || event.originalEvent.dataTransfer.files
-	var fn = files[0];
-	if (fn.name.toLowerCase().endsWith(".png")) {
-		HexaLab.UI.import_settings_from_png(fn)
-	} else {
-		HexaLab.UI.import_settings_from_txt(fn)
-	}
-})
-HexaLab.UI.dragdrop.settings.on('dragbetterleave', function (event) {
-    $(this).removeClass('drag_drop_quad_on').addClass('drag_drop_quad_off');
-})
-
 /* drop on canvas: guess based on file name */
 HexaLab.UI.display.on('drop', function (event) {
     event.preventDefault()
     var files = event.originalEvent.target.files || event.originalEvent.dataTransfer.files
-    
+
 	var fn = files[0];
 	var st = fn.name.toLowerCase();
 	if (st.endsWith(".png")) {
 		HexaLab.UI.import_settings_from_png(fn)
 	} else if (st.endsWith(".txt"))  {
 		HexaLab.UI.import_settings_from_txt(fn)
-	} else if (st.endsWith(".mesh"))  {
+	} else if (st.endsWith(".mesh") || st.endsWith(".vtk"))  {
 		HexaLab.UI.import_custom_mesh(fn)
 	}
 })
 // --------------------------------------------------------------------------------
-//  _____  _       _   
-// |  __ \| |     | |  
-// | |__) | | ___ | |_ 
+//  _____  _       _
+// |  __ \| |     | |
+// | |__) | | ___ | |_
 // |  ___/| |/ _ \| __|
-// | |    | | (_) | |_ 
+// | |    | | (_) | |_
 // |_|    |_|\___/ \__|
 // @Plot
 // --------------------------------------------------------------------------------
@@ -1462,7 +1421,7 @@ HexaLab.UI.export_plot = function (format, callback) {
         // Re-generate the old plot
         env.plot_layout.paper_bgcolor = 'rgba(255, 255, 255, 0.2)'
         env.plot_layout.plot_bgcolor = 'rgba(255, 255, 255, 0.2)'
-        env.plot_layout.font.size /= magFac                    
+        env.plot_layout.font.size /= magFac
         env.plot_layout.margin.l /= magFac
         env.plot_layout.margin.r /= magFac
         env.plot_layout.margin.b /= magFac
@@ -1476,8 +1435,8 @@ HexaLab.UI.export_plot = function (format, callback) {
     // Generate and store the png
     if (format == 'png') {
         Plotly.toImage(env.container.find('#plot_div')[0], {
-            format: format, 
-            width: env.container.find('#plot_div').width()*magFac, 
+            format: format,
+            width: env.container.find('#plot_div').width()*magFac,
             height: env.container.find('#plot_div').height()*magFac
         }).then(function(data) {
             let canvas_width, canvas_height
@@ -1497,7 +1456,7 @@ HexaLab.UI.export_plot = function (format, callback) {
 
             let plot_img = new Image()
             let bar_img  = new Image()
-            
+
             plot_img.src = data
             plot_img.onload = function() {
                 bar_img.src = HexaLab.UI.settings.color.quality_map_bar_filename
@@ -1580,13 +1539,13 @@ HexaLab.UI.quality_plot = function(container, axis) {
     let data = []
     let bins_colors = []
     let colorscale = []
-    // Note that 
+    // Note that
     let range_bad  = HexaLab.app.backend.get_lower_quality_range_bound()
     let range_good = HexaLab.app.backend.get_upper_quality_range_bound()
     let data_min= 10000000
     let data_max=-10000000
-    let sorted_range_min = Math.min(range_bad,range_good) 
-    let sorted_range_max = Math.max(range_bad,range_good) 
+    let sorted_range_min = Math.min(range_bad,range_good)
+    let sorted_range_max = Math.max(range_bad,range_good)
 
     let quality = HexaLab.app.backend.get_hexa_quality()
     if (quality != null) {
@@ -1594,12 +1553,12 @@ HexaLab.UI.quality_plot = function(container, axis) {
         for (let i = 0; i < quality.size() ; i++) {
             data_min=Math.min(t[i],data_min)
             data_max=Math.max(t[i],data_max)
-            //data[i] = Math.min(Math.max(range_bad, t[i]), range_bad) 
+            //data[i] = Math.min(Math.max(range_bad, t[i]), range_bad)
             data[i] = t[i]
         }
     }
-    
-    
+
+
     // problem: plotly does not map the color to the range, it maps the color to the bins.
     //          the first color is given to the first non-empty bin, the others follow.
     //          following non-empty bins are correctly counted and their color is skipped.
@@ -1713,7 +1672,7 @@ HexaLab.UI.quality_plot = function(container, axis) {
             }],
             [{
                 name: 'Save',
-                icon: Plotly.Icons['camera'],
+                icon: Plotly.Icons['disk'],
                 click: function() {
                     HexaLab.UI.plot_format_dialog = HexaLab.UI.dialog(200, 150, "<div title='Choose format'>\
                         <ul style='list-style-type:none;'>\
@@ -1739,14 +1698,14 @@ HexaLab.UI.quality_plot = function(container, axis) {
     });
 }
 // --------------------------------------------------------------------------------
-//  _______            ____             
-// |__   __|          |  _ \            
-//    | | ___  _ __   | |_) | __ _ _ __ 
+//  _______            ____
+// |__   __|          |  _ \
+//    | | ___  _ __   | |_) | __ _ _ __
 //    | |/ _ \| '_ \  |  _ < / _` | '__|
-//    | | (_) | |_) | | |_) | (_| | |   
-//    |_|\___/| .__/  |____/ \__,_|_|   
-//            | |                       
-//            |_|             
+//    | | (_) | |_) | | |_) | (_| | |
+//    |_|\___/| .__/  |____/ \__,_|_|
+//            | |
+//            |_|
 // @TopBar
 // --------------------------------------------------------------------------------
 HexaLab.UI.topbar.load_mesh.on('click', function () {
@@ -1868,14 +1827,14 @@ function str2ab(str) {
 HexaLab.UI.topbar.snapshot.on('click', function () {
     HexaLab.app.canvas.element.toBlob(function (blob) {
 			var reader = new FileReader();
-			
+
 			reader.onloadend = function (e) {
 				const settingsStr = JSON.stringify(HexaLab.app.get_settings(), null, 4)
 				pngitxt.set(
-					reader.result, 
-					{  
-						keyword: "hexalab", 
-						value: settingsStr	
+					reader.result,
+					{
+						keyword: "hexalab",
+						value: settingsStr
 					},
 					function (res) {
 						var by = new Uint8Array(res.length);
@@ -1892,8 +1851,8 @@ HexaLab.UI.topbar.snapshot.on('click', function () {
 }).prop("disabled", true);
 
 HexaLab.UI.settings.rendering_menu_content.prop('disabled', true)
-HexaLab.UI.settings.silhouette.slider('disable')    
-HexaLab.UI.settings.erode_dilate.slider('disable')    
+HexaLab.UI.settings.silhouette.slider('disable')
+HexaLab.UI.settings.erode_dilate.slider('disable')
 HexaLab.UI.settings.singularity_mode.slider('disable')
 //HexaLab.UI.settings.wireframe_row.hide()
 //HexaLab.UI.settings.crack_size_row.hide()
