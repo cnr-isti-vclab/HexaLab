@@ -54,7 +54,7 @@ Matteo Bracci, Marco Tarini, Nico Pietroni, Marco Livesu, Paolo Cignoni<br><a hr
 				<button id="load_settings" title="Open settings (Ctrl+V to paste from clipboard)">
 				<img src="img\setting_load.png" width=20 height=20 ALT="Open Settings"></img>
 				</button>
-				<button id="snapshot" title="Take a Screenshot">
+				<button id="snapshot" title="Screenshot">
 				<img src="img\icon_screenshot.png" width=20 height=20 ALT="Save snapshot"></img>
 				</button>
                 <button id="github" title="Info &amp Sources (GitHub page)">
@@ -117,7 +117,7 @@ Matteo Bracci, Marco Tarini, Nico Pietroni, Marco Livesu, Paolo Cignoni<br><a hr
 				<label>Slice
 				<button id="plane_snap_camera" title="Slice in current view direction&#013;(shift: enforce axis-aligned)">
 				</button>
-				<button class="smallplus" id="bt0" title="Plane direction params" 
+				<button class="smallplus" id="bt0" title="Plane direction params"
 				onclick="$('#planeDirPanel').toggle(); $('#bt0').toggleClass('checked')"
 				></button></label>
 				<div class="menu_row_input">
@@ -125,19 +125,19 @@ Matteo Bracci, Marco Tarini, Nico Pietroni, Marco Livesu, Paolo Cignoni<br><a hr
 					<input type="number" class="scalar_value" id="plane_offset_number">
 				</div>
 			</div>
-			
+
 			<div class="menu_subrow" id="planeDirPanel" style="display:none">
 					<span class="subspacer"></span
 					><label class="minilabel connect">direction</label>
-					<button id="plane_snap_nx" class="minibutton" title="Slice along the X axis">X</button><!-- 
-					--><button id="plane_snap_ny" class="minibutton"title="Slice along the Y axis">Y</button><!-- 
+					<button id="plane_snap_nx" class="minibutton" title="Slice along the X axis">X</button><!--
+					--><button id="plane_snap_ny" class="minibutton"title="Slice along the Y axis">Y</button><!--
 					--><button id="plane_snap_nz" class="minibutton" title="Slice along the Z axis">Z</button>
 					<button id="plane_swap_sign" class="minibutton" title="Flip slicing plane"><img src="img\icon_flip.png" width=13 height=12 ALT="Flip"></img></button>
 					<input class="scalar_value" type="number" id="plane_nx" ><!--
 					--><input class="scalar_value" type="number" id="plane_ny"><!--
 					--><input class="scalar_value" type="number" id="plane_nz">
 			</div>
-			
+
 
 			<div class="menu_row">
 				<label>Peel</label>
@@ -146,7 +146,7 @@ Matteo Bracci, Marco Tarini, Nico Pietroni, Marco Livesu, Paolo Cignoni<br><a hr
 					</div><input class="scalar_value" type="number" id="peeling_depth_number">
 				</div>
 			</div>
-			
+
 			<div class="menu_row">
 				<label id="quality_label">Quality &ge;</label>
 				<div class="menu_row_input">
@@ -154,7 +154,7 @@ Matteo Bracci, Marco Tarini, Nico Pietroni, Marco Livesu, Paolo Cignoni<br><a hr
 					</div><input class="scalar_value" type="number" id="quality_max_number">
 				</div>
 			</div>
-			
+
 			<div class="menu_row">
 			    <label>Handpick</label>
 				<button id="pick_button" class="pickbutton" title="Handpick hexas to filter [ctrl]">dig</button>
@@ -162,7 +162,7 @@ Matteo Bracci, Marco Tarini, Nico Pietroni, Marco Livesu, Paolo Cignoni<br><a hr
 				<button id="isolate_button" class="pickbutton" title="Isolate one hexa (hide all else)">isolate</button>
 				<button id="pick_clear_button" class="pickbutton" title="Clear all handpicks">clear</button>
 			</div>
-			
+
 			<hr/>
 
 			<div class="menu_row">
@@ -196,14 +196,14 @@ Matteo Bracci, Marco Tarini, Nico Pietroni, Marco Livesu, Paolo Cignoni<br><a hr
 			</div>
 			<div class="menu_row">
 				<label>Separation</label>
-				
+
 				<select id="geometry_mode" class="miniselect">
 					<option value="Smooth">Roundings</option>
 					<option value="Cracked">Fissures</option>
 					<option value="DynamicLines" selected="selected">Lines</option>
                     <option value="Lines">Flat Lines</option>
 				</select>
-				<div class="menu_row_input">	
+				<div class="menu_row_input">
                     <div class="slider" id="wireframe_slider" ></div>
 					<div class="slider" id="crack_size" style="display:none;"></div>
 					<div class="slider" id="rounding_radius" style="display:none;"> </div>
@@ -244,25 +244,8 @@ Matteo Bracci, Marco Tarini, Nico Pietroni, Marco Livesu, Paolo Cignoni<br><a hr
 	<main id="frame">
 		<div id="drag_drop_overlay" class="first_drag_drop">
 			<div>
-				<span id="drag_drop_header">Drop a file in the box below<br/> or use the menu to the side.</span>
+				<span id="drag_drop_header">Drop a mesh here or use the menu to the side</span>
 			</div>
-			<div id="mesh_drag_drop_area">
-				<div id="mesh_drag_drop_quad" class="drag_drop_quad_off">
-					<div id="mesh_drag_drop_content" class="drag_drop_content">
-						<div>Mesh</div>
-						<i class="fa fa-upload" aria-hidden="true"></i>
-					</div>
-				</div>
-			</div>
-			<div id="settings_drag_drop_area">
-				<div id="settings_drag_drop_quad" class="drag_drop_quad_off">
-					<div id="settings_drag_drop_content" class="drag_drop_content">
-						<div>Settings<br/>Snapshot</div>
-						<i class="fa fa-upload" aria-hidden="true"></i>
-					</div>
-				</div>
-			</div>
-			<div style="clear:both"></div>
 		</div>
 	</main>
 
