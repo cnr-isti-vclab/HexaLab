@@ -20,6 +20,7 @@ Current datasets come from the following papers:
 - [Singularity Structure Simplification of Hexahedral Mesh via Weighted Ranking (2019)](https://arxiv.org/abs/1901.00238)
 - [Dual Sheet Meshing: An Interactive Approach to Robust Hexahedralization (2019)](https://diglib.eg.org/handle/10.1111/cgf13617)
 - [Symmetric Moving Frames (2019)](https://www.cs.cmu.edu/~kmcrane/Projects/SymmetricMovingFrames/index.html)
+- [Feature Preserving Octree-Based Hexahedral Meshing (2019)](https://gaoxifeng.github.io/)
 
 ## How to contribute
 We really welcome datasets from existing papers, and we are collecting the ones we find available on the web. If you have some models related to a published paper you have two ways to contribute:
