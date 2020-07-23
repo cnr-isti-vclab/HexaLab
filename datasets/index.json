@@ -488,7 +488,7 @@
             "hex_joint.vtk",
             "hex_torus.vtk",
             "hex_cylinder.vtk",
-            "hex_prisma.vtk"    
+            "hex_prisma.vtk"
         ]
     }
         , {
@@ -940,5 +940,77 @@
             "wrench_input_tri.vtk"
         ]
     }
+
+    , {
+    "paper": {
+        "title": "LoopyCuts: Practical Feature-Preserving Block Decomposition for Strongly Hex-Dominant Meshing",
+        "venue": "ACM Transactions on Graphics (SIGGRAPH 2020)",
+        "authors": "Livesu, Marco and Pietroni, Nico and Puppo, Enrico and Sheffer, Alla and Cignoni, Paolo",
+        "year": "2020",
+        "PDF": "http://pers.ge.imati.cnr.it/livesu/papers/LPPSC20/LPPSC20.pdf",
+        "web": "https://github.com/mlivesu/LoopyCuts",
+        "DOI": "10.1145/3386569.3392472"
+    },
+    "path": "2020 - LoopyCuts - Practical Feature-Preserving Block Decomposition for Strongly Hex-Dominant Meshing",
+    "label": "2020 - LoopyCuts - Practical Feature-Preserving Block Decomposition for Strongly Hex-Dominant Meshing",
+    "data": [
+      "hand.mesh",
+      "impeller.mesh",
+      "hinge.mesh",
+      "cube_carved.mesh",
+      "metatron.mesh",
+      "mid2Fem.mesh",
+      "mech_piece.mesh",
+      "sphinx.mesh",
+      "ellipse.mesh",
+      "torus.mesh",
+      "bunny.mesh",
+      "wave.mesh",
+      "prism.mesh",
+      "wrench.mesh",
+      "bone.mesh",
+      "cube_minus_sphere.mesh",
+      "tris_closed.mesh",
+      "torque.mesh",
+      "bimba.mesh",
+      "beveled_shoulder.mesh",
+      "mechanical06.mesh",
+      "lever_arm.mesh",
+      "rod.mesh",
+      "rabbit.mesh",
+      "Plate1.mesh",
+      "tris_open.mesh",
+      "ujoint.mesh",
+      "inlay_dovetail.mesh",
+      "Plate2.mesh",
+      "pig.mesh",
+      "gear.mesh",
+      "trebol.mesh",
+      "wedge.mesh",
+      "mech10.mesh",
+      "kong.mesh",
+      "holes2.mesh",
+      "clef.mesh",
+      "pinion.mesh",
+      "dog.mesh",
+      "eraser_ball.mesh",
+      "Plate3.mesh",
+      "mechanical02.mesh",
+      "bolt.mesh",
+      "joint.mesh",
+      "Plate4.mesh",
+      "sculpt.mesh",
+      "cactus.mesh",
+      "cat.mesh",
+      "busto_bimba.mesh",
+      "cylinder_plate.mesh",
+      "kitten.mesh",
+      "knob.mesh",
+      "vessel.mesh",
+      "torque1.mesh",
+      "motor_tail.mesh",
+      "cup.mesh",
+        ]
+}
                ]
 }
