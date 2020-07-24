@@ -21,7 +21,7 @@ Current datasets come from the following papers:
 - [Dual Sheet Meshing: An Interactive Approach to Robust Hexahedralization (2019)](https://diglib.eg.org/handle/10.1111/cgf13617)
 - [Symmetric Moving Frames (2019)](https://www.cs.cmu.edu/~kmcrane/Projects/SymmetricMovingFrames/index.html)
 - [Feature Preserving Octree-Based Hexahedral Meshing (2019)](https://gaoxifeng.github.io/)
-- [LoopyCuts: Practical Feature-Preserving Block Decomposition for Strongly Hex-Dominant Meshing](https://github.com/mlivesu/LoopyCuts)
+- [LoopyCuts: Practical Feature-Preserving Block Decomposition for Strongly Hex-Dominant Meshing (2020)](https://github.com/mlivesu/LoopyCuts)
 
 ## How to contribute
 We really welcome datasets from existing papers, and we are collecting the ones we find available on the web. If you have some models related to a published paper you have two ways to contribute:
