@@ -354,11 +354,33 @@ namespace HexaLab {
         Index idx = visible_model.surface_vert_pos.size();
 
         FourIndices vi = mesh->vertex_indices( face );
+
         for (int i=0; i<4; i++) {
             add_vertex( mesh->pos(vi[i]) , face.normal, color );
         }
         this->add_triangle ( idx + 2, idx + 1, idx + 0 );
         this->add_triangle ( idx + 0, idx + 3, idx + 2 );
+
+        add_wireframe_edge( vi[0], vi[1] );
+        add_wireframe_edge( vi[1], vi[2] );
+        add_wireframe_edge( vi[2], vi[3] );
+        add_wireframe_edge( vi[3], vi[0] );
+    }
+
+    void App::add_wireframe_edge ( Index v0, Index v1 ){
+
+        if (v0 <= v1) return;
+
+        float alpha = 1;
+        visible_model.wireframe_vert_pos.push_back ( mesh->pos(v0) );
+        visible_model.wireframe_vert_pos.push_back ( mesh->pos(v1) );
+
+        for (int i=0; i<2; i++) {
+            // todo: make this less wasteful
+            visible_model.wireframe_vert_color.push_back ( Vector3f ( 0, 0, 0 ) );
+            visible_model.wireframe_vert_alpha.push_back ( alpha );
+        }
+
     }
 
 
