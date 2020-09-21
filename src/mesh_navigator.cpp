@@ -66,4 +66,13 @@ namespace HexaLab {
     const Dart& MeshNavigator::dart() const { return *_dart; }
 
     Dart& MeshNavigator::dart() { return *_dart; }
+
+    long Mesh::total_occupation_RAM() const{
+        return sizeof(Dart) * darts.size() +
+               sizeof(Cell) * cells.size() +
+               sizeof(Face) * faces.size() +
+               sizeof(Edge) * edges.size() +
+               sizeof(Vert) * verts.size();
+    }
+
 }

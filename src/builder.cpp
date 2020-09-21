@@ -267,14 +267,14 @@ void Builder::build ( Mesh& mesh, const vector<Vector3f>& vertices, const vector
     edges_map.clear();
     faces_map.clear();
 
-    HL_LOG ( "[Builder] adding hexa " );
+    HL_LOG ( "[Builder] adding hexa\n" );
     add_hexas(mesh, indices ,  0, 25);
     add_hexas(mesh, indices , 25, 50);
     add_hexas(mesh, indices , 50, 75);
     add_hexas(mesh, indices , 75, 100);
 
     mesh.hexa_quality.resize ( mesh.cells.size() );
-    HL_LOG ( "100%%\n" );
+    HL_LOG ( "100%%\r" );
 
     auto dt = milli_from_sample ( t0 );
 
@@ -292,7 +292,7 @@ void Builder::add_hexas( Mesh& mesh, const vector<Index>& indices, int from , in
     for ( size_t h = first_in; h < first_out; h++ ) {
         add_hexa ( mesh, &indices[h * 8] );
     }
-    HL_LOG ( "%d%%\n", to );
+    HL_LOG ( "%d%%\r", to );
 }
 
 void Builder::update_surface_status( Mesh& mesh ) {

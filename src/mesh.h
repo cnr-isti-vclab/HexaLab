@@ -160,5 +160,7 @@ namespace HexaLab {
         // The quality values are stored per hexa both in normalized and non-normalized formats.
         vector<float>      hexa_quality;
         vector<float>      normalized_hexa_quality;
+
+        long total_occupation_RAM() const; // approximation!
     };
 }

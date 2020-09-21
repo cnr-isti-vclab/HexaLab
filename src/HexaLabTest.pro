@@ -31,4 +31,5 @@ HEADERS = app.h \
   peeling_filter.h \
   hex_quality.h \
   pick_filter.h \
+  common.h \
   hex_quality_color_maps.h

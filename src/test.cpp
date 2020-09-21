@@ -11,6 +11,7 @@ using namespace HexaLab;
 using json = nlohmann::json; // for json reading
 
 int main() {
+    printf ( "Size of Vector3 %lu\n", sizeof ( Eigen::Vector3f ) );
     printf ( "Size of Hexa %lu\n", sizeof ( Cell ) );
     printf ( "Size of Face %lu\n", sizeof ( Face ) );
     printf ( "Size of Edge %lu\n", sizeof ( Edge ) );
@@ -46,7 +47,6 @@ int main() {
         printf ( "-- title %s\n", title.c_str() );
 
       for ( size_t j = 0; j < dataVec.size(); ++j ) {
-//        { size_t j= 2;
             printf ("Mesh %lu/%lu on dataset %lu/%lu\n",j+1,dataVec.size(),i+1,paperArrayJSON.size());fflush ( stdout );
             ++meshCnt;
             string filename = dataVec[j];
@@ -58,18 +58,23 @@ int main() {
               meshCnt--;
               printf("\n\n ************** FAILURE ***************\n in loading mesh  %s\n\n",filename.c_str());
             }
-            printf("     Hex %4lu\n",app.get_mesh()->cells.size());fflush ( stdout );
-            if(hexMin>app.get_mesh()->cells.size()) {
-              hexMin=app.get_mesh()->cells.size();
-              minMeshName= basepath + path + "/" + filename;
-            } 
-            if(hexMax<app.get_mesh()->cells.size()) {
-              hexMax=app.get_mesh()->cells.size();
-              maxMeshName= basepath + path + "/" + filename;
+            printf("     Hexas: %4lu\n",app.get_mesh()->cells.size());
+            printf("     Faces: %4lu\n",app.get_mesh()->faces.size());
+
+            if (hexMin > app.get_mesh()->cells.size()) {
+              hexMin = app.get_mesh()->cells.size();
+              minMeshName = path + "/" + filename;
+            }
+            if (hexMax < app.get_mesh()->cells.size()) {
+              hexMax = app.get_mesh()->cells.size();
+              maxMeshName = path + "/" + filename;
             }
             hexMax=std::max(hexMax,app.get_mesh()->cells.size());
-            //app.set_quality_measure( QualityMeasureEnum::ODD );
+
+            printf("TOTAL RAM: %4lu\n\n",app.get_mesh()->total_occupation_RAM() );
+
             fflush ( stdout );
+
         }
     }
 
