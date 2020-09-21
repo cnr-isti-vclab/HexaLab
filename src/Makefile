@@ -14,18 +14,20 @@ CC=emcc
 # -s TOTAL_MEMORY=1073741824 
 # -s TOTAL_MEMORY=2147483648
 
+.SUFFIXES: .bc
 
-CFLAGS= -I ./ -I ./eigen -s WASM=0 -s TOTAL_MEMORY=1073741824 --memory-init-file 0 -std=c++11 -s PRECISE_F32=1 -s DEMANGLE_SUPPORT=1 --bind  -s LINKABLE=1 -Os -s ASSERTIONS=1
+CFLAGS= -I ./ -I ./eigen -s WASM=0 -s TOTAL_MEMORY=1073741824 --memory-init-file 0 -std=c++11 -s PRECISE_F32=1 -s DEMANGLE_SUPPORT=1 --bind  -Os -s ASSERTIONS=1
 
 OBJ = hexalab_js.bc \
       app.bc \
       builder.bc \
-      color_map.cpp \
-      loader.cpp \
+      color_map.bc \
+      loader.bc \
       plane_filter.bc \
       peeling_filter.bc \
       quality_filter.bc \
-      pick_filter.bc 
+	  mesh.bc \
+      pick_filter.bc
 
 DEPS = app.h \
 	   builder.h \
@@ -43,11 +45,21 @@ DEPS = app.h \
 	   quality_filter.h \
 	   pick_filter.h
 
+
 %.bc: %.cpp $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 hexalab_asm.js: $(OBJ) $(LIBS)
-	$(CC) -o ../js/generated/$@ $^ $(CFLAGS)
+	$(CC) -o ../js/generated/$@ $^ $(CFLAGS) -s LINKABLE=0
 
+color_map.bc: color_map.cpp
+	$(CC) -c -o color_map.bc $< $(CFLAGS) -s LINKABLE=1
+	
+loader.bc: loader.cpp
+	$(CC) -c -o loader.bc $< $(CFLAGS) -s LINKABLE=1
+
+app.bc: app.cpp
+	$(CC) -c -o app.bc $< $(CFLAGS) -s LINKABLE=1
+	
 clean:
 	rm -f *.bc ../../js/generated/*.js 
