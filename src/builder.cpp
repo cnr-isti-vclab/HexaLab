@@ -1,8 +1,7 @@
-#include <hex_quality.h>
+#include "hex_quality.h"
 
-#include <builder.h>
+#include "builder.h"
 
-#include <hex_quality.h>
 //#include <emscripten.h>
 
 //#define HL_SET_PROGRESS_PHASE(X) \
@@ -11,235 +10,163 @@
 //    EM_ASM( HexaLab.UI.set_progress_phasename( X ) )
 #define HL_SET_PROGRESS_PHASE(X)
 
+
 namespace HexaLab {
 
-std::unordered_map<Builder::EdgeMapKey, Index> Builder::edges_map;
-std::unordered_map<Builder::FaceMapKey, Index> Builder::faces_map;
+struct FaceData{
+    Index v1,v2,v3; // vertex index 1,2,3, NOT the first one
+    Index ci; // originating cell
+    short side; // originating side
 
-constexpr Index Builder::hexa_face[6][4];
+    FaceData(FourIndices vi, Index _ci, short s):ci(_ci),v1(vi[1]),v2(vi[2]),v3(vi[3]),side(s) {}
 
+    bool matches( const FaceData& other) {
+        return (other.v2==v2) && (other.v1==v3) && (other.v3==v1);
+    }
+};
 
-/*
-        The second edge must come after the first, like so:
+std::vector< std::vector< FaceData > > face_data;
 
-         - e1 ->
-        ---------
-                | |
-                | e2
-                | v
-    */
-void Builder::link_edges ( Mesh& mesh, Index e1, Index e2 ) {
-    MeshNavigator n1 = mesh.navigate ( mesh.darts[e1] );
-    MeshNavigator n2 = mesh.navigate ( mesh.darts[e2] );
-    n1.flip_vert().dart().edge_neighbor = n2.dart_index();
-    n2.dart().edge_neighbor = n1.flip_vert().dart_index();
+/*inline FourIndices canonicize(const FourIndices &v) {
+    // find max, put it in first place
+    int m0 = (v[0]>v[1])?0:1;
+    int m1 = (v[2]>v[3])?2:3;
+    int m = (v[m0]>v[m1])?m0:m1;
+    return FourIndices( v[m] , v[(m+1)%4], v[(m+2)%4], v[(m+3)%4]);
+}*/
+
+inline FourIndices canonicize(const FourIndices &v) {
+    // find max, put it in first place
+    int m0 = (v[0]>v[1])?0:1;
+    int m1 = (v[2]>v[3])?2:3;
+    int m = (v[m0]>v[m1])?m0:m1;
+    FourIndices f( v[m] , v[(m+1)%4], v[(m+2)%4], v[(m+3)%4]);
+
+    // canonicize triangles: repeated vertex is a -1 in v[2]
+    if (f.vi[0]==f.vi[1]) { f.vi[1]=f.vi[2]; f.vi[2]=-1; }
+    if (f.vi[3]==f.vi[0]) { f.vi[3]=f.vi[2]; f.vi[2]=-1; }
+    if (f.vi[1]==f.vi[2] || f.vi[2]==f.vi[3]) { f.vi[2]=-1; }
+
+    return f;
 }
 
-void Builder::link_hexas ( Mesh& mesh, Index d1, Index d2 ) {
-    MeshNavigator n1 = mesh.navigate ( mesh.darts[d1] );
-    MeshNavigator n2 = mesh.navigate ( mesh.darts[d2] );
-    size_t found = 0;
+static Vector3f barycenter_of(const Mesh &mesh, const Face &face){
+    FourIndices vi = mesh.vertex_indices( face );
+    return (mesh.pos( vi[0])+mesh.pos( vi[1])+mesh.pos( vi[2])+mesh.pos( vi[3]) )/4.0;
+}
 
-    for ( size_t i = 0; i < 4; ++i ) {
-        for ( size_t j = 0; j < 4; ++j ) {
-            if ( n2.vert() == n1.vert() && n2.edge() == n1.edge() ) {
-                n2.dart().cell_neighbor = n1.dart_index();
-                n1.dart().cell_neighbor = n2.dart_index();
-                n2.flip_vert().dart().cell_neighbor = n1.flip_vert().dart_index();
-                n1.flip_vert().dart().cell_neighbor = n2.flip_vert().dart_index();
-                ++found;
-            }
+static Vector3f barycenter_of(const Mesh &mesh, const Cell &c){
+    return (mesh.pos( c.vi[0])+mesh.pos( c.vi[1])+mesh.pos( c.vi[2])+mesh.pos(c.vi[3]) +
+            mesh.pos( c.vi[4])+mesh.pos( c.vi[5])+mesh.pos( c.vi[6])+mesh.pos(c.vi[7]))/8.0;
+}
 
-            n2 = n2.flip_vert();
+void compute_normal(Mesh &mesh, Face &face){
+    Vector3f normal ( 0, 0, 0 );
+    FourIndices vi = mesh.vertex_indices( face );
 
-            if ( n2.vert() == n1.vert() && n2.edge() == n1.edge() ) {
-                n2.dart().cell_neighbor = n1.dart_index();
-                n1.dart().cell_neighbor = n2.dart_index();
-                n2.flip_vert().dart().cell_neighbor = n1.flip_vert().dart_index();
-                n1.flip_vert().dart().cell_neighbor = n2.flip_vert().dart_index();
-                ++found;
-            }
+    Vector3f a,b;
 
-            n2 = n2.flip_edge();
+    a = mesh.verts[vi[3]].position - mesh.verts[vi[0]].position;
+    b = mesh.verts[vi[1]].position - mesh.verts[vi[0]].position;
+    normal += a.cross ( b );
+    a = mesh.verts[vi[0]].position - mesh.verts[vi[1]].position;
+    b = mesh.verts[vi[2]].position - mesh.verts[vi[1]].position;
+    normal += a.cross ( b );
+    a = mesh.verts[vi[1]].position - mesh.verts[vi[2]].position;
+    b = mesh.verts[vi[3]].position - mesh.verts[vi[2]].position;
+    normal += a.cross ( b );
+    a = mesh.verts[vi[2]].position - mesh.verts[vi[3]].position;
+    b = mesh.verts[vi[0]].position - mesh.verts[vi[3]].position;
+    normal += a.cross ( b );
+
+    if (normal== Vector3f(0,0,0)) {
+        // fall back strategy
+        normal = barycenter_of(mesh, face) - barycenter_of(mesh,mesh.cells[face.ci[0]]);
+    }
+    normal.normalize();
+
+    face.normal = normal;
+}
+
+void fix_if_degenerate( Mesh& mesh, Face & f ){
+    FourIndices v = mesh.vertex_indices( f );
+    int matches = 0;
+    if (v[0]==v[1]) matches++;
+    if (v[1]==v[2]) matches++;
+    if (v[2]==v[3]) matches++;
+    if (v[3]==v[0]) matches++;
+    // hack: degenerate (segment-shaped) faces are pointing to self
+    if (matches>=2) {
+        f.ci[1] = f.ci[0];
+        f.wi[1] = f.wi[0];
+    }
+}
+
+void add_face(Mesh& mesh, const FaceData & fa){
+    Face f;
+    f.ci[0] = fa.ci;
+    f.wi[0] = fa.side;
+    f.ci[1] = -1;
+    f.wi[1] = -1;
+    compute_normal( mesh, f);
+    fix_if_degenerate(mesh,f);
+
+    Index fi = mesh.faces.size();
+    mesh.faces.push_back( f );
+    mesh.cells[ fa.ci ].fi[ fa.side ] = fi;
+}
+
+void add_face(Mesh& mesh, const FaceData & fa,const FaceData & fb){
+    Face f;
+    f.ci[0] = fa.ci;
+    f.wi[0] = fa.side;
+    f.ci[1] = fb.ci;
+    f.wi[1] = fb.side;
+    compute_normal( mesh, f);
+
+    Index fi = mesh.faces.size();
+    mesh.faces.push_back( f );
+    mesh.cells[ fa.ci ].fi[ fa.side ] = fi;
+    mesh.cells[ fb.ci ].fi[ fb.side ] = fi;
+
+}
+
+
+void find_matches( Mesh& mesh, std::vector<FaceData> &v, const FaceData &fd ){
+    int last = v.size()-1;
+    for (int i=0; i<v.size(); i++) {
+        if ( v[i].matches(fd)) {
+
+            add_face(mesh, fd, v[i]);
+
+            // remove element i
+            if (i<last) std::swap( v[i] , v[last] );
+            v.pop_back();
+            return;
         }
-
-        n1 = n1.rotate_on_face();
     }
-
-    assert ( found > 0 );
+    // not found: add it
+    v.push_back( fd );
 }
 
-void Builder::link_faces ( Mesh& mesh, Index d1, Index d2 ) {
-    MeshNavigator n1 = mesh.navigate ( mesh.darts[d1] );
-    MeshNavigator n2 = mesh.navigate ( mesh.darts[d2] );
-    size_t found = 0;
+// vi: array of 8 vertex indices representing the hexa.
+void Builder::add_hexa ( Mesh& mesh, const Index* vi ) {
+    const Index ci = mesh.cells.size();
 
-    for ( size_t i = 0; i < 4; ++i ) {
-        for ( size_t j = 0; j < 4; ++j ) {
-            if ( n2.vert() == n1.vert() && n2.edge() == n1.edge() ) {
-                n2.dart().face_neighbor = n1.dart_index();
-                n1.dart().face_neighbor = n2.dart_index();
-                n2.flip_vert().dart().face_neighbor = n1.flip_vert().dart_index();
-                n1.flip_vert().dart().face_neighbor = n2.flip_vert().dart_index();
-                ++found;
-                ++found;
-            }
+    Cell c;
+    for (int w=0; w<8; w++)  c.vi[w] = vi[w];
 
-            n2 = n2.flip_vert();
+    mesh.cells.push_back( c );
 
-            if ( n2.vert() == n1.vert() && n2.edge() == n1.edge() ) {
-                n2.dart().face_neighbor = n1.dart_index();
-                n1.dart().face_neighbor = n2.dart_index();
-                n2.flip_vert().dart().face_neighbor = n1.flip_vert().dart_index();
-                n1.flip_vert().dart().face_neighbor = n2.flip_vert().dart_index();
-                ++found;
-                ++found;
-            }
+    for (int side=0; side<6; side++) {
+        FourIndices vi = canonicize( c.get_face( side ) );
+        FaceData fd(vi,ci,side);
 
-            n2 = n2.flip_edge();
-        }
-
-        n1 = n1.rotate_on_face();
+        find_matches( mesh, face_data[ vi[0] ] , fd );
     }
 
-    assert ( found > 0 );
-}
 
-Index Builder::add_edge ( Mesh& mesh, Index h, Index f, const Index* edge ) {
-    // Lookup/add the edge
-    Index e;
-    auto search_result = edges_map.find ( EdgeMapKey ( edge ) );
 
-    if ( search_result != edges_map.end() ) {
-        e = search_result->second;
-    } else {
-        e = mesh.edges.size();
-        mesh.edges.emplace_back ( mesh.darts.size() );
-        edges_map.insert ( std::make_pair ( EdgeMapKey ( edge ), e ) );
-    }
-
-    // Add a dart to each vertex
-    assert ( mesh.verts.size() > edge[0] );
-    Index d = mesh.darts.size();
-
-    if ( mesh.verts[edge[0]].dart == -1 ) {
-        mesh.verts[edge[0]].dart = mesh.darts.size();
-    }
-
-    mesh.darts.emplace_back ( h, f, e, edge[0] );
-    assert ( mesh.verts.size() > edge[1] );
-
-    if ( mesh.verts[edge[1]].dart == -1 ) {
-        mesh.verts[edge[1]].dart = mesh.darts.size();
-    }
-
-    mesh.darts.emplace_back ( h, f, e, edge[1] );
-    // Link vertices along the edge
-    mesh.darts[mesh.darts.size() - 1].vert_neighbor = mesh.darts.size() - 2;
-    mesh.darts[mesh.darts.size() - 2].vert_neighbor = mesh.darts.size() - 1;
-    return d;
-}
-
-// h:    index of the hexa the face is part of.
-// face: array of 4 vertex indices representing the face.
-Index Builder::add_face ( Mesh& mesh, Index h, const Index* face ) {
-    // Lookup/add the face
-    Index f;
-    auto search_result = faces_map.find ( FaceMapKey ( face ) );
-
-    if ( search_result != faces_map.end() ) {
-        f = search_result->second;
-    } else {
-        f = mesh.faces.size();
-        faces_map.insert ( std::make_pair ( FaceMapKey ( face ), f ) );
-        mesh.faces.emplace_back ( mesh.darts.size() );
-    }
-
-    // Add face edges
-    Index edge_indices[2];
-    edge_indices[0] = face[0];
-    edge_indices[1] = face[1];
-    Index e1 = add_edge ( mesh, h, f, edge_indices );
-    edge_indices[0] = face[1];
-    edge_indices[1] = face[2];
-    Index e2 = add_edge ( mesh, h, f, edge_indices );
-    edge_indices[0] = face[2];
-    edge_indices[1] = face[3];
-    Index e3 = add_edge ( mesh, h, f, edge_indices );
-    edge_indices[0] = face[3];
-    edge_indices[1] = face[0];
-    Index e4 = add_edge ( mesh, h, f, edge_indices );
-    // Link face edges between them
-    link_edges ( mesh, e1, e2 );
-    link_edges ( mesh, e2, e3 );
-    link_edges ( mesh, e3, e4 );
-    link_edges ( mesh, e4, e1 );
-
-    // Compute face normal, if it is the first match
-    if ( search_result == faces_map.end() ) {
-        Vector3f normal ( 0, 0, 0 );
-        Vector3f a, b;
-        a = mesh.verts[face[3]].position - mesh.verts[face[0]].position;
-        b = mesh.verts[face[1]].position - mesh.verts[face[0]].position;
-        normal += a.cross ( b ).normalized();
-        a = mesh.verts[face[0]].position - mesh.verts[face[1]].position;
-        b = mesh.verts[face[2]].position - mesh.verts[face[1]].position;
-        normal += a.cross ( b ).normalized();
-        a = mesh.verts[face[1]].position - mesh.verts[face[2]].position;
-        b = mesh.verts[face[3]].position - mesh.verts[face[2]].position;
-        normal += a.cross ( b ).normalized();
-        a = mesh.verts[face[2]].position - mesh.verts[face[3]].position;
-        b = mesh.verts[face[0]].position - mesh.verts[face[3]].position;
-        normal += a.cross ( b ).normalized();
-        ( normal /= 4 ).normalize();
-        mesh.faces.back().normal = normal;
-    }
-
-    // Link hexa faces if the face is shared with another hexa
-    if ( search_result != faces_map.end() ) {
-        link_hexas ( mesh, mesh.faces[f].dart, e1 );
-    }
-
-    return e1;
-}
-
-// hexa: array of 8 vertex indices representing the hexa.
-Index Builder::add_hexa ( Mesh& mesh, const Index* hexa ) {
-    const Index h = mesh.cells.size();
-    mesh.cells.emplace_back ( mesh.darts.size() );
-    Index base = mesh.darts.size();
-    Index faces[6];
-
-    for ( int i = 0; i < 6; ++i ) {
-        Index face_indices[4];
-
-        for ( int j = 0; j < 4; ++j ) {
-            face_indices[j] = hexa[Builder::hexa_face[i][j]];
-        }
-
-        faces[i] = add_face ( mesh, h, face_indices );
-    }
-
-    link_faces ( mesh, faces[Front], faces[Top] );
-    link_faces ( mesh, faces[Front], faces[Bottom] );
-    link_faces ( mesh, faces[Front], faces[Left] );
-    link_faces ( mesh, faces[Front], faces[Right] );
-    link_faces ( mesh, faces[Back], faces[Top] );
-    link_faces ( mesh, faces[Back], faces[Bottom] );
-    link_faces ( mesh, faces[Back], faces[Left] );
-    link_faces ( mesh, faces[Back], faces[Right] );
-    link_faces ( mesh, faces[Top], faces[Left] );
-    link_faces ( mesh, faces[Top], faces[Right] );
-    link_faces ( mesh, faces[Bottom], faces[Left] );
-    link_faces ( mesh, faces[Bottom], faces[Right] );
-    //for ( size_t i = 0; i < 6; ++i ) {
-    //    for ( size_t j = 0; j < 6; ++j ) {
-    //        if ( i != j ) {
-    //            link_faces ( mesh, faces[i], faces[j] );
-    //        }
-    //    }
-    //}
-    return h;
 }
 
 void Builder::add_vertices( Mesh& mesh, const vector<Vector3f>& verts ){
@@ -260,27 +187,32 @@ void Builder::build ( Mesh& mesh, const vector<Vector3f>& vertices, const vector
     add_vertices( mesh, vertices );
 
     HL_SET_PROGRESS_PHASE("Building structures");
-    HL_LOG ( "[Builder] Building %lu darts...\n", indices.size() / 8 * 48 );
 
     auto t0 = sample_time();
 
-    edges_map.clear();
-    faces_map.clear();
+    face_data.clear();
+    face_data.resize( vertices.size() );
 
-    HL_LOG ( "[Builder] adding hexa\n" );
+    HL_LOG ( "[Builder] adding hexa " );
     add_hexas(mesh, indices ,  0, 25);
     add_hexas(mesh, indices , 25, 50);
     add_hexas(mesh, indices , 50, 75);
     add_hexas(mesh, indices , 75, 100);
+
+    HL_LOG ( "[Builder] adding skin faces\n" );
+    for (auto &v : face_data ) {
+        for (FaceData &fd: v) add_face( mesh, fd );
+    }
 
     mesh.hexa_quality.resize ( mesh.cells.size() );
     HL_LOG ( "100%%\r" );
 
     auto dt = milli_from_sample ( t0 );
 
+    face_data.clear();
+
     HL_LOG ( "[Builder] Mesh building took %dms.\n", dt );
 
-    update_surface_status( mesh );
 
 }
 
@@ -295,136 +227,14 @@ void Builder::add_hexas( Mesh& mesh, const vector<Index>& indices, int from , in
     HL_LOG ( "%d%%\r", to );
 }
 
-void Builder::update_surface_status( Mesh& mesh ) {
-    for ( size_t i = 0; i < mesh.edges.size(); ++i ) {
-        MeshNavigator nav = mesh.navigate ( mesh.edges[i] );
-        Face& begin = nav.face();
 
-        do {
-            if ( nav.dart().cell_neighbor == -1 ) {
-                nav.edge().is_surface = true;
-                nav.vert().is_surface = true;
-                nav.flip_vert().vert().is_surface = true;
-            }
-            nav = nav.rotate_on_edge();
-        } while ( nav.face() != begin );
-    }
-}
 
 
 
 
 bool Builder::validate ( Mesh& mesh ) {
-    HL_SET_PROGRESS_PHASE("Validating");
-    auto t0 = sample_time();
-    int surface_darts = 0;
-
-    for ( size_t i = 0; i < mesh.darts.size(); ++i ) {
-        Dart& dart = mesh.darts[i];
-        HL_ASSERT ( dart.cell != -1 && dart.cell < mesh.cells.size() );
-        HL_ASSERT ( dart.face != -1 && dart.face < mesh.faces.size() );
-        HL_ASSERT ( dart.edge != -1 && dart.edge < mesh.edges.size() );
-        HL_ASSERT ( dart.vert != -1 && dart.vert < mesh.verts.size() );
-        HL_ASSERT ( dart.face_neighbor != -1 && dart.face_neighbor < mesh.darts.size() );
-        HL_ASSERT ( dart.edge_neighbor != -1 && dart.edge_neighbor < mesh.darts.size() );
-        HL_ASSERT ( dart.vert_neighbor != -1 && dart.vert_neighbor < mesh.darts.size() );
-
-        if ( dart.cell_neighbor != -1 ) {
-            HL_ASSERT ( dart.cell_neighbor < mesh.darts.size() );
-        } else {
-            ++surface_darts;
-        }
-    }
-
-    for ( size_t i = 0; i < mesh.verts.size(); ++i ) {
-        Vert& v = mesh.verts[i];
-
-        if ( v.dart != -1 ) { // perform test only for referenced vertices.
-            HL_ASSERT ( v.dart != -1 );
-            auto nav = mesh.navigate ( v );
-            HL_ASSERT ( nav.vert() == v );
-            Dart& d1 = nav.dart();
-            nav = nav.flip_vert();
-            HL_ASSERT ( nav.dart().cell == d1.cell
-                        && nav.dart().face == d1.face
-                        && nav.dart().edge == d1.edge );
-            nav = nav.flip_vert();
-            HL_ASSERT ( nav.vert() == v );
-        }
-    }
-
-    for ( size_t i = 0; i < mesh.edges.size(); ++i ) {
-        Edge& e = mesh.edges[i];
-        HL_ASSERT ( e.dart != -1 );
-        auto nav = mesh.navigate ( e );
-        HL_ASSERT ( nav.edge() == e );
-        Dart& d1 = nav.dart();
-        nav = nav.flip_edge();
-        HL_ASSERT ( nav.dart().cell == d1.cell
-                    && nav.dart().face == d1.face
-                    && nav.dart().vert == d1.vert );
-        nav = nav.flip_edge();
-        HL_ASSERT ( nav.edge() == e );
-    }
-
-    for ( size_t i = 1; i < mesh.faces.size(); ++i ) {
-        Face& f = mesh.faces[i];
-        HL_ASSERT ( f.dart != -1 );
-        auto nav = mesh.navigate ( f );
-        HL_ASSERT ( nav.face() == f );
-        Dart& d1 = nav.dart();
-        nav = nav.flip_face();
-        HL_ASSERT ( nav.dart().cell == d1.cell
-                    && nav.dart().edge == d1.edge
-                    && nav.dart().vert == d1.vert );
-        nav = nav.flip_face();
-        HL_ASSERT ( nav.face() == f );
-    }
-
-    for ( size_t i = 0; i < mesh.cells.size(); ++i ) {
-        Cell& h = mesh.cells[i];
-        HL_ASSERT ( h.dart != -1 );
-        auto nav = mesh.navigate ( h );
-        HL_ASSERT ( nav.cell() == h );
-
-        if ( nav.dart().cell_neighbor != -1 ) {
-            Dart& d1 = nav.dart();
-            nav = nav.flip_cell();
-            HL_ASSERT ( nav.dart().face == d1.face
-                        && nav.dart().edge == d1.edge
-                        && nav.dart().vert == d1.vert );
-            nav = nav.flip_cell();
-            HL_ASSERT ( nav.cell() == h );
-        }
-    }
-
-    for ( size_t i = 0; i < mesh.cells.size(); ++i ) {
-        Cell& h = mesh.cells[i];
-        Vector3f v[8];
-        int j = 0;
-        auto nav = mesh.navigate ( h );
-        Vert& a = nav.vert();
-
-        do {
-            v[j++] = nav.vert().position;
-            nav = nav.rotate_on_face();
-        } while ( nav.vert() != a );
-
-        nav = nav.rotate_on_cell().rotate_on_cell().flip_vert();
-        Vert& b = nav.vert();
-
-        do {
-            v[j++] = nav.vert().position;
-            nav = nav.rotate_on_face();
-        } while ( nav.vert() != b );
-
-        float q = QualityMeasureFun::volume ( v[0], v[1], v[2], v[3], v[4], v[5], v[6], v[7], nullptr );
-        //            HL_ASSERT ( q > 0 );
-    }
-
-    auto dt = milli_from_sample ( t0 );
-    HL_LOG ( "[Validator] Surface darts: %d/%lu\n", surface_darts, mesh.darts.size() );
-    HL_LOG ( "[Validator] Validation took %dms.\n", dt );
+    //HL_SET_PROGRESS_PHASE("Validating");
+    //HL_LOG ( "[Validator] Validation took %dms.\n", dt );
     return true;
 }
 }

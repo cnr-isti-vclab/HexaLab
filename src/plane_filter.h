@@ -1,7 +1,6 @@
 #pragma once
 
-#include <mesh.h>
-#include <ifilter.h>
+#include "ifilter.h"
 
 namespace HexaLab {
     class PlaneFilter : public IFilter {
@@ -32,7 +31,7 @@ namespace HexaLab {
         void on_mesh_set(Mesh& mesh);
 
     private:
-        bool plane_cull_test(Mesh& mesh, Face& face);
+        bool cell_test(const Mesh& mesh, const Cell& c);
         void update_min_max_offset();
     };
 }

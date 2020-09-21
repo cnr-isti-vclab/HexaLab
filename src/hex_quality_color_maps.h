@@ -3,8 +3,8 @@
 
 #include <Eigen/Dense>
 
-#include <common.h>
-#include <hex_quality.h>
+#include "common.h"
+#include "hex_quality.h"
 
 namespace HexaLab
 {

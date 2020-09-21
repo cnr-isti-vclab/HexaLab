@@ -1,6 +1,7 @@
-#include <app.h>
-
 #include <limits>
+
+#include "app.h"
+
 
 #define D2R (3.141592653589793f / 180.f)
 
@@ -26,57 +27,11 @@ namespace HexaLab {
         // Validate
         HL_LOG ( "Validating...\n" );
         Builder::validate ( *mesh );
+
         // Update stats
-        float max = std::numeric_limits<float>::lowest();
-        float min = std::numeric_limits<float>::max();
-        float avg = 0;
 
-        for ( size_t i = 0; i < mesh->edges.size(); ++i ) {
-            MeshNavigator nav = mesh->navigate ( mesh->edges[i] );
-            Vector3f edge = nav.vert().position - nav.flip_vert().vert().position;
-            float len = edge.norm();
-
-            if ( len < min ) {
-                min = len;
-            }
-
-            if ( len > max ) {
-                max = len;
-            }
-
-            avg += len;
-        }
-
-        avg /= mesh->edges.size();
-        mesh_stats.min_edge_len = min;
-        mesh_stats.max_edge_len = max;
-        mesh_stats.avg_edge_len = avg;
-        float avg_v = 0;
-        Vector3f v[8];
-
-        for ( size_t i = 0; i < mesh->cells.size(); ++i ) {
-            int j = 0;
-            MeshNavigator nav = mesh->navigate ( mesh->cells[i] );
-            Vert& a = nav.vert();
-
-            do {
-                v[j++] = nav.vert().position;
-                nav = nav.rotate_on_face();
-            } while ( nav.vert() != a );
-
-            nav = nav.rotate_on_cell().rotate_on_cell().flip_vert();
-            Vert& b = nav.vert();
-
-            do {
-                v[j++] = nav.vert().position;
-                nav = nav.rotate_on_face();
-            } while ( nav.vert() != b );
-
-            avg_v += QualityMeasureFun::volume ( v[0], v[1], v[2], v[3], v[4], v[5], v[6], v[7], nullptr );
-        }
-
-        avg_v /= mesh->cells.size();
-        mesh_stats.avg_volume = avg_v;
+        mesh_stats.avg_edge_len = mesh->average_edge_lenght( mesh_stats.min_edge_len, mesh_stats.max_edge_len );
+        mesh_stats.avg_volume = mesh->average_cell_volume(  );
         mesh_stats.vert_count = mesh->verts.size();
         mesh_stats.hexa_count = mesh->cells.size();
         mesh_stats.aabb = mesh->aabb;
@@ -84,6 +39,7 @@ namespace HexaLab {
         mesh_stats.quality_max = 0;
         mesh_stats.quality_avg = 0;
         mesh_stats.quality_var = 0;
+
         // build quality buffers
         this->compute_hexa_quality();
 
@@ -209,27 +165,14 @@ namespace HexaLab {
         float sum2 = 0;
         mesh->hexa_quality.resize ( mesh->cells.size() );
         mesh->normalized_hexa_quality.resize ( mesh->cells.size() );
-        Vector3f v[8];
 
         for ( size_t i = 0; i < mesh->cells.size(); ++i ) {
-            int j = 0;
-            MeshNavigator nav = mesh->navigate ( mesh->cells[i] );
-            Vert& a = nav.vert();
+            Cell &c = mesh->cells[i];
 
-            do {
-                v[j++] = nav.vert().position;
-                nav = nav.rotate_on_face();
-            } while ( nav.vert() != a );
-
-            nav = nav.rotate_on_cell().rotate_on_cell().flip_vert();
-            Vert& b = nav.vert();
-
-            do {
-                v[j++] = nav.vert().position;
-                nav = nav.rotate_on_face();
-            } while ( nav.vert() != b );
-
-            float q = qualityFunctor ( v[0], v[1], v[2], v[3], v[4], v[5], v[6], v[7], arg );
+            // from rational to irrational order!
+            float q = qualityFunctor (
+                    mesh->pos(c.vi[0]), mesh->pos(c.vi[1]), mesh->pos(c.vi[3]), mesh->pos(c.vi[2]),
+                    mesh->pos(c.vi[4]), mesh->pos(c.vi[5]), mesh->pos(c.vi[7]), mesh->pos(c.vi[6]),  arg );
             mesh->hexa_quality[i] = q;
             minQ = min(q,minQ);
             maxQ = max(q,maxQ);
@@ -260,47 +203,14 @@ namespace HexaLab {
         line_singularity_model.clear();
         spined_singularity_model.clear();
         full_singularity_model.clear();
-
+/* TODO: singularities
         // boundary_singularity_model.clear();
         // boundary_creases_model.clear();
         for ( size_t i = 0; i < mesh->edges.size(); ++i ) {
             MeshNavigator nav = mesh->navigate ( mesh->edges[i] );
-            // -- Boundary check --
-            // {
-            //     bool boundary = false;
-            //     Face& begin = nav.face();
-            //     do {
-            //         if (nav.is_face_boundary()) {
-            //             boundary = true;
-            //             break;
-            //         }
-            //         nav = nav.rotate_on_edge();
-            //     } while(nav.face() != begin);
-            //     if (boundary) {
-            //         // Boundary singularity
-            //         if (nav.incident_face_on_edge_num() != 2) {
-            //             for (int n = 0; n < 2; ++n) {     // 2 verts that make the edge
-            //                 boundary_singularity_model.wireframe_vert_pos.push_back(nav.vert().position);
-            //                 boundary_singularity_model.wireframe_vert_color.push_back(Vector3f(0, 0, 1));
-            //                 nav = nav.flip_vert();
-            //             }
-            //         }
-            //         // Boundary Crease
-            //         MeshNavigator nav2 = nav.flip_face();
-            //         if (!nav2.is_face_boundary()) {
-            //             nav2 = nav2.flip_cell().flip_face();
-            //             float dot = nav.face().normal.dot(nav2.face().normal);
-            //             if (std::acos(dot) > 30 * D2R) {
-            //                 for (int n = 0; n < 2; ++n) {     // 2 verts that make the edge
-            //                     boundary_creases_model.wireframe_vert_pos.push_back(nav.vert().position);
-            //                     boundary_creases_model.wireframe_vert_color.push_back(Vector3f(1, 0, 0));
-            //                     nav = nav.flip_vert();
-            //                 }
-            //             }
-            //         }
-            //     }
-            // }
-            // -- Singularity check
+
+            // Boundary check: no thanks --
+
             int face_count = nav.incident_face_on_edge_num();
 
             if ( face_count == 4 ) {
@@ -395,17 +305,7 @@ namespace HexaLab {
 
 
         }
-    }
-
-    void App::add_visible_vert ( Dart& dart, float normal_sign, Vector3f color ) {
-        MeshNavigator nav = mesh->navigate ( dart );
-        visible_model.surface_vert_pos.push_back ( nav.vert().position );
-        visible_model.surface_vert_norm.push_back ( nav.face().normal * normal_sign );
-        visible_model.surface_vert_color.push_back ( color );
-        HL_ASSERT ( visible_model.surface_vert_pos.size() == visible_model.surface_vert_norm.size() &&
-                    visible_model.surface_vert_pos.size() == visible_model.surface_vert_color.size() );
-        Index idx = visible_model.surface_vert_pos.size() - 1;
-        visible_model.surface_ibuffer.push_back ( idx );
+        */
     }
 
     size_t App::add_vertex ( Vector3f pos, Vector3f norm, Vector3f color ) {
@@ -441,207 +341,72 @@ namespace HexaLab {
         add_triangle ( i3, i4, i1 );
     }
 
-    // dart: first dart in the face to render
-    void App::add_visible_face ( Dart& dart, float normal_sign ) {
-        MeshNavigator nav = mesh->navigate ( dart );
+    void App::add_visible_face ( const Face &face ) {
 
-        // Faces are normally shared between two cells, but their data structure references only one of them, the 'main' (the first encountered when parsing the mesh file).
-        // If the normal sign is -1, it means that the cell we want to render is not the main.
-        // Therefore a flip cell is performed, along with a flip edge to maintain the winding.
-        if ( normal_sign == -1 ) {
-            nav = nav.flip_cell().flip_edge();
-        }
-
-        // If cell quality display is enabled, fetch the appropriate quality color.
-        // Otherwise use the defautl coloration (white for outer faces, yellow for everything else)
         Vector3f color;
 
         if ( is_quality_color_mapping_enabled() ) {
-            color = color_map.get ( mesh->normalized_hexa_quality[nav.cell_index()] );
+            color = color_map.get ( mesh->normalized_hexa_quality[ face.ci[0] ] );
         } else {
-            color = nav.is_face_boundary() ? this->default_outside_color : this->default_inside_color;
+            color = face.is_boundary() ? this->default_outside_color : this->default_inside_color;
         }
 
-        for ( int i = 0; i < 2; ++i ) {
-            for ( int j = 0; j < 2; ++j ) {
-                add_visible_wireframe ( nav.dart() );
-                nav = nav.rotate_on_face();
-            }
-        }
-
-        nav = mesh->navigate ( dart );
-        // nav = mesh->navigate(nav.cell());   // TODO remove this
-
-        if ( normal_sign == -1 ) {
-            nav = nav.flip_vert();    // TODO flip cell/edge instead? same thing?
-        }
-
-        Vert& vert = nav.vert();
         Index idx = visible_model.surface_vert_pos.size();
 
-        do {
-            add_vertex ( nav.vert().position, nav.face().normal * normal_sign, color );
-            nav = nav.rotate_on_face();
-        } while ( nav.vert() != vert );
-
-        add_triangle ( idx + 2, idx + 1, idx + 0 );
-        add_triangle ( idx + 0, idx + 3, idx + 2 );
+        FourIndices vi = mesh->vertex_indices( face );
+        for (int i=0; i<4; i++) {
+            add_vertex( mesh->pos(vi[i]) , face.normal, color );
+        }
+        this->add_triangle ( idx + 2, idx + 1, idx + 0 );
+        this->add_triangle ( idx + 0, idx + 3, idx + 2 );
     }
 
-    void App::add_visible_wireframe ( Dart& dart ) {
-        MeshNavigator nav = mesh->navigate ( dart );
-        //if (nav.edge().mark != mesh->mark) {
-        //            nav.edge().mark = mesh->mark;
-        MeshNavigator edge_nav = nav;
-        bool boundary_singularity = false;
-        bool boundary_crease = false;
 
-        if ( this->do_show_boundary_singularity ) {
-            if ( nav.incident_face_on_edge_num() != 2 ) {
-                boundary_singularity = true;
-            }
+    void App::add_filtered_face ( const Face& face ) {
+
+        FourIndices vi = mesh->vertex_indices( face );
+
+        for (int k=0; k<4; k++) {
+            filtered_model.wireframe_vert_pos.push_back( mesh->verts[ vi[k] ].position );
+            filtered_model.wireframe_vert_pos.push_back( mesh->verts[ vi[(k+1)%4] ].position );
         }
 
-        // if (this->do_show_boundary_creases) {
-        //     Face& begin = nav.face();
-        //     bool prev_face_is_boundary = false;
-        //     Vector3f prev_face_normal;
-        //     do {
-        //         if (!prev_face_is_boundary) {
-        //             if (nav.is_face_boundary()) {
-        //                 prev_face_is_boundary = true;
-        //                 prev_face_normal = nav.face().normal;
-        //             }
-        //         } else {
-        //             if (nav.is_face_boundary()) {
-        //                 // float dot = nav.face().normal.dot(prev_face_normal);
-        //                 // if (std::acos(std::abs(dot)) > 1 * D2R) {
-        //                     boundary_crease = true;
-        //                     break;      // Ends in a different dart from the starting one!
-        //                 // }
-        //             } else {
-        //                 prev_face_is_boundary = false;
-        //             }
-        //         }
-        //         nav = nav.rotate_on_edge();
-        //     } while (nav.face() != begin);
-        // }
+        filtered_model.surface_vert_pos.push_back ( mesh->verts[ vi[0] ].position );
+        filtered_model.surface_vert_pos.push_back ( mesh->verts[ vi[1] ].position );
+        filtered_model.surface_vert_pos.push_back ( mesh->verts[ vi[2] ].position );
 
-        float alpha;
-        if (this->do_show_visible_wireframe_singularity) {
-            size_t unfiltered_cells = 0;
-            Cell& h = edge_nav.cell();
-            do {
-                if ( !mesh->is_marked( edge_nav.cell() ) ) {
-                    ++unfiltered_cells;
-                }
-                edge_nav = edge_nav.rotate_on_edge();
-            } while ( edge_nav.cell() != h );
+        filtered_model.surface_vert_pos.push_back ( mesh->verts[ vi[2] ].position );
+        filtered_model.surface_vert_pos.push_back ( mesh->verts[ vi[3] ].position );
+        filtered_model.surface_vert_pos.push_back ( mesh->verts[ vi[0] ].position );
 
-            switch ( unfiltered_cells ) {
-            case 0:             // should never hit
-                alpha = 0;
-            case 1:
-                alpha = 0.1;
-                break;
-            case 2:
-                alpha = 0.5;
-            case 3:
-                alpha = 0.7;
-            default:
-                alpha = 0.9;
-            }
-        } else {
-            alpha = 1;
-        }
-
-        for ( int v = 0; v < 2; ++v ) {
-            visible_model.wireframe_vert_pos.push_back ( edge_nav.vert().position );
-
-            // if (this->do_show_boundary_singularity && boundary_singularity
-            // && this->do_show_boundary_creases && boundary_crease) {
-            // visible_model.wireframe_vert_color.push_back(Vector3f(0, 1, 1));
-            // } else
-            if ( this->do_show_boundary_singularity && boundary_singularity ) {
-                visible_model.wireframe_vert_color.push_back ( Vector3f ( 0, 0, 1 ) );
-                visible_model.wireframe_vert_alpha.push_back ( 1 );
-                // } else if (this->do_show_boundary_creases && boundary_crease) {
-                // visible_model.wireframe_vert_color.push_back(Vector3f(0, 1, 0));
-            } else {
-                visible_model.wireframe_vert_color.push_back ( Vector3f ( 0, 0, 0 ) );
-                visible_model.wireframe_vert_alpha.push_back ( alpha );
-            }
-
-            edge_nav = edge_nav.flip_vert();
-        }
-
-        //}
+        for (int k=0; k<6; k++)
+            filtered_model.surface_vert_norm.push_back ( face.normal );
     }
 
-    void App::add_filtered_face ( Dart& dart ) {
-        MeshNavigator nav = mesh->navigate ( dart );
+    void App::add_full_face ( const Face& f ) {
 
-        for ( int i = 0; i < 2; ++i ) {
-            for ( int j = 0; j < 2; ++j ) {
-                filtered_model.surface_vert_pos.push_back ( mesh->verts[nav.dart().vert].position );
-                add_filtered_wireframe ( nav.dart() );
-                nav = nav.rotate_on_face();
-            }
-
-            filtered_model.surface_vert_pos.push_back ( mesh->verts[nav.dart().vert].position );
-            Vector3f normal = nav.face().normal;
-            filtered_model.surface_vert_norm.push_back ( normal );
-            filtered_model.surface_vert_norm.push_back ( normal );
-            filtered_model.surface_vert_norm.push_back ( normal );
-        }
-    }
-
-    void App::add_filtered_wireframe ( Dart& dart ) {
-        MeshNavigator nav = mesh->navigate ( dart );
-        //if (nav.edge().mark != mesh->mark) {
-        //            nav.edge().mark = mesh->mark;
-        MeshNavigator edge_nav = nav;
-
-        for ( int v = 0; v < 2; ++v ) {
-            filtered_model.wireframe_vert_pos.push_back ( mesh->verts[edge_nav.dart().vert].position );
-            edge_nav = edge_nav.flip_vert();
-        }
-
-        //}
-    }
-
-    void App::add_full_face ( Dart& dart ) {
-        MeshNavigator nav = mesh->navigate ( dart );
-        Vert& vert = nav.vert();
         Index idx = full_model.surface_vert_pos.size();
         Vector3f color{ 1, 1, 1 };
 
-        do {
-            add_full_vertex ( nav.vert().position, nav.face().normal, color );
-            nav = nav.rotate_on_face();
-        } while ( nav.vert() != vert );
+        FourIndices vi = mesh->vertex_indices( f );
+        for (int w=0; w<4; w++) {
+            add_full_vertex ( mesh->verts[ vi[w] ].position , f.normal, color );
+        }
 
         add_full_triangle ( idx + 2, idx + 1, idx + 0 );
         add_full_triangle ( idx + 0, idx + 3, idx + 2 );
     }
 
     void App::prepare_geometry() {
-        for ( size_t i = 0; i < mesh->faces.size(); ++i ) {
-            MeshNavigator nav = mesh->navigate ( mesh->faces[i] );
-
-            // cell a visible, cell b not existing or not visible
-            if ( !mesh->is_marked ( nav.cell() ) && ( nav.dart().cell_neighbor == -1 || mesh->is_marked ( nav.flip_cell().cell() ) ) ) {
-                this->add_visible_face ( nav.dart(), 1 );
-                // cell a invisible, cell b existing and visible
-            } else if ( mesh->is_marked ( nav.cell() ) && nav.dart().cell_neighbor != -1 && !mesh->is_marked ( nav.flip_cell().cell() ) ) {
-                this->add_visible_face ( nav.dart(), -1 );
-                // add_filtered_face(nav.dart());
-                // face was culled by the plane, is surface
-            } else if ( mesh->is_marked ( nav.cell() ) && nav.dart().cell_neighbor == -1 ) {
-                this->add_filtered_face ( nav.flip_edge().dart() );
-            }
+        for (const Face& f: mesh->faces) {
+            bool side0 = !mesh->is_marked( f.ci[0] );
+            bool side1 = !f.is_boundary() && !mesh->is_marked( f.ci[1] );
+            if ( side0 && !side1 ) this->add_visible_face ( f );
+            if (!side0 &&  side1 ) this->add_visible_face ( f.flipped() );
         }
     }
+
+    //
     void App::build_gap_hexa ( const Vector3f pp[8], const Vector3f nn[6], const bool vv[8], const Vector3f ww[6] ) {
         if ( !vv[0] && !vv[1] && !vv[2] && !vv[3] && !vv[4] && !vv[5] && !vv[6] && !vv[7] ) {
             return;
@@ -677,24 +442,11 @@ namespace HexaLab {
         addSide ( 1 + 4, 0 + 4, 2 + 4, 3 + 4, 5 );
         addSide ( 0 + 0, 4 + 0, 5 + 0, 1 + 0, 2 );
         addSide ( 4 + 2, 0 + 2, 1 + 2, 5 + 2, 3 );
-        //addSide ( 0 + 0, 2 + 0, 6 + 0, 4 + 0, 1 );
-        //addSide ( 2 + 1, 0 + 1, 4 + 1, 6 + 1, 0 );
-        //addSide ( 0 + 0, 1 + 0, 3 + 0, 2 + 0, 5 );
-        //addSide ( 1 + 4, 0 + 4, 2 + 4, 3 + 4, 4 );
-        //addSide ( 0 + 0, 4 + 0, 5 + 0, 1 + 0, 3 );
-        //addSide ( 4 + 2, 0 + 2, 1 + 2, 5 + 2, 2 );
-        //{ 0, 1, 2, 3 },   // Front
-        //{ 5, 4, 7, 6 },   // Back
-        //{ 1, 5, 6, 2 },   // Left
-        //{ 4, 0, 3, 7 },   // Right
-        //{ 6, 7, 3, 2 },   // Bottom
-        //{ 4, 5, 1, 0 },   // Top
+
     }
-    /*
-    float len(vec3 p){
-    return p[0]*p[0]+p[1]*p[1]+p[2]*p[2];
-    }*/
-    // 8 [pp]ositions, 6 [nn]ormals, 8 [vv]isible 6 [ww]hite_or_not
+
+
+    // 8 [pp]ositions, 6 [nn]ormals, 8 [vv]isible, 6 [ww]hite_or_not
     void App::build_smooth_hexa ( const Vector3f pp[8], const Vector3f nn[6], const bool vv[8], const bool ww[6], Index cell_idx ) {
         if ( !vv[0] && !vv[1] && !vv[2] && !vv[3] && !vv[4] && !vv[5] && !vv[6] && !vv[7] ) {
             return;
@@ -703,427 +455,213 @@ namespace HexaLab {
         static Vector3f p[4][4][4];
         static Vector3f n[4][4][4];
         static bool     w[4][4][4]; // TODO
-        static int     iv[4][4][4]; // indices
-        auto addSide = [&] ( int v0, int v1, int v2, int v3, bool side ) {
+        static Index    iv[4][4][4];
+
+        auto addSide = [&] ( Index v0, Index v1, Index v2, Index v3, Index side ) {
             if ( ( v0 != -1 ) && ( v1 != -1 ) && ( v2 != -1 ) && ( v3 != -1 ) ) {
                 add_quad ( v0, v1, v2, v3 );
             } else if ( side ) {
-                if ( ( v0 != -1 ) && ( v1 != -1 ) && ( v2 != -1 ) ) {
-                    add_triangle ( v0, v1, v2 );
-                } else if ( ( v0 != -1 ) && ( v1 != -1 ) && ( v3 != -1 ) ) {
-                    add_triangle ( v0, v1, v3 );
-                } else if ( ( v0 != -1 ) && ( v2 != -1 ) && ( v3 != -1 ) ) {
-                    add_triangle ( v0, v2, v3 );
-                } else if ( ( v1 != -1 ) && ( v2 != -1 ) && ( v3 != -1 ) ) {
-                    add_triangle ( v1, v2, v3 );
-                }
+                if ( (v0!=-1) && (v1!=-1) && (v2!=-1) ) add_triangle ( v0, v1, v2 ); else
+                if ( (v0!=-1) && (v1!=-1) && (v3!=-1) ) add_triangle ( v0, v1, v3 ); else
+                if ( (v0!=-1) && (v2!=-1) && (v3!=-1) ) add_triangle ( v0, v2, v3 ); else
+                if ( (v1!=-1) && (v2!=-1) && (v3!=-1) ) add_triangle ( v1, v2, v3 );
             }
         };
 
         // compute normals / whites (from per face to per vertex)
-        for ( int z = 0; z < 4; z++ ) {
-            for ( int y = 0; y < 4; y++ ) {
-                for ( int x = 0; x < 4; x++ ) {
-                    n[x][y][z] = Vector3f ( 0, 0, 0 ); // todo: memfill or something - ?
-                    w[x][y][z] = false;
+
+        for ( int z = 0; z < 4; z++ )
+        for ( int y = 0; y < 4; y++ )
+        for ( int x = 0; x < 4; x++ ) {
+            n[x][y][z] = Vector3f ( 0, 0, 0 ); // todo: memfill or something - ?
+            w[x][y][z] = false;
+        }
+
+        for ( int z = 0; z < 4; z++ )
+        for ( int y = 0; y < 4; y++ ) {
+            n[0][y][z] += nn[0];
+            n[3][y][z] += nn[1];
+            n[y][0][z] += nn[2];
+            n[y][3][z] += nn[3];
+            n[y][z][0] += nn[4];
+            n[y][z][3] += nn[5];
+            w[0][y][z] |= ww[0];
+            w[3][y][z] |= ww[1];
+            w[y][0][z] |= ww[2];
+            w[y][3][z] |= ww[3];
+            w[y][z][0] |= ww[4];
+            w[y][z][3] |= ww[5];
+        }
+
+        for ( int i = 0; i < 4; ++i )
+        for ( int j = 0; j < 4; ++j )
+        for ( int k = 0; k < 4; ++k )
+            n[i][j][k].normalize();
+
+        for ( int z = 0; z < 4; z++ )
+        for ( int y = 0; y < 4; y++ )
+        for ( int x = 0; x < 4; x++ ) {
+            int ii = ( x / 2 ) + ( y / 2 ) * 2 + ( z / 2 ) * 4;
+            p[x][y][z] = pp[ii];
+            iv[x][y][z] = -1;
+        }
+
+        float smooth = this->max_rounding_radius * this->rounding_radius; // smooth = 0.5 --> perfect sphere
+
+        for ( int z = 0; z < 4; z += 3 )
+        for ( int y = 0; y < 4; y += 3 )
+        for ( int x = 0; x < 4; x += 3 ) {
+            for ( int D = 0; D < 3; D++ ) {
+                int dA[3] = { 0, 0, 0 };
+                int dB[3] = { 0, 0, 0 };
+                int dC[3] = { 0, 0, 0 };
+                int s[3];
+                dA[D] = 1;
+                dB[ (D+1)%3 ] = 1;
+                dC[ (D+2)%3 ] = 1;
+                s[0] = (x>1) ? -1 : +1;
+                s[1] = (y>1) ? -1 : +1;
+                s[2] = (z>1) ? -1 : +1;
+                int ii = (x/2) + (y/2) * 2 + (z/2) * 4;
+
+                if ( vv[ii] ) {
+                    int jj = ( ii ^ ( 1 << D ) );
+                    Vector3f edge0 = ( pp[jj] - pp[ii] ) * smooth;
+                    Vector3f edge1 = ( pp[jj] - pp[ii] ) * ( smooth * ( 1 - ( sqrt ( 2 ) / 2 ) ) );
+                    Vector3f edge2 = ( pp[jj] - pp[ii] ) * ( smooth * ( 1 - ( sqrt ( 3 ) / 3 ) ) );
+
+                    p[x + s[0]*(     dA[0]   )] [y + s[1]*(     dA[1]     )] [z + s[2]*(      dA[2]    )] += edge0;
+                    p[x + s[0]*( dB[0]+dA[0] )] [y + s[1]*( dB[1] + dA[1] )] [z + s[2]*( dB[2] + dA[2] )] += edge0;
+                    p[x + s[0]*( dC[0]+dA[0] )] [y + s[1]*( dC[1] + dA[1] )] [z + s[2]*( dC[2] + dA[2] )] += edge0;
+
+                    p[x + s[0]*(     dB[0]   )] [y + s[1]*(     dB[1]     )] [z + s[2]*(      dB[2]    )] += edge1;
+                    p[x + s[0]*(     dC[0]   )] [y + s[1]*(     dC[1]     )] [z + s[2]*(      dC[2]    )] += edge1;
+
+                    p[x][y][z] += edge2;
                 }
             }
         }
 
-        for ( int z = 0; z < 4; z++ ) {
-            for ( int y = 0; y < 4; y++ ) {
-                n[0][y][z] += nn[0];
-                n[3][y][z] += nn[1];
-                n[y][0][z] += nn[2];
-                n[y][3][z] += nn[3];
-                n[y][z][0] += nn[4];
-                n[y][z][3] += nn[5];
-                w[0][y][z] |= ww[0];    // TODO
-                w[3][y][z] |= ww[1];
-                w[y][0][z] |= ww[2];
-                w[y][3][z] |= ww[3];
-                w[y][z][0] |= ww[4];
-                w[y][z][3] |= ww[5];
+        for ( int z = 0; z < 4; z++ )
+        for ( int y = 0; y < 4; y++ )
+        for ( int x = 0; x < 4; x++ ) {
+            int i = (x/2) + (y/2) * 2 + (z/2) * 4;
+            bool mx = ( ( x > 0 ) && ( x < 3 ) ); // mid
+            bool my = ( ( y > 0 ) && ( y < 3 ) );
+            bool mz = ( ( z > 0 ) && ( z < 3 ) );
+
+            int category = 0;
+            if ( mx ) category++;
+            if ( my ) category++;
+            if ( mz ) category++;
+
+            int j = i;
+            if ( category == 1 ) {
+                if ( mx ) j ^= 1;
+                if ( my ) j ^= 2;
+                if ( mz ) j ^= 4;
             }
+
+            if ( category == 0 && !vv[i] ) continue;    // corner: show only if corner visible
+            if ( category == 1 && !vv[i] && !vv[j] ) continue;    // mid edge: show only if both corners visible
+            if ( category == 2 && !vv[i] )  continue;    // mid face: show only if corner visible
+            if ( category == 3 ) continue;    // midpoint: never show
+
+            Vector3f c;
+
+            if ( is_quality_color_mapping_enabled() ) {
+                c = color_map.get ( mesh->normalized_hexa_quality[cell_idx] );
+            } else {
+                c = w[x][y][z] ? this->default_outside_color : this->default_inside_color;
+            }
+
+            iv[x][y][z] = add_vertex ( p[x][y][z], n[x][y][z], c );
+            //std::cout<<"Range = "<<len(p[x][y][z]-vec3(1,1,1))<<"\n"; // test: smooth = 0.5 --> perfect sphere
         }
 
-        for ( int i = 0; i < 4; ++i ) {
-            for ( int j = 0; j < 4; ++j ) {
-                for ( int k = 0; k < 4; ++k ) {
-                    n[i][j][k].normalize();
-                }
-            }
-        }
+        for ( int x = 0; x < 3; x++ )
+        for ( int y = 0; y < 3; y++ ) {
 
-        for ( int z = 0; z < 4; z++ ) {
-            for ( int y = 0; y < 4; y++ ) {
-                for ( int x = 0; x < 4; x++ ) {
-                    int ii = ( x / 2 ) + ( y / 2 ) * 2 + ( z / 2 ) * 4;
-                    p[x][y][z] = pp[ii];
-                    iv[x][y][z] = -1;
-                }
-            }
-        }
-
-        float smooth = this->max_rounding_radius * this->rounding_radius;
-
-        for ( int z = 0; z < 4; z += 3 ) {
-            for ( int y = 0; y < 4; y += 3 ) {
-                for ( int x = 0; x < 4; x += 3 ) {
-                    //std::cout << " ";
-                    for ( int D = 0; D < 3; D++ ) {
-                        int dA[3] = { 0, 0, 0 };
-                        int dB[3] = { 0, 0, 0 };
-                        int dC[3] = { 0, 0, 0 };
-                        int s[3];
-                        dA[D] = 1;
-                        dB[ ( D + 1 ) % 3] = 1;
-                        dC[ ( D + 2 ) % 3] = 1;
-                        s[0] = ( x > 1 ) ? -1 : +1;
-                        s[1] = ( y > 1 ) ? -1 : +1;
-                        s[2] = ( z > 1 ) ? -1 : +1;
-                        int ii = ( x / 2 ) + ( y / 2 ) * 2 + ( z / 2 ) * 4;
-
-                        if ( vv[ii] ) {
-                            int jj = ( ii ^ ( 1 << D ) );
-                            Vector3f edge0 = ( pp[jj] - pp[ii] ) * smooth;
-                            Vector3f edge1 = ( pp[jj] - pp[ii] ) * ( smooth * ( 1 - ( sqrt ( 2 ) / 2 ) ) );
-                            Vector3f edge2 = ( pp[jj] - pp[ii] ) * ( smooth * ( 1 - ( sqrt ( 3 ) / 3 ) ) );
-                            p[x + s[0] * ( dA[0] )][y + s[1] * ( dA[1] )][z + s[2] * ( dA[2] )] += edge0;
-                            p[x + s[0] * ( dB[0] + dA[0] )][y + s[1] * ( dB[1] + dA[1] )][z + s[2] * ( dB[2] + dA[2] )] += edge0;
-                            p[x + s[0] * ( dC[0] + dA[0] )][y + s[1] * ( dC[1] + dA[1] )][z + s[2] * ( dC[2] + dA[2] )] += edge0;
-                            p[x + s[0] * ( dB[0] )][y + s[1] * ( dB[1] )][z + s[2] * ( dB[2] )] += edge1;
-                            p[x + s[0] * ( dC[0] )][y + s[1] * ( dC[1] )][z + s[2] * ( dC[2] )] += edge1;
-                            p[x][y][z] += edge2;
-                        }
-                    }
-                }
-            }
-        }
-
-        for ( int z = 0; z < 4; z++ ) {
-            for ( int y = 0; y < 4; y++ ) {
-                for ( int x = 0; x < 4; x++ ) {
-                    int i = ( x / 2 ) + ( y / 2 ) * 2 + ( z / 2 ) * 4;
-                    bool mx = ( ( x > 0 ) && ( x < 3 ) ); // mid
-                    bool my = ( ( y > 0 ) && ( y < 3 ) );
-                    bool mz = ( ( z > 0 ) && ( z < 3 ) );
-                    int category = 0;
-
-                    if ( mx ) {
-                        category++;
-                    }
-
-                    if ( my ) {
-                        category++;
-                    }
-
-                    if ( mz ) {
-                        category++;
-                    }
-
-                    int j = i;
-
-                    if ( category == 1 ) {
-                        if ( mx ) {
-                            j ^= 1;
-                        }
-
-                        if ( my ) {
-                            j ^= 2;
-                        }
-
-                        if ( mz ) {
-                            j ^= 4;
-                        }
-                    }
-
-                    /*
-                    v[i][j][k] =    (category==3)  // midpoint: never show
-                    || (category==0 && !vv[i])  // corner: show only if corner visible
-                    || (category==1 && !vv[i] && !vv[j])  // mid edge: show only if corner visible
-                    || (category==2 && !vv[i]); // mid face: show only if corner visible*/
-
-                    if ( category == 0 && !vv[i] ) {
-                        continue;    // corner: show only if corner visible
-                    }
-
-                    if ( category == 1 && !vv[i] && !vv[j] ) {
-                        continue;    // mid edge: show only if corner visible
-                    }
-
-                    if ( category == 2 && !vv[i] ) {
-                        continue;    // mid face: show only if corner visible*/
-                    }
-
-                    if ( category == 3 ) {
-                        continue;    // midpoint: never show
-                    }
-
-                    Vector3f c;
-
-                    if ( is_quality_color_mapping_enabled() ) {
-                        c = color_map.get ( mesh->normalized_hexa_quality[cell_idx] );
-                    } else {
-                        c = w[x][y][z] ? this->default_outside_color : this->default_inside_color;
-                    }
-
-                    iv[x][y][z] = add_vertex ( p[x][y][z], n[x][y][z], c );
-                    //std::cout<<"Range = "<<len(p[x][y][z]-vec3(1,1,1))<<"\n"; // test: smooth = 0.5 --> perfect sphere
-                }
-            }
-        }
-
-        for ( int x = 0; x < 3; x++ ) {
-            for ( int y = 0; y < 3; y++ ) {
-                bool mx = ( x == 1 ); // mid
-                bool my = ( y == 1 );
                 int category = 0;
+                if ( x == 1 ) category++;
+                if ( y == 1 ) category++;
 
-                if ( mx ) {
-                    category++;
-                }
-
-                if ( my ) {
-                    category++;
-                }
-
-                addSide ( iv[x][y][0], iv[x][y + 1][0], iv[x + 1][y + 1][0], iv[x + 1][y][0], category == 1 );
-                addSide ( iv[x][y][3], iv[x + 1][y][3], iv[x + 1][y + 1][3], iv[x][y + 1][3], category == 1 );
-                addSide ( iv[x][0][y], iv[x + 1][0][y], iv[x + 1][0][y + 1], iv[x][0][y + 1], category == 1 );
-                addSide ( iv[x][3][y], iv[x][3][y + 1], iv[x + 1][3][y + 1], iv[x + 1][3][y], category == 1 );
-                addSide ( iv[0][x][y], iv[0][x][y + 1], iv[0][x + 1][y + 1], iv[0][x + 1][y], category == 1 );
-                addSide ( iv[3][x][y], iv[3][x + 1][y], iv[3][x + 1][y + 1], iv[3][x][y + 1], category == 1 );
-            }
+                addSide ( iv[x][y][0], iv[ x ][y+1][ 0 ], iv[x+1][y+1][ 0 ], iv[x+1][ y ][ 0 ], category == 1 );
+                addSide ( iv[x][y][3], iv[x+1][ y ][ 3 ], iv[x+1][y+1][ 3 ], iv[ x ][y+1][ 3 ], category == 1 );
+                addSide ( iv[x][0][y], iv[x+1][ 0 ][ y ], iv[x+1][ 0 ][y+1], iv[ x ][ 0 ][y+1], category == 1 );
+                addSide ( iv[x][3][y], iv[ x ][ 3 ][y+1], iv[x+1][ 3 ][y+1], iv[x+1][ 3 ][ y ], category == 1 );
+                addSide ( iv[0][x][y], iv[ 0 ][ x ][y+1], iv[ 0 ][x+1][y+1], iv[ 0 ][x+1][ y ], category == 1 );
+                addSide ( iv[3][x][y], iv[ 3 ][x+1][ y ], iv[ 3 ][x+1][y+1], iv[ 3 ][ x ][y+1], category == 1 );
         }
     }
+
+    void App::prepare_external_skin(){
+        // add boundary (white) faces unless they are visible
+        for ( const Face& f:mesh->faces ) {
+            if (f.is_boundary() && mesh->is_marked(f.ci[0]))
+                this->add_filtered_face(f);
+        }
+    }
+
     void App::prepare_cracked_geometry() {
-        for ( size_t i = 0; i < this->mesh->verts.size(); ++i ) {
-            this->mesh->unmark ( this->mesh->verts[i] );
-        }
 
-        auto mark_face_as_visible = [] ( Mesh * mesh, Dart & dart ) {
-            MeshNavigator nav = mesh->navigate ( dart );
-            Vert& vert = nav.vert();
+        this->mesh->update_vertex_visibility();
+        prepare_external_skin();
 
-            do {
-                mesh->mark ( nav.vert() );
-                nav = nav.rotate_on_face();
-            } while ( nav.vert() != vert );
-        };
+        for ( Index ci = 0; ci < mesh->cells.size(); ++ci ) {
 
-        for ( size_t i = 0; i < mesh->faces.size(); ++i ) {
-            MeshNavigator nav = mesh->navigate ( mesh->faces[i] );
+            const Cell& c = mesh->cells[ci];
 
-            if ( !mesh->is_marked ( nav.cell() ) && ( nav.dart().cell_neighbor == -1 || mesh->is_marked ( nav.flip_cell().cell() ) ) ) {
-                mark_face_as_visible ( this->mesh, nav.dart() );
-            } else if ( mesh->is_marked ( nav.cell() ) && nav.dart().cell_neighbor != -1 && !mesh->is_marked ( nav.flip_cell().cell() ) ) {
-                mark_face_as_visible ( this->mesh, nav.dart() );
-            }
-        }
+            if ( mesh->is_marked ( c ) ) continue;
 
-        for ( size_t i = 0; i < mesh->faces.size(); ++i ) {
-            MeshNavigator nav = mesh->navigate ( mesh->faces[i] );
-
-            if ( mesh->is_marked ( nav.cell() ) && nav.dart().cell_neighbor == -1 ) {
-                this->add_filtered_face ( nav.flip_edge().dart() );
-            }
-        }
-
-        for ( size_t i = 0; i < mesh->cells.size(); ++i ) {
-            if ( mesh->is_marked ( mesh->cells[i] ) ) {
-                continue;
-            }
-
-            // ******
-            //    P6------P7
-            //   / |     / |
-            //  P2------P3 |
-            //  |  |    |  |
-            //  | P4----|--P5
-            //  | /     | /
-            //  P0------P1
             Vector3f    verts_pos[8];
             bool        verts_vis[8];
             Vector3f    faces_colors[6];
             Vector3f    faces_norms[6];
-            // ******
-            // Extract face normals
-            MeshNavigator nav = this->mesh->navigate ( mesh->cells[i] );
-            Face& face = nav.face();
-            Vector3f    norms_buffer[6];
-            Vector3f    colors_buffer[6];
 
-            for ( size_t f = 0; f < 6; ++f ) {
-                MeshNavigator n2 = this->mesh->navigate ( nav.face() );
-                float normal_sign;
+            for (int w=0; w<8; w++) verts_pos[w] = mesh->pos( c.vi[w] );
+            for (int w=0; w<8; w++) verts_vis[w] = mesh->is_visible( c.vi[w] );
 
-                if ( n2.cell() == nav.cell() ) {
-                    normal_sign = 1;
-                } else {
-                    normal_sign = -1;
-                    n2 = n2.flip_cell().flip_edge();
-                }
+            for (int w=0; w<6; w++) faces_norms[w] = mesh->norm_of_side( ci, w);
 
-                norms_buffer[f] = n2.face().normal * normal_sign;
-
-                // color
-                if ( is_quality_color_mapping_enabled() ) {
-                    colors_buffer[f] = color_map.get ( mesh->normalized_hexa_quality[nav.cell_index()] );
-                } else {
-                    colors_buffer[f] = nav.is_face_boundary() ? this->default_outside_color : this->default_inside_color;
-                }
-
-                nav = nav.next_cell_face();
+            // color
+            if ( is_quality_color_mapping_enabled() ) {
+                for (int w=0; w<6; w++) faces_colors[w] = color_map.get( mesh->normalized_hexa_quality[ci] );
+            } else {
+                for (int w=0; w<6; w++) faces_colors[w] =
+                        mesh->faces[c.fi[w]].is_boundary() ?
+                        this->default_outside_color :
+                        this->default_inside_color;
             }
 
-            faces_norms[0] = norms_buffer[4];
-            faces_norms[1] = norms_buffer[1];
-            faces_norms[2] = norms_buffer[5];
-            faces_norms[3] = norms_buffer[2];
-            faces_norms[4] = norms_buffer[0];
-            faces_norms[5] = norms_buffer[3];
-            faces_colors[0] = colors_buffer[4];
-            faces_colors[1] = colors_buffer[1];
-            faces_colors[2] = colors_buffer[5];
-            faces_colors[3] = colors_buffer[2];
-            faces_colors[4] = colors_buffer[0];
-            faces_colors[5] = colors_buffer[3];
-            // Extract vertices
-            nav = mesh->navigate ( mesh->cells[i] );
-            auto store_vert = [&] ( size_t i ) {
-                verts_pos[i] = nav.vert().position;
-                verts_vis[i] = mesh->is_marked ( nav.vert() );
-            };
-            nav = mesh->navigate ( mesh->cells[i] ).flip_vert();
-            store_vert ( 1 );
-            nav = mesh->navigate ( mesh->cells[i] );
-            store_vert ( 0 );
-            nav = mesh->navigate ( mesh->cells[i] ).flip_side().flip_vert();
-            store_vert ( 5 );
-            nav = mesh->navigate ( mesh->cells[i] ).flip_side();
-            store_vert ( 4 );
-            nav = mesh->navigate ( mesh->cells[i] ).flip_vert().flip_edge().flip_vert();
-            store_vert ( 3 );
-            nav = mesh->navigate ( mesh->cells[i] ).flip_edge().flip_vert();
-            store_vert ( 2 );
-            nav = mesh->navigate ( mesh->cells[i] ).flip_side().flip_vert().flip_edge().flip_vert();
-            store_vert ( 7 );
-            nav = mesh->navigate ( mesh->cells[i] ).flip_side().flip_edge().flip_vert();
-            store_vert ( 6 );
             build_gap_hexa ( verts_pos, faces_norms, verts_vis, faces_colors );
         }
     }
+
     void App::prepare_smooth_geometry() {
-        for ( size_t i = 0; i < this->mesh->verts.size(); ++i ) {
-            this->mesh->unmark ( this->mesh->verts[i] );
-        }
+        this->mesh->update_vertex_visibility();
+        prepare_external_skin();
 
-        auto mark_face_as_visible = [] ( Mesh * mesh, Dart & dart ) {
-            MeshNavigator nav = mesh->navigate ( dart );
-            Vert& vert = nav.vert();
+        for ( Index ci = 0; ci < mesh->cells.size(); ++ci ) {
 
-            do {
-                mesh->mark ( nav.vert() );
-                nav = nav.rotate_on_face();
-            } while ( nav.vert() != vert );
-        };
+            const Cell& c =  mesh->cells[ci];
 
-        for ( size_t i = 0; i < mesh->faces.size(); ++i ) {
-            MeshNavigator nav = mesh->navigate ( mesh->faces[i] );
+            if ( mesh->is_marked ( c ) ) continue;
 
-            if ( !mesh->is_marked ( nav.cell() ) && ( nav.dart().cell_neighbor == -1 || mesh->is_marked ( nav.flip_cell().cell() ) ) ) {
-                mark_face_as_visible ( this->mesh, nav.dart() );
-            } else if ( mesh->is_marked ( nav.cell() ) && nav.dart().cell_neighbor != -1 && !mesh->is_marked ( nav.flip_cell().cell() ) ) {
-                mark_face_as_visible ( this->mesh, nav.dart() );
-            }
-        }
-
-        for ( size_t i = 0; i < mesh->faces.size(); ++i ) {
-            MeshNavigator nav = mesh->navigate ( mesh->faces[i] );
-
-            if ( mesh->is_marked ( nav.cell() ) && nav.dart().cell_neighbor == -1 ) {
-                this->add_filtered_face ( nav.flip_edge().dart() );
-            }
-        }
-
-        for ( size_t i = 0; i < mesh->cells.size(); ++i ) {
-            if ( mesh->is_marked ( mesh->cells[i] ) ) {
-                continue;
-            }
-
-            // ******
-            //    P6------P7
-            //   / |     / |
-            //  P4------P5 |
-            //  |  |    |  |
-            //  | P2----|--P3
-            //  | /     | /
-            //  P0------P1
             Vector3f    verts_pos[8];
             bool        verts_vis[8];
-            bool        faces_vis[6]; // true: external, false: internal
-            Vector3f    faces_norms[6];
-            // ******
-            // Extract face normals
-            MeshNavigator nav = this->mesh->navigate ( mesh->cells[i] );
-            Face& face = nav.face();
-            Vector3f    norms_buffer[6];
-            bool        vis_buffer[6];
+            bool        faces_skin[6]; // true: external, false: internal
+            Vector3f    faces_norm[6];
 
-            for ( size_t f = 0; f < 6; ++f ) {
-                MeshNavigator n2 = this->mesh->navigate ( nav.face() );
-                float normal_sign;
+            for (int w=0; w<8; w++) verts_pos[w] = mesh->pos( c.vi[w] );
+            for (int w=0; w<8; w++) verts_vis[w] = mesh->is_visible( c.vi[w] );
+            for (int w=0; w<6; w++) faces_skin[w] = mesh->faces[c.fi[w]].is_boundary();
+            for (int w=0; w<6; w++) faces_norm[w] = mesh->norm_of_side( ci, w);
 
-                if ( n2.cell() == nav.cell() ) {
-                    normal_sign = 1;
-                } else {
-                    normal_sign = -1;
-                    n2 = n2.flip_cell().flip_edge();
-                }
-
-                norms_buffer[f] = n2.face().normal * normal_sign;
-                vis_buffer[f] = n2.dart().cell_neighbor == -1;
-                nav = nav.next_cell_face();
-            }
-
-            faces_norms[0] = norms_buffer[4];
-            faces_norms[1] = norms_buffer[1];
-            faces_norms[2] = norms_buffer[5];
-            faces_norms[3] = norms_buffer[2];
-            faces_norms[4] = norms_buffer[0];
-            faces_norms[5] = norms_buffer[3];
-            faces_vis[0] = vis_buffer[4];
-            faces_vis[1] = vis_buffer[1];
-            faces_vis[2] = vis_buffer[5];
-            faces_vis[3] = vis_buffer[2];
-            faces_vis[4] = vis_buffer[0];
-            faces_vis[5] = vis_buffer[3];
-            // Extract vertices
-            nav = mesh->navigate ( mesh->cells[i] );
-            auto store_vert = [&] ( size_t i ) {
-                verts_pos[i] = nav.vert().position;
-                verts_vis[i] = mesh->is_marked ( nav.vert() );
-            };
-            nav = mesh->navigate ( mesh->cells[i] ).flip_vert();
-            store_vert ( 1 );
-            nav = mesh->navigate ( mesh->cells[i] );
-            store_vert ( 0 );
-            nav = mesh->navigate ( mesh->cells[i] ).flip_side().flip_vert();
-            store_vert ( 5 );
-            nav = mesh->navigate ( mesh->cells[i] ).flip_side();
-            store_vert ( 4 );
-            nav = mesh->navigate ( mesh->cells[i] ).flip_vert().flip_edge().flip_vert();
-            store_vert ( 3 );
-            nav = mesh->navigate ( mesh->cells[i] ).flip_edge().flip_vert();
-            store_vert ( 2 );
-            nav = mesh->navigate ( mesh->cells[i] ).flip_side().flip_vert().flip_edge().flip_vert();
-            store_vert ( 7 );
-            nav = mesh->navigate ( mesh->cells[i] ).flip_side().flip_edge().flip_vert();
-            store_vert ( 6 );
-            build_smooth_hexa ( verts_pos, faces_norms, verts_vis, faces_vis, nav.cell_index() );
+            build_smooth_hexa ( verts_pos, faces_norm, verts_vis, faces_skin, ci );
         }
     }
+
     void App::build_surface_models() {
         if ( mesh == nullptr ) {
             return;
@@ -1133,12 +671,14 @@ namespace HexaLab {
         visible_model.clear();
         filtered_model.clear();
 
+
         HL_ASSERT(filters.size()==4);
         filters[0]->filter( *mesh ); // slice
         filters[1]->filter( *mesh ); // peel
         erode_dilate( regularize_str );
         filters[2]->filter( *mesh ); // quality
         filters[3]->filter( *mesh ); // pick
+
 
 
         switch ( this->geometry_mode ) {
@@ -1163,12 +703,9 @@ namespace HexaLab {
 
         this->full_model.clear();
 
-        for ( size_t i = 0; i < mesh->faces.size(); ++i ) {
-            MeshNavigator nav = mesh->navigate ( mesh->faces[i] );
-
-            // cell a visible, cell b not existing or not visible
-            if ( nav.dart().cell_neighbor == -1 ) {
-                this->add_full_face ( nav.dart() );
+        for ( const Face & f : mesh->faces ) {
+            if ( f.is_boundary() ) {
+                this->add_full_face ( f );
             }
         }
     }
@@ -1181,6 +718,8 @@ namespace HexaLab {
 
     // filter -> mark vertices -> inc mark -> manual mark update -> re-mark vertices -> ...
     void App::erode() {
+        /* TODO: marco */
+        /*
         for ( size_t i = 0; i < this->mesh->verts.size(); ++i ) {
             this->mesh->unmark ( this->mesh->verts[i] );
         }
@@ -1237,10 +776,12 @@ namespace HexaLab {
 
                 nav = nav.rotate_on_face();
             }
-        }
+        }*/
     }
 
     void App::dilate() {
+        /* TODO: Marco */
+        /*
         for ( size_t i = 0; i < this->mesh->verts.size(); ++i ) {
             this->mesh->unmark ( this->mesh->verts[i] );
         }
@@ -1297,6 +838,6 @@ namespace HexaLab {
 
                 nav = nav.rotate_on_face();
             }
-        }
+        }*/
     }
 }

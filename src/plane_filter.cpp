@@ -1,4 +1,5 @@
-#include <plane_filter.h>
+#include "mesh.h"
+#include "plane_filter.h"
 
 #define HL_PLANE_FILTER_DEFAULT_OFFSET  0
 #define HL_PLANE_FILTER_DEFAULT_NORMAL  1, 0, 0
@@ -13,12 +14,10 @@ namespace HexaLab {
         update_min_max_offset();
     }
 
-    // Returns true if any of the face vertices are culled (behind the plane)
-    bool PlaneFilter::plane_cull_test(Mesh& mesh, Face& face) {
-        MeshNavigator nav = mesh.navigate(face);
-        for (int v = 0; v < 4; ++v) {
-            if (normal.dot( nav.vert().position) < offset) return true;
-            nav = nav.rotate_on_face();
+    // Returns true if any of the cell vertices are culled (behind the plane)
+    bool PlaneFilter::cell_test(const Mesh& mesh, const Cell& c ) {
+        for (int w=0; w<8; ++w) {
+            if (normal.dot( mesh.pos( c.vi[w] ) ) < offset) return true;
         }
         return false;
     }
@@ -27,20 +26,8 @@ namespace HexaLab {
         if (!this->enabled)
             return;
 
-        for (unsigned int i = 0; i < mesh.cells.size(); ++i) {
-            Cell& cell = mesh.cells[i];
-
-            // front face plane cull check
-            MeshNavigator nav = mesh.navigate(cell);
-            if (plane_cull_test(mesh, nav.face())) { 
-                mesh.mark(nav.cell());
-                continue;
-            }
-            nav = nav.rotate_on_cell().rotate_on_cell();
-            if (plane_cull_test(mesh, nav.face())) { 
-                mesh.mark(nav.cell());
-                continue;
-            }
+        for (Cell& c : mesh.cells) {
+            if (  cell_test(mesh, c) ) mesh.mark( c );
         }
     }
 

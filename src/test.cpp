@@ -12,11 +12,12 @@ using json = nlohmann::json; // for json reading
 
 int main() {
     printf ( "Size of Vector3 %lu\n", sizeof ( Eigen::Vector3f ) );
+
     printf ( "Size of Hexa %lu\n", sizeof ( Cell ) );
     printf ( "Size of Face %lu\n", sizeof ( Face ) );
     printf ( "Size of Edge %lu\n", sizeof ( Edge ) );
     printf ( "Size of Vert %lu\n", sizeof ( Vert ) );
-    printf ( "Size of Dart %lu\n", sizeof ( Dart ) );
+    //printf ( "Size of Dart %lu\n", sizeof ( Dart ) );
     
     // Testing all the meshes in the repository:
     // The repository is indexed by a JSON that contains an array named 'sources' that contains papers. 
@@ -47,12 +48,15 @@ int main() {
         printf ( "-- title %s\n", title.c_str() );
 
       for ( size_t j = 0; j < dataVec.size(); ++j ) {
+//        { size_t j= 2;
             printf ("Mesh %lu/%lu on dataset %lu/%lu\n",j+1,dataVec.size(),i+1,paperArrayJSON.size());fflush ( stdout );
             ++meshCnt;
-            string filename = dataVec[j];
+            string filename = dataVec[j];//"jumpRamp.mesh";
             const string basepath = "../datasets/";
             app.set_quality_measure( QualityMeasureEnum::SJ );
+            //bool ret = app.import_mesh ( basepath + "/example_tetra.mesh" );
             bool ret = app.import_mesh ( basepath + path + "/" + filename );
+
             if(!ret) {
               failCnt++;
               meshCnt--;
@@ -60,22 +64,13 @@ int main() {
             }
             printf("     Hexas: %4lu\n",app.get_mesh()->cells.size());
             printf("     Faces: %4lu\n",app.get_mesh()->faces.size());
-
-            if (hexMin > app.get_mesh()->cells.size()) {
-              hexMin = app.get_mesh()->cells.size();
-              minMeshName = path + "/" + filename;
-            }
-            if (hexMax < app.get_mesh()->cells.size()) {
-              hexMax = app.get_mesh()->cells.size();
-              maxMeshName = path + "/" + filename;
-            }
-            hexMax=std::max(hexMax,app.get_mesh()->cells.size());
-
             printf("TOTAL RAM: %4lu\n\n",app.get_mesh()->total_occupation_RAM() );
 
             fflush ( stdout );
 
+            //break;
         }
+        //break;
     }
 
     printf ( "%i meshes in the archive (%i fails to load)\n", meshCnt, failCnt );

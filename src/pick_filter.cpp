@@ -38,29 +38,22 @@ void PickFilter::clear(){
 void PickFilter::raycast( Vector3f origin, Vector3f direction, Index &in , Index &out ){
 
     in = out = -1;
+
     float  maxd = FLT_MAX;
 
+    for (const Face &f: mesh->faces) {
 
-    for (Face &f: mesh->faces) {
+        Index h0 = f.ci[0];
+        Index h1 = f.ci[1];
 
-        Index h0 , h1;
-        bool in0, in1;
+        bool in0 = !mesh->is_marked( h0 );
+        bool in1 = (h1!=-1) && !mesh->is_marked( h1 );
 
-        MeshNavigator nav = mesh->navigate(f);
-        h0 = nav.cell_index();
-        in0 = !mesh->is_marked( nav.cell() );
-
-        if (nav.dart().cell_neighbor == -1) {
-            h1 = -1;
-            in1 = false;
-        } else {
-            nav = nav.flip_cell();
-            h1 = nav.cell_index();
-            in1 = !mesh->is_marked( nav.cell() );
-        }
         if (in0==in1) continue; // not a current boundary face
 
-        if (this->face_ray_test( f, origin, direction, maxd)) {
+        Face ff = f;
+        if (in1) ff.flip();
+        if (this->face_ray_test( ff, origin, direction, maxd)) {
             if (in0) { in = h0; out = h1; }
             else {in = h1; out = h0; }
         }
@@ -176,17 +169,14 @@ static bool tri_ray_test(Vector3f vert0, Vector3f vert1,Vector3f vert2,Vector3f 
 }
 
 
-bool PickFilter::face_ray_test( Face& face, Vector3f origin, Vector3f direction, float& maxd) {
+bool PickFilter::face_ray_test(const Face& f, Vector3f origin, Vector3f direction, float& maxd) {
 
-    MeshNavigator nav = this->mesh->navigate(face);
+    FourIndices x = mesh->vertex_indices(f);
 
-    Vector3f v0 = nav.vert().position;
-    nav = nav.rotate_on_face();
-    Vector3f v1 = nav.vert().position;
-    nav = nav.rotate_on_face();
-    Vector3f v2 = nav.vert().position;
-    nav = nav.rotate_on_face();
-    Vector3f v3 = nav.vert().position;
+    Vector3f v0 = mesh->verts[ x.vi[0] ].position;
+    Vector3f v1 = mesh->verts[ x.vi[1] ].position;
+    Vector3f v2 = mesh->verts[ x.vi[2] ].position;
+    Vector3f v3 = mesh->verts[ x.vi[3] ].position;
 
     if (tri_ray_test( v0,v1,v2 , origin, direction,  maxd)) return true;
     if (tri_ray_test( v2,v3,v0 , origin, direction,  maxd)) return true;

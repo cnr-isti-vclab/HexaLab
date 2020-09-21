@@ -1,8 +1,9 @@
 #pragma once
 
-#include <mesh.h>
-
 namespace HexaLab {
+
+    class Mesh;
+
     class IFilter {
     public:
     	bool enabled = true;

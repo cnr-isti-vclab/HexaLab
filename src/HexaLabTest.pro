@@ -1,5 +1,5 @@
-DEPENDPATH += . ./eigen .
-INCLUDEPATH += . ./eigen .
+DEPENDPATH += . ../src/eigen .
+INCLUDEPATH += . ../src/eigen .
 CONFIG += console stl c++11
 
 TEMPLATE = app
@@ -7,14 +7,14 @@ TEMPLATE = app
 CONFIG -= app_bundle
 
 SOURCES += app.cpp \
-  builder.cpp \ 
+  builder.cpp \
+  mesh.cpp \
   loader.cpp \
-  mesh_navigator.cpp \
   plane_filter.cpp \
   quality_filter.cpp \
   test.cpp \
   color_map.cpp \
-  hexalab_js.cpp \ 
+  hexalab_js.cpp \
   peeling_filter.cpp \
   pick_filter.cpp
 
@@ -22,7 +22,7 @@ SOURCES += app.cpp \
 HEADERS = app.h \
   builder.h\
   loader.h\
-  mesh_navigator.h\
+  # mesh_navigator.h\
   ifilter.h\
   mesh.h \
   model.h \

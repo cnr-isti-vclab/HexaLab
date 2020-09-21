@@ -1,4 +1,6 @@
-#include <quality_filter.h>
+#include "mesh.h"
+
+#include "quality_filter.h"
 
 #define HL_QUALITY_FILTER_DEFAULT_ENABLED   true
 #define HL_QUALITY_FILTER_DEFAULT_MIN       0.f

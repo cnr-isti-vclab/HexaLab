@@ -21,12 +21,11 @@ OBJ = hexalab_js.bc \
       app.bc \
       builder.bc \
       color_map.cpp \
-      loader.bc \
+      loader.cpp \
       plane_filter.bc \
       peeling_filter.bc \
       quality_filter.bc \
-      pick_filter.bc \
-      mesh_navigator.bc
+      pick_filter.bc 
 
 DEPS = app.h \
 	   builder.h \

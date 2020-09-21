@@ -33,9 +33,8 @@ namespace HexaLab {
         this->HexaDepth.resize(hn,-1);
         std::vector<size_t> toBeProcessed, toBeProcessedNext;
         
-        for(size_t i = 0; i < mesh.faces.size(); ++i) {
-            if(mesh.navigate(mesh.faces[i]).is_face_boundary())
-                this->HexaDepth[mesh.navigate(mesh.faces[i]).cell_index()] = 0;
+        for (const Face& f: mesh.faces) {
+            if (f.is_boundary()) this->HexaDepth[ f.ci[0] ] = 0;
         }
 
         for(size_t i = 0; i < hn; ++i) {
@@ -47,26 +46,26 @@ namespace HexaLab {
         while(!toBeProcessed.empty()) {
             curDepth++;
             toBeProcessedNext.clear();
-            for (size_t i : toBeProcessed) {
-                auto navStart = mesh.navigate(mesh.cells[i]);
-                assert(this->HexaDepth[i] == -1);
-                int minInd = std::numeric_limits<int>::max();
-                auto nav = navStart;
-                int faceCnt = 0;
-                do {
-                    faceCnt++;
-                    assert(!nav.is_face_boundary());            
-                    int otherDepth = this->HexaDepth[nav.flip_cell().cell_index()];
-                    assert(otherDepth == -1 || otherDepth <= curDepth);
-                    if (otherDepth >= 0 && otherDepth < curDepth && otherDepth < minInd) minInd = otherDepth;            
-                    nav = nav.next_cell_face();
-                } while(!(nav == navStart));
-                assert(faceCnt == 6);
+            for (size_t ci : toBeProcessed) {
+                const Cell& c = mesh.cells[ci];
 
-                if(minInd < std::numeric_limits<int>::max())
-                    this->HexaDepth[i] = minInd + 1;
+                assert(this->HexaDepth[ci] == -1);
+
+                const int BIG = std::numeric_limits<int>::max();
+                int minInd = BIG;
+
+                for (int s=0; s<6; s++) {
+                    int cj = mesh.other_side( ci, s );
+                    if (cj<0) continue;
+
+                    int otherDepth = this->HexaDepth[ cj ];
+                    if (otherDepth >= 0 && otherDepth < curDepth && otherDepth < minInd) minInd = otherDepth;
+
+                }
+                if(minInd < BIG )
+                    this->HexaDepth[ci] = minInd + 1;
                 else 
-                    toBeProcessedNext.push_back(i);                      
+                    toBeProcessedNext.push_back(ci);
             }
             std::swap(toBeProcessed, toBeProcessedNext); 
         }
