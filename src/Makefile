@@ -46,7 +46,7 @@ DEPS = app.h \
 	   pick_filter.h
 
 
-%.bc: %.cpp $(DEPS)
+%.bc : %.cpp $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
 hexalab_asm.js: $(OBJ) $(LIBS)

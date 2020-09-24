@@ -361,22 +361,35 @@ namespace HexaLab {
         this->add_triangle ( idx + 2, idx + 1, idx + 0 );
         this->add_triangle ( idx + 0, idx + 3, idx + 2 );
 
-        add_wireframe_edge( vi[0], vi[1] );
-        add_wireframe_edge( vi[1], vi[2] );
-        add_wireframe_edge( vi[2], vi[3] );
-        add_wireframe_edge( vi[3], vi[0] );
+        for (short side=0; side<4; side++) {
+            int v0 = vi[side];
+            int v1 = vi[(side+1)&3];
+
+            if (v0 <= v1) continue; // only once per edge! (also avoids degenerate edges)
+
+            float alpha = 1.0;
+
+            if (this->do_show_visible_wireframe_singularity) {  // if not flat_lines
+                Index ci = face.ci[0];
+                int new_side = Cell::pivot_face_around_edge( face.wi[0], side );
+                Index cj = mesh->other_side( ci , new_side );
+                if ( (cj < 0) || ( mesh->is_marked(cj) ) ) alpha = 0.1f;
+                else {
+                    // Is it really necessary to distinguish between 1 and multpiple edges?
+                    // No. But, if so... put it here
+                }
+            }
+            add_wireframe_edge( v0, v1, alpha );
+        }
     }
 
-    void App::add_wireframe_edge ( Index v0, Index v1 ){
+    void App::add_wireframe_edge ( Index v0, Index v1, float alpha ){
 
-        if (v0 <= v1) return;
-
-        float alpha = 1;
         visible_model.wireframe_vert_pos.push_back ( mesh->pos(v0) );
         visible_model.wireframe_vert_pos.push_back ( mesh->pos(v1) );
 
         for (int i=0; i<2; i++) {
-            // todo: make this less wasteful
+            // todo: color is not needed, alpha suffices
             visible_model.wireframe_vert_color.push_back ( Vector3f ( 0, 0, 0 ) );
             visible_model.wireframe_vert_alpha.push_back ( alpha );
         }

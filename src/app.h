@@ -150,7 +150,7 @@ namespace HexaLab {
         void add_visible_face ( const Face& f );
         void add_filtered_face ( const Face& f );
         void add_full_face ( const Face& f );
-        void add_wireframe_edge ( Index v0, Index vi );
+        void add_wireframe_edge ( Index v0, Index vi , float alpha);
 
         size_t add_vertex ( Vector3f pos, Vector3f norm, Vector3f color );
         size_t add_full_vertex ( Vector3f pos, Vector3f norm, Vector3f color );

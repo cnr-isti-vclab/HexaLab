@@ -81,8 +81,6 @@ bool Loader::load_MESH(const string& path, vector<Vector3f>& vertices, vector<In
             for (int h = 0; h < tetra_count; ++h) {
                 Index a,b,c,d;
 
-
-
                 Index x;
                 HL_ASSERT_LOG(stream >> a >> b >> c >> d >> x,
                               "ERROR: malformed mesh file. Unexpected hexahedra data format.\n");
