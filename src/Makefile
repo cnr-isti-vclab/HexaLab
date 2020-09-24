@@ -46,10 +46,7 @@ DEPS = app.h \
 	   pick_filter.h
 
 
-%.bc : %.cpp $(DEPS)
-	$(CC) -c -o $@ $< $(CFLAGS)
-
-hexalab_asm.js: $(OBJ) $(LIBS)
+hexalab_asm.js: $(OBJ) 
 	$(CC) -o ../js/generated/$@ $^ $(CFLAGS) -s LINKABLE=0
 
 color_map.bc: color_map.cpp
@@ -60,6 +57,12 @@ loader.bc: loader.cpp
 
 app.bc: app.cpp
 	$(CC) -c -o app.bc $< $(CFLAGS) -s LINKABLE=1
+
+peeling_filter.bc: peeling_filter.cpp
+	$(CC) -c -o $@ $< $(CFLAGS) -s LINKABLE=1
+
+%.bc : %.cpp $(DEPS)
+	$(CC) -c -o $@ $< $(CFLAGS)
 	
 clean:
 	rm -f *.bc ../../js/generated/*.js 
