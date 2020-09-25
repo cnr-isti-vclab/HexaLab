@@ -2,6 +2,65 @@
 
 namespace HexaLab {
 
+Index Mesh::pivot_around_edge(Index fi,  Index vi, short &w) const{
+
+
+    Face ffi = faces[fi];
+    if (ffi.is_boundary()) return -1;
+
+    Index ci = ffi.ci[w];
+    short face0to5 = ffi.wi[w];
+    FourIndices vvi = cells[ ci ].get_face(face0to5);
+
+    short edge0to3=3;
+    for (int i=0; i<3; i++) {
+        if (vvi[i]==vi) edge0to3=i;
+    }
+
+    face0to5 = Cell::pivot_face_around_edge(face0to5,edge0to3);
+
+    Index fj = cells[ci].fi[face0to5];
+    Face ffj = faces[fj];
+
+    w = (ffj.ci[0]==ci)?1:0;
+
+    return fj;
+}
+
+int Mesh::internal_edge_valency(Index fi, short side0to3) const{
+
+    if (faces[fi].is_boundary()) return 0; // not internal
+
+    FourIndices vvi = vertex_indices( faces[fi] );
+
+    int vi = vvi[side0to3];
+    int vj = vvi[(side0to3+1)%4];
+
+    if (vi==vj) return 0;
+
+    short side = 0;
+    if (vi<vj) {
+        vi = vj;
+        side = 1;
+    }
+
+    int val = 0;
+
+    Index fj = fi;
+
+    while (1) {
+        val++;
+        fj = pivot_around_edge(fj,vi,side);
+        if (fj==-1) return 0; // not internal
+        if (val>6) break;
+        if (fj>fi) return 0; // not unique
+        if (fj==fi) break;
+    }
+    return val;
+
+}
+
+
 void Mesh::unmark_all(){
     for ( Cell& c : cells) c.marked = false;
 }

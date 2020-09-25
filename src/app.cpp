@@ -203,6 +203,51 @@ namespace HexaLab {
         line_singularity_model.clear();
         spined_singularity_model.clear();
         full_singularity_model.clear();
+
+        for (Index fi=0; fi<mesh->faces.size();fi++) {
+            for (short w = 0; w<4; w++ ) {
+                int val = mesh->internal_edge_valency( fi, w );
+                if (val>0 && val!=4) {
+
+                    Vector3f colWI; // wireframe Interior
+                    Vector3f colWE; // wireframe Exterior
+                    Vector3f colSI; // surface Interior
+                    Vector3f colSE; // surface Exterior
+                    Vector3f colSW; // surface Wire
+
+                    switch ( val ) {
+                        case  3:
+                            colWI = Vector3f( 0.8f, 0.30f, 0.30f );
+                            colWE = Vector3f( 1.0f, 0.80f, 0.80f );
+                            colSE = Vector3f( 1.0f, 0.30f, 0.30f );
+                            colSI = colSE * 0.6f;
+                            colSW = colSI *0.75f;
+                            break;
+
+                        case  5:
+                            colWI = Vector3f( 0.1f, 0.70f , 0.1f );
+                            colWE = Vector3f( 0.5f, 0.90f , 0.5f );
+                            colSE = Vector3f( 0.3f, 1.00f , 0.3f );;
+                            colSI = colSE * 0.5f;
+                            colSW = colSI * 0.75f;
+                            break;
+
+                        default:
+                            colWI  = Vector3f( 0.2f, 0.2f, 1 );
+                            colWE = Vector3f( 0.6f, 0.6f, 1 );
+                            colSI = colWI * 0.5f;
+                            colSE = colWI;
+                            colSW = colSI * 0.75f;
+                            break;
+                    }
+                    FourIndices v = mesh->vertex_indices( mesh->faces[fi] );
+                    line_singularity_model.add_wire_vert( mesh->verts[v[w]].position , colWI);
+                    line_singularity_model.add_wire_vert( mesh->verts[v[(w+1)%4]].position , colWI);
+
+                }
+
+            }
+        }
 /* TODO: singularities
         // boundary_singularity_model.clear();
         // boundary_creases_model.clear();
@@ -221,37 +266,6 @@ namespace HexaLab {
                 continue;
             }
 
-            Vector3f colWI; // wireframe Interior
-            Vector3f colWE; // wireframe Exterior
-            Vector3f colSI; // surface Interior
-            Vector3f colSE; // surface Exterior
-            Vector3f colSW; // surface Wire
-
-            switch ( face_count ) {
-                case  3:
-                    colWI = Vector3f( 0.8f, 0.30f, 0.30f );
-                    colWE = Vector3f( 1.0f, 0.80f, 0.80f );
-                    colSE = Vector3f( 1.0f, 0.30f, 0.30f );
-                    colSI = colSE * 0.6f;
-                    colSW = colSI *0.75f;
-                    break;
-
-                case  5:
-                    colWI = Vector3f( 0.1f, 0.70f , 0.1f );
-                    colWE = Vector3f( 0.5f, 0.90f , 0.5f );
-                    colSE = Vector3f( 0.3f, 1.00f , 0.3f );;
-                    colSI = colSE * 0.5f;
-                    colSW = colSI * 0.75f;
-              break;
-
-                default:
-                    colWI  = Vector3f( 0.2f, 0.2f, 1 );
-                    colWE = Vector3f( 0.6f, 0.6f, 1 );
-                    colSI = colWI * 0.5f;
-                    colSE = colWI;
-                    colSW = colSI * 0.75f;
-              break;
-            }
 
             Vector3f black = Vector3f(0,0,0);
             Vector3f white = Vector3f(1,1,1);

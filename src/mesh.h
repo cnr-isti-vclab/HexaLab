@@ -155,11 +155,15 @@ namespace HexaLab {
         vector<float>      normalized_hexa_quality;
 
 
+        int internal_edge_valency(Index fi, short side) const;
+
         float average_edge_lenght(float &min, float &max) const;
         float average_cell_volume() const;
         void update_vertex_visibility();
         void update_vertex_visibility_internals();
 
         long total_occupation_RAM() const; // approximation!
+
+        Index pivot_around_edge(Index fi, Index vi, short &w) const;
     };
 }
