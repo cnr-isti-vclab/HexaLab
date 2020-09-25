@@ -38,7 +38,6 @@ DEPS = app.h \
 	   ifilter.h \
 	   loader.h \
 	   mesh.h \
-	   mesh_navigator.h \
 	   model.h \
 	   peeling_filter.h \
 	   plane_filter.h \
@@ -58,11 +57,20 @@ loader.bc: loader.cpp
 app.bc: app.cpp
 	$(CC) -c -o app.bc $< $(CFLAGS) -s LINKABLE=1
 
+mesh.bc: mesh.cpp
+	$(CC) -c -o mesh.bc $< $(CFLAGS) -s LINKABLE=1
+
 peeling_filter.bc: peeling_filter.cpp
 	$(CC) -c -o $@ $< $(CFLAGS) -s LINKABLE=1
 
 %.bc : %.cpp $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 	
+builder.bc : builder.cpp $(DEPS)
+	$(CC) -c -o $@ $< $(CFLAGS)
+	
+hexalab_js.bc: hexalab_js.cpp
+	$(CC) -c -o $@ $< $(CFLAGS) -s LINKABLE=1
+	
 clean:
-	rm -f *.bc ../../js/generated/*.js 
+	rm -f *.bc ../js/generated/*.js 

@@ -13,9 +13,9 @@ using json = nlohmann::json; // for json reading
 int main() {
     printf ( "Size of Vector3 %lu\n", sizeof ( Eigen::Vector3f ) );
 
-    printf ( "Size of Hexa %lu\n", sizeof ( Cell ) );
+    printf ( "Size of Cell %lu\n", sizeof ( Cell ) );
     printf ( "Size of Face %lu\n", sizeof ( Face ) );
-    printf ( "Size of Edge %lu\n", sizeof ( Edge ) );
+    //printf ( "Size of Edge %lu\n", sizeof ( Edge ) );
     printf ( "Size of Vert %lu\n", sizeof ( Vert ) );
     //printf ( "Size of Dart %lu\n", sizeof ( Dart ) );
     

@@ -46,7 +46,7 @@ namespace HexaLab {
         Index fi[6];
         Index vi[8];
 
-        bool marked;
+        uint32_t marked;
 
         FourIndices get_face(short face0to5) const {
             switch (face0to5){
@@ -103,22 +103,12 @@ namespace HexaLab {
 
     };
 
-    struct Edge {
-        bool is_surface = false;
-        Index vi[2];
-
-        Edge() {}
-    };
-
     struct Vert {
         Vector3f position;
         uint32_t visible; // mystery: if bool, size of vert rises (from 12+4 to 12+12!)
         Vert() {}
         Vert ( Vector3f p ):position(p) {}
     };
-
-
-
 
     class Mesh {
         // Builder class is responsible for building a Mesh instance, given the file parser output.
@@ -127,7 +117,6 @@ namespace HexaLab {
       public:
         vector<Cell> cells;
         vector<Face> faces;
-        vector<Edge> edges;
         vector<Vert> verts;
 
         AlignedBox3f aabb;
@@ -169,6 +158,7 @@ namespace HexaLab {
         float average_edge_lenght(float &min, float &max) const;
         float average_cell_volume() const;
         void update_vertex_visibility();
+        void update_vertex_visibility_internals();
 
         long total_occupation_RAM() const; // approximation!
     };

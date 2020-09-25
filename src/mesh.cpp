@@ -37,7 +37,6 @@ float Mesh::average_edge_lenght(float &min, float &max) const {
 long Mesh::total_occupation_RAM() const{
     return sizeof(Cell) * cells.size() +
            sizeof(Face) * faces.size() +
-           sizeof(Edge) * edges.size() +
            sizeof(Vert) * verts.size();
 }
 
@@ -54,6 +53,19 @@ float Mesh::average_cell_volume() const {
 }
 
 
+void Mesh::update_vertex_visibility_internals(){
+    for ( Vert& v: verts) set_invisible( v );
+
+    for ( const Face &f : faces ) if (!f.is_boundary()) {
+        bool side0 = !is_marked( f.ci[0] );
+        bool side1 = !is_marked( f.ci[1] );
+        if ( side0 != side1 )  {
+            FourIndices vi = vertex_indices(f);
+            for (int w=0; w<4; w++) set_visible( verts[ vi[w] ] );
+        }
+    }
+
+}
 
 
 void Mesh::update_vertex_visibility(){

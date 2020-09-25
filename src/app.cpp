@@ -641,7 +641,6 @@ namespace HexaLab {
     void App::prepare_cracked_geometry() {
 
         this->mesh->update_vertex_visibility();
-        prepare_external_skin();
 
         for ( Index ci = 0; ci < mesh->cells.size(); ++ci ) {
 
@@ -675,7 +674,6 @@ namespace HexaLab {
 
     void App::prepare_smooth_geometry() {
         this->mesh->update_vertex_visibility();
-        prepare_external_skin();
 
         for ( Index ci = 0; ci < mesh->cells.size(); ++ci ) {
 
@@ -698,14 +696,13 @@ namespace HexaLab {
     }
 
     void App::build_surface_models() {
-        if ( mesh == nullptr ) {
-            return;
-        }
+
+        filtered_model.clear();
+        visible_model.clear();
+
+        if ( mesh == nullptr ) return;
 
         mesh->unmark_all();
-        visible_model.clear();
-        filtered_model.clear();
-
 
         HL_ASSERT(filters.size()==4);
         filters[0]->filter( *mesh ); // slice
@@ -714,20 +711,12 @@ namespace HexaLab {
         filters[2]->filter( *mesh ); // quality
         filters[3]->filter( *mesh ); // pick
 
-
+        prepare_external_skin();
 
         switch ( this->geometry_mode ) {
-            case GeometryMode::Default:
-                this->prepare_geometry();
-                break;
-
-            case GeometryMode::Cracked:
-                this->prepare_cracked_geometry();
-                break;
-
-            case GeometryMode::Smooth:
-                this->prepare_smooth_geometry();
-                break;
+            case GeometryMode::Default:  prepare_geometry(); break;
+            case GeometryMode::Cracked:  prepare_cracked_geometry(); break;
+            case GeometryMode::Smooth:   this->prepare_smooth_geometry(); break;
         }
     }
 
@@ -750,129 +739,21 @@ namespace HexaLab {
         for ( int i=0; i<str; i++ ) dilate();
     }
 
-
-    // filter -> mark vertices -> inc mark -> manual mark update -> re-mark vertices -> ...
     void App::erode() {
-        /* TODO: marco */
-        /*
-        for ( size_t i = 0; i < this->mesh->verts.size(); ++i ) {
-            this->mesh->unmark ( this->mesh->verts[i] );
-        }
-
-        auto mark_face_as_visible = [] ( Mesh * mesh, Dart & dart ) {
-            MeshNavigator nav = mesh->navigate ( dart );
-            Vert& vert = nav.vert();
-
-            do {
-                mesh->mark ( nav.vert() );
-                nav = nav.rotate_on_face();
-            } while ( nav.vert() != vert );
-        };
-
-        for ( size_t i = 0; i < mesh->faces.size(); ++i ) {
-            MeshNavigator nav = mesh->navigate ( mesh->faces[i] );
-
-            if ( !mesh->is_marked ( nav.cell() ) && ( nav.dart().cell_neighbor == -1 || mesh->is_marked ( nav.flip_cell().cell() ) ) ) {
-                mark_face_as_visible ( this->mesh, nav.dart() );
-            } else if ( mesh->is_marked ( nav.cell() ) && nav.dart().cell_neighbor != -1 && !mesh->is_marked ( nav.flip_cell().cell() ) ) {
-                mark_face_as_visible ( this->mesh, nav.dart() );
+        mesh->update_vertex_visibility_internals();
+        for (Cell& c:mesh->cells) {
+            for (short i=0; i<8; i++) {
+                if (mesh->is_visible(c.vi[i])) mesh->mark( c );
             }
         }
-
-        for ( size_t i = 0; i < mesh->cells.size(); ++i ) {
-            if ( mesh->is_marked ( mesh->cells[i] ) ) {
-                continue;
-            }
-
-            MeshNavigator nav = mesh->navigate ( mesh->cells[i] );
-            bool exit = false;
-
-            for ( size_t j = 0; j < 4; ++j ) {
-                if ( mesh->is_marked ( nav.vert() ) && !nav.vert().is_surface ) {
-                    mesh->mark ( nav.cell() );
-                    exit = true;
-                    break;
-                }
-
-                nav = nav.rotate_on_face();
-            }
-
-            if ( exit ) {
-                continue;
-            }
-
-            nav = nav.rotate_on_cell().rotate_on_cell();
-
-            for ( size_t j = 0; j < 4; ++j ) {
-                if ( mesh->is_marked ( nav.vert() ) && !nav.vert().is_surface ) {
-                    mesh->mark ( nav.cell() );
-                    break;
-                }
-
-                nav = nav.rotate_on_face();
-            }
-        }*/
     }
 
     void App::dilate() {
-        /* TODO: Marco */
-        /*
-        for ( size_t i = 0; i < this->mesh->verts.size(); ++i ) {
-            this->mesh->unmark ( this->mesh->verts[i] );
-        }
-
-        auto mark_face_as_visible = [] ( Mesh * mesh, Dart & dart ) {
-            MeshNavigator nav = mesh->navigate ( dart );
-            Vert& vert = nav.vert();
-
-            do {
-                mesh->mark ( nav.vert() );
-                nav = nav.rotate_on_face();
-            } while ( nav.vert() != vert );
-        };
-
-        for ( size_t i = 0; i < mesh->faces.size(); ++i ) {
-            MeshNavigator nav = mesh->navigate ( mesh->faces[i] );
-
-            if ( !mesh->is_marked ( nav.cell() ) && ( nav.dart().cell_neighbor == -1 || mesh->is_marked ( nav.flip_cell().cell() ) ) ) {
-                mark_face_as_visible ( this->mesh, nav.dart() );
-            } else if ( mesh->is_marked ( nav.cell() ) && nav.dart().cell_neighbor != -1 && !mesh->is_marked ( nav.flip_cell().cell() ) ) {
-                mark_face_as_visible ( this->mesh, nav.dart() );
+        mesh->update_vertex_visibility_internals();
+        for (Cell& c:mesh->cells) {
+            for (short i=0; i<8; i++) {
+                if (mesh->is_visible(c.vi[i])) mesh->unmark( c );
             }
         }
-
-        for ( size_t i = 0; i < mesh->cells.size(); ++i ) {
-            if ( !mesh->is_marked ( mesh->cells[i] ) ) {
-                continue;
-            }
-
-            MeshNavigator nav = mesh->navigate ( mesh->cells[i] );
-            bool exit = false;
-
-            for ( size_t j = 0; j < 4; ++j ) {
-                if ( mesh->is_marked ( nav.vert() ) && !nav.vert().is_surface ) {
-                    mesh->unmark ( nav.cell() );
-                    exit = true;
-                    break;
-                }
-
-                nav = nav.rotate_on_face();
-            }
-
-            if ( exit ) {
-                continue;
-            }
-
-            nav = nav.rotate_on_cell().rotate_on_cell();
-
-            for ( size_t j = 0; j < 4; ++j ) {
-                if ( mesh->is_marked ( nav.vert() ) && !nav.vert().is_surface ) {
-                    mesh->unmark ( nav.cell() );
-                    break;
-                }
-
-                nav = nav.rotate_on_face();
-            }
-        }*/
     }
 }
