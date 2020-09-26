@@ -126,6 +126,9 @@ namespace HexaLab {
         FourIndices vertex_indices(const Face &f) const{
             return cells[ f.ci[0] ].get_face( f.wi[0] );
         }
+        FourIndices vertex_indices(const Face &f,short side0or1) const{
+            return cells[ f.ci[side0or1] ].get_face( f.wi[side0or1] );
+        }
 
         Vector3f pos( Index vi) const { return verts[vi].position; }
         Vector3f norm_of_side( Index ci, short side) const {
@@ -164,6 +167,7 @@ namespace HexaLab {
 
         long total_occupation_RAM() const; // approximation!
 
-        Index pivot_around_edge(Index fi, Index vi, short &w) const;
+        Index pivot_around_edge(Index fi, Index vi, short &side0or1, short edge0to3) const;
+        short find_edge(Index fi, Index vi, short side0or1) const;
     };
 }

@@ -201,7 +201,7 @@ namespace HexaLab {
 
     void App::build_singularity_models() {
         line_singularity_model.clear();
-        spined_singularity_model.clear();
+        spined_singularity_model.clear(); // TODO: full_singularity_model wire e spined_singuality modeARE THE SAME!!!
         full_singularity_model.clear();
 
         for (Index fi=0; fi<mesh->faces.size();fi++) {
@@ -214,6 +214,7 @@ namespace HexaLab {
                     Vector3f colSI; // surface Interior
                     Vector3f colSE; // surface Exterior
                     Vector3f colSW; // surface Wire
+                    const Vector3f black(0,0,0);
 
                     switch ( val ) {
                         case  3:
@@ -223,7 +224,6 @@ namespace HexaLab {
                             colSI = colSE * 0.6f;
                             colSW = colSI *0.75f;
                             break;
-
                         case  5:
                             colWI = Vector3f( 0.1f, 0.70f , 0.1f );
                             colWE = Vector3f( 0.5f, 0.90f , 0.5f );
@@ -231,18 +231,81 @@ namespace HexaLab {
                             colSI = colSE * 0.5f;
                             colSW = colSI * 0.75f;
                             break;
-
                         default:
-                            colWI  = Vector3f( 0.2f, 0.2f, 1 );
+                            colWI = Vector3f( 0.2f, 0.2f, 1 );
                             colWE = Vector3f( 0.6f, 0.6f, 1 );
                             colSI = colWI * 0.5f;
                             colSE = colWI;
                             colSW = colSI * 0.75f;
                             break;
                     }
-                    FourIndices v = mesh->vertex_indices( mesh->faces[fi] );
-                    line_singularity_model.add_wire_vert( mesh->verts[v[w]].position , colWI);
-                    line_singularity_model.add_wire_vert( mesh->verts[v[(w+1)%4]].position , colWI);
+                    FourIndices vvi = mesh->vertex_indices( mesh->faces[fi] );
+
+                    Index vi0 = vvi[w];
+                    Index vi1 = vvi[(w+1)%4];
+                    short side = 0;
+
+                    if (vi0<vi1) {
+                        std::swap(vi0,vi1);
+                        side = 1;
+                    }
+
+                    Vector3f v0 = mesh->verts[vi0].position;
+                    Vector3f v1 = mesh->verts[vi1].position;
+
+                    int val2 = 0;
+
+                    Index fj = fi;
+
+                    for (int unused=0; unused<val; unused++) {
+
+                        short edge = mesh->find_edge(fj,vi0,side);
+
+                        FourIndices vvj = mesh->vertex_indices( mesh->faces[fj],side );
+
+                        Index vi2 = vvj[(edge+2)%4];
+                        Index vi3 = vvj[(edge+3)%4];
+
+                        Vector3f v2 = mesh->verts[vi2].position;
+                        Vector3f v3 = mesh->verts[vi3].position;
+
+                        v2 = v2*0.45 + v1*0.55;
+                        v3 = v3*0.45 + v0*0.55;
+
+                        //if (vi0>vi3) {
+                            spined_singularity_model.add_wire_vert( v0, colWI );
+                            spined_singularity_model.add_wire_vert( v3, colWE );
+
+                            full_singularity_model.add_wire_vert( v0, colSW );
+                            full_singularity_model.add_wire_vert( v3, colSE );
+                        //}
+
+                        //if (vi1>vi2) {
+                            spined_singularity_model.add_wire_vert( v1, colWI );
+                            spined_singularity_model.add_wire_vert( v2, colWE );
+
+                            full_singularity_model.add_wire_vert( v1, colSW );
+                            full_singularity_model.add_wire_vert( v2, colSE );
+                        //}
+
+                        // add two tris
+                        full_singularity_model.add_surf_vert( v0,colSI );
+                        full_singularity_model.add_surf_vert( v1,colSI );
+                        full_singularity_model.add_surf_vert( v2,colSE );
+                        full_singularity_model.add_surf_vert( v2,colSE );
+                        full_singularity_model.add_surf_vert( v3,colSE );
+                        full_singularity_model.add_surf_vert( v0,colSI );
+
+                        fj = mesh->pivot_around_edge(fj,vi0,side,edge);
+
+                    }
+                    line_singularity_model.add_wire_vert( v0 , colWI);
+                    spined_singularity_model.add_wire_vert( v0 , colWI);
+                    full_singularity_model.add_wire_vert( v0 , black);
+
+                    line_singularity_model.add_wire_vert( v1 , colWI);
+                    spined_singularity_model.add_wire_vert( v1 , colWI);
+                    full_singularity_model.add_wire_vert( v1 , black);
 
                 }
 

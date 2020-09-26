@@ -2,21 +2,29 @@
 
 namespace HexaLab {
 
-Index Mesh::pivot_around_edge(Index fi,  Index vi, short &w) const{
+
+short Mesh::find_edge( Index fi, Index vi, short side0or1) const{
+    Index ci = faces[fi].ci[side0or1];
+    short face0to5 = faces[fi].wi[side0or1];
+
+    FourIndices vvi = cells[ ci ].get_face(face0to5);
+    short res=3;
+    for (int i=0; i<3; i++) {
+        if (vvi[i]==vi) res=i;
+    }
+    return res;
+
+}
+
+Index Mesh::pivot_around_edge(Index fi,  Index vi, short &w, short edge0to3) const{
 
 
     Face ffi = faces[fi];
     if (ffi.is_boundary()) return -1;
 
     Index ci = ffi.ci[w];
+
     short face0to5 = ffi.wi[w];
-    FourIndices vvi = cells[ ci ].get_face(face0to5);
-
-    short edge0to3=3;
-    for (int i=0; i<3; i++) {
-        if (vvi[i]==vi) edge0to3=i;
-    }
-
     face0to5 = Cell::pivot_face_around_edge(face0to5,edge0to3);
 
     Index fj = cells[ci].fi[face0to5];
@@ -42,6 +50,7 @@ int Mesh::internal_edge_valency(Index fi, short side0to3) const{
     if (vi<vj) {
         vi = vj;
         side = 1;
+        side0to3 = find_edge(fi,vi,1);
     }
 
     int val = 0;
@@ -50,11 +59,12 @@ int Mesh::internal_edge_valency(Index fi, short side0to3) const{
 
     while (1) {
         val++;
-        fj = pivot_around_edge(fj,vi,side);
+        fj = pivot_around_edge(fj,vi,side,side0to3);
         if (fj==-1) return 0; // not internal
         if (val>6) break;
         if (fj>fi) return 0; // not unique
         if (fj==fi) break;
+        side0to3 = find_edge(fj,vi,side);
     }
     return val;
 
