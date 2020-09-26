@@ -13,27 +13,8 @@
 
 namespace HexaLab {
 
-struct FaceData{
-    Index v1,v2,v3; // vertex index 1,2,3, NOT the first one
-    Index ci; // originating cell
-    short side; // originating side
 
-    FaceData(FourIndices vi, Index _ci, short s):ci(_ci),v1(vi[1]),v2(vi[2]),v3(vi[3]),side(s) {}
 
-    bool matches( const FaceData& other) {
-        return (other.v2==v2) && (other.v1==v3) && (other.v3==v1);
-    }
-};
-
-std::vector< std::vector< FaceData > > face_data;
-
-/*inline FourIndices canonicize(const FourIndices &v) {
-    // find max, put it in first place
-    int m0 = (v[0]>v[1])?0:1;
-    int m1 = (v[2]>v[3])?2:3;
-    int m = (v[m0]>v[m1])?m0:m1;
-    return FourIndices( v[m] , v[(m+1)%4], v[(m+2)%4], v[(m+3)%4]);
-}*/
 
 inline FourIndices canonicize(const FourIndices &v) {
     // find max, put it in first place
@@ -50,45 +31,7 @@ inline FourIndices canonicize(const FourIndices &v) {
     return f;
 }
 
-static Vector3f barycenter_of(const Mesh &mesh, const Face &face){
-    FourIndices vi = mesh.vertex_indices( face );
-    return (mesh.pos( vi[0])+mesh.pos( vi[1])+mesh.pos( vi[2])+mesh.pos( vi[3]) )/4.0;
-}
-
-static Vector3f barycenter_of(const Mesh &mesh, const Cell &c){
-    return (mesh.pos( c.vi[0])+mesh.pos( c.vi[1])+mesh.pos( c.vi[2])+mesh.pos(c.vi[3]) +
-            mesh.pos( c.vi[4])+mesh.pos( c.vi[5])+mesh.pos( c.vi[6])+mesh.pos(c.vi[7]))/8.0;
-}
-
-void compute_normal(Mesh &mesh, Face &face){
-    Vector3f normal ( 0, 0, 0 );
-    FourIndices vi = mesh.vertex_indices( face );
-
-    Vector3f a,b;
-
-    a = mesh.verts[vi[3]].position - mesh.verts[vi[0]].position;
-    b = mesh.verts[vi[1]].position - mesh.verts[vi[0]].position;
-    normal += a.cross ( b );
-    a = mesh.verts[vi[0]].position - mesh.verts[vi[1]].position;
-    b = mesh.verts[vi[2]].position - mesh.verts[vi[1]].position;
-    normal += a.cross ( b );
-    a = mesh.verts[vi[1]].position - mesh.verts[vi[2]].position;
-    b = mesh.verts[vi[3]].position - mesh.verts[vi[2]].position;
-    normal += a.cross ( b );
-    a = mesh.verts[vi[2]].position - mesh.verts[vi[3]].position;
-    b = mesh.verts[vi[0]].position - mesh.verts[vi[3]].position;
-    normal += a.cross ( b );
-
-    if (normal== Vector3f(0,0,0)) {
-        // fall back strategy
-        normal = barycenter_of(mesh, face) - barycenter_of(mesh,mesh.cells[face.ci[0]]);
-    }
-    normal.normalize();
-
-    face.normal = normal;
-}
-
-void fix_if_degenerate( Mesh& mesh, Face & f ){
+static void fix_if_degenerate( Mesh& mesh, Face & f ){
     FourIndices v = mesh.vertex_indices( f );
     int matches = 0;
     if (v[0]==v[1]) matches++;
@@ -102,13 +45,13 @@ void fix_if_degenerate( Mesh& mesh, Face & f ){
     }
 }
 
-void add_face(Mesh& mesh, const FaceData & fa){
+void Builder::add_face(Mesh& mesh, const FaceData & fa){
     Face f;
     f.ci[0] = fa.ci;
     f.wi[0] = fa.side;
     f.ci[1] = -1;
     f.wi[1] = -1;
-    compute_normal( mesh, f);
+    mesh.compute_and_store_normal(f);
     fix_if_degenerate(mesh,f);
 
     Index fi = mesh.faces.size();
@@ -116,23 +59,21 @@ void add_face(Mesh& mesh, const FaceData & fa){
     mesh.cells[ fa.ci ].fi[ fa.side ] = fi;
 }
 
-void add_face(Mesh& mesh, const FaceData & fa,const FaceData & fb){
+void Builder::add_face(Mesh& mesh, const FaceData & fa, const FaceData & fb){
     Face f;
     f.ci[0] = fa.ci;
     f.wi[0] = fa.side;
     f.ci[1] = fb.ci;
     f.wi[1] = fb.side;
-    compute_normal( mesh, f);
+    mesh.compute_and_store_normal( f );
 
     Index fi = mesh.faces.size();
     mesh.faces.push_back( f );
     mesh.cells[ fa.ci ].fi[ fa.side ] = fi;
     mesh.cells[ fb.ci ].fi[ fb.side ] = fi;
-
 }
 
-
-void find_matches( Mesh& mesh, std::vector<FaceData> &v, const FaceData &fd ){
+void Builder::find_matches( Mesh& mesh, std::vector<FaceData> &v, const FaceData &fd ){
     int last = v.size()-1;
     for (int i=0; i<v.size(); i++) {
         if ( v[i].matches(fd)) {
@@ -165,11 +106,10 @@ void Builder::add_hexa ( Mesh& mesh, const Index* vi ) {
         find_matches( mesh, face_data[ vi[0] ] , fd );
     }
 
-
-
 }
 
 void Builder::add_vertices( Mesh& mesh, const vector<Vector3f>& verts ){
+
     mesh.aabb = AlignedBox3f();
 
     for ( const Vector3f &v: verts ) {
@@ -183,6 +123,9 @@ void Builder::add_vertices( Mesh& mesh, const vector<Vector3f>& verts ){
 // indices:  8*n vertex indices
 void Builder::build ( Mesh& mesh, const vector<Vector3f>& vertices, const vector<Index>& indices ) {
     assert ( indices.size() % 8 == 0 );
+
+    mesh.verts.reserve( vertices.size() );
+    mesh.faces.reserve( indices.size()/8 );
 
     add_vertices( mesh, vertices );
 
@@ -226,10 +169,6 @@ void Builder::add_hexas( Mesh& mesh, const vector<Index>& indices, int from , in
     }
     HL_LOG ( "%d%%\r", to );
 }
-
-
-
-
 
 
 bool Builder::validate ( Mesh& mesh ) {

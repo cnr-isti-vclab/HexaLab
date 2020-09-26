@@ -21,12 +21,16 @@ namespace HexaLab {
             return false;
         }
 
-        // Build
-        HL_LOG ( "Building...\n" );
-        Builder::build ( *mesh, verts, indices );
-        // Validate
-        HL_LOG ( "Validating...\n" );
-        Builder::validate ( *mesh );
+        {
+            Builder builder;
+
+            HL_LOG ( "Building...\n" );
+            builder.build ( *mesh, verts, indices );
+
+            HL_LOG ( "Validating...\n" );
+            builder.validate ( *mesh );
+
+        }
 
         // Update stats
 

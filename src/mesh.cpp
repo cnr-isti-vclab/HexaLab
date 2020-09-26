@@ -3,6 +3,45 @@
 namespace HexaLab {
 
 
+Vector3f Mesh::barycenter_of(const Face &face) const{
+    FourIndices vi = vertex_indices( face );
+    return ( pos(vi[0])+pos(vi[1])+pos(vi[2])+pos(vi[3]) )/4.0;
+}
+
+Vector3f Mesh::barycenter_of(const Cell &c) const{
+    return ( pos( c.vi[0])+pos( c.vi[1])+pos( c.vi[2])+pos(c.vi[3]) +
+             pos( c.vi[4])+pos( c.vi[5])+pos( c.vi[6])+pos(c.vi[7]) )/8.0;
+}
+
+void Mesh::compute_and_store_normal(Face &face){
+    Vector3f normal ( 0, 0, 0 );
+    FourIndices vi = vertex_indices( face );
+
+    Vector3f a,b;
+
+    a = verts[vi[3]].position - verts[vi[0]].position;
+    b = verts[vi[1]].position - verts[vi[0]].position;
+    normal += a.cross ( b );
+    a = verts[vi[0]].position - verts[vi[1]].position;
+    b = verts[vi[2]].position - verts[vi[1]].position;
+    normal += a.cross ( b );
+    a = verts[vi[1]].position - verts[vi[2]].position;
+    b = verts[vi[3]].position - verts[vi[2]].position;
+    normal += a.cross ( b );
+    a = verts[vi[2]].position - verts[vi[3]].position;
+    b = verts[vi[0]].position - verts[vi[3]].position;
+    normal += a.cross ( b );
+
+    if (normal== Vector3f(0,0,0)) {
+        // fall back strategy
+        normal = barycenter_of(face) - barycenter_of( cells[face.ci[0]] );
+    }
+    normal.normalize();
+
+    face.normal = normal;
+}
+
+
 short Mesh::find_edge( Index fi, Index vi, short side0or1) const{
     Index ci = faces[fi].ci[side0or1];
     short face0to5 = faces[fi].wi[side0or1];

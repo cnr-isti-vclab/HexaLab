@@ -153,7 +153,7 @@ namespace HexaLab {
             return (f.ci[0]==ci)?f.ci[1]:f.ci[0];
         }
 
-        // per-hxa quality measure (parallel vectors)
+        // per-hexa quality measure (parallel vectors)
         vector<float>      hexa_quality;
         vector<float>      normalized_hexa_quality;
 
@@ -169,5 +169,12 @@ namespace HexaLab {
 
         Index pivot_around_edge(Index fi, Index vi, short &side0or1, short edge0to3) const;
         short find_edge(Index fi, Index vi, short side0or1) const;
+
+      private:
+
+        /* used during construction */
+        Vector3f barycenter_of(const Face &face) const;
+        Vector3f barycenter_of(const Cell &c) const;
+        void compute_and_store_normal(Face &face);
     };
 }
