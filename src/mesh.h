@@ -146,6 +146,10 @@ namespace HexaLab {
         void set_invisible ( Vert& vert )  { vert.visible = false; }
         void set_visible ( Vert& vert )  { vert.visible = true; }
 
+        void erode_dilate_marked(int str);
+        void erode_marked();
+        void dilate_marked();
+
         int count_visible_faces(Index fi, short si) const;
 
         Index other_side( Index ci, int side0to5 ) const {

@@ -788,7 +788,7 @@ namespace HexaLab {
         HL_ASSERT(filters.size()==4);
         filters[0]->filter( *mesh ); // slice
         filters[1]->filter( *mesh ); // peel
-        erode_dilate( regularize_str );
+        mesh->erode_dilate_marked( regularize_str );
         filters[2]->filter( *mesh ); // quality
         filters[3]->filter( *mesh ); // pick
 
@@ -815,26 +815,4 @@ namespace HexaLab {
         }
     }
 
-    void App::erode_dilate( int str ) {
-        for ( int i=0; i<str; i++ ) erode();
-        for ( int i=0; i<str; i++ ) dilate();
-    }
-
-    void App::erode() {
-        mesh->update_vertex_visibility_internals();
-        for (Cell& c:mesh->cells) {
-            for (short i=0; i<8; i++) {
-                if (mesh->is_visible(c.vi[i])) mesh->mark( c );
-            }
-        }
-    }
-
-    void App::dilate() {
-        mesh->update_vertex_visibility_internals();
-        for (Cell& c:mesh->cells) {
-            for (short i=0; i<8; i++) {
-                if (mesh->is_visible(c.vi[i])) mesh->unmark( c );
-            }
-        }
-    }
 }

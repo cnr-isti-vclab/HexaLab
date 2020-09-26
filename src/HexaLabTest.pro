@@ -2,6 +2,8 @@ DEPENDPATH += . ../src/eigen .
 INCLUDEPATH += . ../src/eigen .
 CONFIG += console stl c++11
 
+QMAKE_CXXFLAGS += "-Wint-in-bool-context -Wattributes"
+
 TEMPLATE = app
 # Mac specific Config required to avoid to make application bundles
 CONFIG -= app_bundle
@@ -17,7 +19,6 @@ SOURCES += app.cpp \
   hexalab_js.cpp \
   peeling_filter.cpp \
   pick_filter.cpp
-
 
 HEADERS = app.h \
   builder.h\

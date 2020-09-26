@@ -3,6 +3,28 @@
 namespace HexaLab {
 
 
+void Mesh::erode_dilate_marked( int str ) {
+    for ( int i=0; i<str; i++ ) erode_marked();
+    for ( int i=0; i<str; i++ ) dilate_marked();
+}
+
+void Mesh::erode_marked() {
+
+    update_vertex_visibility_internals();
+
+    for (Cell& c:cells) for (short i=0; i<8; i++) if (is_visible(c.vi[i])) mark( c );
+
+}
+
+void Mesh::dilate_marked() {
+
+    update_vertex_visibility_internals();
+
+    for (Cell& c:cells) for (short i=0; i<8; i++) if (is_visible(c.vi[i])) unmark( c );
+
+}
+
+
 Vector3f Mesh::barycenter_of(const Face &face) const{
     FourIndices vi = vertex_indices( face );
     return ( pos(vi[0])+pos(vi[1])+pos(vi[2])+pos(vi[3]) )/4.0;

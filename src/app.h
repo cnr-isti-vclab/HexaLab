@@ -163,10 +163,6 @@ namespace HexaLab {
         void prepare_smooth_geometry();
         void prepare_external_skin();
 
-        void erode_dilate(int str);
-        void erode();
-        void dilate();
-
         void build_full_model();
 
         void build_gap_hexa ( const Vector3f pp[8], const Vector3f nn[6], const bool vv[8], const Vector3f ww[6] );
