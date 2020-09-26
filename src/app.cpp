@@ -446,7 +446,7 @@ namespace HexaLab {
             int v0 = vi[side];
             int v1 = vi[(side+1)&3];
 
-            if (v0 <= v1) continue; // only once per edge! (also avoids degenerate edges)
+            if (v0 >= v1) continue; // only once per edge! (also avoids degenerate edges)
 
             float alpha = 1.0;
 
@@ -786,6 +786,7 @@ namespace HexaLab {
         mesh->unmark_all();
 
         HL_ASSERT(filters.size()==4);
+
         filters[0]->filter( *mesh ); // slice
         filters[1]->filter( *mesh ); // peel
         mesh->erode_dilate_marked( regularize_str );
@@ -797,7 +798,7 @@ namespace HexaLab {
         switch ( this->geometry_mode ) {
             case GeometryMode::Default:  prepare_geometry(); break;
             case GeometryMode::Cracked:  prepare_cracked_geometry(); break;
-            case GeometryMode::Smooth:   this->prepare_smooth_geometry(); break;
+            case GeometryMode::Smooth:   prepare_smooth_geometry(); break;
         }
     }
 

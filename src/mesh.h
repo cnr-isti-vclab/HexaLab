@@ -167,7 +167,7 @@ namespace HexaLab {
         float average_edge_lenght(float &min, float &max) const;
         float average_cell_volume() const;
         void update_vertex_visibility();
-        void update_vertex_visibility_internals();
+        void update_vertex_visibility_internals_only();
 
         long total_occupation_RAM() const; // approximation!
 

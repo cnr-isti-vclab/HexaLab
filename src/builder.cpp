@@ -38,10 +38,11 @@ static void fix_if_degenerate( Mesh& mesh, Face & f ){
     if (v[1]==v[2]) matches++;
     if (v[2]==v[3]) matches++;
     if (v[3]==v[0]) matches++;
-    // hack: degenerate (segment-shaped) faces are pointing to self
+    // hack: degenerate (segment-shaped) faces are pointing to same hexa
     if (matches>=2) {
         f.ci[1] = f.ci[0];
         f.wi[1] = f.wi[0];
+        for (short w=0; w<4; w++) if (v[(w+2)%4]<v[(w+3)%4]) f.wi[1] = Cell::pivot_face_around_edge(f.wi[0],w);
     }
 }
 

@@ -10,7 +10,7 @@ void Mesh::erode_dilate_marked( int str ) {
 
 void Mesh::erode_marked() {
 
-    update_vertex_visibility_internals();
+    update_vertex_visibility_internals_only();
 
     for (Cell& c:cells) for (short i=0; i<8; i++) if (is_visible(c.vi[i])) mark( c );
 
@@ -18,7 +18,7 @@ void Mesh::erode_marked() {
 
 void Mesh::dilate_marked() {
 
-    update_vertex_visibility_internals();
+    update_vertex_visibility_internals_only();
 
     for (Cell& c:cells) for (short i=0; i<8; i++) if (is_visible(c.vi[i])) unmark( c );
 
@@ -71,7 +71,7 @@ short Mesh::find_edge( Index fi, Index vi, short side0or1) const{
     FourIndices vvi = cells[ ci ].get_face(face0to5);
     short res=3;
     for (int i=0; i<3; i++) {
-        if (vvi[i]==vi) res=i;
+        if ((vvi[i]==vi)&&(vvi[(i+1)%4]<vi)) res=i;
     }
     return res;
 
@@ -183,7 +183,7 @@ float Mesh::average_cell_volume() const {
 }
 
 
-void Mesh::update_vertex_visibility_internals(){
+void Mesh::update_vertex_visibility_internals_only(){
     for ( Vert& v: verts) set_invisible( v );
 
     for ( const Face &f : faces ) if (!f.is_boundary()) {
