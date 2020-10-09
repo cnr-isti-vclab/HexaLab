@@ -42,7 +42,8 @@ static void fix_if_degenerate( Mesh& mesh, Face & f ){
     if (matches>=2) {
         f.ci[1] = f.ci[0];
         f.wi[1] = f.wi[0];
-        for (short w=0; w<4; w++) if (v[(w+2)%4]<v[(w+3)%4]) f.wi[1] = Cell::pivot_face_around_edge(f.wi[0],w);
+        for (short w=0; w<4; w++)
+            if (v[(w+2)%4]<v[(w+3)%4]) f.wi[1] = Cell::pivot_face_around_edge(f.wi[0],w);
     }
 }
 

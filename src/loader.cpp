@@ -73,7 +73,10 @@ bool Loader::load_MESH(const string& path, vector<Vector3f>& vertices, vector<In
                     indices.push_back(idx[i] - 1);
                 }
             }
-        } else if (header.compare("Tetrahedra") == 0) {
+/*        // TODO: deal with the tetra case!
+        }  else if (header.compare("Tetrahedra") == 0) {
+
+
             int tetra_count;
             HL_ASSERT_LOG(stream >> tetra_count, "ERROR: malformed mesh file. Unexpected tag after hexahedras tag.\n");
             HL_LOG("[Loader] Reading %d tetra...\n", tetra_count);
@@ -94,6 +97,7 @@ bool Loader::load_MESH(const string& path, vector<Vector3f>& vertices, vector<In
                 indices.push_back(c);
                 indices.push_back(d);
             }
+            */
         } else if (header.compare("Triangles") == 0) {
             int tri_count;
             HL_ASSERT_LOG(stream >> tri_count, "ERROR: malformed mesh file. Unexpected tag after Triangles tag.\n");
