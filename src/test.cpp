@@ -62,6 +62,17 @@ int main() {
               meshCnt--;
               printf("\n\n ************** FAILURE ***************\n in loading mesh  %s\n\n",filename.c_str());
             }
+            
+            size_t hexNum = app.get_mesh()->cells.size();
+            if(hexNum > hexMax) {
+              hexMax=hexNum;
+              maxMeshName=path + "/" + filename;
+            }
+            if(hexNum < hexMin) {
+              hexMin=hexNum;
+              minMeshName=path + "/" + filename;
+            }
+           
             printf("     Hexas: %4lu\n",app.get_mesh()->cells.size());
             printf("     Faces: %4lu\n",app.get_mesh()->faces.size());
             printf("TOTAL RAM: %4lu\n\n",app.get_mesh()->total_occupation_RAM() );
