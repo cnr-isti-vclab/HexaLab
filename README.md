@@ -18,6 +18,19 @@ HexaLab is a WebGL application for real time visualization, exploration and asse
 
 HexaLab aims also to easily present the results of recent papers on hex meshing by directly including them in its own repository when provided by the authors. The datasets presented are copyrighted by the respective paper authors. Look in the [`datasets`](https://github.com/cnr-isti-vclab/HexaLab/tree/master/datasets) folder for more info.
 
+### Release Notes
+- **2020.10** Complete rewrote of the core data structures. Now it is much faster and it uses a fraction of memory. 
+All datasets, even the ones composed by more than 600k cells, can be loaded. 
+- **2020.07** added "LoopyCuts: Practical Feature-Preserving..."
+- **2019.06** added "Feature Preserving Octree-Based..."
+- **2019.05** added "Dual Sheet Meshing...", "Symmetric Moving Frames...", "Hexahedral Mesh Generation via Constrained"
+- **2019.01** added "Singularity Structure Simplification of Hexahedral..."
+- **2019.01** added "Selective Padding for Polycube‐Based Hexahedral Mes..."
+- **2018.10** added "A global approach to multi-axis swept..." and "Fuzzy clustering based pseudo-swept ...
+- **2018.06** added "All-Hex Mesh Generation via Volumetric PolyCube"
+- **2018.05** added "PolyCut: Monotone Graph-Cuts for PolyCube Base" and  "Explicit Cylindrical Maps for General..."
+- **2018.01** First public version, released with the preprint on [arxiv](https://arxiv.org/abs/1806.06639)
+
 ---
 
 - <sup>x</sup> Joint first authors
