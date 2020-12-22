@@ -29,55 +29,49 @@ namespace HexaLab {
         // Compute depth
         printf("[Peeling Filter] %lu %lu on_mesh_set\n", mesh.cells.size(), this->HexaDepth.size());
         const size_t hn = mesh.cells.size();
+
+        const int BIG = std::numeric_limits<int>::max();
+
         this->HexaDepth.clear();
-        this->HexaDepth.resize(hn,-1);
-        std::vector<size_t> toBeProcessed, toBeProcessedNext;
+        this->HexaDepth.resize(hn, BIG);
+        std::vector<size_t> toBeProcessed;
         
-        for(size_t i = 0; i < mesh.faces.size(); ++i) {
-            if(mesh.navigate(mesh.faces[i]).is_face_boundary())
-                this->HexaDepth[mesh.navigate(mesh.faces[i]).cell_index()] = 0;
+        for (const Face& f: mesh.faces) {
+            if (f.is_boundary()) {
+                if (HexaDepth[ f.ci[0] ] > 0) {
+                    HexaDepth[ f.ci[0] ] = 0;
+                    toBeProcessed.push_back( f.ci[0] );
+                }
+            }
         }
 
-        for(size_t i = 0; i < hn; ++i) {
-            if (this->HexaDepth[i] < 0)
-                toBeProcessed.push_back(i);
-        }
-        
         int curDepth = 0;
         while(!toBeProcessed.empty()) {
             curDepth++;
-            toBeProcessedNext.clear();
-            for (size_t i : toBeProcessed) {
-                auto navStart = mesh.navigate(mesh.cells[i]);
-                assert(this->HexaDepth[i] == -1);
-                int minInd = std::numeric_limits<int>::max();
-                auto nav = navStart;
-                int faceCnt = 0;
-                do {
-                    faceCnt++;
-                    assert(!nav.is_face_boundary());            
-                    int otherDepth = this->HexaDepth[nav.flip_cell().cell_index()];
-                    assert(otherDepth == -1 || otherDepth <= curDepth);
-                    if (otherDepth >= 0 && otherDepth < curDepth && otherDepth < minInd) minInd = otherDepth;            
-                    nav = nav.next_cell_face();
-                } while(!(nav == navStart));
-                assert(faceCnt == 6);
+            std::vector<size_t> inProcess;
+            std::swap(toBeProcessed, inProcess);
 
-                if(minInd < std::numeric_limits<int>::max())
-                    this->HexaDepth[i] = minInd + 1;
-                else 
-                    toBeProcessedNext.push_back(i);                      
+            for (size_t ci : inProcess) {
+
+                for (int s=0; s<6; s++) {
+                    int cj = mesh.other_side( ci, s );
+                    if (cj<0) continue;
+
+                    if (HexaDepth[ cj ] > curDepth) {
+                        HexaDepth[ cj ] = curDepth;
+                        toBeProcessed.push_back( cj );
+                    }
+                }
             }
-            std::swap(toBeProcessed, toBeProcessedNext); 
         }
         this->max_depth = curDepth;
         if (this->depth_threshold > curDepth) 
             this->depth_threshold = curDepth;
         
+        for(int d : HexaDepth ) assert( d < BIG);
+
         printf("[Peeling Filter] Max Depth %i\n",curDepth);
-        for(size_t i = 0; i < hn; ++i) { 
-            assert (this->HexaDepth[i] >= 0); 
-        }
+
     }
     
 };

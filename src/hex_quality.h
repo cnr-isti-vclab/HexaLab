@@ -29,7 +29,7 @@ typedef float (quality_measure_fun) (const Vector3f&, const Vector3f&, const Vec
 
 namespace QualityMeasureFun {
 /*
- * All the metrics in this section are defined on a hexahedral element as shown
+ * ATTENTION: All the metrics in this section are defined with the "irrational" order
  * 
  *       P7------P6
  *      / |     / |

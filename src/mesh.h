@@ -2,163 +2,183 @@
 
 #include <vector>
 #include <unordered_map>
-#include <algorithm>
 #include <Eigen/Dense>
 #include <Eigen/Geometry>
 
-#include <common.h>
-#include <mesh_navigator.h>
-#include <hex_quality_color_maps.h>
+#include "common.h"
+#include "hex_quality_color_maps.h"
 
-// How to save a lot of mem
-// Darts are quite verbous, you need 48 of them for a hexa, and in most of 'reasonable' subdivisions they are uselessy repetitive
-// Nice trick is to compact them (e.g. moving to halfedge like structures) 
-// This can be done implicitly
-// consider that for example the four darts inside a wedge: they share the same cell and edge and refers two vertices and two faces; 
-// You always will have this 4plets of darts, so if you keep them distributed in fixed way in a vector you can avoid to explicitly store them. 
-// In this way you store a vector of N/4 FatDarts that can be used to represent a vector of N darts and simply use the 2 LSB to disambiguate a FatDart into the right dart.
+/*
+ * HEXALAB vertex and face orderning
+ *
+ *      6-------7       +   -   +       +-------+       +-------+
+ *     /|      /|      /|      /|      /   3   /        |   5   |
+ *    2-------3 |     + | -   + |     +-------+       +-------+ |
+ *    | |     | |     |0|     |1|                     | |     | |
+ *    | 4-----|-5     | +   - | +       +-------+     | +-----|-+
+ *    |/      |/      |/      |/       /   2   /      |   4   |
+ *    0-------1       +   -   +       +-------+       +-------+
+ *
+ *      Vertex                           Faces
+ *
+ *
+ * 2---6---7                               +-0-+-2-+
+ * | 0 | 5 |                               3   1   3
+ * 0---4---5---7         0---1  +-0-+      +-2-+-0-+-2-+
+ *     | 2 | 1 |         |   |  3   1          3   1   3
+ *     0---1---3---7     3---2  +-2-+          +-2-+-0-+-2-+
+ *         | 4 | 3 |                               3   1   3
+ *         0---2---6   Corners  Edges       Edges  +-2-+-0-+
+ */
 
 
 namespace HexaLab {
     using namespace Eigen;
     using namespace std;
 
-    // https://en.wikipedia.org/wiki/Generalized_map
-    // TODO switch to combinatorial maps (half-edge structures) ?
-    struct Dart {
-        Index cell_neighbor = -1;
-        Index face_neighbor = -1;
-        Index edge_neighbor = -1;
-        Index vert_neighbor = -1;
-        Index cell = -1;
-        Index face = -1;
-        Index edge = -1;
-        Index vert = -1;
-
-        Dart() {}
-        Dart ( Index cell, Index face, Index edge, Index vert ) {
-            this->cell = cell;
-            this->face = face;
-            this->edge = edge;
-            this->vert = vert;
-        }
-
-        Dart ( const Dart& other ) = delete;
-
-        Dart ( const Dart&& other ) {
-            this->cell_neighbor = other.cell_neighbor;
-            this->face_neighbor = other.face_neighbor;
-            this->edge_neighbor = other.edge_neighbor;
-            this->vert_neighbor = other.vert_neighbor;
-            this->cell          = other.cell;
-            this->face          = other.face;
-            this->edge          = other.edge;
-            this->vert          = other.vert;
-        }
-
-        bool operator== ( const Dart& other ) const {
-            // TODO avoid comparing neighbors, only compare cell/face/edeg/vert fields ?
-            return this->cell_neighbor == other.cell_neighbor
-                   && this->face_neighbor == other.face_neighbor
-                   && this->edge_neighbor == other.edge_neighbor
-                   && this->vert_neighbor == other.vert_neighbor
-                   && this->cell          == other.cell
-                   && this->face          == other.face
-                   && this->edge          == other.edge
-                   && this->vert          == other.vert;
-        }
+    struct FourIndices{
+        Index vi[4];
+        FourIndices(Index a, Index b, Index c,Index d){ vi[0]=a; vi[1]=b; vi[2]=c; vi[3]=d; }
+        Index operator[] (short i) const {return vi[i];}
     };
-
-    // marked <=> filtered
 
     struct Cell {
-        Index dart      = -1;
-        uint32_t mark   =  0;       // mark == mesh.mark -> cell is filtered
+        Index fi[6];
+        Index vi[8];
 
-        Cell() {}
-        Cell ( Index dart ) { this->dart = dart; }
-        bool operator== ( const Cell& other ) const { return this->dart == other.dart; }
-        bool operator!= ( const Cell& other ) const { return ! ( *this == other ); }
+        uint32_t marked;
+
+        FourIndices get_face(short face0to5) const {
+            switch (face0to5){
+            case  0: return FourIndices(vi[2],vi[6],vi[4],vi[0]); //  010 110 100 000
+            case  1: return FourIndices(vi[3],vi[1],vi[5],vi[7]); //  011 001 101 111
+            case  2: return FourIndices(vi[4],vi[5],vi[1],vi[0]); //  100 101 001 000
+            case  3: return FourIndices(vi[6],vi[2],vi[3],vi[7]); //  011 010 011 111
+            case  4: return FourIndices(vi[1],vi[3],vi[2],vi[0]); //  001 011 010 000
+            default: return FourIndices(vi[5],vi[4],vi[6],vi[7]); //  101 100 110 111
+            }
+        }
+
+        inline int get_v3_of_face(short face0to5) const {
+            return vi[(face0to5&1)*7];
+        }
+
+        static short pivot_face_around_edge( short face0to5, short edge0to3 ) {
+            /*
+             * edge=0 : faces 0<->3 1<->4 2<->5
+             * edge=1 : faces 0<->5 2<->1 4<->3
+             * edge=2 : faces 0->2->4->0  5->3->1->5
+             * edge=3 : faces 0->4->2->0  5->1->3->5
+             */
+
+            if (edge0to3==1) face0to5 = (face0to5+3)^1;  else
+            if (edge0to3> 1) face0to5 += (((edge0to3 ^ (face0to5&1))<<1)|5);
+            return (face0to5+3)%6;
+
+            // edge: 3<->2 (0,1 unchanged)
+            //edge0to3 ^= (edge0to3>>1);
+        }
+
     };
 
-    struct Face {
-        Index dart = -1;
+    struct Face {  
         Vector3f normal;
-        // is_surface is given by simply checking the existence of a neighboring hexa.
-        // the normal is stored with respect to the hexa that the dart belongs to. flip it if you want it with respect to the other.
+        Index ci[2];
+        short wi[2]; // this is face number wi[0] of cell ci[0]
 
-        Face() {}
-        Face ( Index dart ) { this->dart = dart; }
-        Face ( Index dart, const Vector3f& norm ) { this->dart = dart; this->normal = norm; }
-        Face ( Index dart, const Vector3f&& norm ) { this->dart = dart; this->normal = norm; }
+        bool is_boundary() const { return ci[1]==-1; }
 
-        bool operator== ( const Face& other ) const { return this->dart == other.dart; }
-        bool operator!= ( const Face& other ) const { return ! ( *this == other ); }
-    };
+        void flip() {
+            assert(!is_boundary());
+            normal *= -1.0f;
+            std::swap(ci[0],ci[1]);
+            std::swap(wi[0],wi[1]);
+        }
 
-    struct Edge {
-        Index dart      = -1;
-        bool is_surface = false;
+        Face flipped() const {
+            Face res = *this;
+            res.flip();
+            return res;
+        }
 
-        Edge() {}
-        Edge ( int32_t dart ) { this->dart = dart; }
-        bool operator== ( const Edge& other ) const { return this->dart == other.dart; }
-        bool operator!= ( const Edge& other ) const { return ! ( *this == other ); }
     };
 
     struct Vert {
-        Index dart          = -1;
         Vector3f position;
-        uint32_t visible_mark = 0;
-        bool is_surface     = false;
-
+        uint32_t visible; // mystery: if bool, size of vert rises (from 12+4 to 12+12!)
         Vert() {}
-        Vert ( Vector3f position ) { this->position = position; }
-        Vert ( Vector3f position, Index dart ) { this->position = position; this->dart = dart; }
-        // TODO avoid comparing the position, only compare the dart field ?
-        bool operator== ( const Vert& other ) const { return this->dart == other.dart && this->position == other.position; }
-        bool operator!= ( const Vert& other ) const { return ! ( *this == other ); }
+        Vert ( Vector3f p ):position(p) {}
     };
 
     class Mesh {
-        // As the name suggests, the Builder class is responsible for building a Mesh instance, given the file parser output.
+        // Builder class is responsible for building a Mesh instance, given the file parser output.
         friend class Builder;
-
-      private:
-        // Marks are used to flag the visibility of elements. 
-        // If an element's mark field equals to the mesh mark field, that element is currently invisible. 
-        // Otherwise, it means that is has not been filtered and should be displayed.
-        uint32_t current_mark = 0;
 
       public:
         vector<Cell> cells;
         vector<Face> faces;
-        vector<Edge> edges;
         vector<Vert> verts;
-        vector<Dart> darts;
 
         AlignedBox3f aabb;
 
-        void unmark_all() { ++this->current_mark; }
+        void unmark_all();
 
-        //bool mark_is_current ( const Cell& cell ) const { return cell.mark == this->current_mark; }
-        bool is_marked ( const Cell& cell ) const { return cell.mark == this->current_mark ; }
-        bool is_marked ( const Vert& vert ) const { return vert.visible_mark == this->current_mark; }
-        void unmark ( Cell& cell ) const { cell.mark = this->current_mark - 1; }
-        void unmark ( Vert& vert ) const { vert.visible_mark = this->current_mark - 1; }
-        void mark ( Cell& cell ) const { cell.mark = this->current_mark; }
-        void mark ( Vert& vert ) const { vert.visible_mark = this->current_mark; }
+        FourIndices vertex_indices(const Face &f) const{
+            return cells[ f.ci[0] ].get_face( f.wi[0] );
+        }
+        FourIndices vertex_indices(const Face &f,short side0or1) const{
+            return cells[ f.ci[side0or1] ].get_face( f.wi[side0or1] );
+        }
 
-        // Methods to spawn a mesh navigator off of a mesh element
-        MeshNavigator navigate ( Dart& dart ) { return MeshNavigator ( dart, *this ); }
-        MeshNavigator navigate ( Cell& cell ) { Dart& d = darts[cell.dart]; return navigate ( d ); }
-        MeshNavigator navigate ( Face& face ) { Dart& d = darts[face.dart]; return navigate ( d ); }
-        MeshNavigator navigate ( Edge& edge ) { Dart& d = darts[edge.dart]; return navigate ( d ); }
-        MeshNavigator navigate ( Vert& vert ) { Dart& d = darts[vert.dart]; return navigate ( d ); }
+        Vector3f pos( Index vi) const { return verts[vi].position; }
+        Vector3f norm_of_side( Index ci, short side) const {
+            const Face& f = faces[ cells[ci].fi[side] ];
+            if (f.ci[0]==ci) return f.normal; else return -f.normal;
+        }
 
-        // The mesh class also functions as a cache for one (the last) evaluated quality measure.
-        // The quality values are stored per hexa both in normalized and non-normalized formats.
+        bool is_marked ( int ci ) const { return cells[ci].marked; }
+        bool is_marked ( const Cell& cell ) const { return cell.marked; }
+        void unmark ( Cell& cell )  { cell.marked = false; }
+        void mark ( Cell& cell )  { cell.marked = true; }
+
+        bool is_visible ( const Vert& vert ) const { return vert.visible; }
+        bool is_visible ( int vi ) const { return verts[vi].visible; }
+        void set_invisible ( Vert& vert )  { vert.visible = false; }
+        void set_visible ( Vert& vert )  { vert.visible = true; }
+
+        void erode_dilate_marked(int str);
+        void erode_marked();
+        void dilate_marked();
+
+        int count_visible_faces(Index fi, short si) const;
+
+        Index other_side( Index ci, int side0to5 ) const {
+            const Face &f = faces[ cells[ci].fi[side0to5] ];
+            return (f.ci[0]==ci)?f.ci[1]:f.ci[0];
+        }
+
+        // per-hexa quality measure (parallel vectors)
         vector<float>      hexa_quality;
         vector<float>      normalized_hexa_quality;
+
+
+        int internal_edge_valency(Index fi, short side) const;
+
+        float average_edge_lenght(float &min, float &max) const;
+        float average_cell_volume() const;
+        void update_vertex_visibility();
+        void update_vertex_visibility_internals_only();
+
+        long total_occupation_RAM() const; // approximation!
+
+        Index pivot_around_edge(Index fi, Index vi, short &side0or1, short edge0to3) const;
+        short find_edge(Index fi, Index vi, short side0or1) const;
+
+      private:
+
+        /* used during construction */
+        Vector3f barycenter_of(const Face &face) const;
+        Vector3f barycenter_of(const Cell &c) const;
+        void compute_and_store_normal(Face &face);
     };
 }

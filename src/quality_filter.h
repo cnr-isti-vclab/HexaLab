@@ -1,9 +1,11 @@
 #pragma once
 
-#include <mesh.h>
-#include <ifilter.h>
+#include "ifilter.h"
 
 namespace HexaLab {
+
+    class Mesh;
+
     class QualityFilter : public IFilter {
     public:
     	enum class Operator {

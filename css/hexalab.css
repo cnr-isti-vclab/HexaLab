@@ -16,6 +16,11 @@ h1{
 	margin: 0 0 -4px 5px;
 	display: inline;
 }
+h1mini{
+	font-size: 10px;
+	margin: 0 0 -4px 5px;
+	display: inline;
+}
 
 h2{
 	color: rgb(120,120,155);

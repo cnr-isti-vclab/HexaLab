@@ -2,9 +2,9 @@
 
 #include <vector>
 
-#include <common.h>
-#include <mesh.h>
-#include <ifilter.h>
+#include "common.h"
+#include "mesh.h"
+#include "ifilter.h"
 
 namespace HexaLab {
     class PickFilter : public IFilter {
@@ -37,7 +37,7 @@ namespace HexaLab {
 
         void raycast( Vector3f origin, Vector3f direction, Index &in , Index &out );
 
-        bool face_ray_test(Face &face, Vector3f origin, Vector3f direction, float& max);
+        bool face_ray_test(const Face &face, Vector3f origin, Vector3f direction, float& max);
     };
 
 }

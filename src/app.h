@@ -1,13 +1,12 @@
 #pragma once
 
-#include <mesh.h>
-#include <mesh_navigator.h>
-#include <ifilter.h>
-#include <model.h>
-#include <loader.h>
-#include <builder.h>
-#include <color_map.h>
-#include <hex_quality_color_maps.h>
+#include "mesh.h"
+#include "ifilter.h"
+#include "model.h"
+#include "loader.h"
+#include "builder.h"
+#include "color_map.h"
+#include "hex_quality_color_maps.h"
 
 #include <Eigen/Geometry>
 
@@ -148,12 +147,10 @@ namespace HexaLab {
         QualityMeasureEnum  get_quality_measure()               { return this->quality_measure; }
 
       private:
-        void add_visible_vert ( Dart& dart, float normal_sign, Vector3f color );
-        void add_visible_face ( Dart& dart, float normal_sign );
-        void add_visible_wireframe ( Dart& dart );
-        void add_filtered_face ( Dart& dart );
-        void add_filtered_wireframe ( Dart& dart );
-        void add_full_face ( Dart& dart );
+        void add_visible_face ( const Face& f );
+        void add_filtered_face ( const Face& f );
+        void add_full_face ( const Face& f );
+        void add_wireframe_edge ( Index v0, Index vi , float alpha);
 
         size_t add_vertex ( Vector3f pos, Vector3f norm, Vector3f color );
         size_t add_full_vertex ( Vector3f pos, Vector3f norm, Vector3f color );
@@ -164,10 +161,7 @@ namespace HexaLab {
         void prepare_geometry();
         void prepare_cracked_geometry();
         void prepare_smooth_geometry();
-
-        void erode_dilate(int str);
-        void erode();
-        void dilate();
+        void prepare_external_skin();
 
         void build_full_model();
 
