@@ -17,8 +17,8 @@ h1{
 	display: inline;
 }
 h1mini{
-	font-size: 10px;
-	margin: 0 0 -4px 5px;
+	font-size: 8px;
+	margin: 0 0 -3px 3px;
 	display: inline;
 }
 
@@ -46,13 +46,13 @@ height: 1px;
 }
 
 #toolbar {
-	margin: 5px;
+	margin: 2px;
 }
 
 #toolbar button {
-	width: 26px;
-	height: 26px;
-	padding: 2px;
+	width: 25px;
+	height: 25px;
+	padding: 1px;
     margin: 0;
 }
 
