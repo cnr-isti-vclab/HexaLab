@@ -901,7 +901,7 @@
              "fig9/torus_cut_hex.vtk"
         ]
     }
-    
+ 
     ,{
         "paper": {
             "title": "Generalized Adaptive Refinement for Grid-based Hexahedral Meshing",
@@ -1117,6 +1117,37 @@
             "venus_input_tri.mesh",
             "woodenfish_input_tri.mesh",
             "wrench_input_tri.mesh"
+        ]
+    }
+
+    , {
+        "paper": {
+            "title": "At-Most-Hexa Meshes",
+            "venue": "Computer Graphics Forum (2021)",
+            "authors": "Dennis R. Bukenberger, Marco Tarini, Hendrik P. A. Lensch",
+            "year": "2021",
+            "PDF": "https://uni-tuebingen.de/fileadmin/Uni_Tuebingen/Fakultaeten/InfoKogni/WSI/ComGraph/publications/2021/CGF21_atMostHexa/AtMostHexaMeshes.pdf",
+            "web": "https://uni-tuebingen.de/fakultaeten/mathematisch-naturwissenschaftliche-fakultaet/fachbereiche/informatik/lehrstuehle/computergrafik/lehrstuhl/veroeffentlichungen/publications-since-2012/at-most-hexa-meshes/",
+            "DOI": "10.1111/cgf.14393"
+        },
+        "path": "2021 - At-Most-Hexa Meshes",
+        "label": "2021 - At-Most-Hexa Meshes",
+        "data": [
+            "cylinder_g.mesh",
+            "cylinder_g_slivers.mesh",
+            "cylinder_n.mesh",
+            "cylinder_n_slivers.mesh",
+            "fandisk.mesh",
+            "fandisk_slivers.mesh",
+            "jumpRamp.mesh",
+            "jumpRamp_slivers.mesh",
+            "twistcube_l.mesh",
+            "twistcube_l_slivers.mesh",
+            "twistcube_m.mesh",
+            "twistcube_m_slivers.mesh",
+            "twistcube_s.mesh",
+            "twistcube_s_slivers.mesh"
+
         ]
     }
                ]
