@@ -242,7 +242,8 @@ HexaLab.PlaneFilter.prototype = Object.assign(Object.create(HexaLab.Filter.proto
 		//this.set_plane_offset(1 - this.backend.get_plane_offset())
 	},
 	set_plane_normal_as_view: function( snap_to_axis , maybe_flip){
-		var camera_dir = HexaLab.app.camera().getWorldDirection()
+		let camera_dir = new THREE.Vector3()            
+        HexaLab.app.camera().getWorldDirection(camera_dir)
 		if (!closest_axis && (maybe_flip===true)) {
 			var dot = camera_dir.x*this.nx+camera_dir.y*this.ny+camera_dir.z*this.nz;
 			if (dot<-0.9) {this.flip_plane(); return;}

@@ -887,6 +887,7 @@ Object.assign(HexaLab.Viewer.prototype, {
         this.silhouette_alpha_pass.material.depthTest = false
         this.fullscreen_quad.material = this.silhouette_alpha_pass.material
 
+        this.renderer.setRenderTarget(null)
         this.renderer.context.colorMask(false, false, false, true)
         this.renderer.render(this.scene, this.fullscreen_camera)
         this.renderer.context.colorMask(true, true, true, true)
@@ -902,6 +903,7 @@ Object.assign(HexaLab.Viewer.prototype, {
         this.silhouette_alpha_pass.material.polygonOffset = true
         this.scene.overrideMaterial = this.silhouette_alpha_pass.material
         
+        this.renderer.setRenderTarget(null)
         this.renderer.context.colorMask(false, false, false, true)
         this.renderer.render(this.scene, this.scene_camera)
         this.renderer.context.colorMask(true, true, true, true)
@@ -914,6 +916,7 @@ Object.assign(HexaLab.Viewer.prototype, {
         // Do a fullscreen pass, coloring the pixels with set alpha values only
         this.fullscreen_quad.material = this.silhouette_color_pass
 
+        this.renderer.setRenderTarget(null)
         this.renderer.render(this.scene, this.fullscreen_camera)
 
         this.clear_scene()
@@ -925,6 +928,7 @@ Object.assign(HexaLab.Viewer.prototype, {
         this.silhouette_alpha_pass.material.depthTest = false
         this.fullscreen_quad.material = this.silhouette_alpha_pass.material
 
+        this.renderer.setRenderTarget(null)
         this.renderer.context.colorMask(false, false, false, true)
         this.renderer.render(this.scene, this.fullscreen_camera)
         this.renderer.context.colorMask(true, true, true, true)
@@ -965,6 +969,7 @@ Object.assign(HexaLab.Viewer.prototype, {
         }
 
         // draw
+        this.renderer.setRenderTarget(null)
         this.renderer.render(this.scene, this.scene_camera)
 
         if (this.settings.lighting == 'Direct') {
@@ -980,11 +985,17 @@ Object.assign(HexaLab.Viewer.prototype, {
 
         // bind material, draw
         this.scene.overrideMaterial = this.depth_pass.material
-        this.renderer.render(this.scene, this.scene_camera, this.depth_pass.target, true)
+        this.renderer.setRenderTarget(this.depth_pass.target)
+        this.renderer.clear()
+        this.renderer.render(this.scene, this.scene_camera)
+        //this.renderer.render(this.scene, this.scene_camera, this.depth_pass.target, true)
         
         // bind material, draw
         this.scene.overrideMaterial = this.normal_pass.material
-        this.renderer.render(this.scene, this.scene_camera, this.normal_pass.target, true)
+        this.renderer.setRenderTarget(this.normal_pass.target)
+        this.renderer.clear()
+        this.renderer.render(this.scene, this.scene_camera)
+        //this.renderer.render(this.scene, this.scene_camera, this.normal_pass.target, true)
     },
 
     compute_ssao: function () {
@@ -1000,11 +1011,15 @@ Object.assign(HexaLab.Viewer.prototype, {
         this.fullscreen_quad.material             = this.ssao_pass.material
         
         // draw
-        this.renderer.render(this.scene, this.fullscreen_camera, this.ssao_pass.target, true)
+        this.renderer.setRenderTarget(this.ssao_pass.target)
+        this.renderer.clear()
+        this.renderer.render(this.scene, this.fullscreen_camera)
+        //this.renderer.render(this.scene, this.fullscreen_camera, this.ssao_pass.target, true)
     },
 
     blend_in_ssao: function () {
         // quad
+        this.renderer.setRenderTarget(null)
         this.clear_scene()
         this.scene.add(this.fullscreen_quad)
         this.scene.position.set(0, 0, 0)
@@ -1032,7 +1047,9 @@ Object.assign(HexaLab.Viewer.prototype, {
         // bind material, fetch camera, draw
         this.scene.overrideMaterial = this.viewpos_pass.material
         const light_cam             = this.ao_pass.views[this.ao_pass.progress.view_i]
-        this.renderer.render(this.scene, light_cam, this.viewpos_pass.target, false)
+        this.renderer.setRenderTarget(this.viewpos_pass.target)
+        this.renderer.render(this.scene, light_cam)
+        //this.renderer.render(this.scene, light_cam, this.viewpos_pass.target, false)
     },
 
     compute_osao_step: function () {
@@ -1058,7 +1075,10 @@ Object.assign(HexaLab.Viewer.prototype, {
         this.fullscreen_quad.material = this.ao_pass.material
 
         // draw
-        this.renderer.render(this.scene, this.fullscreen_camera, this.ao_pass.progress.target, this.ao_pass.progress.view_i == 0)
+        this.renderer.setRenderTarget(this.ao_pass.progress.target)
+        if(this.ao_pass.progress.view_i == 0) this.renderer.clear()
+        this.renderer.render(this.scene, this.fullscreen_camera)
+        //this.renderer.render(this.scene, this.fullscreen_camera, this.ao_pass.progress.target, this.ao_pass.progress.view_i == 0)
 
         // progress
         this.ao_pass.progress.view_i += 1
@@ -1077,6 +1097,7 @@ Object.assign(HexaLab.Viewer.prototype, {
         // this.fresnel_transparency_pass.material.uniforms.uColor = { value: new THREE.Vector3(c.x, c.y, c.z) }
         this.scene.overrideMaterial = this.fresnel_transparency_pass.material
 
+        this.renderer.setRenderTarget(null)
         this.renderer.render(this.scene, this.scene_camera)
     },
 
@@ -1085,6 +1106,7 @@ Object.assign(HexaLab.Viewer.prototype, {
         this.scene.add(this.renderables.visible.wireframe)
         this.scene.position.set(this.mesh_offset.x, this.mesh_offset.y, this.mesh_offset.z)
 
+        this.renderer.setRenderTarget(null)
         this.renderer.render(this.scene, this.scene_camera)
     },
 
@@ -1103,6 +1125,7 @@ Object.assign(HexaLab.Viewer.prototype, {
         this.scene.add(this.renderables.full_singularity.surface)
 
 
+        this.renderer.setRenderTarget(null)
         this.renderer.render(this.scene, this.scene_camera)
     },
 
@@ -1111,6 +1134,7 @@ Object.assign(HexaLab.Viewer.prototype, {
         this.scene.position.set(this.mesh_offset.x, this.mesh_offset.y, this.mesh_offset.z)
         this.scene.add(this.meshes)
 
+        this.renderer.setRenderTarget(null)
         this.renderer.render(this.scene, this.scene_camera)
     },
 
@@ -1120,8 +1144,9 @@ Object.assign(HexaLab.Viewer.prototype, {
         // axes gizmo        
         if (this.do_show_axes) {
             this.scene.add(this.gizmo)
-            this.renderer.setViewport(this.width - 110, 10, 100, 100)
+            this.renderer.setViewport(this.width - 110, this.height - 110, 100, 100)
             this.hud_camera.setRotationFromMatrix(this.scene_camera.matrixWorld)
+            this.renderer.setRenderTarget(null)
             this.renderer.render(this.scene, this.hud_camera)
             this.scene.remove(this.gizmo)
             this.renderer.setViewport(0, 0, this.width, this.height)
