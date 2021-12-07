@@ -1,10 +1,10 @@
 THREE.AOEval = {
     vertexShader: [
         "varying vec2 vUv;",
-        "varying mat4 vProj;",
+        //"varying mat4 vProj;",
         "void main() {",
             "vUv = uv;",
-            "vProj = projectionMatrix;",
+        //    "vProj = projectionMatrix;",
             "gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);",
         "}"
     ].join( "\n" ),
@@ -20,7 +20,7 @@ THREE.AOEval = {
         "uniform float uDepthBias;",
 
         "varying vec2 vUv;",
-        "varying mat4 vProj;",
+        //"varying mat4 vProj;",
 
         "#include <packing>",
 

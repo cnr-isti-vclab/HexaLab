@@ -683,7 +683,9 @@ Object.assign(HexaLab.Viewer.prototype, {
         const prev_clear_color = this.renderer.getClearColor().clone()
         const prev_clear_alpha = this.renderer.getClearAlpha()
         this.renderer.setClearColor(0x000000, 1.0)
-        this.renderer.clearTarget(tTarget, true, true, true)     // TODO this is not working ?
+        this.renderer.setRenderTarget(tTarget)
+        this.renderer.clear(true, true, true)
+        //this.renderer.clearTarget(tTarget, true, true, true)     // TODO this is not working ?
         this.renderer.setClearColor(prev_clear_color, prev_clear_alpha)
 
         // ao pass
@@ -736,7 +738,7 @@ Object.assign(HexaLab.Viewer.prototype, {
             Module.print("[AO] Cached at " + progress.toFixed(0) + "%")
             this.update_osao_buffers()
         } else {
-            Module.print("[AO] Starting...")
+            //Module.print("[AO] Starting...")
         }
     },
 
@@ -1022,7 +1024,9 @@ Object.assign(HexaLab.Viewer.prototype, {
         const prev_clear_color = this.renderer.getClearColor().clone()
         const prev_clear_alpha = this.renderer.getClearAlpha()
         this.renderer.setClearColor(new THREE.Color(0, 0, -100000), 1.0)
-        this.renderer.clearTarget(this.viewpos_pass.target, true, true, true)
+        this.renderer.setRenderTarget(this.viewpos_pass.target)
+        this.renderer.clear(true, true, true)
+        //this.renderer.clearTarget(this.viewpos_pass.target, true, true, true)
         this.renderer.setClearColor(prev_clear_color, prev_clear_alpha)
 
         // bind material, fetch camera, draw
@@ -1359,7 +1363,7 @@ Object.assign(HexaLab.App.prototype, {
         if (this.mesh) {
             let worldCameraDir = new THREE.Vector3()            
             this.camera().getWorldDirection(worldCameraDir)
-            console.log("worldCameraDir"+worldCameraDir)
+            //console.log("worldCameraDir"+worldCameraDir)
             return {
                 offset:     new THREE.Vector3().subVectors(this.controls.target, new THREE.Vector3(0, 0, 0)),
                 direction:  worldCameraDir,

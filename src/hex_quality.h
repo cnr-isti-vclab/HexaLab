@@ -19,9 +19,11 @@ namespace HexaLab {
 using namespace Eigen;
 using namespace std;
 
-#define HL_QUALITY_MEASURE_DEF(name) static float name (const Vector3f& p0, const Vector3f& p1, const Vector3f& p2, \
-                                     const Vector3f& p3, const Vector3f& p4, const Vector3f& p5, const Vector3f& p6, \
-                                     const Vector3f& p7, const void* arg)
+//#define static float name (const Vector3f& p0, const Vector3f& p1, const Vector3f& p2, \
+//                                     const Vector3f& p3, const Vector3f& p4, const Vector3f& p5, const Vector3f& p6, \
+//                                     const Vector3f& p7, const void* arg)(name) static float name (const Vector3f& p0, const Vector3f& p1, const Vector3f& p2, \
+//                                     const Vector3f& p3, const Vector3f& p4, const Vector3f& p5, const Vector3f& p6, \
+//                                     const Vector3f& p7, const void* arg)
 
 typedef float (quality_measure_fun) (const Vector3f&, const Vector3f&, const Vector3f&, const Vector3f&, 
                                      const Vector3f&, const Vector3f&, const Vector3f&, const Vector3f&, 
@@ -152,7 +154,9 @@ float frobenius(const Vector3f & col0, const Vector3f & col1, const Vector3f & c
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-HL_QUALITY_MEASURE_DEF(diagonal)
+static float diagonal (const Vector3f& p0, const Vector3f& p1, const Vector3f& p2, 
+                      const Vector3f& p3, const Vector3f& p4, const Vector3f& p5, const Vector3f& p6, 
+                      const Vector3f& p7, const void* /*arg*/)
 {
     Vector3f D[4];
     float    D_norms[4];
@@ -163,21 +167,27 @@ HL_QUALITY_MEASURE_DEF(diagonal)
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-HL_QUALITY_MEASURE_DEF(dimension)
+static float dimension (const Vector3f& /*p0*/, const Vector3f& /*p1*/, const Vector3f& /*p2*/,
+                       const Vector3f& /*p3*/, const Vector3f& /*p4*/, const Vector3f& /*p5*/, const Vector3f& /*p6*/, 
+                       const Vector3f& /*p7*/, const void* /*arg*/)
 {
     return -1;
 }
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-HL_QUALITY_MEASURE_DEF(distortion)
+static float distortion (const Vector3f& /*p0*/, const Vector3f& /*p1*/, const Vector3f& /*p2*/,
+                        const Vector3f& /*p3*/, const Vector3f& /*p4*/, const Vector3f& /*p5*/, const Vector3f& /*p6*/, 
+                        const Vector3f& /*p7*/, const void* /*arg*/)
 {
     return -1;
 }
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-HL_QUALITY_MEASURE_DEF(edge_ratio)
+static float edge_ratio (const Vector3f& p0, const Vector3f& p1, const Vector3f& p2, \
+                                     const Vector3f& p3, const Vector3f& p4, const Vector3f& p5, const Vector3f& p6, \
+                                     const Vector3f& p7, const void* /*arg*/)
 {
     Vector3f L[12];
     float    L_norms[12];
@@ -188,7 +198,9 @@ HL_QUALITY_MEASURE_DEF(edge_ratio)
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-HL_QUALITY_MEASURE_DEF(jacobian)
+static float jacobian (const Vector3f& p0, const Vector3f& p1, const Vector3f& p2, \
+                                     const Vector3f& p3, const Vector3f& p4, const Vector3f& p5, const Vector3f& p6, \
+                                     const Vector3f& p7, const void* /*arg*/)
 {
     Vector3f L[12];
     Vector3f X[3];
@@ -208,7 +220,9 @@ HL_QUALITY_MEASURE_DEF(jacobian)
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-HL_QUALITY_MEASURE_DEF(maximum_edge_ratio)
+static float maximum_edge_ratio (const Vector3f& p0, const Vector3f& p1, const Vector3f& p2, \
+                                     const Vector3f& p3, const Vector3f& p4, const Vector3f& p5, const Vector3f& p6, \
+                                     const Vector3f& p7, const void* /*arg*/)
 {
     Vector3f X[3];
     float    X_norms[3];
@@ -234,7 +248,9 @@ HL_QUALITY_MEASURE_DEF(maximum_edge_ratio)
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-HL_QUALITY_MEASURE_DEF(maximum_aspect_frobenius)
+static float maximum_aspect_frobenius (const Vector3f& p0, const Vector3f& p1, const Vector3f& p2, \
+                                     const Vector3f& p3, const Vector3f& p4, const Vector3f& p5, const Vector3f& p6, \
+                                     const Vector3f& p7, const void* /*arg*/)
 {
     Vector3f L[12];
     Vector3f X[3];
@@ -254,7 +270,9 @@ HL_QUALITY_MEASURE_DEF(maximum_aspect_frobenius)
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-HL_QUALITY_MEASURE_DEF(mean_aspect_frobenius)
+static float mean_aspect_frobenius (const Vector3f& p0, const Vector3f& p1, const Vector3f& p2, \
+                                     const Vector3f& p3, const Vector3f& p4, const Vector3f& p5, const Vector3f& p6, \
+                                     const Vector3f& p7, const void* /*arg*/)
 {
     Vector3f L[12];
     Vector3f X[3];
@@ -272,7 +290,9 @@ HL_QUALITY_MEASURE_DEF(mean_aspect_frobenius)
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-HL_QUALITY_MEASURE_DEF(oddy)
+static float oddy (const Vector3f& p0, const Vector3f& p1, const Vector3f& p2, \
+                                     const Vector3f& p3, const Vector3f& p4, const Vector3f& p5, const Vector3f& p6, \
+                                     const Vector3f& p7, const void* /*arg*/)
 {
     static float four_over_three = 4.0/3.0;
 
@@ -308,7 +328,9 @@ HL_QUALITY_MEASURE_DEF(oddy)
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-HL_QUALITY_MEASURE_DEF(relative_size_squared)
+static float relative_size_squared (const Vector3f& p0, const Vector3f& p1, const Vector3f& p2, \
+                                     const Vector3f& p3, const Vector3f& p4, const Vector3f& p5, const Vector3f& p6, \
+                                     const Vector3f& p7, const void* arg)
 {
     float avgV = *(float*)arg;
 
@@ -322,7 +344,9 @@ HL_QUALITY_MEASURE_DEF(relative_size_squared)
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-HL_QUALITY_MEASURE_DEF(scaled_jacobian)
+static float scaled_jacobian (const Vector3f& p0, const Vector3f& p1, const Vector3f& p2, \
+                                     const Vector3f& p3, const Vector3f& p4, const Vector3f& p5, const Vector3f& p6, \
+                                     const Vector3f& p7, const void* /*arg*/)
 {
     Vector3f L[12];
     Vector3f X[3];
@@ -342,7 +366,9 @@ HL_QUALITY_MEASURE_DEF(scaled_jacobian)
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-HL_QUALITY_MEASURE_DEF(shape)
+static float shape (const Vector3f& p0, const Vector3f& p1, const Vector3f& p2, \
+                                     const Vector3f& p3, const Vector3f& p4, const Vector3f& p5, const Vector3f& p6, \
+                                     const Vector3f& p7, const void* /*arg*/)
 {
     static float two_over_three = 2.0/3.0;
 
@@ -368,7 +394,9 @@ HL_QUALITY_MEASURE_DEF(shape)
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-HL_QUALITY_MEASURE_DEF(shape_and_size)
+static float shape_and_size (const Vector3f& p0, const Vector3f& p1, const Vector3f& p2, \
+                                     const Vector3f& p3, const Vector3f& p4, const Vector3f& p5, const Vector3f& p6, \
+                                     const Vector3f& p7, const void* arg)
 {
     return relative_size_squared(p0,p1,p2,p3,p4,p5,p6,p7,arg) *
            shape(p0,p1,p2,p3,p4,p5,p6,p7,nullptr);
@@ -376,7 +404,9 @@ HL_QUALITY_MEASURE_DEF(shape_and_size)
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-HL_QUALITY_MEASURE_DEF(shear)
+static float shear (const Vector3f& p0, const Vector3f& p1, const Vector3f& p2, \
+                                     const Vector3f& p3, const Vector3f& p4, const Vector3f& p5, const Vector3f& p6, \
+                                     const Vector3f& p7, const void* /*arg*/)
 {
     Vector3f L[12];
     Vector3f X[3];
@@ -395,7 +425,9 @@ HL_QUALITY_MEASURE_DEF(shear)
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-HL_QUALITY_MEASURE_DEF(shear_and_size)
+static float shear_and_size (const Vector3f& p0, const Vector3f& p1, const Vector3f& p2, \
+                                     const Vector3f& p3, const Vector3f& p4, const Vector3f& p5, const Vector3f& p6, \
+                                     const Vector3f& p7, const void* arg)
 {
     return relative_size_squared(p0,p1,p2,p3,p4,p5,p6,p7,arg) *
            shear(p0,p1,p2,p3,p4,p5,p6,p7,nullptr);
@@ -403,7 +435,9 @@ HL_QUALITY_MEASURE_DEF(shear_and_size)
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-HL_QUALITY_MEASURE_DEF(skew)
+static float skew (const Vector3f& p0, const Vector3f& p1, const Vector3f& p2, \
+                                     const Vector3f& p3, const Vector3f& p4, const Vector3f& p5, const Vector3f& p6, \
+                                     const Vector3f& p7, const void* /*arg*/)
 {
     Vector3f X[3];
     hex_principal_axes(p0, p1, p2, p3, p4, p5, p6, p7, X, true);
@@ -423,7 +457,9 @@ HL_QUALITY_MEASURE_DEF(skew)
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-HL_QUALITY_MEASURE_DEF(stretch)
+static float stretch (const Vector3f& p0, const Vector3f& p1, const Vector3f& p2, \
+                                     const Vector3f& p3, const Vector3f& p4, const Vector3f& p5, const Vector3f& p6, \
+                                     const Vector3f& p7, const void* /*arg*/)
 {
     static float sqrt3 = 1.732050807568877f;
 
@@ -443,7 +479,9 @@ HL_QUALITY_MEASURE_DEF(stretch)
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-HL_QUALITY_MEASURE_DEF(taper)
+static float taper (const Vector3f& p0, const Vector3f& p1, const Vector3f& p2, \
+                                     const Vector3f& p3, const Vector3f& p4, const Vector3f& p5, const Vector3f& p6, \
+                                     const Vector3f& p7, const void* /*arg*/)
 {
     Vector3f X[3];
     Vector3f XX[3];
@@ -470,7 +508,9 @@ HL_QUALITY_MEASURE_DEF(taper)
 
 //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-HL_QUALITY_MEASURE_DEF(volume)
+static float volume (const Vector3f& p0, const Vector3f& p1, const Vector3f& p2, \
+                                     const Vector3f& p3, const Vector3f& p4, const Vector3f& p5, const Vector3f& p6, \
+                                     const Vector3f& p7, const void* /*arg*/)
 {
     Vector3f X[3];
     hex_principal_axes(p0, p1, p2, p3, p4, p5, p6, p7, X, false);

@@ -83,8 +83,8 @@ int main() {
         }
         //break;
     }
-
-    printf ( "%i meshes in a collection of %i papers (%i fails to load)\n", meshCnt, paperArrayJSON.size(), failCnt );
+    
+    printf ( "%i meshes in a collection of %i papers (%i fails to load)\n", meshCnt, int(paperArrayJSON.size()), failCnt );
     printf ( "Range of Meshes\n"
              "   Min %10lu hex (%s) \n"
              "   Max %10lu hex (%s) \n", hexMin, minMeshName.c_str(),hexMax,maxMeshName.c_str());
