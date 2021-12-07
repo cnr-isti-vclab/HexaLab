@@ -18,23 +18,23 @@ HexaLab.BufferGeometry = function (backend) {
 
 Object.assign(HexaLab.BufferGeometry.prototype, {
     update: function () {
-        this.surface.removeAttribute('position')
+        this.surface.deleteAttribute('position')
         const x = this.backend.surface_pos().size()
         if (this.backend.surface_pos().size() != 0) {
             const buffer = new Float32Array(Module.HEAPU8.buffer, this.backend.surface_pos().data(), this.backend.surface_pos().size() * 3)
-            this.surface.addAttribute('position', new THREE.BufferAttribute(buffer, 3))
+            this.surface.setAttribute('position', new THREE.BufferAttribute(buffer, 3))
         }
-        this.surface.removeAttribute('normal')
+        this.surface.deleteAttribute('normal')
         if (this.backend.surface_norm().size() != 0) {
             const buffer = new Float32Array(Module.HEAPU8.buffer, this.backend.surface_norm().data(), this.backend.surface_norm().size() * 3)
-            this.surface.addAttribute('normal', new THREE.BufferAttribute(buffer, 3))
+            this.surface.setAttribute('normal', new THREE.BufferAttribute(buffer, 3))
         } else {
             this.surface.computeVertexNormals()
         }
-        this.surface.removeAttribute('color')
+        this.surface.deleteAttribute('color')
         if (this.backend.surface_color().size() != 0) {
             const buffer = new Float32Array(Module.HEAPU8.buffer, this.backend.surface_color().data(), this.backend.surface_color().size() * 3)
-            this.surface.addAttribute('color', new THREE.BufferAttribute(buffer, 3))
+            this.surface.setAttribute('color', new THREE.BufferAttribute(buffer, 3))
         }
         this.surface.setIndex(null)     // TODO ?
         if (this.backend.surface_ibuffer().size() != 0) {
@@ -48,20 +48,20 @@ Object.assign(HexaLab.BufferGeometry.prototype, {
             this.surface.setIndex(buffer)
         }
 
-        this.wireframe.removeAttribute('position')
+        this.wireframe.deleteAttribute('position')
         if (this.backend.wireframe_pos().size() != 0) {
             const buffer = new Float32Array(Module.HEAPU8.buffer, this.backend.wireframe_pos().data(), this.backend.wireframe_pos().size() * 3)
-            this.wireframe.addAttribute('position', new THREE.BufferAttribute(buffer, 3))
+            this.wireframe.setAttribute('position', new THREE.BufferAttribute(buffer, 3))
         }
-        this.wireframe.removeAttribute('color')
+        this.wireframe.deleteAttribute('color')
         if (this.backend.wireframe_color().size() != 0) {
             const buffer = new Float32Array(Module.HEAPU8.buffer, this.backend.wireframe_color().data(), this.backend.wireframe_color().size() * 3)
-            this.wireframe.addAttribute('color', new THREE.BufferAttribute(buffer, 3))
+            this.wireframe.setAttribute('color', new THREE.BufferAttribute(buffer, 3))
         }
-        this.wireframe.removeAttribute('alpha')
+        this.wireframe.deleteAttribute('alpha')
         if (this.backend.wireframe_alpha().size() != 0) {
             const buffer = new Float32Array(Module.HEAPU8.buffer, this.backend.wireframe_alpha().data(), this.backend.wireframe_alpha().size())
-            this.wireframe.addAttribute('alpha', new THREE.BufferAttribute(buffer, 1))
+            this.wireframe.setAttribute('alpha', new THREE.BufferAttribute(buffer, 1))
         }
     },
 })
@@ -531,7 +531,7 @@ Object.assign(HexaLab.Viewer.prototype, {
             preserveDrawingBuffer: true,    // disable hidden/automatic clear of the rendertarget
             alpha: true,                    // to have an alpha on the rendertarget? (needed for setClearAlpha to work)
         })
-        this.renderer.context.getExtension("EXT_frag_depth")
+        this.renderer.getContext().getExtension("EXT_frag_depth")
         this.renderer.setSize(this.width, this.height)
         this.renderer.autoClear = false
         this.renderer.setClearColor(this.settings.background, 1.0)
@@ -888,9 +888,9 @@ Object.assign(HexaLab.Viewer.prototype, {
         this.fullscreen_quad.material = this.silhouette_alpha_pass.material
 
         this.renderer.setRenderTarget(null)
-        this.renderer.context.colorMask(false, false, false, true)
+        this.renderer.getContext().colorMask(false, false, false, true)
         this.renderer.render(this.scene, this.fullscreen_camera)
-        this.renderer.context.colorMask(true, true, true, true)
+        this.renderer.getContext().colorMask(true, true, true, true)
 
         this.clear_scene()
         this.scene.add(this.renderables.full.surface)
@@ -904,9 +904,9 @@ Object.assign(HexaLab.Viewer.prototype, {
         this.scene.overrideMaterial = this.silhouette_alpha_pass.material
         
         this.renderer.setRenderTarget(null)
-        this.renderer.context.colorMask(false, false, false, true)
+        this.renderer.getContext().colorMask(false, false, false, true)
         this.renderer.render(this.scene, this.scene_camera)
-        this.renderer.context.colorMask(true, true, true, true)
+        this.renderer.getContext().colorMask(true, true, true, true)
 
         this.silhouette_alpha_pass.material.polygonOffset = false
 
@@ -929,9 +929,9 @@ Object.assign(HexaLab.Viewer.prototype, {
         this.fullscreen_quad.material = this.silhouette_alpha_pass.material
 
         this.renderer.setRenderTarget(null)
-        this.renderer.context.colorMask(false, false, false, true)
+        this.renderer.getContext().colorMask(false, false, false, true)
         this.renderer.render(this.scene, this.fullscreen_camera)
-        this.renderer.context.colorMask(true, true, true, true)
+        this.renderer.getContext().colorMask(true, true, true, true)
 
         this.clear_scene()
     },
@@ -1184,11 +1184,11 @@ Object.assign(HexaLab.Viewer.prototype, {
                 new_color[i * 3 + 2] = color.array[i * 3 + 2] * (gpu_data[i * 4 + 2] - 1) / scale
             }
             
-            this.buffers.visible.surface.removeAttribute('color')
-            this.buffers.visible.surface.addAttribute('color', new THREE.BufferAttribute(new_color, 3))
+            this.buffers.visible.surface.deleteAttribute('color')
+            this.buffers.visible.surface.setAttribute('color', new THREE.BufferAttribute(new_color, 3))
         } else {
-            this.buffers.visible.surface.removeAttribute('color')
-            this.buffers.visible.surface.addAttribute('color', this.ao_pass.original_color)
+            this.buffers.visible.surface.deleteAttribute('color')
+            this.buffers.visible.surface.setAttribute('color', this.ao_pass.original_color)
         }
     },
 
