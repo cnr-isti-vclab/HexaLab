@@ -403,13 +403,13 @@ HexaLab.Viewer = function (canvas_width, canvas_height) {
             fragmentShader: THREE.SSAOEval.fragmentShader,
             uniforms: {
                 tDepth: { value: this.depth_pass.target.texture },
+                tNoise: { value: noise_tex },
                 tNormals: { value: this.normal_pass.target.texture },
+                uKernel: { value: kernel },
                 uRadius: { value: 0.1 },
                 uSize: { value: new THREE.Vector2(this.width, this.height) },
-                uNear: { value: 0.1 },
-                uFar: { value: 1000 },
-                uKernel: { value: kernel },
-                tNoise: { value: noise_tex }
+                uProj: { value: new THREE.Matrix4() },
+                uInvProj: { value: new THREE.Matrix4() }
             },
             defines: {
                 numSamples: 16,
@@ -434,7 +434,9 @@ HexaLab.Viewer = function (canvas_width, canvas_height) {
                 tDepth: { value: this.depth_pass.target.texture },
                 tNormals: { value: this.normal_pass.target.texture },
                 uSize: { value: new THREE.Vector2(this.width, this.height) },
-                depthThreshold: { value: 0.001 }
+                depthThreshold: { value: 0.001 },
+                uProj: { value: new THREE.Matrix4() },
+                uInvProj: { value: new THREE.Matrix4() }
             },
             blending: THREE.CustomBlending,
             blendEquation: THREE.AddEquation,
@@ -680,7 +682,9 @@ Object.assign(HexaLab.Viewer.prototype, {
             depthBuffer: false
         })
         // clear render target to 0,0,0,1
-        const prev_clear_color = this.renderer.getClearColor().clone()
+        //const prev_clear_color = this.renderer.getClearColor().clone()
+        let prev_clear_color = new THREE.Color()
+        this.renderer.getClearColor(prev_clear_color)
         const prev_clear_alpha = this.renderer.getClearAlpha()
         this.renderer.setClearColor(0x000000, 1.0)
         this.renderer.setRenderTarget(tTarget)
@@ -1005,9 +1009,12 @@ Object.assign(HexaLab.Viewer.prototype, {
         this.scene.position.set(0, 0, 0)
 
         // update uniforms, bind material
-        this.ssao_pass.material.uniforms.uProj    = { value: this.scene_camera.projectionMatrix }
-        this.ssao_pass.material.uniforms.uInvProj = { value: new THREE.Matrix4().getInverse(this.scene_camera.projectionMatrix) }
-        this.blur_pass.material.uniforms.uInvProj = { value: new THREE.Matrix4().getInverse(this.scene_camera.projectionMatrix) }
+        this.ssao_pass.material.uniforms.uProj    = { value: new THREE.Matrix4().copy(this.scene_camera.projectionMatrix ) }
+        this.ssao_pass.material.uniforms.uInvProj = { value: new THREE.Matrix4().copy(this.scene_camera.projectionMatrix).invert() }
+        this.blur_pass.material.uniforms.uInvProj = { value: new THREE.Matrix4().copy(this.scene_camera.projectionMatrix).invert() }
+        //this.ssao_pass.material.uniforms.uProj    = { value: this.scene_camera.projectionMatrix }
+        //this.ssao_pass.material.uniforms.uInvProj = { value: new THREE.Matrix4().getInverse(this.scene_camera.projectionMatrix) }
+        //this.blur_pass.material.uniforms.uInvProj = { value: new THREE.Matrix4().getInverse(this.scene_camera.projectionMatrix) }
         this.fullscreen_quad.material             = this.ssao_pass.material
         
         // draw
@@ -1036,7 +1043,8 @@ Object.assign(HexaLab.Viewer.prototype, {
         this.scene.position.set(this.mesh_offset.x, this.mesh_offset.y, this.mesh_offset.z)
 
         // clear target to max depth
-        const prev_clear_color = this.renderer.getClearColor().clone()
+        let prev_clear_color = new THREE.Color()
+        this.renderer.getClearColor(prev_clear_color)
         const prev_clear_alpha = this.renderer.getClearAlpha()
         this.renderer.setClearColor(new THREE.Color(0, 0, -100000), 1.0)
         this.renderer.setRenderTarget(this.viewpos_pass.target)
@@ -1066,7 +1074,8 @@ Object.assign(HexaLab.Viewer.prototype, {
         this.ao_pass.material.uniforms.uCamPos.value    = light_cam.position
         this.ao_pass.material.uniforms.uProj.value      = light_cam.projectionMatrix
         this.ao_pass.material.uniforms.tDepth           = { value: this.viewpos_pass.target.texture }
-        this.ao_pass.material.uniforms.uInvProj         =  { value: new THREE.Matrix4().getInverse(light_cam.projectionMatrix) }
+        this.ao_pass.material.uniforms.uInvProj         = new THREE.Matrix4().copy(light_cam.projectionMatrix).invert()
+        //this.ao_pass.material.uniforms.uInvProj         =  { value: new THREE.Matrix4().getInverse(light_cam.projectionMatrix) }
         this.ao_pass.material.uniforms.uModel.value     = new THREE.Matrix4().makeTranslation(
             this.mesh_offset.x, 
             this.mesh_offset.y, 
@@ -1193,7 +1202,7 @@ Object.assign(HexaLab.Viewer.prototype, {
     },
 
     step_osao: function () {
-        if (this.ao_pass.progress.view_i < this.ao_pass.views.length) {
+        if (this.ao_pass.progress == null || (this.ao_pass.progress.view_i < this.ao_pass.views.length)) {
             this.prepare_osao_step()
             this.compute_osao_step()   
         }
