@@ -1,5 +1,5 @@
 # Datasets
-This folder contains a collection of 599 hexahedral meshes that have been presented in 21 papers and made available by the respective authors. All the datasets are copyrighted by their authors. For any use different from displaying them inside HexaLab you should contact the authors.
+This folder contains a collection of 815 hexahedral meshes that have been presented in 23 papers and made available by the respective authors. All the datasets are copyrighted by their authors. For any use different from displaying them inside HexaLab you should contact the authors.
 Current datasets come from the following papers:
 
 - [All-Hex Mesh Generation via Volumetric PolyCube Deformation (2011)](https://doi.org/10.1111/j.1467-8659.2011.02015.x)
@@ -23,6 +23,8 @@ Current datasets come from the following papers:
 - [Feature Preserving Octree-Based Hexahedral Meshing (2019)](https://gaoxifeng.github.io/)
 - [LoopyCuts: Practical Feature-Preserving Block Decomposition for Strongly Hex-Dominant Meshing (2020)](https://github.com/mlivesu/LoopyCuts)
 - [Cut-enhanced PolyCube-Maps for Feature-aware All-Hex Meshing (2020)](https://guohaoxiang.github.io/projects/ce_polycube.html)
+- [Generalized Adaptive Refinement for Grid-based Hexahedral Meshing (2021)](https://doi.org/10.1145/3478513.3480508)
+- [At-Most-Hexa Meshes](https://doi.org/10.1111/cgf.14393)
 
 ## How to contribute
 We really welcome datasets from existing papers, and we are collecting the ones we find available on the web. If you have some models related to a published paper you have two ways to contribute:

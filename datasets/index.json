@@ -1128,7 +1128,7 @@
             "year": "2021",
             "PDF": "https://uni-tuebingen.de/fileadmin/Uni_Tuebingen/Fakultaeten/InfoKogni/WSI/ComGraph/publications/2021/CGF21_atMostHexa/AtMostHexaMeshes.pdf",
             "web": "https://uni-tuebingen.de/fakultaeten/mathematisch-naturwissenschaftliche-fakultaet/fachbereiche/informatik/lehrstuehle/computergrafik/lehrstuhl/veroeffentlichungen/publications-since-2012/at-most-hexa-meshes/",
-            "DOI": "10.1111/cgf.14393"
+            "DOI": "https://doi.org/10.1111/cgf.14393"
         },
         "path": "2021 - At-Most-Hexa Meshes",
         "label": "2021 - At-Most-Hexa Meshes",
