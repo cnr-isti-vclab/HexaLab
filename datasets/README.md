@@ -24,7 +24,7 @@ Current datasets come from the following papers:
 - [LoopyCuts: Practical Feature-Preserving Block Decomposition for Strongly Hex-Dominant Meshing (2020)](https://github.com/mlivesu/LoopyCuts)
 - [Cut-enhanced PolyCube-Maps for Feature-aware All-Hex Meshing (2020)](https://guohaoxiang.github.io/projects/ce_polycube.html)
 - [Generalized Adaptive Refinement for Grid-based Hexahedral Meshing (2021)](https://doi.org/10.1145/3478513.3480508)
-- [At-Most-Hexa Meshes](https://doi.org/10.1111/cgf.14393)
+- [At-Most-Hexa Meshes (2021)](https://doi.org/10.1111/cgf.14393)
 
 ## How to contribute
 We really welcome datasets from existing papers, and we are collecting the ones we find available on the web. If you have some models related to a published paper you have two ways to contribute:
