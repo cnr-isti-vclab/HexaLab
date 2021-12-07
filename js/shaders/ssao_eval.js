@@ -92,15 +92,15 @@ THREE.SSAOEval = {
 			"float occlusion = 0.0;",
 			"if (screenPos.z < 1.0) {",	// remove darkened background
 				"for (int i = 0; i < numSamples; ++i) {",
-					"vec3 sample = rotationMatrix * uKernel[i] * uRadius + viewPos;",
-					"vec4 sampleNDC = (uProj * vec4(sample, 1.0));",
+					"vec3 sampleBase = rotationMatrix * uKernel[i] * uRadius + viewPos;",
+					"vec4 sampleNDC = (uProj * vec4(sampleBase, 1.0));",
 					"sampleNDC.xyz /= sampleNDC.w;",
 					"vec2 sampleUV = sampleNDC.xy * 0.5 + 0.5 ;",
 					"vec3 sampleScreen = getScreenPos(sampleUV);",
 					"vec3 sampleView = getViewPos(sampleScreen);",
 
 					"float rangeCheck = smoothstep(0.0, 1.0, uRadius / abs(viewPos.z - sampleView.z));",
-					"occlusion += (sampleView.z > sample.z ? 1.0 : 0.0) * rangeCheck;",
+					"occlusion += (sampleView.z > sampleBase.z ? 1.0 : 0.0) * rangeCheck;",
 				"}",
 			"}",
 
