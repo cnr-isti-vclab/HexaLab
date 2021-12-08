@@ -878,6 +878,8 @@ Object.assign(HexaLab.Viewer.prototype, {
 
         // screen render target
         this.renderer.setSize(width, height)
+
+        controls.handleResize();
     },
 
     // TODO ?
@@ -1224,7 +1226,7 @@ Object.assign(HexaLab.Viewer.prototype, {
     },
 
     update_canvas: function () {
-        if (!this.dirty_canvas) return
+       // if (!this.dirty_canvas) return
 
         this.clear_canvas()
 
@@ -1246,6 +1248,9 @@ Object.assign(HexaLab.Viewer.prototype, {
         this.draw_hud()
 
         this.dirty_canvas = false
+
+        // This is needed just to leave a pickable surface in the scene
+        this.scene.add(this.renderables.visible.surface)
     },
 
     update: function () {
@@ -1289,25 +1294,35 @@ HexaLab.App = function (dom_element) {
     this.canvas.container.appendChild(this.canvas.element)
 
     this.dirty_canvas = true
-    this.controls = new THREE.TrackballControls(this.viewer.get_scene_camera(), dom_element)
-    HexaLab.controls.on_mouse_down = function () {
-        self.mouse_is_down = true
-    }
-    HexaLab.controls.on_mouse_move = function () {
-        if (self.mouse_is_down) {
-            self.viewer.show_axes(true)
-            self.queue_canvas_update()
-			self.filters[0].on_change_view();
-        }
-    }
-    HexaLab.controls.on_mouse_wheel = function () {
-        self.queue_canvas_update()
-    }
-    HexaLab.controls.on_mouse_up = function () {
-        self.mouse_is_down = false
-        self.viewer.show_axes(false)
-		self.queue_canvas_update()
-    }
+    //this.controls = new THREE.TrackballControls(this.viewer.get_scene_camera(), dom_element)
+    this.controls = new THREE.ArcballControls(this.viewer.get_scene_camera(), dom_element, this.viewer.scene)
+    this.controls.setMouseAction('PAN',1)
+    this.controls.dampingFactor = 50
+    this.controls.wMax = 10
+    this.controls.activateGizmos(true)
+    this.controls.adjustNearFar = true
+    this.controls.enableGizmos = true
+    this.controls.useClipboard = false
+
+    //this.controls.
+    // HexaLab.controls.on_mouse_down = function () {
+    //     self.mouse_is_down = true
+    // }
+    // HexaLab.controls.on_mouse_move = function () {
+    //     if (self.mouse_is_down) {
+    //         self.viewer.show_axes(true)
+    //         self.queue_canvas_update()
+	// 		self.filters[0].on_change_view();
+    //     }
+    // }
+    // HexaLab.controls.on_mouse_wheel = function () {
+    //     self.queue_canvas_update()
+    // }
+    // HexaLab.controls.on_mouse_up = function () {
+    //     self.mouse_is_down = false
+    //     self.viewer.show_axes(false)
+	// 	self.queue_canvas_update()
+    // }
 
     // App
     this.default_app_settings = {
@@ -1567,6 +1582,7 @@ Object.assign(HexaLab.App.prototype, {
         this.viewer.resize(width, height)
         log('Frame resized to ' + width + 'x' + height)
 		this.queue_canvas_update()
+        this.controls.handleResize()
     },
 
     get_canvas_size: function () {
@@ -1924,7 +1940,7 @@ Object.assign(HexaLab.App.prototype, {
     // The application main loop. Call this after instancing an App object to start rendering.
     animate: function () {
         if (this.screen_rendering) {
-            this.controls.update()
+            // this.controls.update()
             this.viewer.update()
         }
 
@@ -1935,6 +1951,8 @@ Object.assign(HexaLab.App.prototype, {
 
         // queue next frame
         requestAnimationFrame(this.animate.bind(this))
+        this.controls.update()
+        this.viewer.update()
     },
 
     enable_screen_rendering: function (enabled) {
