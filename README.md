@@ -16,10 +16,12 @@ Live view on [www.hexalab.net](http://www.hexalab.net)
 
 HexaLab is a WebGL application for real time visualization, exploration and assessment of hexahedral meshes. HexaLab can be used by simply opening www.hexalab.net. This visualization tool targets both users and scholars. Practitioners who employ hexmeshes for Finite Element Analysis, can readily check mesh quality and assess its usability for simulation. Researchers involved in mesh generation may use HexaLab to perform a detailed analysis of the mesh structure, isolating weak points and testing new solutions to improve on the state of the art and generate high quality images. To this end, we support a wide variety of visualization and volume inspection tools. The system also offers immediate access to a repository containing all the publicly available meshes produced with the most recent techniques for hex mesh generation. We believe HexaLab, providing a common tool for visualizing, assessing and distributing results, will push forward the recent strive for replicability in our scientific community. The system supports hexahedral models in the popular `.mesh` and `.vtk` ASCII formats. 
 
+Hexalab was awarded with the [2021 Symposium on Geometry Processing Dataset Award](http://awards.geometryprocessing.org/)
+
 HexaLab aims also to easily present the results of recent papers on hex meshing by directly including them in its own repository when provided by the authors. The datasets presented are copyrighted by the respective paper authors. Look in the [`datasets`](https://github.com/cnr-isti-vclab/HexaLab/tree/master/datasets#readme) folder for more info.
 
 ### Release Notes
-- **2021.12** added two 2021 datasets, ("Generalized Adaptive Refinement.." and "At-Most-Hexa Meshes"), updated Threejs to r101
+- **2021.12** added three 2021 datasets, ("Generalized Adaptive Refinement..", "At-Most-Hexa Meshes" and "Interactive All-Hex Meshing..."), updated Threejs to r135
 - **2021.05** added "Cut-enhanced PolyCube-Maps for Feature-aware..."
 - **2020.10** Complete rewrote of the core data structures. Now it is much faster and it uses a fraction of memory. 
 All datasets, even the ones composed by more than 600k cells, can be loaded. 

@@ -905,7 +905,7 @@
     ,{
         "paper": {
             "title": "Generalized Adaptive Refinement for Grid-based Hexahedral Meshing",
-            "venue": "ACM Transactions on Graphics (SIGGRAPH Asia 2021)",
+            "venue": "ACM Transactions on Graphics, Volume 40, Issue 6, December 2021 (SIGGRAPH Asia 2021)",
             "authors": "Luca Pitzalis, Marco Livesu, Gianmarco Cherchi, Enrico Gobbetti, Riccardo Scateni",
             "year": "2021",
             "PDF": "https://pizza1994.github.io/pdf/gen_adapt_grid_hexmeshing.pdf",
@@ -1150,5 +1150,35 @@
 
         ]
     }
+    , {
+        "paper": {
+            "title": "Interactive All-Hex Meshing via Cuboid Decomposition",
+            "venue": "ACM Transactions on Graphics, Volume 40, Issue 6, December 2021 (SIGGRAPH Asia 2021)",
+            "authors": "Lingxiao Li, Paul Zhang, Dmitriy Smirnov, S. Mazdak Abulnaga, Justin Solomon",
+            "year": "2021",
+            "PDF": "https://dl.acm.org/doi/pdf/10.1145/3478513.3480568",
+            "web": "https://github.com/lingxiaoli94/interactive-hex-meshing",
+            "DOI": "https://doi.org/10.1145/3478513.3480568"
+        },
+        "path": "2021 - Interactive All-Hex Meshing via Cuboid Decomposition",
+        "label": "2021 - Interactive All-Hex Meshing via Cuboid Decomposition",
+        "data": [
+            "armadillo.mesh",
+            "bimba.mesh",
+            "bunny.mesh",
+            "buste.mesh",
+            "dancing_children.mesh",
+            "dilo.mesh",
+            "dragon.mesh",
+            "fandisk.mesh",
+            "hanger.mesh",
+            "joint.mesh",
+            "kitten.mesh",
+            "lock.mesh",
+            "rocker_arm.mesh",
+            "sculpt.mesh"
+        ]
+    }
+   
                ]
 }
