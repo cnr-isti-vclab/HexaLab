@@ -1,0 +1,13 @@
+# vtk DataFile Version 2.0 
+Created by AlgoHex
+ASCII
+DATASET UNSTRUCTURED_GRID
+POINTS 0 double
+
+CELLS 0 0
+
+CELL_TYPES 0
+
+CELL_DATA 0
+SCALARS CellEntityIds int 1
+LOOKUP_TABLE default
