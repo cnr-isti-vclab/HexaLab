@@ -24,7 +24,9 @@ Current datasets come from the following papers:
 - [LoopyCuts: Practical Feature-Preserving Block Decomposition for Strongly Hex-Dominant Meshing (2020)](https://github.com/mlivesu/LoopyCuts)
 - [Cut-enhanced PolyCube-Maps for Feature-aware All-Hex Meshing (2020)](https://guohaoxiang.github.io/projects/ce_polycube.html)
 - [Generalized Adaptive Refinement for Grid-based Hexahedral Meshing (2021)](https://doi.org/10.1145/3478513.3480508)
-- [Interactive All-Hex Meshing via Cuboid Decomposition](https://doi.org/10.1145/3478513.3480568)
+- [Interactive All-Hex Meshing via Cuboid Decomposition](https://doi.org/10.1145/3478513.3480568) (2021)
+- [Hex Me If You Can](https://doi.org/10.1111/cgf.14608) (2022)
+
 ## How to contribute
 We really welcome datasets from existing papers, and we are collecting the ones we find available on the web. If you have some models related to a published paper you have two ways to contribute:
 1) raise an [issue](https://github.com/cnr-isti-vclab/HexaLab/issues) asking for a dataset/paper to be included providing doi of the paper and the link to the dataset;
