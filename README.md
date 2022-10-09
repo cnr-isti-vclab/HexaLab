@@ -21,6 +21,7 @@ Hexalab was awarded with the [2021 Symposium on Geometry Processing Dataset Awar
 HexaLab aims also to easily present the results of recent papers on hex meshing by directly including them in its own repository when provided by the authors. The datasets presented are copyrighted by the respective paper authors. Look in the [`datasets`](https://github.com/cnr-isti-vclab/HexaLab/tree/master/datasets#readme) folder for more info.
 
 ### Release Notes
+- **2022.10** added "Hex Me If You Can"
 - **2021.12** added three 2021 datasets, ("Generalized Adaptive Refinement..", "At-Most-Hexa Meshes" and "Interactive All-Hex Meshing..."), updated Threejs to r135
 - **2021.05** added "Cut-enhanced PolyCube-Maps for Feature-aware..."
 - **2020.10** Complete rewrote of the core data structures. Now it is much faster and it uses a fraction of memory. 
