@@ -270,7 +270,7 @@ HexaLab.UI.mesh.quality_type.element = $('<select id="quality_type" title="Choos
 
 // Load the datasets index js file
 $.ajax({
-    url: 'datasets/index.json',
+    url: 'datasets/index_clean.json',
     dataType: 'json'
 }).done(function(data) {
     HexaLab.UI.datasets_index = data
@@ -667,7 +667,7 @@ HexaLab.UI.show_mesh_dropdown_list = function () {
         let is_mesh_selected = displayed_mesh_idx == i && selected_dataset == displayed_dataset
         mesh_list.append($('<option>', {
             value: i,
-            text : name,
+            text : name + "      \t(" + selected_dataset.datasize[i]+" 🧊)",
             style: 'font-style: normal;',
             selected: is_mesh_selected
         }));
