@@ -151,12 +151,12 @@ HexaLab.Viewer = function (canvas_width, canvas_height) {
     // Materials
     this.materials = []
     this.materials.visible_surface      = new THREE.MeshBasicMaterial({
-        vertexColors:                   THREE.VertexColors,
+        vertexColors:                   true,
         polygonOffset:                  true,
         polygonOffsetFactor:            0.5,
     })
     this.materials.visible_surface_diffuse      = new THREE.MeshLambertMaterial({
-        vertexColors:                   THREE.VertexColors,
+        vertexColors:                   true,
         polygonOffset:                  true,
         polygonOffsetFactor:            0.5,
         emissive:                       new THREE.Color( 0x303030 ),
@@ -164,7 +164,7 @@ HexaLab.Viewer = function (canvas_width, canvas_height) {
     this.materials.visible_wireframe    = new THREE.ShaderMaterial({
         vertexShader:                   THREE.AlphaWireframeMaterial.vertexShader,
         fragmentShader:                 THREE.AlphaWireframeMaterial.fragmentShader,
-        vertexColors:                   THREE.VertexColors,
+        vertexColors:                   true,
         transparent:                    true,
         depthWrite:                     false,
         uniforms: {
@@ -183,7 +183,7 @@ HexaLab.Viewer = function (canvas_width, canvas_height) {
         depthWrite:                     false,
     })
     this.materials.singularity_surface  = new THREE.MeshBasicMaterial({
-        vertexColors:                   THREE.VertexColors,
+        vertexColors:                   true,
         // transparent:                    true,
         polygonOffset:                  true,
         polygonOffsetFactor:            1.5,
@@ -191,24 +191,24 @@ HexaLab.Viewer = function (canvas_width, canvas_height) {
         side:                           THREE.DoubleSide,
     })
     this.materials.singularity_wireframe = new THREE.LineBasicMaterial({
-        vertexColors:                   THREE.VertexColors,
+        vertexColors:                   true,
         transparent:                    true,
         depthWrite:                     false,
         // polygonOffset:                  true,
         // polygonOffsetFactor:            -1.5,
     })
     this.materials.singularity_line_wireframe = new THREE.LineBasicMaterial({
-        vertexColors:                   THREE.VertexColors,
+        vertexColors:                   true,
         transparent:                    true,
         depthWrite:                     false,
     })
     this.materials.singularity_spined_wireframe = new THREE.LineBasicMaterial({
-        vertexColors:                   THREE.VertexColors,
+        vertexColors:                   true,
         transparent:                    true,
         depthWrite:                     false,
     })
     this.materials.singularity_hidden_surface  = new THREE.MeshBasicMaterial({
-        vertexColors:                   THREE.VertexColors,
+        vertexColors:                   true,
         transparent:                    true,
         //polygonOffset:                  true,
         //polygonOffsetFactor:            -1.0,
@@ -216,19 +216,19 @@ HexaLab.Viewer = function (canvas_width, canvas_height) {
         depthTest:                      false,
     })
     this.materials.singularity_hidden_wireframe = new THREE.LineBasicMaterial({
-        vertexColors:                   THREE.VertexColors,
+        vertexColors:                   true,
         transparent:                    true,
         depthWrite:                     false,
         depthTest:                      false,
     })
     this.materials.singularity_hidden_line_wireframe = new THREE.LineBasicMaterial({
-        vertexColors:                   THREE.VertexColors,
+        vertexColors:                   true,
         transparent:                    true,
         depthWrite:                     false,
         depthTest:                      false,
     })
     this.materials.singularity_hidden_spined_wireframe = new THREE.LineBasicMaterial({
-        vertexColors:                   THREE.VertexColors,
+        vertexColors:                   true,
         transparent:                    true,
         depthWrite:                     false,
         depthTest:                      false,
@@ -295,7 +295,7 @@ HexaLab.Viewer = function (canvas_width, canvas_height) {
     // RENDER PASSES/MATERIALS SETUP
 
     this.fullscreen_camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1)
-    this.fullscreen_quad   = new THREE.Mesh(new THREE.PlaneBufferGeometry(2, 2), null)
+    this.fullscreen_quad   = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), null)
 
     // Used for silhouette drawing
     this.silhouette_alpha_pass = {
@@ -360,7 +360,7 @@ HexaLab.Viewer = function (canvas_width, canvas_height) {
         noise[i + 1] = v.y
         noise[i + 2] = v.z
     }
-    var noise_tex = new THREE.DataTexture(noise, noise_size, noise_size, THREE.RGBFormat, THREE.FloatType,
+    var noise_tex = new THREE.DataTexture(noise, noise_size, noise_size, THREE.RGBAFormat, THREE.FloatType,
         THREE.UVMapping, THREE.RepeatWrapping, THREE.RepeatWrapping, THREE.NearestFilter, THREE.NearestFilter)
     noise_tex.needsUpdate = true
 
@@ -416,7 +416,7 @@ HexaLab.Viewer = function (canvas_width, canvas_height) {
             }
         }),
         target: new THREE.WebGLRenderTarget(this.width, this.height, {
-            format: THREE.RGBFormat,
+            format: THREE.RGBAFormat,
             minFilter: THREE.NearestFilter,
             magFilter: THREE.NearestFilter,
             stencilBuffer: false,

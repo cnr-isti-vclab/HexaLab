@@ -14,6 +14,7 @@ bool Loader::load(const string& path, vector<Vector3f>& vertices, vector<Index>&
 
 void cleanWinLine(std::string & str){
     if (!str.empty() && *str.rbegin()=='\r') str.erase(str.length()-1,1);
+    while(str.back() == ' ') str.pop_back();
 }
 
 bool Loader::load_MESH(const string& path, vector<Vector3f>& vertices, vector<Index>& indices)
