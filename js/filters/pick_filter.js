@@ -247,16 +247,22 @@ HexaLab.PickFilter.prototype = Object.assign(Object.create(HexaLab.Filter.protot
         if (canvas_rect.top  > client_y || canvas_rect.bottom  < client_y) return
         // get projection matrix
         const proj_m         = HexaLab.app.camera().projectionMatrix
-        const inv_proj_m     = new THREE.Matrix4().getInverse(proj_m)
+        //const inv_proj_m     = new THREE.Matrix4().getInverse(proj_m)
+        const inv_proj_m     = HexaLab.app.camera().projectionMatrixInverse
         const view_m         = HexaLab.app.camera().matrixWorldInverse
         const view_rot_m     = new THREE.Matrix3().set( 
             view_m.elements[0],view_m.elements[1],view_m.elements[2], 
             view_m.elements[4],view_m.elements[5],view_m.elements[6], 
             view_m.elements[8],view_m.elements[9],view_m.elements[10] )
-        const inv_view_m     = new THREE.Matrix4().getInverse(view_m)
-        const inv_view_rot_m = new THREE.Matrix3().getInverse(view_rot_m)
+        //const inv_view_m     = new THREE.Matrix4().getInverse(view_m)
+        const inv_view_m = HexaLab.app.camera().matrixWorld
+        //const inv_view_rot_m = new THREE.Matrix3().getInverse(view_rot_m)
+        const inv_view_rot_m = new THREE.Matrix3(view_rot_m)
+        view_rot_m.invert()
         const world_m        = HexaLab.app.viewer.get_models_transform()
-        const inv_world_m    = new THREE.Matrix4().getInverse(world_m)
+        //const inv_world_m    = new THREE.Matrix4().getInverse(world_m)
+        const inv_world_m    = new THREE.Matrix4(world_m)
+        inv_world_m.invert()
 
         const viewport_x = client_x - canvas_rect.left 
         const viewport_y = client_y - canvas_rect.top 
