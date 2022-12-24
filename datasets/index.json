@@ -1350,6 +1350,33 @@
             "s17u_sphere.vtk"
         ]
     }  
+    , {
+        "paper": {
+            "title": "Evocube: a Genetic Labeling Framework for Polycube-Maps",
+            "venue": "Computer Graphics Forum (2022)",
+            "authors": "Corentin Dumery, François Protais, Sébastien Mestrallet, Christophe Bourcier, Franck Ledoux",
+            "year": "2022",
+            "PDF": "https://arxiv.org/pdf/2205.00738.pdf",
+            "web": "https://corentindumery.github.io/projects/evocube.html",
+            "DOI": "https://doi.org/10.1111/cgf.14649"
+        },
+        "path": "2022 - Evocube - a Genetic Labeling Framework for Polycube-Maps",
+        "label": "2022 - Evocube: a Genetic Labeling Framework for Polycube-Maps",
+        "data": [
+            "B16.mesh",
+            "B38.mesh",
+            "B49.mesh",
+            "B51.mesh",
+            "B76.mesh",
+            "S22.mesh",
+            "S26.mesh",
+            "cami1.mesh",
+            "moai.mesh",
+            "pinion_1.mesh",
+            "rocker.mesh",
+            "venus.mesh"
+        ]
+    }
    
                ]
 }
