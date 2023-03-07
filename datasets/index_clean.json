@@ -2394,6 +2394,47 @@
                 "year": "2022"
             },
             "path": "2022 - Hex Me If You Can"
+        },
+        {
+            "data": [
+                "B16.mesh",
+                "B38.mesh",
+                "B49.mesh",
+                "B51.mesh",
+                "B76.mesh",
+                "S22.mesh",
+                "S26.mesh",
+                "cami1.mesh",
+                "moai.mesh",
+                "pinion_1.mesh",
+                "rocker.mesh",
+                "venus.mesh"
+            ],
+            "datasize": [
+                10108,
+                9180,
+                49412,
+                20110,
+                7890,
+                23116,
+                21288,
+                3004,
+                18552,
+                4827,
+                60442,
+                48592
+            ],
+            "label": "2022 - Evocube: a Genetic Labeling Framework for Polycube-Maps",
+            "paper": {
+                "DOI": "https://doi.org/10.1111/cgf.14649",
+                "PDF": "https://arxiv.org/pdf/2205.00738.pdf",
+                "authors": "Corentin Dumery, François Protais, Sébastien Mestrallet, Christophe Bourcier, Franck Ledoux",
+                "title": "Evocube: a Genetic Labeling Framework for Polycube-Maps",
+                "venue": "Computer Graphics Forum (2022)",
+                "web": "https://corentindumery.github.io/projects/evocube.html",
+                "year": "2022"
+            },
+            "path": "2022 - Evocube - a Genetic Labeling Framework for Polycube-Maps"
         }
     ]
 }
