@@ -125,6 +125,14 @@ bool Loader::load_MESH(const string& path, vector<Vector3f>& vertices, vector<In
                 Index c;
                 HL_ASSERT_LOG(stream >> c, "ERROR: malformed mesh file. Unexpected corner format.\n");
             }
+        } else if (header.compare("Ridges") == 0) {
+            int ridge_count;
+            HL_ASSERT_LOG(stream >> ridge_count, "ERROR: malformed mesh file. Unexpected tag after Corner tag.\n");
+            HL_LOG("[Loader] Reading %d Ridges... (ignored)\n ", ridge_count);
+            for (int i = 0; i < ridge_count; ++i) {
+                Index c;
+                HL_ASSERT_LOG(stream >> c, "ERROR: malformed mesh file. Unexpected corner format.\n");
+            }
         } else if (header.compare("End") == 0) {
             break;
         } else if (header[0]=='#')  {
