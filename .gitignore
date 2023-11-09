@@ -13,5 +13,5 @@ src/test/*
 src/.qmake.stash
 build-*/
 emcc.bat
-
+src/HexaLabTest/build
 /nbproject
