@@ -1377,7 +1377,7 @@
             "venus.mesh"
         ]
     }
-    {
+    ,{
         "data": [
             "Block.mesh",
             "Cactus.mesh",
@@ -1402,15 +1402,15 @@
             "hole.mesh",
             "Hollow-sphere.mesh",
             "Indorelax.mesh",
-            "Knob.mesh"
-            "Rocket.mesh"
-            "SGP.mesh"
-            "Tic-tac-toe.mesh"
-            "Torus.mesh"
-            "twisting.mesh"
-            "val3.mesh"
-            "val5.mesh"
-            "val11.mesh"
+            "Knob.mesh",
+            "Rocket.mesh",
+            "SGP.mesh",
+            "Tic-tac-toe.mesh",
+            "Torus.mesh",
+            "twisting.mesh",
+            "val3.mesh",
+            "val5.mesh",
+            "val11.mesh",
             "Vertebra.mesh"
         ],
         "datasize": [

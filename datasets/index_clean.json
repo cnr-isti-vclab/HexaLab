@@ -2435,7 +2435,7 @@
                 "year": "2022"
             },
             "path": "2022 - Evocube - a Genetic Labeling Framework for Polycube-Maps"
-        }
+        },
         {
             "data": [
                 "Block.mesh",
@@ -2461,15 +2461,15 @@
                 "hole.mesh",
                 "Hollow-sphere.mesh",
                 "Indorelax.mesh",
-                "Knob.mesh"
-                "Rocket.mesh"
-                "SGP.mesh"
-                "Tic-tac-toe.mesh"
-                "Torus.mesh"
-                "twisting.mesh"
-                "val3.mesh"
-                "val5.mesh"
-                "val11.mesh"
+                "Knob.mesh",
+                "Rocket.mesh",
+                "SGP.mesh",
+                "Tic-tac-toe.mesh",
+                "Torus.mesh",
+                "twisting.mesh",
+                "val3.mesh",
+                "val5.mesh",
+                "val11.mesh",
                 "Vertebra.mesh"
             ],
             "datasize": [
