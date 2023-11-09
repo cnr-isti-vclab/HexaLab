@@ -1,5 +1,5 @@
 # Datasets
-This folder contains a collection of 997 hexahedral meshes that have been presented in 26 papers and made available by the respective authors. All the datasets are copyrighted by their authors. For any use different from displaying them inside HexaLab you should contact the authors.
+This folder contains a collection of 1030 hexahedral meshes that have been presented in 27 papers and made available by the respective authors. All the datasets are copyrighted by their authors. For any use different from displaying them inside HexaLab you should contact the authors.
 Current datasets come from the following papers:
 
 - [All-Hex Mesh Generation via Volumetric PolyCube Deformation (2011)](https://doi.org/10.1111/j.1467-8659.2011.02015.x)
@@ -26,7 +26,8 @@ Current datasets come from the following papers:
 - [Generalized Adaptive Refinement for Grid-based Hexahedral Meshing (2021)](https://doi.org/10.1145/3478513.3480508)
 - [Interactive All-Hex Meshing via Cuboid Decomposition (2021)](https://doi.org/10.1145/3478513.3480568) 
 - [Hex Me If You Can (2022)](https://doi.org/10.1111/cgf.14608) 
-- [Evocube: A Genetic Labelling Framework for Polycube-Maps](https://doi.org/10.1111/cgf.14649) 
+- [Evocube: A Genetic Labelling Framework for Polycube-Maps (2022)](https://doi.org/10.1111/cgf.14649) 
+- [HexBox: Interactive Box Modeling of Hexahedral Meshes (2023)](https://doi.org/10.1111/cgf.14899) 
 
 ## How to contribute
 We really welcome datasets from existing papers, and we are collecting the ones we find available on the web. If you have some models related to a published paper you have two ways to contribute:
