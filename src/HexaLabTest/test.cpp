@@ -23,7 +23,7 @@ int main() {
     // The repository is indexed by a JSON that contains an array named 'sources' that contains papers. 
     // each paper has a 'data' that is an array of mesh names; 
     
-    std::ifstream istr ( "../datasets/index.json" );
+    std::ifstream istr ( "../../datasets/index.json" );
     if ( !istr.is_open() ) {
         printf ( "Failing to opening dataset index" );
         exit ( -1 );
@@ -54,7 +54,7 @@ int main() {
             printf ("Mesh %lu/%lu on dataset %lu/%lu\n",j+1,dataVec.size(),i+1,paperArrayJSON.size());fflush ( stdout );
             ++meshCnt;
             string filename = dataVec[j];//"jumpRamp.mesh";
-            const string basepath = "../datasets/";
+            const string basepath = "../../datasets/";
             app.set_quality_measure( QualityMeasureEnum::SJ );
             //bool ret = app.import_mesh ( basepath + "/example_tetra.mesh" );
             bool ret = app.import_mesh ( basepath + path + "/" + filename );
@@ -91,7 +91,7 @@ int main() {
     // it will contains also the size of the parsed meshes to be used in the interface
     // ui.js will load index_clean.json instead of index.json
     repositoryJSON["sources"] = paperArrayJSON;
-    std::ofstream o("../datasets/index_clean.json");
+    std::ofstream o("../../datasets/index_clean.json");
     o << std::setw(4) << repositoryJSON << std::endl;
     
     printf ( "%i meshes in a collection of %i papers (%i fails to load)\n", meshCnt, int(paperArrayJSON.size()), failCnt );
