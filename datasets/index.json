@@ -1123,7 +1123,7 @@
     , {
         "paper": {
             "title": "At-Most-Hexa Meshes",
-            "venue": "Computer Graphics Forum (2021)",
+            "venue": "Computer Graphics Forum",
             "authors": "Dennis R. Bukenberger, Marco Tarini, Hendrik P. A. Lensch",
             "year": "2021",
             "PDF": "https://uni-tuebingen.de/fileadmin/Uni_Tuebingen/Fakultaeten/InfoKogni/WSI/ComGraph/publications/2021/CGF21_atMostHexa/AtMostHexaMeshes.pdf",
@@ -1353,7 +1353,7 @@
     , {
         "paper": {
             "title": "Evocube: a Genetic Labeling Framework for Polycube-Maps",
-            "venue": "Computer Graphics Forum (2022)",
+            "venue": "Computer Graphics Forum",
             "authors": "Corentin Dumery, François Protais, Sébastien Mestrallet, Christophe Bourcier, Franck Ledoux",
             "year": "2022",
             "PDF": "https://arxiv.org/pdf/2205.00738.pdf",
@@ -1454,11 +1454,52 @@
             "PDF": "http://pers.ge.imati.cnr.it/livesu/papers/ZGLPC23/ZGLPC23.pdf",
             "authors": "Francesco Zoccheddu, Enrico Gobbetti, Marco Livesu, Nico Pietroni, Gianmarco Cherchi",
             "title": "HexBox: Interactive Box Modeling of Hexahedral Meshes",
-            "venue": "Computer Graphics Forum (2023)",
+            "venue": "Computer Graphics Forum",
             "web": "https://github.com/cg3hci/HexBox",
             "year": "2023"
         },
         "path": "2023 - HexBox - Interactive Box Modeling of Hexahedral Meshes"
+    },
+    {
+        "paper": {
+            "title": "Meso-Skeleton Guided Hexahedral Mesh Design",
+            "venue": "Computer Graphics Forum",
+            "authors": "Paul Viville, Pierre Kraemer, Dominique Bechmann",
+            "year": "2023",
+            "PDF": "https://onlinelibrary.wiley.com/doi/epdf/10.1111/cgf.14932",
+            "web": "https://onlinelibrary.wiley.com/doi/full/10.1111/cgf.14932",
+            "DOI": "https://doi.org/10.1111/cgf.14932"
+        },
+        "path": "2023 - Meso-Skeleton Guided Hexahedral Mesh Design",
+        "label": "2023 - Meso-Skeleton Guided Hexahedral Mesh Design",
+        "data": [
+            "chair.mesh",
+            "dilo.mesh",
+            "dualOcta.mesh",
+            "dualOcta_subd.mesh",
+            "eagle.mesh",
+            
+            "eagle_raw.mesh",
+            "hand.mesh",
+            "holes.mesh",
+            "knob_raw.mesh",
+            "knob_subd.mesh",
+            
+            "metatron.mesh",
+            "pinion2.mesh",
+            "plane2.mesh",
+            "plane2_subd.mesh",
+            "plane_raw.mesh",
+            
+            "sculpture.mesh",
+            "torque_raw.mesh",
+            "torque_sub.mesh",
+            "torusTwist.mesh",
+            "twist.mesh",
+
+            "ujoint_subd.mesh",
+            "vertTurbine_subd.mesh"
+        ]
     }
     ]
 }

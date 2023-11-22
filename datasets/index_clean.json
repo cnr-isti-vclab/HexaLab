@@ -2015,7 +2015,7 @@
                 "PDF": "https://uni-tuebingen.de/fileadmin/Uni_Tuebingen/Fakultaeten/InfoKogni/WSI/ComGraph/publications/2021/CGF21_atMostHexa/AtMostHexaMeshes.pdf",
                 "authors": "Dennis R. Bukenberger, Marco Tarini, Hendrik P. A. Lensch",
                 "title": "At-Most-Hexa Meshes",
-                "venue": "Computer Graphics Forum (2021)",
+                "venue": "Computer Graphics Forum",
                 "web": "https://uni-tuebingen.de/fakultaeten/mathematisch-naturwissenschaftliche-fakultaet/fachbereiche/informatik/lehrstuehle/computergrafik/lehrstuhl/veroeffentlichungen/publications-since-2012/at-most-hexa-meshes/",
                 "year": "2021"
             },
@@ -2430,7 +2430,7 @@
                 "PDF": "https://arxiv.org/pdf/2205.00738.pdf",
                 "authors": "Corentin Dumery, François Protais, Sébastien Mestrallet, Christophe Bourcier, Franck Ledoux",
                 "title": "Evocube: a Genetic Labeling Framework for Polycube-Maps",
-                "venue": "Computer Graphics Forum (2022)",
+                "venue": "Computer Graphics Forum",
                 "web": "https://corentindumery.github.io/projects/evocube.html",
                 "year": "2022"
             },
@@ -2513,11 +2513,72 @@
                 "PDF": "http://pers.ge.imati.cnr.it/livesu/papers/ZGLPC23/ZGLPC23.pdf",
                 "authors": "Francesco Zoccheddu, Enrico Gobbetti, Marco Livesu, Nico Pietroni, Gianmarco Cherchi",
                 "title": "HexBox: Interactive Box Modeling of Hexahedral Meshes",
-                "venue": "Computer Graphics Forum (2023)",
+                "venue": "Computer Graphics Forum",
                 "web": "https://github.com/cg3hci/HexBox",
                 "year": "2023"
             },
             "path": "2023 - HexBox - Interactive Box Modeling of Hexahedral Meshes"
+        },
+        {
+            "data": [
+                "chair.mesh",
+                "dilo.mesh",
+                "dualOcta.mesh",
+                "dualOcta_subd.mesh",
+                "eagle.mesh",
+                "eagle_raw.mesh",
+                "hand.mesh",
+                "holes.mesh",
+                "knob_raw.mesh",
+                "knob_subd.mesh",
+                "metatron.mesh",
+                "pinion2.mesh",
+                "plane2.mesh",
+                "plane2_subd.mesh",
+                "plane_raw.mesh",
+                "sculpture.mesh",
+                "torque_raw.mesh",
+                "torque_sub.mesh",
+                "torusTwist.mesh",
+                "twist.mesh",
+                "ujoint_subd.mesh",
+                "vertTurbine_subd.mesh"
+            ],
+            "datasize": [
+                12128,
+                53760,
+                1344,
+                1344,
+                7072,
+                364,
+                3584,
+                2432,
+                864,
+                6912,
+                7008,
+                16640,
+                812,
+                6496,
+                812,
+                2240,
+                64,
+                1312,
+                768,
+                4224,
+                7232,
+                15168
+            ],
+            "label": "2023 - Meso-Skeleton Guided Hexahedral Mesh Design",
+            "paper": {
+                "DOI": "https://doi.org/10.1111/cgf.14932",
+                "PDF": "https://onlinelibrary.wiley.com/doi/epdf/10.1111/cgf.14932",
+                "authors": "Paul Viville, Pierre Kraemer, Dominique Bechmann",
+                "title": "Meso-Skeleton Guided Hexahedral Mesh Design",
+                "venue": "Computer Graphics Forum",
+                "web": "https://onlinelibrary.wiley.com/doi/full/10.1111/cgf.14932",
+                "year": "2023"
+            },
+            "path": "2023 - Meso-Skeleton Guided Hexahedral Mesh Design"
         }
     ]
 }
