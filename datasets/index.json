@@ -1501,5 +1501,30 @@
             "vertTurbine_subd.mesh"
         ]
     }
+    , {
+        "paper": {
+            "title": "Stress-Aligned Hexahedral Lattice Structures",
+            "venue": "Computer Graphics Forum",
+            "authors": "Dennis R. Bukenberger, Junpeng Wang, Jun Wu, Rüdiger Westermann",
+            "year": "2024",
+            "PDF": "https://bukenberger.net/pdfs/2024_bukenberger_stress-aligned_hexahedral_lattice_structures.pdf",
+            "web": "https://github.com/dbukenberger/HexahedralLattice",
+            "DOI": "https://doi.org/10.1111/cgf.15265"
+        },
+        "path": "2024 - Stress-Aligned Hexahedral Lattice Structures",
+        "label": "2024 - Stress-Aligned Hexahedral Lattice Structures",
+        "data": [
+			"cube.mesh",
+			"femur.mesh",
+			"fertility.mesh",
+			"kitten.mesh",
+			"spot.mesh",
+			"venus.mesh",
+			"JEB.mesh",
+			"buddhaBack.mesh",
+			"buddhaBelly.mesh",
+			"buddhaDown.mesh"
+        ]
+    }
     ]
 }
