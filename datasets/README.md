@@ -28,6 +28,7 @@ Current datasets come from the following papers:
 - [Hex Me If You Can (2022)](https://doi.org/10.1111/cgf.14608) 
 - [Evocube: A Genetic Labelling Framework for Polycube-Maps (2022)](https://doi.org/10.1111/cgf.14649) 
 - [HexBox: Interactive Box Modeling of Hexahedral Meshes (2023)](https://doi.org/10.1111/cgf.14899) 
+- [Stress-Aligned Hexahedral Lattice Structures (2024)](https://doi.org/10.1111/cgf.15265) 
 
 ## How to contribute
 We really welcome datasets from existing papers, and we are collecting the ones we find available on the web. If you have some models related to a published paper you have two ways to contribute:
