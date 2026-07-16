@@ -174,6 +174,7 @@ HexaLab.UI = {
         github:             $('#github'),
         about:              $('#about'),
         snapshot:           $('#snapshot'),
+        snapshot_scale_badge: $('#snapshot_scale_badge'),
         process_pack:       $('#process_pack'),
 
         on_mesh_import: function () {
@@ -1080,10 +1081,11 @@ HexaLab.UI.process_mesh_pack = function (file, settings) {
         if (items.length == 0) return
         let item = items.pop()
         HexaLab.UI.process_pack_env.item = item
-        item.mesh.async("uint8array").then(function (data) {
+        item.mesh.async("uint8array").then(async function (data) {
             let name = item.mesh.name
 
-            HexaLab.UI.set_mesh(name, data)
+            let [mesh_name, mesh_data] = await HexaLab.UI.gunzip_if_needed(name, data)
+            HexaLab.UI.set_mesh(mesh_name, mesh_data)
             HexaLab.UI.show_infobox_2()
             if (item.settings) {
                 HexaLab.app.set_settings(item.settings)
@@ -1117,6 +1119,32 @@ HexaLab.UI.process_mesh_pack = function (file, settings) {
 }
 
 // TODO document long/short name
+// If name ends with ".gz", strip the ".gz" suffix and gunzip the bytes using
+// the browser-native DecompressionStream. To stay robust against servers that
+// serve .gz files with "Content-Encoding: gzip" (in which case the browser has
+// already decompressed the payload), we only run the manual gunzip when the
+// data actually begins with the gzip magic bytes (0x1f 0x8b). Otherwise the
+// inputs are returned unchanged. Always returns a Promise of [name, Uint8Array].
+HexaLab.UI.gunzip_if_needed = async function (name, byte_array) {
+    // normalize to a Uint8Array view (custom uploads arrive as Int8Array)
+    const bytes = (byte_array instanceof Uint8Array)
+        ? byte_array
+        : new Uint8Array(byte_array.buffer, byte_array.byteOffset, byte_array.byteLength)
+
+    if (!name.toLowerCase().endsWith('.gz')) {
+        return [name, bytes]
+    }
+    const plain_name = name.slice(0, -3)
+    const is_gzip = bytes.length >= 2 && bytes[0] === 0x1f && bytes[1] === 0x8b
+    if (!is_gzip) {
+        // already decompressed by the browser (Content-Encoding: gzip)
+        return [plain_name, bytes]
+    }
+    const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'))
+    const buffer = await new Response(stream).arrayBuffer()
+    return [plain_name, new Uint8Array(buffer)]
+}
+
 HexaLab.UI.set_mesh = function (long_name, byte_array) {
     var name = HexaLab.FS.short_path(long_name)
     HexaLab.UI.mesh_long_name = long_name
@@ -1178,9 +1206,10 @@ HexaLab.UI.import_custom_mesh = function (file) {
     //HexaLab.UI.clear_mesh_info()
     // Fill
 	HexaLab.UI.set_progress_phasename('Loading...');
-    HexaLab.FS.read_file(file, function (name, data) {
-        HexaLab.UI.set_mesh(name, data)
-        HexaLab.UI.mesh_long_name = name
+    HexaLab.FS.read_file(file, async function (name, data) {
+        let [mesh_name, mesh_data] = await HexaLab.UI.gunzip_if_needed(name, data)
+        HexaLab.UI.set_mesh(mesh_name, mesh_data)
+        HexaLab.UI.mesh_long_name = mesh_name
         HexaLab.UI.set_displayed_dataset_idx(HexaLab.UI.DATASET_IDX_CUSTOM)
         HexaLab.UI.show_infobox_2()
     })
@@ -1194,9 +1223,10 @@ HexaLab.UI.import_selected_mesh = function () {
     let request = new XMLHttpRequest();
     request.open('GET', 'datasets/' + dataset.path + '/' + name, true);
     request.responseType = 'arraybuffer';
-    request.onloadend = function(e) {
-        var data = new Uint8Array(this.response)
-        HexaLab.UI.set_mesh(name, data)
+    request.onloadend = async function(e) {
+        let data = new Uint8Array(this.response)
+        let [mesh_name, mesh_data] = await HexaLab.UI.gunzip_if_needed(name, data)
+        HexaLab.UI.set_mesh(mesh_name, mesh_data)
         HexaLab.UI.set_displayed_dataset_idx(HexaLab.UI.get_selected_dataset_idx())
         HexaLab.UI.set_displayed_mesh_idx(mesh_idx)
         HexaLab.UI.clear_mesh_dropdown_list()
@@ -1830,30 +1860,110 @@ function str2ab(str) {
   return buf;
 }
 
-HexaLab.UI.topbar.snapshot.on('click', function () {
-    HexaLab.app.canvas.element.toBlob(function (blob) {
-			var reader = new FileReader();
+// Current snapshot resolution multiplier. Alt+clicking the snapshot button
+// cycles it 1 -> 2 -> 4 -> 8 -> 1; a tiny badge over the button shows the
+// current value (nothing is shown at 1x).
+HexaLab.UI.snapshot_scale = 1
 
-			reader.onloadend = function (e) {
-				const settingsStr = JSON.stringify(HexaLab.app.get_settings(), null, 4)
-				pngitxt.set(
-					reader.result,
-					{
-						keyword: "hexalab",
-						value: settingsStr
-					},
-					function (res) {
-						var by = new Uint8Array(res.length);
-						for (var i=0; i<res.length; i++) by[i]=res.charCodeAt(i);
-						blob = new Blob( [by.buffer] )
-						saveAs(blob, "hexalab.png")
-					}
-				)
-			}
+HexaLab.UI.get_snapshot_scale = function () {
+    return HexaLab.UI.snapshot_scale
+}
 
-			reader.readAsBinaryString( blob );
+HexaLab.UI.cycle_snapshot_scale = function () {
+    const next = { 1: 2, 2: 4, 4: 8, 8: 1 }
+    HexaLab.UI.snapshot_scale = next[HexaLab.UI.snapshot_scale] || 1
+    const badge = HexaLab.UI.topbar.snapshot_scale_badge
+    if (HexaLab.UI.snapshot_scale === 1) {
+        badge.text('').hide()
+    } else {
+        badge.text('x' + HexaLab.UI.snapshot_scale).show()
+    }
+}
 
-    }, "image/png");
+// Render the current view at (scale * window size) and return a PNG data URL.
+// The renderer is resized up, one full frame is drawn (SSAO is recomputed at the
+// new size; object-space AO is resolution independent), the pixels are read back
+// synchronously (the canvas uses preserveDrawingBuffer), and the original size is
+// restored before the browser repaints, so nothing flickers on screen.
+HexaLab.UI.render_snapshot_dataurl = function (scale) {
+    const app    = HexaLab.app
+    const viewer = app.viewer
+    const canvas = app.canvas.element
+
+    const gl = viewer.renderer.getContext()
+    const w0 = viewer.width
+    const h0 = viewer.height
+    let W = Math.round(w0 * scale)
+    let H = Math.round(h0 * scale)
+
+    // First clamp to the offscreen render-target limits (SSAO/normal/depth passes).
+    const maxTgt = Math.min(
+        gl.getParameter(gl.MAX_RENDERBUFFER_SIZE),
+        gl.getParameter(gl.MAX_TEXTURE_SIZE)
+    )
+    if (W > maxTgt || H > maxTgt) {
+        const k = Math.min(maxTgt / W, maxTgt / H)
+        W = Math.floor(W * k)
+        H = Math.floor(H * k)
+    }
+
+    if (W === w0 && H === h0) {
+        return canvas.toDataURL('image/png')
+    }
+
+    let dataURL
+    try {
+        viewer.resize(W, H)
+
+        // Browsers also cap the canvas drawing buffer, often well below
+        // MAX_RENDERBUFFER_SIZE. If the buffer came back smaller than requested,
+        // adopt the real size (keeping aspect) and resize again, so what we render
+        // matches the actual buffer and the image is not cropped.
+        const bw = gl.drawingBufferWidth
+        const bh = gl.drawingBufferHeight
+        if (bw < W || bh < H) {
+            const k = Math.min(bw / W, bh / H)
+            W = Math.floor(W * k)
+            H = Math.floor(H * k)
+            viewer.resize(W, H)
+            console.log('HexaLab: snapshot capped by browser to ' + W + 'x' + H)
+        }
+
+        viewer.update_canvas()
+        dataURL = canvas.toDataURL('image/png')
+    } finally {
+        viewer.resize(w0, h0)
+        app.queue_canvas_update()
+    }
+    return dataURL
+}
+
+HexaLab.UI.topbar.snapshot.on('click', function (e) {
+    // Alt+click just cycles the target resolution (2x/4x/8x/off), no capture.
+    if (e.altKey) {
+        HexaLab.UI.cycle_snapshot_scale()
+        return
+    }
+    const scale = HexaLab.UI.get_snapshot_scale()
+    const dataURL = HexaLab.UI.render_snapshot_dataurl(scale)
+
+    // Convert the data URL to a binary string and embed the current settings in a
+    // PNG text chunk, then save (same behaviour as the original snapshot).
+    const binaryStr = atob(dataURL.split(',')[1])
+    const settingsStr = JSON.stringify(HexaLab.app.get_settings(), null, 4)
+    pngitxt.set(
+        binaryStr,
+        {
+            keyword: "hexalab",
+            value: settingsStr
+        },
+        function (res) {
+            var by = new Uint8Array(res.length);
+            for (var i=0; i<res.length; i++) by[i]=res.charCodeAt(i);
+            const blob = new Blob( [by.buffer] )
+            saveAs(blob, "hexalab.png")
+        }
+    )
 }).prop("disabled", true);
 
 HexaLab.UI.settings.rendering_menu_content.prop('disabled', true)
