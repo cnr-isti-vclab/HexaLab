@@ -2816,6 +2816,43 @@
                 "year": "2023"
             },
             "path": "2023 - Locally Meshable Frame Fields"
+        },
+        {
+            "data": [
+                "cube.mesh",
+                "femur.mesh",
+                "fertility.mesh",
+                "kitten.mesh",
+                "spot.mesh",
+                "venus.mesh",
+                "JEB.mesh",
+                "buddhaBack.mesh",
+                "buddhaBelly.mesh",
+                "buddhaDown.mesh"
+            ],
+            "datasize": [
+                1461,
+                3259,
+                45950,
+                4836,
+                5381,
+                4328,
+                12002,
+                8553,
+                3392,
+                6313
+            ],
+            "label": "2024 - Stress-Aligned Hexahedral Lattice Structures",
+            "paper": {
+                "DOI": "https://doi.org/10.1111/cgf.15265",
+                "PDF": "https://bukenberger.net/pdfs/2024_bukenberger_stress-aligned_hexahedral_lattice_structures.pdf",
+                "authors": "Dennis R. Bukenberger, Junpeng Wang, Jun Wu, Rüdiger Westermann",
+                "title": "Stress-Aligned Hexahedral Lattice Structures",
+                "venue": "Computer Graphics Forum",
+                "web": "https://github.com/dbukenberger/HexahedralLattice",
+                "year": "2024"
+            },
+            "path": "2024 - Stress-Aligned Hexahedral Lattice Structures"
         }
     ]
 }
