@@ -1,5 +1,5 @@
 # Datasets
-This folder contains a collection of 1162 hexahedral meshes that have been presented in 29 papers and made available by the respective authors. All the datasets are copyrighted by their authors. For any use different from displaying them inside HexaLab you should contact the authors.
+This folder contains a collection of 1172 hexahedral meshes that have been presented in 30 papers and made available by the respective authors. All the datasets are copyrighted by their authors. For any use different from displaying them inside HexaLab you should contact the authors.
 Current datasets come from the following papers:
 
 - [All-Hex Mesh Generation via Volumetric PolyCube Deformation (2011)](https://doi.org/10.1111/j.1467-8659.2011.02015.x)
@@ -31,6 +31,7 @@ Current datasets come from the following papers:
 - [HexBox: Interactive Box Modeling of Hexahedral Meshes (2023)](https://doi.org/10.1111/cgf.14899) 
 - [Locally Meshable Frame Fields (2023)](https://doi.org/10.1145/3592457)
 - [Meso-Skeleton Guided Hexahedral Mesh Design (2023)](https://doi.org/10.1111/cgf.14932)
+- [Stress-Aligned Hexahedral Lattice Structures (2024)](https://doi.org/10.1111/cgf.15265)
 
 ## How to contribute
 We really welcome datasets from existing papers, and we are collecting the ones we find available on the web. If you have some models related to a published paper you have two ways to contribute:
