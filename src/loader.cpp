@@ -1,14 +1,72 @@
 #include <fstream>
+#include <sstream>
+#include <cctype>
+
+#ifndef __EMSCRIPTEN__
+#include <zlib.h>
+#endif
 
 #include "loader.h"
 
 namespace HexaLab {
 
+static std::string to_lower(std::string s) {
+    for (char& c : s) c = (char)std::tolower((unsigned char)c);
+    return s;
+}
+
+// True if the path ends with the (case-insensitive) ".gz" suffix.
+static bool is_gzip(const std::string& path) {
+    return path.size() >= 3 && to_lower(path.substr(path.size() - 3)) == ".gz";
+}
+
+// Return the lowercased extension of the file, ignoring a trailing ".gz"
+// (e.g. "mymesh.vtk.gz" -> ".vtk", "mymesh.MESH" -> ".mesh").
+static std::string underlying_ext(std::string path) {
+    if (is_gzip(path)) path = path.substr(0, path.size() - 3);
+    std::size_t dot = path.find_last_of(".");
+    if (dot == std::string::npos) return "";
+    return to_lower(path.substr(dot));
+}
+
+#ifndef __EMSCRIPTEN__
+// Fully decompress a gzip file into memory. Returns false on I/O or format error.
+static bool gunzip_file(const std::string& path, std::string& out) {
+    gzFile f = gzopen(path.c_str(), "rb");
+    if (f == nullptr) return false;
+    out.clear();
+    char buf[1 << 16];
+    int n;
+    while ((n = gzread(f, buf, sizeof(buf))) > 0) out.append(buf, (size_t)n);
+    int err = 0;
+    gzerror(f, &err);
+    gzclose(f);
+    return n >= 0 && (err == Z_OK || err == Z_STREAM_END);
+}
+#endif
+
 bool Loader::load(const string& path, vector<Vector3f>& vertices, vector<Index>& indices)
 {
-    std::string ext = path.substr(path.find_last_of("."));
-    if(ext.compare(".mesh")==0 || ext.compare(".MESH")==0) return load_MESH(path, vertices, indices);
-    if(ext.compare(".vtk" )==0 || ext.compare(".VTK")==0 ) return load_VTK (path, vertices, indices);
+    const std::string ext = underlying_ext(path);
+
+    if (is_gzip(path)) {
+#ifndef __EMSCRIPTEN__
+        std::string data;
+        if (!gunzip_file(path, data)) return false;
+        std::istringstream stream(data, std::ios::in | std::ios::binary);
+        if (ext == ".mesh") return load_MESH(stream, vertices, indices);
+        if (ext == ".vtk")  return load_VTK (stream, vertices, indices);
+        return false;
+#else
+        // In the browser the file is gunzipped in JS before it reaches here.
+        return false;
+#endif
+    }
+
+    std::ifstream stream(path, std::ifstream::in | std::ifstream::binary);
+    if (!stream.is_open()) return false;
+    if (ext == ".mesh") return load_MESH(stream, vertices, indices);
+    if (ext == ".vtk")  return load_VTK (stream, vertices, indices);
     return false;
 }
 
@@ -17,15 +75,12 @@ void cleanWinLine(std::string & str){
     while(str.back() == ' ') str.pop_back();
 }
 
-bool Loader::load_MESH(const string& path, vector<Vector3f>& vertices, vector<Index>& indices)
+bool Loader::load_MESH(std::istream& stream, vector<Vector3f>& vertices, vector<Index>& indices)
 {
     string header;
 
     vertices.clear();
     indices.clear();
-
-    ifstream stream(path, ifstream::in | ifstream::binary);
-    HL_ASSERT_LOG(stream.is_open(), "Unable to open file %s!\n", path.c_str());
 
     int precision;
     int dimension;
@@ -162,12 +217,11 @@ bool Loader::load_MESH(const string& path, vector<Vector3f>& vertices, vector<In
 }
 
 
-bool Loader::load_VTK(const string& path, vector<Vector3f>& vertices, vector<Index>& indices)
+bool Loader::load_VTK(std::istream& stream, vector<Vector3f>& vertices, vector<Index>& indices)
 {
     vertices.clear();
     indices.clear();
 
-    std::ifstream stream(path);
     std::string   line;
 
     bool header_found     = false;

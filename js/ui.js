@@ -1080,10 +1080,11 @@ HexaLab.UI.process_mesh_pack = function (file, settings) {
         if (items.length == 0) return
         let item = items.pop()
         HexaLab.UI.process_pack_env.item = item
-        item.mesh.async("uint8array").then(function (data) {
+        item.mesh.async("uint8array").then(async function (data) {
             let name = item.mesh.name
 
-            HexaLab.UI.set_mesh(name, data)
+            let [mesh_name, mesh_data] = await HexaLab.UI.gunzip_if_needed(name, data)
+            HexaLab.UI.set_mesh(mesh_name, mesh_data)
             HexaLab.UI.show_infobox_2()
             if (item.settings) {
                 HexaLab.app.set_settings(item.settings)
@@ -1117,6 +1118,32 @@ HexaLab.UI.process_mesh_pack = function (file, settings) {
 }
 
 // TODO document long/short name
+// If name ends with ".gz", strip the ".gz" suffix and gunzip the bytes using
+// the browser-native DecompressionStream. To stay robust against servers that
+// serve .gz files with "Content-Encoding: gzip" (in which case the browser has
+// already decompressed the payload), we only run the manual gunzip when the
+// data actually begins with the gzip magic bytes (0x1f 0x8b). Otherwise the
+// inputs are returned unchanged. Always returns a Promise of [name, Uint8Array].
+HexaLab.UI.gunzip_if_needed = async function (name, byte_array) {
+    // normalize to a Uint8Array view (custom uploads arrive as Int8Array)
+    const bytes = (byte_array instanceof Uint8Array)
+        ? byte_array
+        : new Uint8Array(byte_array.buffer, byte_array.byteOffset, byte_array.byteLength)
+
+    if (!name.toLowerCase().endsWith('.gz')) {
+        return [name, bytes]
+    }
+    const plain_name = name.slice(0, -3)
+    const is_gzip = bytes.length >= 2 && bytes[0] === 0x1f && bytes[1] === 0x8b
+    if (!is_gzip) {
+        // already decompressed by the browser (Content-Encoding: gzip)
+        return [plain_name, bytes]
+    }
+    const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'))
+    const buffer = await new Response(stream).arrayBuffer()
+    return [plain_name, new Uint8Array(buffer)]
+}
+
 HexaLab.UI.set_mesh = function (long_name, byte_array) {
     var name = HexaLab.FS.short_path(long_name)
     HexaLab.UI.mesh_long_name = long_name
@@ -1178,9 +1205,10 @@ HexaLab.UI.import_custom_mesh = function (file) {
     //HexaLab.UI.clear_mesh_info()
     // Fill
 	HexaLab.UI.set_progress_phasename('Loading...');
-    HexaLab.FS.read_file(file, function (name, data) {
-        HexaLab.UI.set_mesh(name, data)
-        HexaLab.UI.mesh_long_name = name
+    HexaLab.FS.read_file(file, async function (name, data) {
+        let [mesh_name, mesh_data] = await HexaLab.UI.gunzip_if_needed(name, data)
+        HexaLab.UI.set_mesh(mesh_name, mesh_data)
+        HexaLab.UI.mesh_long_name = mesh_name
         HexaLab.UI.set_displayed_dataset_idx(HexaLab.UI.DATASET_IDX_CUSTOM)
         HexaLab.UI.show_infobox_2()
     })
@@ -1194,9 +1222,10 @@ HexaLab.UI.import_selected_mesh = function () {
     let request = new XMLHttpRequest();
     request.open('GET', 'datasets/' + dataset.path + '/' + name, true);
     request.responseType = 'arraybuffer';
-    request.onloadend = function(e) {
-        var data = new Uint8Array(this.response)
-        HexaLab.UI.set_mesh(name, data)
+    request.onloadend = async function(e) {
+        let data = new Uint8Array(this.response)
+        let [mesh_name, mesh_data] = await HexaLab.UI.gunzip_if_needed(name, data)
+        HexaLab.UI.set_mesh(mesh_name, mesh_data)
         HexaLab.UI.set_displayed_dataset_idx(HexaLab.UI.get_selected_dataset_idx())
         HexaLab.UI.set_displayed_mesh_idx(mesh_idx)
         HexaLab.UI.clear_mesh_dropdown_list()

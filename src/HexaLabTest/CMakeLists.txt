@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1.0)
+cmake_minimum_required(VERSION 3.5)
 
 project(HexaLabTest)
 
@@ -38,4 +38,9 @@ include_directories(
     ../../src/eigen
 )
 
+# zlib is used by the loader to transparently read gzip-compressed (.gz) meshes.
+find_package(ZLIB REQUIRED)
+
 add_executable(HexaLabTest ${SOURCES} ${HEADERS})
+
+target_link_libraries(HexaLabTest ZLIB::ZLIB)
