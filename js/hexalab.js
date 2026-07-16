@@ -349,8 +349,8 @@ HexaLab.Viewer = function (canvas_width, canvas_height) {
         kernel[i + 2] = v.z * scale
     }
     var noise_size = 4
-    var noise = new Float32Array(noise_size * noise_size * 3)
-    for (var i = 0; i < noise_size * noise_size * 3; i += 3) {
+    var noise = new Float32Array(noise_size * noise_size * 4)
+    for (var i = 0; i < noise_size * noise_size * 4; i += 4) {
         var v = new THREE.Vector3(
             Math.random() * 2.0 - 1.0,
             Math.random() * 2.0 - 1.0,
@@ -359,6 +359,7 @@ HexaLab.Viewer = function (canvas_width, canvas_height) {
         noise[i + 0] = v.x
         noise[i + 1] = v.y
         noise[i + 2] = v.z
+        noise[i + 3] = 1.0
     }
     var noise_tex = new THREE.DataTexture(noise, noise_size, noise_size, THREE.RGBAFormat, THREE.FloatType,
         THREE.UVMapping, THREE.RepeatWrapping, THREE.RepeatWrapping, THREE.NearestFilter, THREE.NearestFilter)

@@ -1128,8 +1128,14 @@ HexaLab.UI.set_mesh = function (long_name, byte_array) {
     if (HexaLab.UI.first_mesh) {
         HexaLab.UI.on_first_mesh()
         HexaLab.UI.first_mesh = false
-        let settings = JSON.parse(Cookies.get('HexaLab'))
-        HexaLab.app.set_settings(settings)
+        const saved_settings = Cookies.get('HexaLab')
+        if (saved_settings) {
+            try {
+                HexaLab.app.set_settings(JSON.parse(saved_settings))
+            } catch (error) {
+                console.warn('Ignoring invalid HexaLab settings cookie.', error)
+            }
+        }
         HexaLab.UI.update_cookie()
     }
 
