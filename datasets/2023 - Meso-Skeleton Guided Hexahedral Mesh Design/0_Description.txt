@@ -1,0 +1,6 @@
+This archive contains files with our results.
+IG files (our format) contain the meso skeletons.
+OFF files contain the surfaces of the objects.
+MESH files contain the hexmeshes we have generated.
+
+files marked _raw contain the unprocessed output of the pipeline.

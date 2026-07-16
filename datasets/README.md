@@ -1,5 +1,5 @@
 # Datasets
-This folder contains a collection of 1030 hexahedral meshes that have been presented in 27 papers and made available by the respective authors. All the datasets are copyrighted by their authors. For any use different from displaying them inside HexaLab you should contact the authors.
+This folder contains a collection of 1172 hexahedral meshes that have been presented in 30 papers and made available by the respective authors. All the datasets are copyrighted by their authors. For any use different from displaying them inside HexaLab you should contact the authors.
 Current datasets come from the following papers:
 
 - [All-Hex Mesh Generation via Volumetric PolyCube Deformation (2011)](https://doi.org/10.1111/j.1467-8659.2011.02015.x)
@@ -16,18 +16,22 @@ Current datasets come from the following papers:
 - [Explicit Cylindrical Maps for General Tubular Shapes (2017)](https://doi.org/10.1016/j.cad.2017.05.002)
 - [Hexahedral Mesh Generation via Constrained Quadrilateralization (2017)](http://doi.org/10.1371/journal.pone.0177603)
 - [Fuzzy clustering based pseudo-swept volume decomposition for hexahedral meshing (2018)](https://doi.org/10.1016/j.cad.2017.10.001)
+- [Dual Sheet Meshing: An Interactive Approach to Robust Hexahedralization (2019)](https://diglib.eg.org/handle/10.1111/cgf13617)
+- [Feature Preserving Octree-Based Hexahedral Meshing (2019)](https://gaoxifeng.github.io/)
 - [Selective Padding for Polycube‐Based Hexahedral Meshing (2019)](https://doi.org/10.1111/cgf.13593)
 - [Singularity Structure Simplification of Hexahedral Mesh via Weighted Ranking (2019)](https://arxiv.org/abs/1901.00238)
-- [Dual Sheet Meshing: An Interactive Approach to Robust Hexahedralization (2019)](https://diglib.eg.org/handle/10.1111/cgf13617)
 - [Symmetric Moving Frames (2019)](https://www.cs.cmu.edu/~kmcrane/Projects/SymmetricMovingFrames/index.html)
-- [Feature Preserving Octree-Based Hexahedral Meshing (2019)](https://gaoxifeng.github.io/)
-- [LoopyCuts: Practical Feature-Preserving Block Decomposition for Strongly Hex-Dominant Meshing (2020)](https://github.com/mlivesu/LoopyCuts)
 - [Cut-enhanced PolyCube-Maps for Feature-aware All-Hex Meshing (2020)](https://guohaoxiang.github.io/projects/ce_polycube.html)
+- [LoopyCuts: Practical Feature-Preserving Block Decomposition for Strongly Hex-Dominant Meshing (2020)](https://github.com/mlivesu/LoopyCuts)
+- [At-Most-Hexa Meshes (2021)](https://doi.org/10.1111/cgf.14900)
 - [Generalized Adaptive Refinement for Grid-based Hexahedral Meshing (2021)](https://doi.org/10.1145/3478513.3480508)
 - [Interactive All-Hex Meshing via Cuboid Decomposition (2021)](https://doi.org/10.1145/3478513.3480568) 
-- [Hex Me If You Can (2022)](https://doi.org/10.1111/cgf.14608) 
 - [Evocube: A Genetic Labelling Framework for Polycube-Maps (2022)](https://doi.org/10.1111/cgf.14649) 
+- [Hex Me If You Can (2022)](https://doi.org/10.1111/cgf.14608) 
 - [HexBox: Interactive Box Modeling of Hexahedral Meshes (2023)](https://doi.org/10.1111/cgf.14899) 
+- [Locally Meshable Frame Fields (2023)](https://doi.org/10.1145/3592457)
+- [Meso-Skeleton Guided Hexahedral Mesh Design (2023)](https://doi.org/10.1111/cgf.14932)
+- [Stress-Aligned Hexahedral Lattice Structures (2024)](https://doi.org/10.1111/cgf.15265)
 
 ## How to contribute
 We really welcome datasets from existing papers, and we are collecting the ones we find available on the web. If you have some models related to a published paper you have two ways to contribute:

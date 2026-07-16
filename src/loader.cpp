@@ -74,7 +74,7 @@ bool Loader::load_MESH(const string& path, vector<Vector3f>& vertices, vector<In
                     indices.push_back(idx[i] - 1);
                 }
             }
-/*        // TODO: deal with the tetra case!
+        // TODO: deal with the tetra case!
         }  else if (header.compare("Tetrahedra") == 0) {
 
 
@@ -98,7 +98,7 @@ bool Loader::load_MESH(const string& path, vector<Vector3f>& vertices, vector<In
                 indices.push_back(c);
                 indices.push_back(d);
             }
-            */
+
         } else if (header.compare("Triangles") == 0) {
             int tri_count;
             HL_ASSERT_LOG(stream >> tri_count, "ERROR: malformed mesh file. Unexpected tag after Triangles tag.\n");
@@ -250,7 +250,7 @@ bool Loader::load_VTK(const string& path, vector<Vector3f>& vertices, vector<Ind
         int ncells;
         if(sscanf(line.c_str(), "CELLS %d %*d", &ncells)==1)
         {
-            indices.reserve(ncells);
+            indices.reserve(ncells*8);
             cell_data_found = true;
             HL_LOG("[Loader] Reading %d hexas...\n", ncells);
             for(int i=0; i<ncells; ++i)
