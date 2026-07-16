@@ -21,7 +21,7 @@ Hexalab was awarded with the [2021 Symposium on Geometry Processing Dataset Awar
 HexaLab aims also to easily present the results of recent papers on hex meshing by directly including them in its own repository when provided by the authors. The datasets presented are copyrighted by the respective paper authors. Look in the [`datasets`](https://github.com/cnr-isti-vclab/HexaLab/tree/master/datasets#readme) folder for more info.
 
 ### Release Notes
-- **2026.07** added "Locally Meshable Frame Fields", "Stress-Aligned Hexahedral Lattice Structures" and "HybridOctree_Hex - Hybrid Octree-Based Adaptive All-Hexahedral Mesh Generation with Jacobian Control", bringing the collection to 1268 meshes from 31 papers. Large meshes can now be stored gzip-compressed (`.vtk.gz` / `.mesh.gz`) and are transparently decompressed on load.
+- **2026.07** added "Locally Meshable Frame Fields", "Stress-Aligned Hexahedral Lattice Structures" and "HybridOctree_Hex - Hybrid Octree-Based Adaptive All-Hexahedral Mesh Generation with Jacobian Control", bringing the collection to 1268 meshes from 31 papers. Large meshes can now be stored gzip-compressed (`.vtk.gz` / `.mesh.gz`) and are transparently decompressed on load. The snapshot button can now save high-resolution PNGs: Alt+click it to cycle a 2x / 4x / 8x render-resolution factor (shown as a small badge on the button), then click normally to save at that size (capped by the browser/GPU canvas limit).
 - **2023.11** added "HexBox - Interactive Box Modeling of Hexahedral Meshes" and "Meso-Skeleton Guided Hexahedral Mesh Design"
 - **2023.03** added "Evocube - a Genetic ..."
 - **2022.10** added "Hex Me If You Can", updated Threejs to r145, added number of hex in the mesh dropdown menu, improved vtk parser.

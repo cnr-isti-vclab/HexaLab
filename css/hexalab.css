@@ -56,6 +56,25 @@ height: 1px;
     margin: 0;
 }
 
+#snapshot {
+	position: relative;
+}
+
+#snapshot_scale_badge {
+	position: absolute;
+	right: 0px;
+	bottom: 0px;
+	font-size: 8px;
+	line-height: 8px;
+	font-weight: bold;
+	color: #fff;
+	background: rgba(0, 0, 0, 0.7);
+	padding: 0px 1px;
+	border-radius: 2px;
+	pointer-events: none;
+	display: none;
+}
+
 
 #toolbar_buttons :disabled img {
     opacity: 0.4;
