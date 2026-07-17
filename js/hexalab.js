@@ -1262,10 +1262,15 @@ Object.assign(HexaLab.Viewer.prototype, {
         const cam = this.scene_camera
         const r = 0.5 * this.mesh.get_aabb_diagonal()   // conservative scene radius (mesh is centered at the origin)
         const d = cam.position.length()                 // camera distance to the mesh center
+        let far  = (d + r) * 1.2
         let near = (d - r) * 0.8                         // margin so the front of the mesh is never clipped
-        const minNear = Math.max(1e-4, d * 0.001)
+        // Bound the far/near ratio so the depth buffer keeps enough precision when
+        // zoomed in. A too-small near plane crushes precision and causes z-fighting
+        // (faces behind bleeding over nearer ones), which is very visible in fissure/
+        // rounding mode. When zoomed out (d > r) the (d-r) term dominates and this
+        // clamp is inactive, so the double-torus near-clip fix is preserved.
+        const minNear = far / 500
         if (!(near > minNear)) near = minNear
-        let far = (d + r) * 1.2
         if (far <= near) far = near * 1000
         if (cam.near !== near || cam.far !== far) {
             cam.near = near

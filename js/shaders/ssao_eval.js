@@ -40,7 +40,7 @@ THREE.SSAOEval = {
 		"vec3 getScreenPos(const in vec2 tex) {",
 			"float x = tex.x * 2.0 - 1.0;",
 		    "float y = tex.y * 2.0 - 1.0;",
-		    "float z = getLinearDepth(tex);",
+		    "float z = getLinearDepth(tex) * 2.0 - 1.0;",	// window depth [0,1] -> NDC z [-1,1]
 		    "return vec3(x, y, z);",
 		"}",
 
