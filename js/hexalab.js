@@ -408,6 +408,8 @@ HexaLab.Viewer = function (canvas_width, canvas_height) {
                 tNormals: { value: this.normal_pass.target.texture },
                 uKernel: { value: kernel },
                 uRadius: { value: 0.1 },
+                uStrength: { value: 2.5 },   // boost SSAO darkening toward the object-space AO level
+                uMinShade: { value: 0.35 },  // floor for the darkest AO value (lower contrast, darks not fully black)
                 uSize: { value: new THREE.Vector2(this.width, this.height) },
                 uProj: { value: new THREE.Matrix4() },
                 uInvProj: { value: new THREE.Matrix4() }
@@ -529,11 +531,18 @@ HexaLab.Viewer = function (canvas_width, canvas_height) {
 Object.assign(HexaLab.Viewer.prototype, {
 
     setup_renderer: function() {
+        // r152+ enabled automatic sRGB color management by default, which brightens
+        // HexaLab's custom-shaded output. HexaLab was authored against the old
+        // linear/no-gamma pipeline, so we opt out to preserve the original look.
+        // (A proper sRGB workflow could be adopted later as a separate change.)
+        THREE.ColorManagement.enabled = false
+
         this.renderer = new THREE.WebGLRenderer({
             antialias: this.settings.aa == 'msaa',
             preserveDrawingBuffer: true,    // disable hidden/automatic clear of the rendertarget
             alpha: true,                    // to have an alpha on the rendertarget? (needed for setClearAlpha to work)
         })
+        this.renderer.outputColorSpace = THREE.LinearSRGBColorSpace   // match r145 default (no sRGB encoding on output)
         this.renderer.getContext().getExtension("EXT_frag_depth")
         this.renderer.setSize(this.width, this.height)
         this.renderer.autoClear = false
@@ -547,11 +556,14 @@ Object.assign(HexaLab.Viewer.prototype, {
 
     // Settings
     set_background_color:   function (color) { this.settings.background = color },
-    set_light_intensity:    function (intensity) { this.scene_light.intensity = intensity },
+    // r165 removed useLegacyLights; direct lights are now dimmer by a factor of PI
+    // vs the legacy model, so scale the stored intensity up to preserve the look.
+    // (get_light_intensity divides it back out so saved settings stay consistent.)
+    set_light_intensity:    function (intensity) { this.scene_light.intensity = intensity * Math.PI },
     set_aa_mode:            function (value) { this.settings.aa = value; /*this.init_backend()*/ },
     set_lighting_mode:      function (value) { this.settings.lighting = value; this.update_osao_buffers(); this.dirty_canvas = true },
     get_background_color:   function () { return this.settings.background },
-    get_light_intensity:    function () { return this.scene_light.intensity },
+    get_light_intensity:    function () { return this.scene_light.intensity / Math.PI },
     get_aa_mode:            function () { return this.settings.aa },
     get_lighting_mode:      function () { return this.settings.lighting },
 
@@ -955,7 +967,7 @@ Object.assign(HexaLab.Viewer.prototype, {
     },
 
     clear_canvas: function () {
-        this.renderer.setRenderTarget()
+        this.renderer.setRenderTarget(null)
         this.renderer.clear()
     },
 
@@ -1522,8 +1534,8 @@ Object.assign(HexaLab.App.prototype, {
         var up          = settings.up
         var distance    = settings.distance * size
 
-        this.controls.rotateSpeed = 10
-        this.controls.dynamicDampingFactor = 1
+        this.controls.rotateSpeed = 1          // r185 ArcballControls multiplies rotation by rotateSpeed (default 1); the old value of 10 made it 10x too sensitive
+        this.controls.dynamicDampingFactor = 1 // (a TrackballControls property, ignored by ArcballControls)
         this.controls.target.set(target.x, target.y, target.z)
 
         this.camera().position.set(target.x, target.y, target.z)
