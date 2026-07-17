@@ -408,6 +408,8 @@ HexaLab.Viewer = function (canvas_width, canvas_height) {
                 tNormals: { value: this.normal_pass.target.texture },
                 uKernel: { value: kernel },
                 uRadius: { value: 0.1 },
+                uStrength: { value: 2.5 },   // boost SSAO darkening toward the object-space AO level
+                uMinShade: { value: 0.35 },  // floor for the darkest AO value (lower contrast, darks not fully black)
                 uSize: { value: new THREE.Vector2(this.width, this.height) },
                 uProj: { value: new THREE.Matrix4() },
                 uInvProj: { value: new THREE.Matrix4() }
@@ -529,11 +531,23 @@ HexaLab.Viewer = function (canvas_width, canvas_height) {
 Object.assign(HexaLab.Viewer.prototype, {
 
     setup_renderer: function() {
+        // r152+ enabled automatic sRGB color management by default, which brightens
+        // HexaLab's custom-shaded output. HexaLab was authored against the old
+        // linear/no-gamma pipeline, so we opt out to preserve the original look.
+        // (A proper sRGB workflow could be adopted later as a separate change.)
+        THREE.ColorManagement.enabled = false
+
         this.renderer = new THREE.WebGLRenderer({
             antialias: this.settings.aa == 'msaa',
             preserveDrawingBuffer: true,    // disable hidden/automatic clear of the rendertarget
             alpha: true,                    // to have an alpha on the rendertarget? (needed for setClearAlpha to work)
         })
+        this.renderer.outputColorSpace = THREE.LinearSRGBColorSpace   // match r145 default (no sRGB encoding on output)
+        // r155 changed light-intensity semantics (useLegacyLights now false by
+        // default), which dims the Direct-lighting mode. Restore the legacy
+        // behavior for parity. NOTE: this flag is removed in r165, so Phase B
+        // (r185) must instead convert the light intensity to the new model.
+        this.renderer.useLegacyLights = true
         this.renderer.getContext().getExtension("EXT_frag_depth")
         this.renderer.setSize(this.width, this.height)
         this.renderer.autoClear = false
@@ -955,7 +969,7 @@ Object.assign(HexaLab.Viewer.prototype, {
     },
 
     clear_canvas: function () {
-        this.renderer.setRenderTarget()
+        this.renderer.setRenderTarget(null)
         this.renderer.clear()
     },
 

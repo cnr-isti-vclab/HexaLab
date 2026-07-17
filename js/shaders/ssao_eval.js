@@ -21,6 +21,8 @@ THREE.SSAOEval = {
 		"uniform sampler2D tNormals;",
 		"uniform vec3 uKernel[numSamples];",
 		"uniform float uRadius;",
+		"uniform float uStrength;",
+		"uniform float uMinShade;",
 		"uniform vec2 uSize;",
 		"uniform mat4 uProj;",
 		"uniform mat4 uInvProj;",
@@ -104,7 +106,12 @@ THREE.SSAOEval = {
 				"}",
 			"}",
 
-			"occlusion = 1.0 - (occlusion / float(numSamples));",
+			// uStrength scales the amount of occlusion so screen-space AO can be
+			// pushed closer to the (stronger) object-space AO level.
+			"occlusion = clamp(1.0 - (occlusion / float(numSamples)) * uStrength, 0.0, 1.0);",
+			// uMinShade lifts the darkest value (floor) to reduce contrast, so the
+			// darkest creases are not fully black.
+			"occlusion = mix(uMinShade, 1.0, occlusion);",
 			"gl_FragColor = vec4(vec3(occlusion), 1.0);",
 		"}"
 
