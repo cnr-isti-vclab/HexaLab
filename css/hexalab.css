@@ -17,9 +17,11 @@ h1{
 	display: inline;
 }
 h1mini{
-	font-size: 8px;
-	margin: 0 0 -3px 3px;
-	display: inline;
+	font-size: 10px;
+	margin: -5px 0 0 0;
+	display: block;
+	line-height: 1.2;
+	text-align: right;
 }
 
 h2{
@@ -92,6 +94,11 @@ height: 1px;
 	border-radius: 7px;
 	clear: both;
 	margin-left: 5px;
+}
+
+/* first box: tighten the gap below the title/release line */
+#model_menu {
+	margin-top: 12px;
 }
 
 

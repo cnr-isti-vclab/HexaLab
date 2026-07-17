@@ -172,6 +172,7 @@ HexaLab.UI = {
         load_settings:      $('#load_settings'),
         save_settings:      $('#save_settings'),
         github:             $('#github'),
+        cite:               $('#cite'),
         about:              $('#about'),
         snapshot:           $('#snapshot'),
         snapshot_scale_badge: $('#snapshot_scale_badge'),
@@ -1800,6 +1801,56 @@ HexaLab.UI.topbar.save_settings.on('click', function () {
     const blob = new Blob([settings], { type: "text/plain;charset=utf-8" })
     HexaLab.FS.store_blob(blob, "HLsettings.txt")
 }).prop("disabled", true);
+
+HexaLab.UI.hexalab_bibtex =
+'@article{bracci2019hexalab,\n' +
+'  title     = {HexaLab.net: An online viewer for hexahedral meshes},\n' +
+'  author    = {Bracci, Matteo and Tarini, Marco and Pietroni, Nico and Livesu, Marco and Cignoni, Paolo},\n' +
+'  journal   = {Computer-Aided Design},\n' +
+'  volume    = {110},\n' +
+'  pages     = {24--36},\n' +
+'  year      = {2019},\n' +
+'  publisher = {Elsevier},\n' +
+'  doi       = {10.1016/j.cad.2018.12.003}\n' +
+'}'
+
+HexaLab.UI.topbar.cite.on('click', function () {
+    // toggle: if already open, close it
+    if (HexaLab.UI.cite_dialog) {
+        HexaLab.UI.cite_dialog.dialog('close')
+        return
+    }
+    const bibtex = HexaLab.UI.hexalab_bibtex
+    const content = $('<div title="Cite HexaLab"></div>')
+    $('<p style="margin:0 0 6px 0; font-size:13px;">If you use HexaLab in your work, please cite:</p>').appendTo(content)
+    const textarea = $('<textarea readonly spellcheck="false" style="width:100%; height:170px; box-sizing:border-box; font-family:monospace; font-size:11px; white-space:pre; resize:none;"></textarea>')
+    textarea.val(bibtex).appendTo(content)
+    const copy_btn = $('<button style="margin-top:8px; padding:3px 10px;">Copy to clipboard</button>')
+    copy_btn.appendTo(content)
+    copy_btn.on('click', function () {
+        const done = function () {
+            copy_btn.text('Copied!')
+            setTimeout(function () { copy_btn.text('Copy to clipboard') }, 1500)
+        }
+        const fallback = function () {
+            textarea.focus().select()
+            try { document.execCommand('copy') } catch (e) {}
+            done()
+        }
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(bibtex).then(done, fallback)
+        } else {
+            fallback()
+        }
+    })
+    HexaLab.UI.cite_dialog = content.dialog({
+        width: 470,
+        close: function () {
+            $(this).dialog('destroy').remove()
+            delete HexaLab.UI.cite_dialog
+        }
+    })
+})
 
 HexaLab.UI.topbar.github.on('click', function () {
     window.open('https://github.com/cnr-isti-vclab/HexaLab#hexalabnet-an-online-viewer-for-hexahedral-meshes', '_blank');

@@ -35,7 +35,7 @@ THREE.SSAOBlur = {
 		"vec3 getScreenPos(const in vec2 tex) {",
 			"float x = tex.x * 2.0 - 1.0;",
 		    "float y = tex.y * 2.0 - 1.0;",
-		    "float z = getLinearDepth(tex);",
+		    "float z = getLinearDepth(tex) * 2.0 - 1.0;",	// window depth [0,1] -> NDC z [-1,1]
 		    "return vec3(x, y, z);",
 		"}",
 
@@ -64,7 +64,11 @@ THREE.SSAOBlur = {
 	         		"weightSum += w;",
 	      		"}",
 	   		"}",
-		 	"result = result / weightSum + 0.0001;",
+			// guard against weightSum == 0 (no bilaterally-similar neighbour, which
+			// happens at high-curvature corners): a plain division would give NaN,
+			// which renders as a black speckle over the brightest corner pixels.
+			// Fall back to the unblurred SSAO value there.
+		 	"result = weightSum > 0.0 ? (result / weightSum) : texture2D(tSSAO, vUv).r;",
 			"gl_FragColor = vec4(vec3(result), 1.0);",
 			//"gl_FragColor = vec4(vec3(texture2D(tSSAO, vUv).r), 1.0);",
 			//"float ssao = texture2D(tSSAO, vUv).r;",
