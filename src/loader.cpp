@@ -231,12 +231,12 @@ bool Loader::load_VTK(std::istream& stream, vector<Vector3f>& vertices, vector<I
     bool point_data_found = false;
     bool cell_data_found  = false;
 
-    // read header
+    // read header (accept any legacy VTK version, e.g. 2.0, 3.0, 4.0, 5.1;
+    // the ASCII UNSTRUCTURED_GRID layout we parse is the same across versions)
     while(!header_found && std::getline(stream,line))
     {
         cleanWinLine(line);
-        if(line.compare("# vtk DataFile Version 2.0")==0) header_found = true;
-        else if(line.compare("# vtk DataFile Version 3.0")==0) header_found = true;
+        if(line.rfind("# vtk DataFile Version", 0) == 0) header_found = true;
     }
     HL_ASSERT_LOG(!stream.eof(), "ERROR: malformed mesh file. Could not parse header\n");
 
