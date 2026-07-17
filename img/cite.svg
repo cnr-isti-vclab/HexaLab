@@ -9,6 +9,9 @@
    id="svg5"
    inkscape:version="1.1.2 (b8e25be833, 2022-02-05)"
    sodipodi:docname="cite.svg"
+   inkscape:export-filename="C:\cloud\OneDrive\disegni\icons\cite.png"
+   inkscape:export-xdpi="18.421778"
+   inkscape:export-ydpi="18.421778"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
@@ -38,7 +41,7 @@
      inkscape:cx="179.88283"
      inkscape:cy="209.75736"
      inkscape:window-width="1920"
-     inkscape:window-height="1017"
+     inkscape:window-height="1137"
      inkscape:window-x="-8"
      inkscape:window-y="-8"
      inkscape:window-maximized="1"
@@ -69,7 +72,7 @@
          rx="27.244619"
          ry="15.392691" />
       <rect
-         style="fill:#000000;stroke:#f2f2f2;stroke-width:3.17538;stroke-miterlimit:4;stroke-dasharray:none;stop-color:#000000"
+         style="fill:#000000;stroke:#ffffff;stroke-width:3.17538;stroke-miterlimit:4;stroke-dasharray:none;stop-color:#000000"
          id="rect7516"
          width="57.112804"
          height="57.112804"
@@ -98,7 +101,7 @@
          id="text1916"><tspan
            sodipodi:role="line"
            id="tspan1914"
-           style="fill:#ffffff;stroke-width:0.264582"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Eras Bold ITC';-inkscape-font-specification:'Eras Bold ITC';fill:#ffffff;stroke-width:0.264582"
            x="35.430309"
            y="97.565979">CITE</tspan></text>
     </g>
