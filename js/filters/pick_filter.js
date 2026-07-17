@@ -103,6 +103,12 @@ HexaLab.PickFilter.prototype = Object.assign(Object.create(HexaLab.Filter.protot
 		HexaLab.UI.pick_button   .css('background',(this.brush==1)?this.activeCol:this.unactiveCol );
 		HexaLab.UI.fill_button   .css('background',(this.brush==2)?this.activeCol:this.unactiveCol );
 		HexaLab.UI.isolate_button.css('background',(this.brush==3)?this.activeCol:this.unactiveCol );
+		// Disable camera controls while a pick brush is active. ArcballControls
+		// otherwise binds CTRL/SHIFT (and left-drag) to pan/rotate, which would
+		// intercept the dig/undig clicks. It is re-enabled when the brush clears.
+		if (HexaLab.app && HexaLab.app.controls) {
+			HexaLab.app.controls.enabled = (this.brush == 0)
+		}
 		switch (this.brush) {
 		case 0:
 			document.removeEventListener('pointerdown', this.mousedown_listener)
@@ -245,41 +251,27 @@ HexaLab.PickFilter.prototype = Object.assign(Object.create(HexaLab.Filter.protot
         // click on canvas check
         if (canvas_rect.left > client_x || canvas_rect.right   < client_x) return
         if (canvas_rect.top  > client_y || canvas_rect.bottom  < client_y) return
-        // get projection matrix
-        const proj_m         = HexaLab.app.camera().projectionMatrix
-        //const inv_proj_m     = new THREE.Matrix4().getInverse(proj_m)
-        const inv_proj_m     = HexaLab.app.camera().projectionMatrixInverse
-        const view_m         = HexaLab.app.camera().matrixWorldInverse
-        const view_rot_m     = new THREE.Matrix3().set( 
-            view_m.elements[0],view_m.elements[1],view_m.elements[2], 
-            view_m.elements[4],view_m.elements[5],view_m.elements[6], 
-            view_m.elements[8],view_m.elements[9],view_m.elements[10] )
-        //const inv_view_m     = new THREE.Matrix4().getInverse(view_m)
-        const inv_view_m = HexaLab.app.camera().matrixWorld
-        //const inv_view_rot_m = new THREE.Matrix3().getInverse(view_rot_m)
-        const inv_view_rot_m = new THREE.Matrix3(view_rot_m)
-        view_rot_m.invert()
-        const world_m        = HexaLab.app.viewer.get_models_transform()
-        //const inv_world_m    = new THREE.Matrix4().getInverse(world_m)
-        const inv_world_m    = new THREE.Matrix4(world_m)
-        inv_world_m.invert()
 
-        const viewport_x = client_x - canvas_rect.left 
-        const viewport_y = client_y - canvas_rect.top 
-        const w_2 = canvas_rect.width  / 2
-        const h_2 = canvas_rect.height / 2
-        const ndc = new THREE.Vector4(viewport_x / w_2 - 1, (canvas_rect.height - viewport_y) / h_2 - 1, -1, 1)
-        let view = ndc.applyMatrix4(inv_proj_m)
-        view.multiplyScalar(1 / view.w)
-        const direction = new THREE.Vector3(view.x, view.y, view.z).normalize().applyMatrix3(view_rot_m).normalize()
-        const origin = new THREE.Vector4(HexaLab.app.camera().position.x, HexaLab.app.camera().position.y, HexaLab.app.camera().position.z, 1)
-        origin.applyMatrix4(inv_world_m)
+        const cam = HexaLab.app.camera()
+
+        // pixel -> normalized device coordinates
+        const ndc_x =  ((client_x - canvas_rect.left) / canvas_rect.width)  * 2 - 1
+        const ndc_y = -((client_y - canvas_rect.top)  / canvas_rect.height) * 2 + 1
+
+        // Build the picking ray in world space using three.js unproject (robust,
+        // and independent of the near/far planes).
+        const origin_world = cam.position.clone()
+        const dir_world = new THREE.Vector3(ndc_x, ndc_y, 0.5).unproject(cam).sub(origin_world).normalize()
+
+        // Transform the ray into the mesh's own coordinate system. The models
+        // transform is a pure translation by mesh_offset, so the origin is
+        // translated and the direction is left unchanged.
+        const inv_world_m = HexaLab.app.viewer.get_models_transform().clone().invert()
+        const origin    = origin_world.clone().applyMatrix4(inv_world_m)
+        const direction = dir_world.clone().transformDirection(inv_world_m).normalize()
+
         Module.print("[Pick Filter] Origin: " + origin.x.toFixed(6) + " " + origin.y.toFixed(6) + " " + origin.z.toFixed(6))
         Module.print("[Pick Filter] Direction: " + direction.x.toFixed(6) + " " + direction.y.toFixed(6) + " " + direction.z.toFixed(6))
-        // Uncomment the following three lines to get opengl style info on the current transf matrix
-        //Module.print("projectionMatrix: ["+proj_m.elements+" ]")
-        //Module.print("matrixWorldInverse: ["+view_m.elements+" ]")
-        //Module.print("viewport [0,0,"+canvas_rect.width+", "+canvas_rect.height+"]")
         return {
             origin:     origin,
             direction:  direction
