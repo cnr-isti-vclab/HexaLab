@@ -1252,9 +1252,32 @@ Object.assign(HexaLab.Viewer.prototype, {
         this.scene.add(this.renderables.visible.surface)
     },
 
+    // Set the camera near/far planes from the actual mesh bounding sphere every
+    // frame. We do this ourselves (with ArcballControls.adjustNearFar disabled)
+    // because that control derives near/far from the bounding sphere of its own
+    // gizmo, which does not match the mesh and can push the near plane into the
+    // object (clipping it) for wide/flat shapes such as the double torus.
+    update_near_far: function () {
+        if (!this.mesh) return
+        const cam = this.scene_camera
+        const r = 0.5 * this.mesh.get_aabb_diagonal()   // conservative scene radius (mesh is centered at the origin)
+        const d = cam.position.length()                 // camera distance to the mesh center
+        let near = (d - r) * 0.8                         // margin so the front of the mesh is never clipped
+        const minNear = Math.max(1e-4, d * 0.001)
+        if (!(near > minNear)) near = minNear
+        let far = (d + r) * 1.2
+        if (far <= near) far = near * 1000
+        if (cam.near !== near || cam.far !== far) {
+            cam.near = near
+            cam.far = far
+            cam.updateProjectionMatrix()
+        }
+    },
+
     update: function () {
         if (!this.mesh) return
 
+        this.update_near_far()
         this.update_geometry_buffers()
         this.step_osao()
         this.update_canvas()
@@ -1299,7 +1322,7 @@ HexaLab.App = function (dom_element) {
     this.controls.dampingFactor = 50
     this.controls.wMax = 10
     this.controls.activateGizmos(true)
-    this.controls.adjustNearFar = true
+    this.controls.adjustNearFar = false     // we manage near/far ourselves in Viewer.update_near_far()
     this.controls.enableGizmos = true
     this.controls.useClipboard = false
 
