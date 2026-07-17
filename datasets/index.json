@@ -1760,6 +1760,52 @@
                 "woodenfish.vtk.gz",
                 "wrench.vtk"
         ]
+    }, {
+        "paper": {
+            "title": "HexOpt: Efficient and Robust Hexahedral Mesh Optimization Using Rectified Hybrid Quadratic Jacobian and Geometry-Aware Mapping",
+            "venue": "Computer-Aided Design, Volume 196, 104073 (2026)",
+            "authors": "Hua Tong, Yongjie Jessica Zhang",
+            "year": "2024",
+            "PDF": "https://arxiv.org/pdf/2410.11656",
+            "web": "https://github.com/CMU-CBML/HexOpt",
+            "DOI": "10.1016/j.cad.2026.104073"
+        },
+        "path": "2026 - HexOpt - Efficient and Robust Hexahedral Mesh Optimization",
+        "label": "2026 - HexOpt - Efficient and Robust Hexahedral Mesh Optimization",
+        "data": [
+                "CAD4.vtk",
+                "CAD4Opt.vtk",
+                "CAD4Per.vtk",
+                "anc101.vtk.gz",
+                "anc1012Opt.vtk.gz",
+                "anc101Opt.vtk.gz",
+                "anc101Per.vtk.gz",
+                "bunny.vtk",
+                "bunnyOpt.vtk",
+                "bunnyPer.vtk",
+                "impeller.vtk",
+                "impellerOpt.vtk",
+                "impellerPer.vtk",
+                "isidore_horse.vtk.gz",
+                "isidore_horse1Opt.vtk.gz",
+                "isidore_horse2Opt.vtk.gz",
+                "isidore_horseA.vtk.gz",
+                "isidore_horsePer.vtk.gz",
+                "lower_arm.vtk",
+                "lower_arm2.vtk",
+                "lower_armOpt.vtk",
+                "lower_armPer.vtk",
+                "mid2Fem.vtk",
+                "mid2Fem2.vtk",
+                "mid2FemOpt.vtk",
+                "mid2FemPer.vtk",
+                "mount2.vtk",
+                "mount2Opt.vtk",
+                "mount2Per.vtk",
+                "rkm012.vtk",
+                "rkm012Opt.vtk",
+                "rkm012Per.vtk"
+        ]
     }
     ]
 }
