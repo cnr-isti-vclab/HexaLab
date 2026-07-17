@@ -543,11 +543,6 @@ Object.assign(HexaLab.Viewer.prototype, {
             alpha: true,                    // to have an alpha on the rendertarget? (needed for setClearAlpha to work)
         })
         this.renderer.outputColorSpace = THREE.LinearSRGBColorSpace   // match r145 default (no sRGB encoding on output)
-        // r155 changed light-intensity semantics (useLegacyLights now false by
-        // default), which dims the Direct-lighting mode. Restore the legacy
-        // behavior for parity. NOTE: this flag is removed in r165, so Phase B
-        // (r185) must instead convert the light intensity to the new model.
-        this.renderer.useLegacyLights = true
         this.renderer.getContext().getExtension("EXT_frag_depth")
         this.renderer.setSize(this.width, this.height)
         this.renderer.autoClear = false
@@ -561,11 +556,14 @@ Object.assign(HexaLab.Viewer.prototype, {
 
     // Settings
     set_background_color:   function (color) { this.settings.background = color },
-    set_light_intensity:    function (intensity) { this.scene_light.intensity = intensity },
+    // r165 removed useLegacyLights; direct lights are now dimmer by a factor of PI
+    // vs the legacy model, so scale the stored intensity up to preserve the look.
+    // (get_light_intensity divides it back out so saved settings stay consistent.)
+    set_light_intensity:    function (intensity) { this.scene_light.intensity = intensity * Math.PI },
     set_aa_mode:            function (value) { this.settings.aa = value; /*this.init_backend()*/ },
     set_lighting_mode:      function (value) { this.settings.lighting = value; this.update_osao_buffers(); this.dirty_canvas = true },
     get_background_color:   function () { return this.settings.background },
-    get_light_intensity:    function () { return this.scene_light.intensity },
+    get_light_intensity:    function () { return this.scene_light.intensity / Math.PI },
     get_aa_mode:            function () { return this.settings.aa },
     get_lighting_mode:      function () { return this.settings.lighting },
 
@@ -1536,8 +1534,8 @@ Object.assign(HexaLab.App.prototype, {
         var up          = settings.up
         var distance    = settings.distance * size
 
-        this.controls.rotateSpeed = 10
-        this.controls.dynamicDampingFactor = 1
+        this.controls.rotateSpeed = 1          // r185 ArcballControls multiplies rotation by rotateSpeed (default 1); the old value of 10 made it 10x too sensitive
+        this.controls.dynamicDampingFactor = 1 // (a TrackballControls property, ignored by ArcballControls)
         this.controls.target.set(target.x, target.y, target.z)
 
         this.camera().position.set(target.x, target.y, target.z)
